@@ -1,0 +1,140 @@
+buildscript {
+	apply from: file('gradle/buildscript.gradle'), to: buildscript
+}
+
+apply plugin: 'org.anarres.stdproject'
+stdproject {
+}
+
+subprojects {
+	group = "org.anarres.polyglot"
+
+	repositories {
+		mavenLocal()
+	}
+
+	apply plugin: 'org.anarres.stdmodule'
+	stdmodule {
+		description "A multilingual LR(1) parser generator."
+		author id: 'shevek', name: 'Shevek', email: 'github@anarres.org'
+		license {
+			name = 'Proprietary'
+			description = 'Proprietary - Do Not Redistribute'
+			uri = new URI("http://www.anarres.org/")
+		}
+	}
+
+	sourceCompatibility = 1.7
+	animalsniffer {
+		signature = "org.codehaus.mojo.signature:java17:+@signature"
+	}
+
+	findbugs {
+		excludeFilter = file("$rootProject.projectDir/gradle/filter.xml")
+	}
+
+	tasks.withType(JavaCompile) {
+		options.compilerArgs << "-Xlint"
+		options.compilerArgs << "-Xlint:-serial"
+		options.compilerArgs << "-Xmaxwarns"
+		options.compilerArgs << "500"
+	}
+
+	dependencies {
+		testCompile 'com.google.testing.compile:compile-testing:0.7'
+	}
+
+}
+
+project(':polyglot-runtime') {
+	dependencies {
+		compile 'org.slf4j:slf4j-api:1.7.12'
+		compile 'com.google.code.findbugs:annotations:2.0.3'
+	}
+}
+
+project(':polyglot-core') {
+	dependencies {
+		compile 'org.slf4j:slf4j-api:1.7.12'
+		compile 'com.google.code.findbugs:annotations:2.0.3'
+		compile 'com.google.guava:guava:18.0'
+		compile 'org.anarres:jcpp:1.4.11'
+		compile 'org.anarres.graphviz:graphviz-builder:1.0.0'
+		compile 'org.anarres.jdiagnostics:jdiagnostics:1.0.2'
+		// compile 'com.googlecode.javaewah:JavaEWAH:1.1.2'	// Slower than BitSet.
+		compile 'it.unimi.dsi:fastutil:7.0.8'
+
+		compile "org.apache.velocity:velocity:1.7"
+
+		// For access to the runtime constants.
+		compile project(':polyglot-runtime')
+	}
+
+	apply plugin: 'org.anarres.polyglot'
+	// apply plugin: 'sablecc'
+}
+
+project(':polyglot-cmd') {
+	apply plugin: 'application'
+	apply plugin: 'com.github.johnrengelman.shadow'
+
+	mainClassName = 'org.anarres.polyglot.cmd.Main'
+
+	dependencies {
+		compile project(':polyglot-core')
+		compile 'net.sf.jopt-simple:jopt-simple:4.8'
+	}
+}
+
+project(':polyglot-gradle') {
+	apply plugin: 'org.anarres.stdplugin'
+
+	stdplugin {
+		implementation "org.anarres.polyglot", "org.anarres.polyglot.gradle.PolyglotPlugin"
+	}
+
+	dependencies {
+		compile (project(':polyglot-core')) {
+			// Gradle (2.4+?) uses version 0.17. We must exclude our own here.
+			exclude group: 'com.google.guava', module: 'guava'
+		}
+		compile gradleApi()
+		compile 'org.anarres.gradle:gradle-velocity-plugin:1.0.5'
+	}
+
+	animalsniffer {
+		skip = true
+	}
+}
+
+project(':polyglot-ant') {
+	dependencies {
+		compile project(':polyglot-core')
+		compile 'org.apache.ant:ant:1.7.0'
+	}
+}
+
+project(':polyglot-maven') {
+	dependencies {
+		compile project(':polyglot-core')
+		compile 'org.apache.maven:maven-plugin-api:3.0.5'
+		compile 'org.apache.maven:maven-project:2.2.1'
+		compile 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.2'
+		compile 'org.codehaus.plexus:plexus-compiler-api:2.2'
+
+		testCompile 'org.apache.maven.shared:maven-plugin-testing-harness:1.1'
+	}
+}
+
+project(':polyglot-tests') {
+	dependencies {
+		compile project(':polyglot-runtime')
+	}
+
+	sourceSets.main.java.srcDir 'build/generated-sources/polyglot-java'
+	processResources {
+		from ('build/generated-sources/polyglot-java') {
+			include '**/*.dat'
+		}
+	}
+}

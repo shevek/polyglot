@@ -1,0 +1,7 @@
+Package org.anarres.polyglot.test.tokenconstant;
+
+Tokens
+
+	tok_variable = 'a'* ;
+	tok_fixed = 'b' ;
+

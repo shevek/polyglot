@@ -1,0 +1,15 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import javax.annotation.Nonnull;
+
+public interface CloneListener {
+
+	public static final CloneListener NONE = new CloneListener() {
+		@Override
+		public <T extends Node> void fireNodeCloned(T prev, T repl) {
+		}
+	};
+
+    public <T extends Node> void fireNodeCloned(@Nonnull T prev, @Nonnull T repl);
+}

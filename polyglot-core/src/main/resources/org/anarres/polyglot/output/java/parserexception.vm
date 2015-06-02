@@ -1,0 +1,25 @@
+/* ${header} */
+package ${grammar.package.packageName}.parser;
+
+import javax.annotation.Nonnull;
+import ${grammar.package.packageName}.node.Token;
+
+public class ParserException extends Exception {
+
+    @Nonnull
+    private static String toMessage(@Nonnull Token token, @Nonnull String message) {
+        return "[" + token.getLine() + "," + token.getColumn() + "] " + message + " but got " + token.getClass().getSimpleName() + ": " + token.getText();
+    }
+
+    private final Token token;
+
+    public ParserException(@Nonnull Token token, @Nonnull String message) {
+        super(toMessage(token, message));
+        this.token = token;
+    }
+
+	@Nonnull
+    public Token getToken() {
+        return this.token;
+    }
+}

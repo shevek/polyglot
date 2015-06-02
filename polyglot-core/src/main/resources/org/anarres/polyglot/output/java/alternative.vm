@@ -1,0 +1,208 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import ${package}.analysis.Visitor;
+
+#if ($alternative.javadocComment)
+$alternative.javadocComment
+#elseif ($alternative.production.javadocComment)
+$production.javadocComment
+#else
+## No default javadoc - (a) information leakage, (b) javadoc performance sucks.
+## /** ${alternative} */
+#end
+public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
+
+#foreach ($element in $alternative.elements)
+#if ($element.list)
+    private final List<${element.javaTypeName}> _${element.javaFieldName}_ = new ArrayList<${element.javaTypeName}>();
+#else##if element.list
+    private ${element.javaTypeName} _${element.javaFieldName}_;
+#end##if element.list
+#end##foreach alternative.elements
+
+    /** Constructs a new ${alternative.javaTypeName} and sets all fields. */
+    public ${alternative.javaTypeName}(
+#foreach ($element in $alternative.elements)
+        #if($element.nullable)@CheckForNull#{else}@Nonnull#{end}##
+#if ($element.list)
+        Iterable<? extends ${element.javaTypeName}> _${element.javaFieldName}_#if($velocityHasNext),#end
+
+#else##if element.list
+        ${element.javaTypeName} _${element.javaFieldName}_#if($velocityHasNext),#end
+
+#end##if element.list
+#end##foreach alternative.elements
+        ) {
+#foreach ($element in $alternative.elements)
+        set${element.javaMethodName}(_${element.javaFieldName}_);
+#end##foreach alternative.elements
+    }
+
+#if (!$alternative.elements.empty)
+    /** Constructs a new ${alternative.javaTypeName} without setting any fields. */
+    public ${alternative.javaTypeName}() {
+    }
+#end
+
+    @Override
+#if ($helper.isOption("CG_FINDBUGS"))
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("CN_IDIOM_NO_SUPER_CALL")
+#end
+    public ${alternative.javaTypeName} clone() {
+        return clone(CloneListener.NONE);
+    }
+
+    @Override
+    public ${alternative.javaTypeName} clone(CloneListener listener) {
+        ${alternative.javaTypeName} out = new ${alternative.javaTypeName}(
+#foreach ($element in $alternative.elements)
+#if ($element.list)
+            cloneList(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
+#else##if element.list
+            cloneNode(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
+#end##if element.list
+#end##foreach alternative.elements
+        );
+        listener.fireNodeCloned(this, out);
+        return out;
+    }
+
+    @Override
+    public void apply(Switch s) {
+        s.case${alternative.javaMethodName}(this);
+    }
+
+    @Override
+    public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
+        return v.visit${alternative.javaMethodName}(this, input);
+    }
+
+#foreach ($element in $alternative.elements)
+#if ($element.list)
+
+#if ($element.javadocComment)
+    $element.javadocComment
+#end
+    @Nonnull
+    public List<${element.javaTypeName}> get${element.javaMethodName}() {
+        return this._${element.javaFieldName}_;
+    }
+
+#if ($element.javadocComment)
+    $element.javadocComment
+#end
+    public void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} Iterable<? extends ${element.javaTypeName}> list)
+    {
+        for (${element.javaTypeName} e : this._${element.javaFieldName}_) {
+            e.parent(null);
+        }
+        this._${element.javaFieldName}_.clear();
+
+        if (list != null) {
+            for (${element.javaTypeName} e : list) {
+                Node p = e.parent();
+                if (p != null)
+                    p.removeChild(e);
+                e.parent(this);
+                this._${element.javaFieldName}_.add(e);
+            }
+        }
+    }
+#else##if element.list
+
+#if ($element.javadocComment)
+    $element.javadocComment
+#end
+#if ($element.nullable)
+    @CheckForNull
+#else
+    @Nonnull
+#end
+    public ${element.javaTypeName} get${element.javaMethodName}() {
+        return this._${element.javaFieldName}_;
+    }
+
+#if ($element.javadocComment)
+    $element.javadocComment
+#end
+    public void set${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} ${element.javaTypeName} node) {
+        if (this._${element.javaFieldName}_ != null) {
+            this._${element.javaFieldName}_.parent(null);
+        }
+
+        if (node != null) {
+            Node p = node.parent();
+            if (p != null)
+                p.removeChild(node);
+            node.parent(this);
+        }
+
+        this._${element.javaFieldName}_ = node;
+    }
+#end##if element.list
+#end##foreach alternative.elements
+
+    @Override
+    public void removeChild(Node child) {
+#foreach ($element in $alternative.elements)
+#if ($element.list)
+        if (this._${element.javaFieldName}_.remove(child)) {
+            return;
+        }
+#else##if element.list
+        if (this._${element.javaFieldName}_ == child) {
+            this._${element.javaFieldName}_ = null;
+            return;
+        }
+#end##if element.list
+#end##foreach alternative.elements
+
+        throw new RuntimeException("Not a child.");
+    }
+
+    @Override
+    public void replaceChild(Node prev, Node repl) {
+#foreach ($element in $alternative.elements)
+#if ($element.list)
+
+        for (ListIterator<${element.javaTypeName}> it = this._${element.javaFieldName}_.listIterator(); it.hasNext(); /**/) {
+            if (it.next() == prev) {
+                if (repl != null) {
+                    it.set(($element.javaTypeName) repl);
+                    repl.parent(this);
+                    prev.parent(null);
+                } else {
+                    it.remove();
+                    prev.parent(null);
+                }
+                return;
+            }
+        }
+
+#else##if element.list
+
+        if (this._${element.javaFieldName}_ == prev) {
+            set${element.javaMethodName}((${element.javaTypeName}) repl);
+            return;
+        }
+
+#end##if element.list
+#end##foreach alternative.elements
+
+        throw new RuntimeException("Not a child.");
+    }
+
+    @Override
+    public void toStringBuilder(StringBuilder buf) {
+#foreach ($element in $alternative.elements)
+        toStringBuilder(buf, get${element.javaMethodName}());
+#end
+    }
+}

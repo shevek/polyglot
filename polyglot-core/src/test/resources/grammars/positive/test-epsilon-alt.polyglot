@@ -1,0 +1,20 @@
+/* Manually contrived to test epsilon at root. */
+Package org.anarres.polyglot.test.epsilon;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+
+Productions
+
+	program =
+		{a} tok_a?
+			{ -> New program.a() } |
+		{b} tok_b
+			{ -> New program.b() } ;
+
+Abstract Syntax Tree
+
+	program = {a} | {b} ;
+

@@ -1,0 +1,47 @@
+/*
+This tests whether the grammar inlining, which should inline
+on identifier resolves correctly.
+*/
+
+Package org.anarres.polyglot.test.idinline;
+
+Tokens
+
+	a = 'a' ;
+	b = 'b' ;
+	c = 'c' ;
+	d = 'd' ;
+	e = 'e' ;
+
+	plus = '+' ;
+	dot = '.' ;
+
+Productions
+
+	program =
+		{plus} [l]:a_obj plus [r]:a_obj
+			{ -> New program.plus(l.a_obj, r.a_obj) } |
+		{dot} a_obj dot b
+			{ -> New program.dot(a_obj, b) } ;
+
+	// Inserting this into the middle creates an S-R conflict
+	// which should be resolved by inlining a_obj.
+	a_obj =
+		a_list
+			{ -> New a_obj([a_list.a]) } ;
+
+	a_list { -> a* } =
+		{single} a
+			{ -> [a] } |
+		{list} a_list dot a
+			{ -> [a_list.a, a.a] } ;
+
+Abstract Syntax Tree
+
+	program =
+		{plus} [l]:a_obj [r]:a_obj |
+		{dot} a_obj b ;
+
+	a_obj =
+		a* ;
+

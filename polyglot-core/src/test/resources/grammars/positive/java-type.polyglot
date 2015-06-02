@@ -1,0 +1,174 @@
+Package org.anarres.typeserializer.core ;
+
+Helpers
+
+	all = [0 .. 0xFFFF];
+
+	tab = 0x0009;
+	lf  = 0x000a;
+	cr  = 0x000d;
+	eol = lf | cr | cr lf; 
+	not_eol = [all - [cr + lf]];
+
+	not_star = [all - '*'];
+	not_star_slash = [not_star - '/'];
+
+	digit = ['0' .. '9'];
+	nondigit = ['_' + [['a' .. 'z'] + ['A' ..  'Z']]];
+	hex_digit = [digit + [['a' .. 'f'] + ['A' .. 'F']]];
+	hex_quad = hex_digit hex_digit hex_digit hex_digit;
+	universal_char_name = '\u' hex_quad;
+	identifier_nondigit = nondigit | universal_char_name;
+
+// include("helpers.sh")
+
+Tokens
+
+	kw_boolean = 'boolean' ;
+	kw_byte = 'byte' ;
+	kw_char = 'char' ;
+	kw_double = 'double' ;
+	kw_float = 'float' ;
+	kw_int = 'int' ;
+	kw_long = 'long' ;
+	kw_short = 'short' ;
+
+	kw_extends = 'extends' ;
+	kw_super = 'super' ;
+
+	tok_comma   = ',';
+	tok_and     = '&';
+	tok_gt      = '>';  
+	tok_lt      = '<';  
+	tok_dot     = '.';
+	tok_dollar  = '$';
+	tok_lsquare = '[';
+	tok_rsquare = ']';
+	tok_wildcard= '?';
+
+	// Handle com.foo.Bar and Foo$1 -- no identifier_nondigit prefix
+	identifier = /*identifier_nondigit*/ (digit | identifier_nondigit)*;
+
+	blank = (eol | tab | ' ')+;
+	comment = 
+		('//' not_eol* eol?) |
+		('/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/') ;
+
+Ignored Tokens
+	blank,
+	comment;
+
+Productions
+
+	java_type { -> type } = 
+		{class} java_class
+			{ -> java_class.type } |
+		{array} java_array
+			{ -> java_array.type } |
+		{parameterized} java_parameterized
+			{ -> java_parameterized.type } |
+		{primitive} java_primitive
+			{ -> java_primitive.type } ;
+		// {wildcard} java_wildcard { -> java_wildcard.type } ;
+
+	java_class { -> type } =
+		java_class_outer java_class_inner*
+			{ -> New type.class(
+				[java_class_outer.identifier],
+				[java_class_inner.identifier]) } ;
+
+	java_array { -> type } =
+		java_type tok_lsquare tok_rsquare
+			{ -> New type.array(java_type.type) } ;
+
+	java_parameterized { -> type } =
+		java_class java_type_parameters tok_gt
+			{ -> New type.parameterized(
+				java_class.type,
+				[java_type_parameters.type]) } ;
+
+	java_type_parameters { -> type* } =
+		{concrete} tok_lt java_type
+			{ -> [java_type.type] } |
+		{wildcard} tok_lt java_wildcard
+			{ -> [java_wildcard.type] } |
+		{list} java_type_parameters java_type_parameter
+			{ -> [java_type_parameters.type, java_type_parameter.type] } ;
+
+	java_type_parameter { -> type } =
+		{concrete} tok_comma java_type
+			{ -> java_type.type } |
+		{wildcard} tok_comma java_wildcard
+			{ -> java_wildcard.type } ;
+
+	java_wildcard { -> type } =
+		{bare} tok_wildcard
+			{ -> New type.wildcard([], []) } |
+		{upper} tok_wildcard
+				java_bounds_upper
+				java_bounds_lower?
+			{ -> New type.wildcard([java_bounds_upper.type], [java_bounds_lower.type]) } |
+		{lower} tok_wildcard
+				java_bounds_lower
+				java_bounds_upper?
+			{ -> New type.wildcard([java_bounds_upper.type], [java_bounds_lower.type]) } ;
+
+	java_bounds_upper { -> type* } =
+		{single} kw_extends java_type
+			{ -> [java_type.type] } |
+		{list} java_bounds_upper java_bound
+			{ -> [java_bounds_upper.type, java_bound.type] } ;
+
+	java_bounds_lower { -> type* } =
+		{single} kw_super java_type
+			{ -> [java_type.type] } |
+		{list} java_bounds_lower java_bound
+			{ -> [java_bounds_lower.type, java_bound.type] } ;
+
+	java_bound { -> type } =
+		tok_and java_type
+			{ -> java_type.type } ;
+
+	java_primitive { -> type } = 
+		{boolean} kw_boolean
+			{ -> New type.boolean() } |
+		{byte} kw_byte
+			{ -> New type.byte() } |
+		{char} kw_char
+			{ -> New type.char() } |
+		{double} kw_double
+			{ -> New type.double() } |
+		{float} kw_float
+			{ -> New type.float() } |
+		{int} kw_int
+			{ -> New type.int() } |
+		{long} kw_long
+			{ -> New type.long() } |
+		{short} kw_short
+			{ -> New type.short() } ;
+
+	java_class_outer { -> identifier* } =
+		{single} identifier
+			{ -> [identifier] } |
+		{list} java_class_outer tok_dot identifier
+			{ -> [java_class_outer.identifier, identifier] } ;
+
+	java_class_inner { -> identifier } =
+		{single} tok_dollar identifier
+			{ -> identifier } ;
+
+Abstract Syntax Tree
+
+	type = 
+		{class} [name]:identifier* [inner_name]:identifier* |
+		{array} [element_type]:type |
+		{parameterized} [raw_type]:type [arguments]:type* |
+		{wildcard} [upper_bounds]:type* [lower_bounds]:type* |
+		{boolean} |
+		{byte} |
+		{char} |
+		{double} |
+		{float} |
+		{int} |
+		{long} |
+		{short} ;

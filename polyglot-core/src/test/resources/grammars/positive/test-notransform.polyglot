@@ -1,0 +1,28 @@
+Package org.anarres.polyglot.test.notransform;
+
+Tokens
+
+	tok_a = 'a' ;
+
+Productions
+
+	program { -> } =
+		;
+
+	p_a { -> p_a } =
+		tok_a ;
+
+	/** Synthesizes no transforms on tok_a. */
+	p_b { -> } =
+		tok_a ;
+
+	p_c =
+		tok_a ;
+
+Abstract Syntax Tree
+
+	program = ;
+
+	p_a = tok_a ;
+	p_c = tok_a ;
+

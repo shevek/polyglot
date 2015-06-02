@@ -1,0 +1,111 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+
+public abstract class Node implements Switchable, Visitable, Cloneable {
+
+    private Node parent;
+
+    /**
+     * Returns the parent Node of this Node.
+     *
+     * @return the parent Node of this Node, or null.
+     */
+    @CheckForNull
+    public Node parent() {
+        return this.parent;
+    }
+
+    /**
+     * Sets the parent Node of this Node.
+     *
+     * @param parent the new parent Node of this Node.
+     */
+    public void parent(@CheckForNull Node parent) {
+        this.parent = parent;
+    }
+
+    /**
+     * Removes a child of this node.
+     *
+     * @param child The child to remove.
+     * @throws RuntimeException if the given child is not a child of this node.
+     */
+    public abstract void removeChild(@Nonnull Node child);
+
+    /**
+     * Replaces a child of this node with the given replacement node
+     *
+     * @param prev the child to remove.
+     * @param repl the child to insert in place of prev.
+     * @throws RuntimeException if the given child is not a child of this node.
+     */
+    public abstract void replaceChild(@Nonnull Node prev, @Nonnull Node repl);
+
+    /**
+     * Replaces this node under its parent with the given node.
+     *
+     * @param node The node to insert in place of this node.
+     */
+    public void replaceBy(@Nonnull Node node) {
+        this.parent.replaceChild(this, node);
+    }
+
+    /** Recursively clones this node and all children. */
+    @Override
+    public abstract Node clone();
+
+    /** Recursively clones this node and all children, notifying the {@link CloneListener} of each node cloned. */
+    @Nonnull
+    public abstract Node clone(@Nonnull CloneListener listener);
+
+    /** Recursively clones a possibly-null node and all children. */
+    @SuppressWarnings("unchecked")
+    protected <T extends Node> T cloneNode(@Nonnull CloneListener listener, @CheckForNull T node) {
+        if (node == null)
+			return null;
+		return (T) node.clone(listener);
+    }
+
+    /** Recursively clones a possibly-null list of nodes and all children. */
+    @SuppressWarnings("unchecked")
+    protected <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @Nonnull List<? extends T> list) {
+        List<T> out = new ArrayList<T>(list.size());
+        for (T item : list)
+            out.add(cloneNode(listener, item));
+        return out;
+    }
+
+    protected static void toStringBuilder(@Nonnull StringBuilder buf, @CheckForNull Node node) {
+        if (node != null)
+            node.toStringBuilder(buf);
+    }
+
+    protected static void toStringBuilder(@Nonnull StringBuilder buf, @Nonnull List<? extends Node> nodes) {
+        for (Node node : nodes)
+            node.toStringBuilder(buf);
+    }
+
+    /**
+     * Appends the textual content of this node and all children to the given StringBuilder.
+     *
+     * There may be trailing spaces.
+     */
+    public abstract void toStringBuilder(@Nonnull StringBuilder buf);
+
+    @Override
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        toStringBuilder(buf);
+        int length = buf.length();
+        while (length > 0)
+            if (!Character.isWhitespace(buf.charAt(length - 1)))
+                break;
+        buf.setLength(length);
+        return buf.toString();
+    }
+}

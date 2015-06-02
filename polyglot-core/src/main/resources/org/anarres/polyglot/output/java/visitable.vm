@@ -1,0 +1,11 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import javax.annotation.Nonnull;
+import ${grammar.package.packageName}.analysis.Visitor;
+
+public interface Visitable {
+
+    /** Implements the Visitor pattern. */
+    public <I, O, X extends Exception> O apply(@Nonnull Visitor<I, O, X> visitor, I input) throws X;
+}

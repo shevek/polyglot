@@ -1,0 +1,124 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import ${package}.analysis.Visitor;
+
+## It's not actually an element, it's an AstProductionModel
+#set($element = $grammar.astProductionRoot)
+/** This class is the root of the parse tree returned from the Parser. */
+public final class Start extends Node {
+
+    private ${element.javaTypeName} _${element.javaFieldName}_;
+    private EOF _eof_;
+
+    public Start(@Nonnull ${element.javaTypeName} _${element.javaFieldName}_, @Nonnull EOF _eof_) {
+        set${element.javaMethodName}(_${element.javaFieldName}_);
+        setEOF(_eof_);
+    }
+
+    public Start() {
+    }
+
+    @Override
+    public Start clone() {
+        return clone(CloneListener.NONE);
+    }
+
+    @Override
+    public Start clone(CloneListener listener) {
+        Start clone = new Start(
+            cloneNode(listener, this._${element.javaFieldName}_),
+            cloneNode(listener, this._eof_));
+		listener.fireNodeCloned(this, clone);
+		return clone;
+    }
+
+    @Override
+    public void apply(Switch s) {
+        s.caseStart(this);
+    }
+
+    @Override
+    public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
+        return v.visitStart(this, input);
+    }
+
+    @Nonnull
+    public ${element.javaTypeName} get${element.javaMethodName}() {
+        return this._${element.javaFieldName}_;
+    }
+
+    public void set${element.javaMethodName}(@Nonnull ${element.javaTypeName} node) {
+        if (this._${element.javaFieldName}_ != null) {
+            this._${element.javaFieldName}_.parent(null);
+        }
+
+        if (node != null) {
+            Node p = node.parent();
+            if (p != null)
+                p.removeChild(node);
+            node.parent(this);
+        }
+
+        this._${element.javaFieldName}_ = node;
+    }
+
+    @Nonnull
+    public EOF getEOF() {
+        return this._eof_;
+    }
+
+    public void setEOF(@Nonnull EOF node) {
+        if (this._eof_ != null) {
+            this._eof_.parent(null);
+        }
+
+        if (node != null) {
+            Node p = node.parent();
+            if (p != null)
+                p.removeChild(node);
+            node.parent(this);
+        }
+
+        this._eof_ = node;
+    }
+
+    @Override
+    public void removeChild(Node child) {
+        if (this._${element.javaFieldName}_ == child) {
+            this._${element.javaFieldName}_ = null;
+            return;
+        }
+
+        if (this._eof_ == child) {
+            this._eof_ = null;
+            return;
+        }
+
+        throw new RuntimeException("Not a child.");
+    }
+
+    @Override
+    public void replaceChild(Node prev, Node repl) {
+        if (this._${element.javaFieldName}_ == prev) {
+            set${element.javaMethodName}((${element.javaTypeName}) repl);
+            return;
+        }
+
+        if (this._eof_ == prev) {
+            setEOF((EOF) repl);
+            return;
+        }
+
+        throw new RuntimeException("Not a child.");
+    }
+
+    @Override
+    public void toStringBuilder(StringBuilder buf) {
+        toStringBuilder(buf, get${element.javaMethodName}());
+        toStringBuilder(buf, getEOF());
+    }
+}

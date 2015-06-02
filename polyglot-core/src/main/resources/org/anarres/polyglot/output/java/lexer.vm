@@ -1,0 +1,306 @@
+/* ${header} */
+package ${grammar.package.packageName}.lexer;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.PushbackReader;
+import java.io.Reader;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import ${grammar.package.packageName}.node.*;
+
+public class Lexer implements ILexer {
+
+    private final PushbackReader in;
+    protected State state = State.${grammar.states.get(0).name};
+    protected Token token;
+
+    private int offset;
+    private int line;
+    private int column;
+    private boolean cr;
+    private final StringBuilder text = new StringBuilder();
+
+    public Lexer(@Nonnull PushbackReader in) {
+        this.in = in;
+    }
+
+    @Nonnull
+    private static PushbackReader toPushbackReader(@Nonnull Reader in, @Nonnegative int lookahead_length) {
+        if (in instanceof PushbackReader)
+            return (PushbackReader) in;
+        return new PushbackReader(in, lookahead_length);
+    }
+
+    public Lexer(@Nonnull Reader in, @Nonnegative int lookahead_length) {
+        this(toPushbackReader(in, lookahead_length));
+    }
+
+    protected void filter() throws LexerException, IOException {
+    }
+
+    @Override
+    public Token peek() throws LexerException, IOException {
+        while (token == null) {
+            token = getToken();
+            filter();
+        }
+
+        return token;
+    }
+
+    @Override
+    public Token next() throws LexerException, IOException {
+        Token out = peek();
+        token = null;
+        return out;
+    }
+
+    @Nonnull
+    protected Token getToken() throws IOException, LexerException {
+        int dfa_state = 0;
+
+        int start_offset = this.offset;
+        int start_line = this.line;
+        int start_column = this.column;
+
+        int accept_state = -1;
+        int accept_token = -1;
+        int accept_offset = -1;
+        int accept_line = -1;
+        int accept_column = -1;
+        int accept_length = -1;
+
+        int[][][] gotoTableEntry = Lexer.gotoTable[this.state.id()];
+        int[] acceptTableEntry = Lexer.acceptTable[this.state.id()];
+        this.text.setLength(0);
+
+        while (true) {
+            int c = in.read();
+
+            CHAR: {
+                switch (c) {
+                    case 10:
+                        if (this.cr) {
+                            this.cr = false;
+                        } else {
+                            this.offset++;
+                            this.line++;
+                            this.column = 0;
+                        }
+                        break;
+                    case 13:
+                        this.offset++;
+                        this.line++;
+                        this.column = 0;
+                        this.cr = true;
+                        break;
+                    case -1:
+                        dfa_state = -1;
+                        break CHAR;
+                    default:
+                        this.offset++;
+                        this.column++;
+                        this.cr = false;
+                        break;
+                }
+
+                this.text.append((char) c);
+
+                int[][] gotoTableItem = gotoTableEntry[dfa_state];
+                dfa_state = -1;
+                int low = 0;
+                int high = gotoTableItem.length - 1;
+
+                while (low <= high) {
+                    int middle = (low + high) >>> 1;
+                    int[] tableEntry = gotoTableItem[middle];
+
+                    if (c < tableEntry[0]) {
+                        high = middle - 1;
+                    } else if (c > tableEntry[1]) {
+                        low = middle + 1;
+                    } else {
+                        dfa_state = tableEntry[2];
+                        break;
+                    }
+                }
+            }
+
+            if (dfa_state >= 0) {
+                int acceptTableItem = acceptTableEntry[dfa_state];
+                if (acceptTableItem != -1) {
+                    accept_state = dfa_state;
+                    accept_token = acceptTableItem;
+                    accept_length = this.text.length();
+                    accept_offset = this.offset;
+                    accept_line = this.line;
+                    accept_column = this.column;
+                }
+            }
+            else {
+                if (accept_state != -1) {
+                    switch (accept_token) {
+
+#foreach ($token in ${grammar.tokens})
+                        case ${token.index}: {
+#if ($token.fixed)
+                            Token token = new ${token.javaTypeName}(
+                                start_offset,
+                                start_line + 1,
+                                start_column + 1);
+#else## token not fixed
+                            Token token = new ${token.javaTypeName}(
+                                getText(accept_length),
+                                start_offset,
+                                start_line + 1,
+                                start_column + 1);
+#end
+                            unread_except(accept_length);
+                            this.offset = accept_offset;
+                            this.column = accept_column;
+                            this.line = accept_line;
+#if ($token.transitional)
+
+                            switch (state) {
+#foreach ($transition in $token.transitions)
+                                case ${transition.key.name}: state = State.${transition.value.name}; break;
+## TODO: Have a default -> IllegalStateException here? Would we blow up the method limit?
+#end
+                            }
+#end
+
+                            return token;
+                        }
+#end
+                        default:
+                            throw new IllegalStateException("Internal failure.");
+                    }   // switch (accept_token)
+                } else {
+                    if (this.text.length() > 0) {
+                        throw new LexerException(
+                            new InvalidToken(this.text.substring(0, 1), start_offset, start_line + 1, start_column + 1),
+                            "[" + (start_line + 1) + "," + (start_column + 1) + "]" +
+                            " Unknown token: " + this.text);
+                    }
+
+                    return new EOF(
+                        start_offset,
+                        start_line + 1,
+                        start_column + 1);
+                }
+            }
+        }
+    }
+
+    private void unread_except(@Nonnegative int acceptLength) throws IOException {
+        int length = this.text.length();
+        for (int i = length - 1; i >= acceptLength; i--) {
+            this.in.unread(this.text.charAt(i));
+        }
+    }
+
+    protected void unread(@Nonnull Token token) throws IOException {
+        String text = token.getText();
+        int length = text.length();
+        for (int i = length - 1; i >= 0; i--)
+            this.in.unread(text.charAt(i));
+        this.offset = token.getOffset();
+        this.line = token.getLine() - 1;
+        this.column = token.getColumn() - 1;
+    }
+
+    @Nonnull
+    private String getText(@Nonnegative int acceptLength) {
+        return this.text.substring(0, acceptLength);
+    }
+
+    private static final int[][][][] gotoTable /* = {
+#foreach ($state in $grammar.states)
+        // Transitions for ${state.name}, indexed by DFA state. Value is [start, end, dfa-state].
+        {
+#foreach ($dfaState in $state.dfa.states)
+            { #foreach ($dfaTransition in $dfaState.transitions){$dfaTransition.startCode, $dfaTransition.endCode, $dfaTransition.destination.index}, #end}, // DFA State ${dfaState.index}
+#end
+        },
+#end
+    } */ ;
+
+    private static final int[][] acceptTable /* = {
+#foreach ($state in $grammar.states)
+        // Accept table for ${state.name}, indexed by DFA state. Value is token index.
+        { #foreach ($dfaState in $state.dfa.states)${dfaState.acceptTokenIndex}, #end},
+#end
+    } */ ;
+
+    public static enum State {
+#foreach ($state in $grammar.states)
+        ${state.name}(${state.index}),
+#end
+## Trailing comma is valid in Java.
+        ;
+
+        private final int id;
+
+        /* pp */ State(@Nonnegative int id) {
+            this.id = id;
+        }
+
+        @Nonnegative
+        public int id() {
+            return this.id;
+        }
+    }
+
+    private static void readArray(@Nonnull int[] out, @Nonnull DataInputStream in) throws IOException {
+        for (int i = 0; i < out.length; i++)
+            out[i] = in.readInt();
+    }
+
+    @Nonnull
+    private static int[][] readTable(@Nonnull DataInputStream in, @Nonnegative int sublength) throws IOException {
+        int[][] out = new int[in.readInt()][sublength];
+        for (int i = 0; i < out.length; i++)
+            readArray(out[i], in);
+        return out;
+    }
+
+    static {
+        try {
+            DataInputStream in = new DataInputStream(
+#if ($tables.lexerDataInline)
+                new java.util.zip.GZIPInputStream(
+                    new java.io.ByteArrayInputStream(
+                        javax.xml.bind.DatatypeConverter.parseBase64Binary("$tables.lexerDataText")
+                    )
+                )
+#else
+                new java.io.BufferedInputStream(
+                    Lexer.class.getResourceAsStream("lexer.dat")
+                )
+#end
+            );
+
+            int lexerStateCount = in.readInt();
+            gotoTable = new int[lexerStateCount][][][];
+            acceptTable = new int[lexerStateCount][];
+
+            for (int lexerStateIndex = 0; lexerStateIndex < lexerStateCount; lexerStateIndex++) {
+                // DFA state count in this lexer state
+                int dfaStateCount = in.readInt();
+
+                gotoTable[lexerStateIndex] = new int[dfaStateCount][][];
+                acceptTable[lexerStateIndex] = new int[dfaStateCount];
+                for (int dfaStateIndex = 0; dfaStateIndex < dfaStateCount; dfaStateIndex++) {
+                    gotoTable[lexerStateIndex][dfaStateIndex] = readTable(in, 3);
+                    acceptTable[lexerStateIndex][dfaStateIndex] = in.readInt();
+                }
+            }
+
+            in.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load lexer table.", e);
+        }
+    }
+}

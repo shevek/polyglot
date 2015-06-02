@@ -1,0 +1,18 @@
+/* ${header} */
+package ${grammar.package.packageName}.analysis;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import ${grammar.package.packageName}.node.Node;
+import ${grammar.package.packageName}.node.Switch;
+
+public interface Analysis extends Switch {
+
+    public Object getIn(@Nonnull Node node);
+
+    public void setIn(@Nonnull Node node, Object o);
+
+    public Object getOut(@Nonnull Node node);
+
+    public void setOut(@Nonnull Node node, Object o);
+}

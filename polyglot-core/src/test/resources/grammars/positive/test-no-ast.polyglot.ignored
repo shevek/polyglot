@@ -1,0 +1,10 @@
+Package org.anarres.polyglot.test.noast ;
+
+Tokens
+
+	tok_a = 'a' ;
+
+Productions
+
+	program = tok_a ;
+

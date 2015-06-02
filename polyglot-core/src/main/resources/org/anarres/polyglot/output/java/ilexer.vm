@@ -1,0 +1,15 @@
+/* ${header} */
+package ${grammar.package.packageName}.lexer;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import ${grammar.package.packageName}.node.Token;
+
+public interface ILexer {
+
+    @Nonnull
+    public Token peek() throws IOException, LexerException;
+
+    @Nonnull
+    public Token next() throws IOException, LexerException;
+}

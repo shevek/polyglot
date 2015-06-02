@@ -1,0 +1,10 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import javax.annotation.Nonnull;
+
+public interface Switchable {
+
+    /** Implements the Visitor pattern. */
+    public void apply(@Nonnull Switch s);
+}

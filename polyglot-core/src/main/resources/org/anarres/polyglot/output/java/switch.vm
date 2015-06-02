@@ -1,0 +1,24 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import javax.annotation.Nonnull;
+
+/**
+ * A visitor interface.
+ */
+public interface Switch {
+#foreach ($token in $grammar.tokens)
+    public void case${token.javaMethodName}(@Nonnull ${token.javaTypeName} node);
+#end
+## Make sure we have an AST before we emit anything for Start.
+#if ($grammar.astProductionRoot)
+    public void caseStart(@Nonnull Start node);
+#end
+#foreach ($production in $grammar.astProductions)
+#foreach ($alternative in $production.alternatives)
+    public void case${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node);
+#end
+#end
+    public void caseEOF(@Nonnull EOF node);
+    public void caseInvalidToken(@Nonnull InvalidToken node);
+}

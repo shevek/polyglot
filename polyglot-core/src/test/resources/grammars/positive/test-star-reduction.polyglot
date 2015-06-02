@@ -1,0 +1,56 @@
+/*
+This tests whether the grammar rewrite, which causes program to
+reduce $question.none on tok_a OR
+shift tok_a to generate $question.base
+resolves correctly.
+*/
+
+Package org.anarres.polyglot.test.starreduction;
+
+Tokens
+
+	a = 'a' ;
+	b = 'b' ;
+	c = 'c' ;
+	d = 'd' ;
+	e = 'e' ;
+
+Productions
+
+	program =
+		// ab?
+		// ac*
+		ad
+		ae
+			{ -> New program(ad, ae) } ;
+
+/*
+	ab =
+		a b
+			{ -> New ab(a, b) } ;
+
+	ac =
+		a c
+			{ -> New ac(a, c) } ;
+*/
+
+	ad { -> ad? } =
+		{empty}
+			{ -> Null } |
+		{full} a d
+			{ -> New ad(a, d) } ;
+
+	ae =
+		a e
+			{ -> New ae(a, e) } ;
+
+Abstract Syntax Tree
+
+	program =
+		ad?
+		ae?
+		;
+	// ab = a b ;
+	// ac = a c ;
+	ad = a d ;
+	ae = a e ;

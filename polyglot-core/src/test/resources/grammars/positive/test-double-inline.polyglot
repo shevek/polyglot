@@ -1,0 +1,23 @@
+Package org.anarres.polyglot.doubleinline ;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+
+Productions
+
+// This causes a shift-reduce error, which causes inlining.
+// Inlining into an inlined alternative used to bug.
+// Also, we used to get a ClassCastException in Inliner (trivially fixed).
+	program { -> } = p0 ;
+
+	p0 { -> } = [l]:tok_a p1? [r]:tok_a | tok_b ;
+	p1 { -> } = [l]:tok_a p2? [r]:tok_a | tok_b ;
+	p2 { -> } = [l]:tok_a p3? [r]:tok_a | tok_b ;
+	p3 { -> } = tok_a | tok_b ;
+
+Abstract Syntax Tree
+
+	program = ;
+

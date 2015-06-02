@@ -1,0 +1,992 @@
+//
+// PHP4 language grammar for Sablecc3 parser generator.
+// Copyright (C) 2001-2004 Indrek Mandre <indrek (at) mare . ee>
+// 
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation; either version 2.1 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public
+// License along with this program in the file "COPYING-LESSER"; if not,
+// write to the Free Software Foundation, Inc., 59 Temple Place,
+// Suite 330, Boston, MA  02111-1307  USA
+//
+
+//
+// Changelog:
+//    - 24-02-2004 introduced php inline <?= construct
+//    - 01-02-2004 fixed grammar to work with latest sablecc3 beta
+//    - 15-11-2003 break and continue can now take expression as argument
+//    - 30-10-2003 allow case insensitive <?php, ignore any other <?other as html
+//    - 30-10-2003 hack: explicitly allow ! $a = foo() that translates to !($a = foo())
+//    - 30-10-2003 hack: include-s can now be silenced (with @)
+//    - 15-10-2003 added support for missing backtick operator
+//    - 26-07-2003 the list() operator mishandled empty fields
+//    - 24-07-2003 jar building script make_jar.sh was missing .dat files
+//    - 24-07-2003 heredoc line numbers were not correctly parsed
+//    - 24-07-2003 lexer did not properly accept "{"
+//
+
+//
+// This grammar was built mostly from scratch and was not "converted" from
+// the Zend(tm) bison parser file. So many things can be a bit different.
+//
+// As sablecc does not allow default shifting or operator precedence/
+// associativity specification in the LALR grammar this would have
+// been quite difficult.
+//
+// As the PHP language was hacked together by many people with limited
+// coordination and skills the PHP language can sometimes be a real mess.
+// I've tryed to duplicate most of those things here but I don't have eyes
+// for everything so some things might parse differently or not parse at all.
+//
+// Warning: this sablecc3 file is accompanied with a proper lexer java class
+// that is required to get the parser working.
+//
+// Missing, incomplete or buggy parts:
+//    - serious problems with expressions I did not figure out how to
+//      easily overcome. Due to bison's lack operator precedence attitude
+//      expressions like $a = 1 + $b = 2 + $c = 4 + 8; are allowed and I
+//      have no idea how to duplicate this weird syntax with sablecc.
+//      I made some exceptions, like @include() and !$var = foo()
+//      but inherently the problem remains unsolved.
+//    - no readonly expressions like default arguments for functions or class variables
+//      exists, eg. it accepts incorrect arguments that call functions, use variables etc.
+//            function foo ($bar = foo2()) { } /* illeagal by zend but this accepts */
+//    - recursive heredoc blocks are not allowed.. don't ask.
+//    - old_function is not supported
+//    - when assigning a reference the rvalue can be invalid: $a = &42;
+//    - the same goes for building arrays out of references: array (&42);
+//    - the same goes for calling functions: foobar ($a, $b, &42);
+//    - it could be that ternary operation has wrong associativity, not sure, haven't checked
+//    - if file ends with ?>\n then the ending newline is not removed
+//    - lots of bugs
+//
+// If sablecc runs out of heap space add memory using the java -Xmx<size> argument.
+// Couple of hundred megs should do it.
+//
+// If constructs are parsed somewhat strangely but you'll get used to it:
+//    expr* statement* [else]:statement*
+// should be look at as
+//    if ( expr[0] ) { statement[0] } elseif ( expr[1] ) {statement[1] } ... else { else }
+// The number of elements in expr and statement matches. Statement is usually of
+// statement.group type.
+//
+// Currently works with sablecc3-beta-2.
+// For latest updates visit http://www.mare.ee/indrek/sablecc/ and http://www.sablecc.org/
+// Indrek Mandre, 30th of October 2003
+//
+// I'd like to thank Yao-Wen (Wayne) Huang from the Taiwan and his team
+// who have tested the grammar on many sources and reported lots of bugs.
+//
+
+Package org.sablecc.php4;
+
+Helpers
+
+  letter = ['A'..'Z'] | ['a'..'z'] | [0x7F .. 0xFF];
+  digit = ['0'..'9'];
+  nondigit = '_' | letter;
+
+  sign = '+' | '-';
+
+  digit_seq = digit+;
+  letter_seq = letter+;
+  nondigit_seq = nondigit+;
+
+  identifier = nondigit (digit | nondigit)*;
+
+  heredoc_name = (letter | '_') (letter | digit | '_')*;
+
+  float_exponent = ('e' | 'E') sign? digit_seq;
+  float_fraction = digit_seq? '.' digit_seq | digit_seq '.';
+
+  hex = '0' ['x' + 'X'] (digit | ['a'..'f'] | ['A'..'F'])+;
+
+  all = [0 .. 0xFFFF];
+  cr = 13;
+  lf = 10;
+  tab = 9;
+  eol = cr | lf | cr lf;
+
+  blank = (eol | tab | ' ');
+  tabspace = [tab + ' '];
+  space = [cr + [lf + [tab + ' ']]];
+
+  not_cr_lf = [all - [cr + lf]];
+  not_star = [all - '*'];
+  not_star_slash = [not_star - '/'];
+
+  a = ['a' + 'A'];
+  b = ['b' + 'B'];
+  c = ['c' + 'C'];
+  d = ['d' + 'D'];
+  e = ['e' + 'E'];
+  f = ['f' + 'F'];
+  g = ['g' + 'G'];
+  h = ['h' + 'H'];
+  i = ['i' + 'I'];
+  j = ['j' + 'J'];
+  k = ['k' + 'K'];
+  l = ['l' + 'L'];
+  m = ['m' + 'M'];
+  n = ['n' + 'N'];
+  o = ['o' + 'O'];
+  p = ['p' + 'P'];
+  q = ['q' + 'Q'];
+  r = ['r' + 'R'];
+  s = ['s' + 'S'];
+  t = ['t' + 'T'];
+  u = ['u' + 'U'];
+  v = ['v' + 'V'];
+  w = ['w' + 'W'];
+  x = ['x' + 'X'];
+  y = ['y' + 'Y'];
+  z = ['z' + 'Z'];
+
+States
+  html, code, string, heredoc, backtick;
+
+Tokens
+  
+  {html->code} code_print = '<?=';
+  {html->code} code_start = ('<?' p h p) | '<?';
+  {html} htmldata = ([all - '<'] | '<' [all - '?'] | '<?' [all - [p + [space + '=']]] | '<?' p [all - h] | '<?' p h [all - p] | '<?' p h p [all - space])+;
+
+  {code->html} code_end = '?>';
+
+  {code} if = i f;
+  {code} elseif = e l s e i f;
+  {code} if_colon = ;
+  {code} elseif_colon = ;
+  {code} endif = e n d i f;
+  {code} else = e l s e;
+  {code} else_colon = e l s e blank* ':';
+  {code} continue = c o n t i n u e;
+  {code} foreach = f o r e a c h;
+  {code} endforeach = e n d f o r e a c h;
+  {code} for = f o r;
+  {code} as = a s;
+  {code} endfor = e n d f o r;
+  {code} while = w h i l e;
+  {code} endwhile = e n d w h i l e;
+  {code} do = d o;
+  {code} switch = s w i t c h;
+  {code} case = c a s e;
+  {code} default = d e f a u l t;
+  {code} endswitch = e n d s w i t c h;
+  {code} break = b r e a k;
+  {code} function = f u n c t i o n | c f u n c t i o n;
+  {code} return = r e t u r n;
+  {code} exit = e x i t;
+  {code} var = v a r;
+  {code} global = g l o b a l;
+  {code} static = s t a t i c;
+  {code} tclass = c l a s s;
+  {code} extends = e x t e n d s;
+  {code} new = n e w;
+  {code} array = a r r a y;
+  {code} list = l i s t;
+  {code} require = r e q u i r e;
+  {code} require_once = r e q u i r e '_' o n c e;
+  {code} include = i n c l u d e;
+  {code} include_once = i n c l u d e '_' o n c e;
+  {code} echo = e c h o;
+  {code} declare = d e c l a r e;
+  {code} print = p r i n t;
+  {code} boolean = (t r u e) | (f a l s e);
+
+  {code->heredoc} heredoc_start = '<<<' heredoc_name;
+
+  {code} plus_eq = '+=';
+  {code} minus_eq = '-=';
+  {code} star_eq = '*=';
+  {code} slash_eq = '/=';
+  {code} dot_eq = '.=';
+  {code} perc_eq = '%=';
+  {code} caret_eq = '^=';
+  {code} amp_eq = '&=';
+  {code} bar_eq = '|=';
+  {code} sh_l_eq = '<<=';
+  {code} sh_r_eq = '>>=';
+
+  {code} bop_sh_left = '<<';
+  {code} bop_sh_right = '>>';
+
+  {code} point_assoc = '=>';
+  {code} point_elem = '->';
+
+  {code} cop_eq = '==';
+  {code} cop_leq = '===';
+  {code} cop_nleq = '!==';
+  {code} cop_lteq = '<=';
+  {code} cop_gteq = '>=';
+  {code} cop_lt = '<';
+  {code} cop_gt = '>';
+  {code} cop_neq = '!=';
+  {code} cop_or = '||';
+  {code} cop_and = '&&';
+  
+  {code} lop_or = o r;
+  {code} lop_and = a n d;
+  {code} lop_xor = x o r;
+
+  {code} exclamation = '!';
+  {code} ampersand = '&';
+  {code} bar = '|';
+  {code} caret = '^';
+  {code} tilde = '~';
+  {code} equal = '=';
+  {code} star = '*';
+  {code} at = '@';
+  {code} div = '/';
+  {code} mod = '%';
+  {code} plus_plus = '++';
+  {code} minus_minus = '--';
+  {code} plus = '+';
+  {code} minus = '-';
+  {code} l_par = '(';
+  {code} r_par = ')';
+  {code} l_brace = '{';
+  {code} r_brace = '}';
+  {code} l_bracket = '[';
+  {code} r_bracket = ']';
+  {code} semicolon = ';';
+  {code} colon = ':';
+  {code} coloncolon = '::';
+  {code} dot = '.';
+  {code} comma = ',';
+  {code} dollar = '$';
+  {code} quest = '?';
+
+  {code} cast_int = '(' tabspace* (i n t e g e r | i n t) tabspace* ')';
+  {code} cast_double = '(' tabspace* (d o u b l e | f l o a t | r e a l) tabspace* ')';
+  {code} cast_string = '(' tabspace* (s t r i n g) tabspace* ')';
+  {code} cast_array = '(' tabspace* (a r r a y) tabspace* ')';
+  {code} cast_object = '(' tabspace* (o b j e c t) tabspace* ')';
+  {code} cast_bool = '(' tabspace* (b o o l | b o o l e a n) tabspace* ')';
+  {code} cast_unset = '(' tabspace* (u n s e t) tabspace* ')';
+
+
+  {code} float = float_fraction float_exponent? | digit_seq float_exponent;
+  {code} integer = digit_seq | hex;
+  {code} variable = '$' identifier;
+  {code} identifier = identifier;
+
+  {code} blank = blank+;
+  {code} short_comment = '//' not_cr_lf* eol | '#' not_cr_lf* eol;
+  {code} long_comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';  /* '4vim */
+
+  {code} static_string = ''' ([all - ['\' + ''']] | '\' all)*  '''; /* '4vim */
+
+  {code->string} string_start = '"';
+  {string->code} string_end = '"';
+
+  {code->backtick} backtick_start = '`';
+  {backtick->code} backtick_end = '`';
+
+  {string->code} string_to_complex_cvar = '${' identifier | '{$' identifier;
+  {heredoc->code} heredoc_to_complex_cvar = '${' identifier | '{$' identifier;
+  {backtick->code} backtick_to_complex_cvar = '${' identifier | '{$' identifier;
+
+  {string, heredoc, backtick} string_var = '$' identifier;
+  {string, heredoc, backtick} string_array_var = '$' identifier '[' '$' identifier ']';
+  {string, heredoc, backtick} string_array_static = '$' identifier '[' [all - ']']+ ']';
+  {string, heredoc, backtick} string_object = '$' identifier '->' identifier;
+
+  {string} string_chunk = ([all - ['$' + ['"' + ['{' + '\']]]] | '\' all | '{' '\' all | '{' [all - ['$' + ['\' + '"']]])+;
+  {string} string_chunk_helper = '$' | '{';
+
+  {heredoc} heredoc_chunk = ([all - ['\' + ['$' + '{']]] | '\' all | '{' '\' all | '{' [all - ['$' + ['\' + '"']]])+;
+  {heredoc} heredoc_chunk_helper = '$' | '{';
+
+  {backtick} backtick_chunk = ([all - ['$' + ['`' + ['{' + '\']]]] | '\' all | '{' '\' all | '{' [all - ['$' + ['\' + '`']]])+;
+  {backtick} backtick_chunk_helper = '$' | '{';
+
+  {string} string_cvar_start =;
+  {string, code->string} string_cvar_end =;
+
+  {string, code->string} string_from_complex_cvar =;
+  {heredoc, code->heredoc} heredoc_from_complex_cvar =;
+  {backtick, code->backtick} backtick_from_complex_cvar =;
+
+  {heredoc} heredoc_end =;
+
+Ignored Tokens
+
+  blank,
+  short_comment,
+  long_comment,
+  code_start;
+
+Productions
+
+  program =
+                          statement*
+  ;
+
+  terminator {-> } =
+      {semicolon}         semicolon {-> }
+    | {code_end}          code_end {-> }
+  ;
+
+  statement {-> statement? } =
+      {html}              htmldata
+    | {html_print}        code_print expr semicolon* code_end {-> New statement.echo([expr.expr]) }
+
+    | {terminator}        terminator {-> Null }
+
+    | {expr}              expr terminator {-> New statement.expr (expr.expr) }
+    | {echo}              echo_statement {-> echo_statement.statement }
+    | {declare}           declare_statement {-> declare_statement.statement }
+
+    | {exit}              exit_statement {-> exit_statement.statement }
+    | {return}            return_statement {-> return_statement.statement }
+
+    | {fcontrol}          flow_control_statement {-> flow_control_statement.statement }
+
+    | {global}            global_statement {-> global_statement.statement }
+    | {static}            static_statement {-> static_statement.statement }
+
+    | {for}               for_statement {-> for_statement.statement }
+    | {foreach}           foreach_statement {-> foreach_statement.statement }
+    | {while}             while_statement {-> while_statement.statement }
+    | {switch}            switch_statement {-> switch_statement.statement }
+
+    | {if}                if_statement {-> if_statement.statement }
+    | {htmlif}            htmlif_statement {-> htmlif_statement.statement }
+
+    | {function}          function_statement {-> function_statement.statement }
+    | {class}             class_statement {-> class_statement.statement }
+
+    | {group}             l_brace statement* r_brace {-> New statement.group ([statement]) }
+  ;
+
+  lesser_statement {-> statement? } =
+      {html}              htmldata {-> New statement.html (htmldata) }
+    | {terminator}        terminator {-> Null }
+    | {expr}              [e]:expr terminator {-> New statement.expr (e.expr) }
+    | {echo}              echo_statement {-> echo_statement.statement }
+    | {declare}           lesser_declare_statement {-> lesser_declare_statement.statement }
+
+    | {exit}              exit_statement {-> exit_statement.statement }
+    | {return}            return_statement {-> return_statement.statement }
+
+    | {fcontrol}          flow_control_statement {-> flow_control_statement.statement }
+
+    | {global}            global_statement {-> global_statement.statement }
+    | {static}            static_statement {-> static_statement.statement }
+
+    | {foreach}           lesser_foreach_statement {-> lesser_foreach_statement.statement }
+    | {while}             lesser_while_statement {-> lesser_while_statement.statement }
+    | {for}               lesser_for_statement {-> lesser_for_statement.statement }
+    | {switch}            switch_statement {-> switch_statement.statement }
+
+    | {htmlif}            htmlif_statement {-> htmlif_statement.statement }
+    | {if}                lesser_if_else_statement {-> lesser_if_else_statement.statement }
+
+    | {function}          function_statement {-> function_statement.statement }
+    | {class}             class_statement {-> class_statement.statement }
+
+    | {group}             l_brace statement* r_brace {-> New statement.group ([statement]) }
+  ;
+
+  flow_control_statement {-> statement } =
+      {break}             break expr? terminator {-> New statement.break (expr) }
+    | {continue}          continue expr? terminator {-> New statement.continue (expr) }
+  ;
+
+  echo_statement {-> statement } =
+      {echo}              echo for_expr terminator {-> New statement.echo ([for_expr.expr]) }
+  ;
+
+  declare_statement {-> statement } =
+      {declare}           declare l_par identifier equal integer r_par statement {-> New statement.declare ([New declare_arg.key (identifier, integer)], [statement]) }
+  ;
+
+  lesser_declare_statement {-> statement } =
+      {declare}           declare l_par identifier equal integer r_par lesser_statement {-> New statement.declare ([New declare_arg.key (identifier, integer)], [lesser_statement.statement]) }
+  ;
+
+  exit_statement {-> statement } =
+      {exit}                T.exit expr? terminator {-> New statement.exit (expr.expr) }
+    | {empty}               T.exit l_par r_par terminator {-> New statement.exit (Null) }
+  ;
+
+  return_statement {-> statement } =
+      {return}              return expr? terminator {-> New statement.return (expr.expr) }
+  ;
+
+  static_statement {-> statement } =
+      {simple}            static static_arguments terminator {-> New statement.static ([static_arguments.expr]) }
+  ;
+
+  static_arguments {-> expr* } =
+      {var}               variable {-> [New expr.variable (variable)] }
+    | {varis}             variable equal [e1]:expr {-> [New expr.assign (New expr.variable (variable), e1.expr)] }
+    | {list}              static_arguments comma variable {-> [static_arguments.expr, New expr.variable (variable)] }
+    | {listis}            static_arguments comma variable equal [e1]:expr {-> [static_arguments.expr, New expr.assign (New expr.variable (variable), e1.expr)] }
+  ;
+
+  global_statement {-> statement } =
+      {simple}            global global_arguments terminator {-> New statement.global ([global_arguments.variable]) }
+  ;
+
+  global_arguments {-> variable* } =
+      {var}               variable {-> [variable] }
+    | {list}              global_arguments comma variable {-> [global_arguments.variable, variable] }
+  ;
+
+  function_statement {-> statement } =
+      {simple}            function ampersand? identifier l_par function_arguments? r_par l_brace statement* r_brace {-> New statement.function (ampersand, identifier, [function_arguments.function_arg], [statement]) }
+  ;
+
+  function_arguments {-> function_arg* } =
+      {var}               ampersand? variable {-> [New function_arg (ampersand, variable, Null)] }
+    | {is}                ampersand? variable equal expr {-> [New function_arg (ampersand, variable, expr)] }
+    | {list}              function_arguments comma ampersand? variable {-> [function_arguments.function_arg, New function_arg (ampersand, variable, Null)] }
+    | {islist}            function_arguments comma ampersand? variable equal expr {-> [function_arguments.function_arg, New function_arg (ampersand, variable, expr)] }
+  ;
+
+  function_arg =  ampersand? variable expr?;
+
+  class_statement {-> statement } =
+      {simple}            tclass identifier l_brace member_statement* r_brace {-> New statement.class (identifier, Null, [member_statement.statement]) }
+    | {extended}          tclass [name]:identifier extends [base]:identifier l_brace member_statement* r_brace {-> New statement.class (name, base, [member_statement.statement]) }
+  ;
+
+  member_statement {-> statement* } =
+      {function}          function_statement {-> [function_statement.statement] }
+    | {var}               var_statement {-> [var_statement.statement] }
+    | {terminator}        semicolon {-> [] }
+  ;
+
+  var_statement {-> statement }  =
+      {simple}            var var_arguments terminator {-> New statement.var ([var_arguments.expr]) }
+  ;
+
+  var_arguments {-> expr* } =
+      {var}               variable {-> [New expr.variable (variable)] }
+    | {varis}             variable equal [e1]:expr {-> [New expr.assign (New expr.variable (variable), e1.expr)] }
+    | {list}              var_arguments comma variable {-> [var_arguments.expr, New expr.variable (variable)] }
+    | {listis}            var_arguments comma variable equal [e1]:expr {-> [var_arguments.expr, New expr.assign (New expr.variable (variable), e1.expr)] }
+  ;
+
+  for_statement {-> statement } =
+      {simple}            for l_par [e1]:for_expr? [s1]:semicolon [e2]:for_expr? [s2]:semicolon [e3]:for_expr? r_par statement {-> New statement.for ([e1.expr], [e2.expr], [e3.expr], [statement]) }
+    | {html}              for l_par [e1]:for_expr? [s1]:semicolon [e2]:for_expr? [s2]:semicolon [e3]:for_expr? r_par colon statement* endfor terminator {-> New statement.for ([e1.expr], [e2.expr], [e3.expr], [statement]) }
+  ;
+
+  lesser_for_statement {-> statement } =
+      {simple}            for l_par [e1]:for_expr? [s1]:semicolon [e2]:for_expr? [s2]:semicolon [e3]:for_expr? r_par lesser_statement {-> New statement.for ([e1.expr], [e2.expr], [e3.expr], [lesser_statement.statement]) }
+    | {html}              for l_par [e1]:for_expr? [s1]:semicolon [e2]:for_expr? [s2]:semicolon [e3]:for_expr? r_par colon statement* endfor terminator {-> New statement.for ([e1.expr], [e2.expr], [e3.expr], [statement]) }
+
+  ;
+
+  foreach_statement {-> statement } =
+      {nonassoc}          foreach l_par [e1]:expr as [e2]:expr r_par statement {-> New statement.foreach (e1.expr, Null, e2.expr, [statement]) }
+    | {assoc}             foreach l_par [e1]:expr as [e2]:expr point_assoc [e3]:expr r_par statement {-> New statement.foreach (e1.expr, e2.expr, e3.expr, [statement]) }
+    | {html_nonassoc}     foreach l_par [e1]:expr as [e2]:expr r_par colon statement* endforeach terminator {-> New statement.foreach (e1.expr, Null, e2.expr, [statement]) }
+    | {html_assoc}        foreach l_par [e1]:expr as [e2]:expr point_assoc [e3]:expr r_par colon statement* endforeach terminator {-> New statement.foreach (e1.expr, e2.expr, e3.expr, [statement]) }
+  ;
+
+  lesser_foreach_statement {-> statement } =
+      {nonassoc}          foreach l_par [e1]:expr as [e2]:expr r_par lesser_statement {-> New statement.foreach (e1.expr, Null, e2.expr, [lesser_statement.statement]) }
+    | {assoc}             foreach l_par [e1]:expr as [e2]:expr point_assoc [e3]:expr r_par lesser_statement {-> New statement.foreach (e1.expr, e2.expr, e3.expr, [lesser_statement.statement]) }
+    | {html_nonassoc}     foreach l_par [e1]:expr as [e2]:expr r_par colon statement* endforeach terminator {-> New statement.foreach (e1.expr, Null, e2.expr, [statement]) }
+    | {html_assoc}        foreach l_par [e1]:expr as [e2]:expr point_assoc [e3]:expr r_par colon statement* endforeach terminator {-> New statement.foreach (e1.expr, e2.expr, e3.expr, [statement]) }
+  ;
+
+  while_statement {-> statement } =
+      {simple}            while l_par [e1]:expr r_par statement {-> New statement.while (e1.expr, [statement]) }
+    | {do}                do statement while l_par [e1]:expr r_par terminator {-> New statement.do_while ([statement], e1.expr) }
+    | {html_simple}       while l_par [e1]:expr r_par colon statement* endwhile terminator {-> New statement.while (e1.expr, [statement]) }
+  ;
+
+  lesser_while_statement {-> statement } =
+      {simple}            while l_par [e1]:expr r_par lesser_statement {-> New statement.while (e1.expr, [lesser_statement.statement]) }
+    | {do}                do statement while l_par [e1]:expr r_par terminator {-> New statement.do_while ([statement], e1.expr) }
+    | {html_simple}       while l_par [e1]:expr r_par colon statement* endwhile terminator {-> New statement.while (e1.expr, [statement]) }
+  ;
+
+  switch_statement {-> statement } =
+      {simple}            switch l_par expr r_par l_brace switch_case* r_brace {-> New statement.switch (expr.expr, [switch_case]) }
+    | {html}              switch l_par expr r_par colon switch_case* endswitch terminator {-> New statement.switch (expr.expr, [switch_case]) }
+  ;
+
+  switch_case {-> switch_case } =
+      {expr}              case expr case_separator statement* {-> New switch_case (expr.expr, [statement]) }
+    | {default}           default case_separator statement* {-> New switch_case (Null, [statement]) }
+  ;
+
+  case_separator {-> } =
+      {colon}             colon {-> }
+    | {semicolon}         semicolon {-> }
+  ;
+
+  for_expr {-> expr* } =
+      {list}            for_expr comma expr {-> [for_expr.expr, expr.expr] }
+    | {expr}            expr {-> [expr.expr] }
+  ;
+
+  if_statement {-> statement } =
+      {if}                if l_par expr r_par statement {-> New statement.if ([expr.expr], [statement], []) }
+    | {else}              if l_par expr r_par lesser_statement else statement {-> New statement.if ([expr.expr], [lesser_statement.statement], [statement]) }
+    | {elseif}            if l_par expr r_par lesser_statement elseif_statement {-> New statement.if ([expr.expr, elseif_statement.expr], [lesser_statement.statement, elseif_statement.statement], [elseif_statement.else]) }
+  ;
+
+  elseif_statement {-> expr* statement* [else]:statement* } =
+      {if}                elseif l_par expr r_par statement {-> [expr.expr] [statement] [] }
+    | {else}              elseif l_par expr r_par lesser_statement else statement {-> [expr] [lesser_statement.statement] [statement] }
+    | {elseif}            elseif l_par expr r_par lesser_statement elseif_statement {-> [expr, elseif_statement.expr] [lesser_statement.statement, elseif_statement.statement] [elseif_statement.else] }
+  ;
+
+  lesser_if_else_statement {-> statement } =
+      {else}              if l_par expr r_par [s1]:lesser_statement else [s2]:lesser_statement {-> New statement.if ([expr], [s1.statement], [s2.statement]) }
+    | {elseif}            if l_par expr r_par [s1]:lesser_statement lesser_elseif_statement {-> New statement.if ([expr, lesser_elseif_statement.expr], [s1.statement, lesser_elseif_statement.statement], [lesser_elseif_statement.else]) }
+  ;
+
+  lesser_elseif_statement {-> expr* statement* [else]:statement*} =
+      {else}              elseif l_par expr r_par [s1]:lesser_statement else [s2]:lesser_statement {-> [expr] [s1.statement] [s2.statement] }
+    | {elseif}            elseif l_par expr r_par [s1]:lesser_statement lesser_elseif_statement {-> [expr, lesser_elseif_statement.expr] [s1.statement, lesser_elseif_statement.statement] [lesser_elseif_statement.else] }
+  ;
+
+  htmlif_statement {-> statement } =
+      {if}                if_colon l_par expr r_par colon statement* html_elseif* html_else? endif terminator {-> New statement.if ([expr.expr, html_elseif.expr], [New statement.group ([statement]), html_elseif.statement], [html_else.statement]) }
+  ;
+
+  html_elseif {-> expr statement } =
+      {elseif}            elseif_colon l_par expr r_par colon statement* {-> expr.expr New statement.group ([statement]) }
+  ;
+
+  html_else {-> statement } =
+      {else}              else_colon statement* {-> New statement.group ([statement]) }
+  ;
+
+  cvar {-> expr } =
+      {index}             cvar l_bracket expr? r_bracket {-> New expr.index (cvar.expr, expr.expr) }
+    | {object_var}        cvar point_elem cvar1 {-> New expr.property (cvar.expr, cvar1.expr) }
+    | {object_ident}      cvar point_elem identifier {-> New expr.property (cvar.expr, New expr.name (identifier)) }
+    | {other}             [e1]:cvar1 {-> e1.expr }
+  ;
+
+  cvar1 {-> expr } =
+      {string_index}      cvar1 l_brace expr r_brace {-> New expr.string_index (cvar1.expr, expr.expr) }
+    | {other}             [e1]:cvar2 {-> e1.expr }
+  ;
+
+  cvar2 {-> expr } =
+      {varvar}            dollar cvar2 {-> New expr.varvar (cvar2.expr) }
+    | {varvar2}           dollar l_brace expr r_brace {-> New expr.varvar (expr.expr) }
+    | {other}             [e1]:cvar99 {-> e1.expr }
+  ;
+
+  cvar99 {-> expr } =
+      {variable}          variable {-> New expr.variable (variable) }
+  ;
+
+
+  expr {-> expr } =
+      {other}             [e1]:expr0a {-> e1.expr }
+  ;
+
+  include_expr {->expr} =
+      {include}           include [e1]:expr0a {-> New expr.include (e1.expr) }
+    | {require}           require [e1]:expr0a {-> New expr.require (e1.expr) }
+    | {include_once}      include_once [e1]:expr0a {-> New expr.include_once (e1.expr) }
+    | {require_once}      require_once [e1]:expr0a {-> New expr.require_once (e1.expr) }
+  ;
+
+  expr0a {-> expr } =
+      {other}             [e1]:expr0b {-> e1.expr }
+    | {include}           [e1]:include_expr {-> e1.expr }
+    | {include_at}        at [e1]:include_expr {-> New expr.silence(e1.expr) }
+    | {include_not}       exclamation [e1]:include_expr {-> New expr.not(e1.expr) }
+  ;
+
+  expr0b {-> expr } =
+      {lop_or}            [e1]:expr0b lop_or [e2]:expr1 {-> New expr.bop_or (e1.expr, e2.expr) }
+    | {other}             [e1]:expr1 {-> e1.expr }
+  ;
+
+  expr1 {-> expr } =
+      {lop_xor}           [e1]:expr1 lop_xor [e2]:expr2 {-> New expr.bop_xor (e1.expr, e2.expr) } // a xor b
+    | {other}             [e1]:expr2 {-> e1.expr }
+  ;
+
+  expr2 {-> expr } =
+      {lop_and}           [e1]:expr2 lop_and [e2]:expr3 {-> New expr.bop_and (e1.expr, e2.expr) } // a and b
+    | {other}             [e1]:expr3 {-> e1.expr }
+  ;
+
+  expr3 {-> expr } =
+      {print}             print [e1]:expr3 {-> New expr.print (e1.expr) } // print a
+    | {other}             [e1]:expr4 {-> e1.expr }
+  ;
+
+  expr4 {-> expr } =
+      {assign}            [e1]:cvar equal [e2]:expr4 {-> New expr.assign (e1.expr, e2.expr) }
+    | {assignref}         [e1]:cvar equal ampersand [e2]:expr4 {-> New expr.assignref (e1.expr, e2.expr) }
+    | {list}              list l_par l_exprs r_par equal [e1]:expr5 {-> New expr.list ([l_exprs.list_expr], e1.expr) }
+    | {plus_eq}           [e1]:cvar plus_eq [e2]:expr4 {-> New expr.add_eq (e1.expr, e2.expr) }   // a += b, left
+    | {minus_eq}          [e1]:cvar minus_eq [e2]:expr4 {-> New expr.sub_eq (e1.expr, e2.expr) }  // a -= b, left
+    | {star_eq}           [e1]:cvar star_eq [e2]:expr4 {-> New expr.mul_eq (e1.expr, e2.expr) }   // a *= b, left
+    | {slash_eq}          [e1]:cvar slash_eq [e2]:expr4 {-> New expr.div_eq (e1.expr, e2.expr) }  // a /= b, left
+    | {dot_eq}            [e1]:cvar dot_eq [e2]:expr4 {-> New expr.con_eq (e1.expr, e2.expr) }    // a .= b, left
+    | {perc_eq}           [e1]:cvar perc_eq [e2]:expr4 {-> New expr.mod_eq (e1.expr, e2.expr) }   // a %= b, left
+    | {caret_eq}          [e1]:cvar caret_eq [e2]:expr4 {-> New expr.xor_eq (e1.expr, e2.expr) }  // a ^= b, left
+    | {bar_eq}            [e1]:cvar bar_eq [e2]:expr4 {-> New expr.or_eq (e1.expr, e2.expr) }    // a |= b, left
+    | {amp_eq}            [e1]:cvar amp_eq [e2]:expr4 {-> New expr.and_eq (e1.expr, e2.expr) }    // a &= b, left
+    | {sh_l_eq}           [e1]:cvar sh_l_eq [e2]:expr4 {-> New expr.shl_eq (e1.expr, e2.expr) }   // a <<= b, left
+    | {sh_r_eq}           [e1]:cvar sh_r_eq [e2]:expr4 {-> New expr.shr_eq (e1.expr, e2.expr) }   // a >>= b, left
+    | {other}             [e1]:expr5 {-> e1.expr }
+  ;
+
+  l_exprs {-> list_expr* } =
+      {expr}              list_expr {-> [list_expr] }
+    | {more}              [exprs]:l_exprs comma list_expr {-> [exprs.list_expr, list_expr] }
+  ;
+
+  list_expr =
+      {expr}              [e1]:expr
+    | {empty}
+  ;
+
+  expr5 {-> expr } =                 // a ? b : c
+      {caser}             [e1]:expr5 quest [e2]:expr6 colon [e3]:expr6 {-> New expr.ternary (e1.expr, e2.expr, e3.expr) }
+    | {other}             [e1]:expr6 {-> e1.expr }
+  ;
+
+  expr6 {-> expr } =
+      {or}                [e1]:expr6 cop_or [e2]:expr7 {-> New expr.bop_or (e1.expr, e2.expr) } // a || b
+    | {other}             [e1]:expr7 {-> e1.expr }
+  ;
+
+  expr7 {-> expr } =
+      {and}               [e1]:expr7 cop_and [e2]:expr8 {-> New expr.bop_and (e1.expr, e2.expr) } // a && b
+    | {other}             [e1]:expr8 {-> e1.expr }
+  ;
+
+  expr8 {-> expr } =
+      {bar}               [e1]:expr8 bar [e2]:expr9 {-> New expr.bop_bor (e1.expr, e2.expr) } // a | b
+    | {other}             [e1]:expr9 {-> e1.expr }
+  ;
+
+  expr9 {-> expr } =
+      {caret}             [e1]:expr9 caret [e2]:expr10 {-> New expr.bop_bxor (e1.expr, e2.expr) } // a ^ b
+    | {other}             [e1]:expr10 {-> e1.expr }
+  ;
+
+  expr10 {-> expr } =
+      {amp}               [e1]:expr10 ampersand [e2]:expr11 {-> New expr.bop_band (e1.expr, e2.expr) } // a & b
+    | {other}             [e1]:expr11 {-> e1.expr }
+  ;
+
+  expr11 {-> expr } =
+      {equals}            [e1]:expr11 cop_eq [e2]:expr12 {-> New expr.bop_eq (e1.expr, e2.expr) } // a == b
+    | {nequals}           [e1]:expr11 cop_neq [e2]:expr12 {-> New expr.bop_neq (e1.expr, e2.expr) } // a != b
+    | {ident}             [e1]:expr11 cop_leq [e2]:expr12 {-> New expr.bop_ident (e1.expr, e2.expr) } // a === b
+    | {nident}            [e1]:expr11 cop_nleq [e2]:expr12 {-> New expr.bop_nident (e1.expr, e2.expr) } // a !== b
+    | {other}             [e1]:expr12 {-> e1.expr }
+  ;
+
+  expr12 {-> expr } =
+      {lt}                [e1]:expr12 cop_lt [e2]:expr13 {-> New expr.bop_lt (e1.expr, e2.expr) } // a < b
+    | {gt}                [e1]:expr12 cop_gt [e2]:expr13 {-> New expr.bop_gt (e1.expr, e2.expr) } // a > b
+    | {lteq}              [e1]:expr12 cop_lteq [e2]:expr13 {-> New expr.bop_lteq (e1.expr, e2.expr) } // a <= b
+    | {gteq}              [e1]:expr12 cop_gteq [e2]:expr13 {-> New expr.bop_gteq (e1.expr, e2.expr) } // a >= b
+    | {other}             [e1]:expr13 {-> e1.expr }
+  ;
+
+  expr13 {-> expr } =
+      {shl}               [e1]:expr13 bop_sh_left [e2]:expr14 {-> New expr.bop_shl (e1.expr, e2.expr) } // a << b
+    | {shr}               [e1]:expr13 bop_sh_right [e2]:expr14 {-> New expr.bop_shr (e1.expr, e2.expr) } // a >> b
+    | {other}             [e1]:expr14 {-> e1.expr }
+  ;
+
+  expr14 {-> expr } =
+      {plus}              [e1]:expr14 plus [e2]:expr15 {-> New expr.bop_add (e1.expr, e2.expr) } // a + b
+    | {minus}             [e1]:expr14 minus [e2]:expr15 {-> New expr.bop_sub (e1.expr, e2.expr) } // a - b
+    | {dot}               [e1]:expr14 dot [e2]:expr15 {-> New expr.bop_con (e1.expr, e2.expr) } // a . b
+    | {other}             [e1]:expr15 {-> e1.expr }
+  ;
+
+  expr15 {-> expr } =
+      {mul}               [e1]:expr15 star [e2]:expr16 {-> New expr.bop_mul (e1.expr, e2.expr) } // a * b
+    | {div}               [e1]:expr15 div [e2]:expr16 {-> New expr.bop_div (e1.expr, e2.expr) } // a / b
+    | {mod}               [e1]:expr15 mod [e2]:expr16 {-> New expr.bop_mod (e1.expr, e2.expr) } // a % b
+    | {other}             [e1]:expr16 {-> e1.expr }
+  ;
+
+  expr16 {-> expr } =
+      {neg}               minus [e1]:expr17 {-> New expr.neg (e1.expr) } // -a
+    | {plus}              plus [e1]:expr17 {-> e1.expr } // +b
+    | {other}             [e1]:expr17 {-> e1.expr }
+  ;
+
+  expr17 {-> expr } =
+      {not}               exclamation [e1]:expr17 {-> New expr.not (e1.expr) } // !a
+    | {not_equal}         exclamation [e1]:cvar equal [e2]:expr18 {-> New expr.not (New expr.assign(e1.expr, e2.expr)) }
+    | {bnot}              tilde [e1]:expr17 {-> New expr.bnot (e1.expr) } // ~a
+    | {plusplus_pre}      plus_plus [e1]:expr18 {-> New expr.pre_incr (e1.expr) } // ++a
+    | {plusplus_post}     [e1]:expr18 plus_plus {-> New expr.post_incr (e1.expr) } // a++
+    | {minusminus_pre}    minus_minus [e1]:expr18 {-> New expr.pre_decr (e1.expr) } // --a
+    | {minusminus_post}   [e1]:expr18 minus_minus {-> New expr.post_decr (e1.expr) } // a--
+    | {at}                at [e1]:expr17 {-> New expr.silence (e1.expr) } // @a
+    | {cast_int}          cast_int [e1]:expr17 {-> New expr.cast_int (e1.expr) } // (int)a
+    | {cast_string}       cast_string [e1]:expr17 {-> New expr.cast_string (e1.expr) } // (string)a
+    | {cast_object}       cast_object [e1]:expr17 {-> New expr.cast_object (e1.expr) } // (object)a
+    | {cast_array}        cast_array [e1]:expr17 {-> New expr.cast_array (e1.expr) } // (array)a
+    | {cast_double}       cast_double [e1]:expr17 {-> New expr.cast_double (e1.expr) } // (double)a
+    | {cast_bool}         cast_bool [e1]:expr17 {-> New expr.cast_bool (e1.expr) } // (bool)a
+    | {other}             [e1]:expr18 {-> e1.expr }
+  ;
+
+  expr18 {-> expr } =
+      {expr}              [e1]:expr20 {-> e1.expr }
+    ;
+
+  expr20 {-> expr } =
+      {newarg}            new identifier l_par arguments? r_par {-> New expr.new (New expr.name(identifier), [arguments.argument]) }
+    | {new}               new identifier {-> New expr.new (New expr.name(identifier), []) }
+    | {newarg_cvar}       new cvar l_par arguments? r_par {-> New expr.new (cvar.expr, [arguments.argument]) }
+    | {new_cvar}          new cvar {-> New expr.new (cvar.expr, []) }
+    | {function}          function_name l_par arguments? r_par {-> New expr.function (function_name.base, function_name.name, [arguments.argument]) }
+    | {other}             [e1]:expr99 {-> e1.expr }
+  ;
+
+  function_name {-> [base]:expr? [name]:expr } =
+      {simple}            [name]:identifier {-> Null New expr.name (name) }
+    | {cvar}              [name]:cvar {-> Null name.expr }
+    | {class_simple}      [base]:identifier coloncolon [name]:identifier {-> New expr.name (base) New expr.name (name) }
+    | {class_cvar}        [base]:identifier coloncolon [name]:cvar {-> New expr.name (base) name.expr }
+  ;
+
+  arguments {-> argument* } =
+      {argument}          argument {-> [argument] }
+    | {more}              arguments comma argument {-> [arguments.argument, argument] }
+  ;
+
+  argument =
+                          ampersand? [e1]:expr
+  ;
+
+  expr99 {-> expr } =
+      {parenthesis}       l_par [e1]:expr r_par {-> e1.expr }
+    | {cvar}              cvar {-> cvar.expr }
+    | {integer}           integer {-> New expr.integer (integer) }
+    | {float}             float {-> New expr.float (float) }
+    | {string}            [string]:static_string {-> New expr.string (string) }
+    | {bool}              boolean {-> New expr.bool (boolean) }
+    | {dynamic_string}    dynamic_string {-> New expr.dynamic_string ([dynamic_string.expr]) }
+    | {backtick_string}   backtick_string {-> New expr.shell_exec ([backtick_string.expr]) }
+    | {heredoc_string}    heredoc_string {-> New expr.dynamic_string ([heredoc_string.expr]) }
+    | {constant}          [constant]:identifier {-> New expr.constant (constant) }
+    | {array}             T.array l_par array_content r_par {-> New expr.array ([array_content.array_element]) }
+  ;
+
+  array_content {-> array_element* } =
+      {elements}          array_elements comma? {-> [array_elements.array_element] }
+    | {empty}             {-> [] }
+  ;
+
+  array_elements {-> array_element* } =
+      {element}           array_element {-> [array_element] }
+    | {more}              array_elements comma array_element {-> [array_elements.array_element, array_element] }
+  ;
+
+  array_element {-> array_element } =
+      {expr}              ampersand? [e1]:expr {-> New array_element (Null, ampersand, e1.expr) }
+    | {assoc}             [e1]:expr point_assoc ampersand? [e2]:expr {-> New array_element (e1.expr, ampersand, e2.expr) }
+  ;
+
+  dynamic_string {-> expr* } =
+      {string}            string_start string_data* string_end {-> [string_data.expr] }
+  ;
+
+  backtick_string {-> expr* } =
+      {string}            backtick_start backtick_data* backtick_end {-> [backtick_data.expr] }
+  ;
+
+  backtick_data {-> expr } =
+      {var}               variable {-> New expr.variable (variable) }
+    | {string}            static_string {-> New expr.string (static_string) }
+    | {cvar}              string_cvar_start cvar string_cvar_end {-> cvar.expr }
+    | {complex_cvar}      string_to_complex_cvar l_brace cvar r_brace string_from_complex_cvar {-> cvar.expr }
+  ;
+
+  string_data {-> expr } =
+      {var}               variable {-> New expr.variable (variable) }
+    | {string}            static_string {-> New expr.string (static_string) }
+    | {cvar}              string_cvar_start cvar string_cvar_end {-> cvar.expr }
+    | {complex_cvar}      string_to_complex_cvar l_brace cvar r_brace string_from_complex_cvar {-> cvar.expr }
+  ;
+
+  heredoc_string {-> expr* } =
+      {string}            heredoc_start heredoc_data* heredoc_end {-> [heredoc_data.expr] }
+  ;
+
+  heredoc_data {-> expr } =
+      {var}               variable {-> New expr.variable (variable) }
+    | {string}            static_string {-> New expr.string (static_string) }
+    | {cvar}              string_cvar_start cvar string_cvar_end {-> cvar.expr }
+    | {complex_cvar}      heredoc_to_complex_cvar l_brace cvar r_brace heredoc_from_complex_cvar {-> cvar.expr }
+  ;
+
+Abstract Syntax Tree
+
+  program =
+                          statement*
+  ;
+
+  statement =
+      {html}              htmldata
+
+    | {expr}              [e1]:expr                                     // $e1
+    | {echo}              [e1]:expr*                                    // echo $e1, $e2;
+
+    | {declare}           declare_arg* statement*
+
+    | {exit}              [e1]:expr?                                    // exit $e1
+    | {return}            [e1]:expr?                                    // return $e1
+
+    | {global}            variable*                                     // global $a, $b, $c;
+    | {static}            expr*                                         // static $a, $b = 42, $c;
+
+    | {for}               [e1]:expr* [e2]:expr* [e3]:expr* statement*   // for (e1; e2; e3) statement
+    | {foreach}           [e1]:expr [e2]:expr? [e3]:expr statement*     // foreach (e1 as e2 => e3) statement
+    | {while}             [e1]:expr statement*                          // while (e1) statement
+    | {do_while}          statement* [e1]:expr                          // do { statement } while (e1)
+    | {switch}            [e1]:expr switch_case*                        // switch (e1) { switch_case }
+
+    | {break}             [level]:expr?                                 // break, level may be null
+    | {continue}          [level]:expr?
+
+    | {if}                [e1]:expr* statement* [else]:statement*
+
+    | {function}          ampersand? [name]:identifier function_arg* statement*
+    | {class}             [name]:identifier [extends]:identifier? statement*
+    | {var}               [e1]:expr*                                    // var $a, $b, $c = 5, $d; for class only
+
+    | {group}             statement*
+  ;
+
+  expr =
+      {integer}           integer                           // 42
+    | {float}             float                             // 0.42e2
+    | {bool}              boolean                           // true
+    | {string}            [string]:static_string            // "hello world"
+    | {dynamic_string}    [e1]:expr*
+    | {shell_exec}        [e1]:expr*                        // `echo "boo"`
+    | {constant}          [constant]:identifier             // foobar
+    | {array}             array_element*                    // array (1, 2, "foo" => 4)
+
+    | {print}             [e1]:expr                         // print e1
+
+    | {list}              list_expr* [e2]:expr              // list (e1[0], e1[1], , , e1[4]) = e2;
+
+    | {include}           [e1]:expr                         // include (e1)
+    | {require}           [e1]:expr                         // require (e1)
+    | {include_once}      [e1]:expr                         // include_once (e1)
+    | {require_once}      [e1]:expr                         // require_once (e1)
+
+    | {ternary}           [e1]:expr [e2]:expr [e3]:expr     // $x ? $y : $z
+
+    | {bop_add}           [e1]:expr [e2]:expr               // $x + $y
+    | {bop_sub}           [e1]:expr [e2]:expr               // $x - $y
+    | {bop_con}           [e1]:expr [e2]:expr               // $x . $y
+    | {bop_mul}           [e1]:expr [e2]:expr               // $x * $y
+    | {bop_div}           [e1]:expr [e2]:expr               // $x / $y
+    | {bop_mod}           [e1]:expr [e2]:expr               // $x % $y
+    | {bop_band}          [e1]:expr [e2]:expr               // $x & $y
+    | {bop_bxor}          [e1]:expr [e2]:expr               // $x ^ $y
+    | {bop_bor}           [e1]:expr [e2]:expr               // $x | $y
+    | {bop_shl}           [e1]:expr [e2]:expr               // $x << $y
+    | {bop_shr}           [e1]:expr [e2]:expr               // $x >> $y
+
+    | {bop_lt}            [e1]:expr [e2]:expr               // $x < $y
+    | {bop_gt}            [e1]:expr [e2]:expr               // $x > $y
+    | {bop_lteq}          [e1]:expr [e2]:expr               // $x <= $y
+    | {bop_gteq}          [e1]:expr [e2]:expr               // $x >= $y
+    | {bop_eq}            [e1]:expr [e2]:expr               // $x == $y
+    | {bop_neq}           [e1]:expr [e2]:expr               // $x != $y
+    | {bop_ident}         [e1]:expr [e2]:expr               // $x === $y
+    | {bop_nident}        [e1]:expr [e2]:expr               // $x !== $y
+
+    | {bop_and}           [e1]:expr [e2]:expr               // $x && $y  /  $x and $y
+    | {bop_or}            [e1]:expr [e2]:expr               // $x || $y  /  $x or $y
+    | {bop_xor}           [e1]:expr [e2]:expr               // $x xor $y
+
+    | {bnot}              [e1]:expr                         // ~$x
+    | {not}               [e1]:expr                         // !$x
+    | {neg}               [e1]:expr                         // -$x
+    | {silence}           [e1]:expr                         // @$x
+    | {post_incr}         [e1]:expr                         // $x++
+    | {post_decr}         [e1]:expr                         // $x--
+    | {pre_incr}          [e1]:expr                         // ++$x
+    | {pre_decr}          [e1]:expr                         // --$x
+
+    | {cast_int}          [e1]:expr                         // (int)a
+    | {cast_bool}         [e1]:expr                         // (bool)a
+    | {cast_string}       [e1]:expr                         // (string)a
+    | {cast_object}       [e1]:expr                         // (object)a
+    | {cast_array}        [e1]:expr                         // (array)a
+    | {cast_double}       [e1]:expr                         // (double)a
+
+    | {variable}          variable                          // $x
+
+    | {index}             [array]:expr [index]:expr?        // $x[$y], $y may be null
+    | {string_index}      [string]:expr [index]:expr        // $x{$y}
+    | {property}          [e1]:expr [e2]:expr               // $x->$y
+    | {varvar}            [varvar]:expr                     // ${$x}  /  $$x
+
+    | {name}              [name]:identifier                 // used at property and new call
+
+    | {assign}            [e1]:expr [e2]:expr               // $x = $y
+    | {assignref}         [e1]:expr [e2]:expr               // $x = &$y
+
+    | {add_eq}            [e1]:expr [e2]:expr               // $x += $y
+    | {sub_eq}            [e1]:expr [e2]:expr               // $x -= $y
+    | {con_eq}            [e1]:expr [e2]:expr               // $x .= $y
+    | {mul_eq}            [e1]:expr [e2]:expr               // $x *= $y
+    | {div_eq}            [e1]:expr [e2]:expr               // $x /= $y
+    | {mod_eq}            [e1]:expr [e2]:expr               // $x %= $y
+    | {and_eq}            [e1]:expr [e2]:expr               // $x &= $y
+    | {xor_eq}            [e1]:expr [e2]:expr               // $x ^= $y
+    | {or_eq}             [e1]:expr [e2]:expr               // $x |= $y
+    | {shl_eq}            [e1]:expr [e2]:expr               // $x <<= $y
+    | {shr_eq}            [e1]:expr [e2]:expr               // $x >>= $y
+
+    | {new}               [name]:expr argument*             // new name (argument, ..)
+    | {function}          [base]:expr? [name]:expr argument*// base::name (argument, ..)
+  ;
+
+  array_element =
+                          [key]:expr? ampersand? [value]:expr
+  ;
+
+  argument =
+                          ampersand? [e1]:expr
+  ;
+
+  switch_case =
+                          expr? statement*                  // expr is null then we're at default
+  ;
+
+  function_arg =          ampersand? variable [default]:expr?;
+
+  declare_arg =
+      {key}               identifier integer
+  ;
+
+  list_expr =
+      {expr}              [e1]:expr
+    | {empty}
+  ;
+

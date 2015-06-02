@@ -1,0 +1,46 @@
+/* Manually contrived to test star, plus and complex transforms. */
+Package org.anarres.polyglot.test.transform;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+	tok_d = 'd' ;
+
+Productions
+
+	program =
+		p0 { -> New program.a([]) } ;
+
+	p0 { -> program foo } =
+		{a} tok_a* { -> New program.a([tok_a]) New foo.x() } |
+		{b} tok_b+ { -> New program.b([tok_b]) New foo.x() } ;
+
+	p1 { -> program foo } =
+		{c} tok_c? { -> New program.c(tok_c) New foo.x() } |
+		{d} tok_d  { -> New program.d(tok_d) New foo.x() } ;
+
+	p2 { -> program foo* } =
+		{e} [p]:sub_a* { -> New program.a([p.tok_a]) [p.x] } |
+		{f} [p]:sub_b+ { -> New program.b([p.tok_b]) [p.x] } ;
+
+	p3 { -> program foo? } =
+		{g} [p]:sub_c? { -> New program.c(p.tok_c) p.x } |
+		{h} [p]:sub_d  { -> New program.d(p.tok_d) p.x } ;
+
+	sub_a { -> tok_a [x]:foo } = tok_a { -> tok_a New foo.x() } ;
+	sub_b { -> tok_b [x]:foo } = tok_b { -> tok_b New foo.x() } ;
+	sub_c { -> tok_c [x]:foo } = tok_c { -> tok_c New foo.x() } ;
+	sub_d { -> tok_d [x]:foo } = tok_d { -> tok_d New foo.x() } ;
+
+Abstract Syntax Tree
+
+	program =
+		{a} tok_a* |
+		{b} tok_b+ |
+		{c} tok_c? |
+		{d} tok_d  ;
+
+	foo = {x} ;
+

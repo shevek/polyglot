@@ -1,0 +1,18 @@
+Package org.anarres.polyglot.test.documentation;
+
+Tokens
+
+	/** The fixed 'A' token. */
+	tok_a = 'a' ;
+	/** The variable 'B' token. */
+	tok_b = 'b' ;
+
+Abstract Syntax Tree
+
+	/** This is a program. */
+	program =
+		/** A single token a. */
+		{a} /** The A token itself. */ tok_a |
+		/** A single token b. */
+		{b} /** The B token itself. */ tok_b ;
+

@@ -1,0 +1,9 @@
+Package org.anarres.polyglot.test.noparser;
+
+Tokens
+	foo = 'foo' ;
+
+Abstract Syntax Tree
+
+	program = foo ;
+

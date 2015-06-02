@@ -1,0 +1,71 @@
+/* ${header} */
+package ${grammar.package.packageName}.analysis;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+import ${grammar.package.packageName}.node.*;
+
+public class DepthFirstAdapter extends AnalysisAdapter {
+
+    public void defaultIn(@Nonnull Node node) {
+    }
+
+    public void defaultOut(@Nonnull Node node) {
+    }
+
+    public void inStart(@Nonnull Start node) {
+        defaultIn(node);
+    }
+
+    public void outStart(@Nonnull Start node) {
+        defaultOut(node);
+    }
+
+    @Override
+    public void caseStart(Start node) {
+        inStart(node);
+        node.get${grammar.astProductionRoot.javaMethodName}().apply(this);
+        node.getEOF().apply(this);
+        outStart(node);
+    }
+
+#foreach ($production in $grammar.astProductions)
+    // Production: $production
+#foreach ($alternative in $production.alternatives)
+    // Alternative: $alternative
+    public void in${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node) {
+        defaultIn(node);
+    }
+
+    public void out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node) {
+        defaultOut(node);
+    }
+
+    @Override
+    public void case${alternative.javaMethodName}(${alternative.javaTypeName} node) {
+        in${alternative.javaMethodName}(node);
+
+#foreach ($element in $alternative.elements)
+#if ($element.list)
+        {
+            List<${element.javaTypeName}> copy = new ArrayList<${element.javaTypeName}>(node.get${element.javaMethodName}());
+            for (${element.javaTypeName} e : copy)
+                e.apply(this);
+        }
+#else##list
+        {
+            ${element.javaTypeName} e = node.get${element.javaMethodName}();
+            if (e != null)
+                e.apply(this);
+        }
+#end##list
+#end##foreach element
+
+        out${alternative.javaMethodName}(node);
+    }
+
+#end
+#end
+
+}

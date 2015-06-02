@@ -1,0 +1,30 @@
+/* Erasure rules in LR(1) grammars, from Dick Grune's PTAPG v1 S9.5.1 */
+Package org.anarres.polyglot.test.erasure;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+
+Productions
+
+	program =
+		pa pb tok_c { -> New program.a() } ;
+
+	pa { -> program foo } =
+		tok_a
+			{ -> New program.a() New foo.x() } ;
+
+	pb { -> program foo } =
+		{terminal} tok_b
+			{ -> New program.b() New foo.x() } |
+		{epsilon}
+			{ -> New program.c() New foo.x() } ;
+
+Abstract Syntax Tree
+
+	program = {a} | {b} | {c} ;
+
+	foo = {x} ;
+

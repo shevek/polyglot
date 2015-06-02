@@ -1,0 +1,17 @@
+Package org.anarres.polyglot.test.cstnames ;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+
+Productions
+
+	program { -> } =
+		tok_a |
+		tok_b ;
+
+Abstract Syntax Tree
+
+	program = ;
+

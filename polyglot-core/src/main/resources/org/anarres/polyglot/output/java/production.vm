@@ -1,0 +1,20 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+
+#if ($production.javadocComment)
+$production.javadocComment
+#else
+## No default javadoc - (a) information leakage, (b) javadoc performance sucks.
+## /** ${production} */
+#end
+public abstract class ${production.javaTypeName} extends Node {
+
+    @Override
+    public abstract ${production.javaTypeName} clone();
+
+    @Nonnull
+    public abstract ${production.javaTypeName} clone(@Nonnull CloneListener listener);
+}

@@ -1,0 +1,77 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.CheckForSigned;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
+/** The abstract Token class is the superclass of all fixed and variable tokens. */
+public abstract class Token extends Node {
+
+    private int offset;
+    private int line;
+    private int column;
+
+    @CheckForSigned
+    public abstract int getTokenIndex();
+
+    @Nonnull
+    public abstract String getText();
+
+    public int getOffset() {
+        return this.offset;
+    }
+
+    public void setOffset(@Nonnegative int offset) {
+        this.offset = offset;
+    }
+
+    public int getLine() {
+        return this.line;
+    }
+
+    public void setLine(@Nonnegative int line) {
+        this.line = line;
+    }
+
+    /** Use getColumn(). */
+    @Deprecated
+    public int getPos() {
+        return getColumn();
+    }
+
+    /** Use setColumn(int). */
+    @Deprecated
+    public void setPos(int column) {
+        setColumn(column);
+    }
+
+    public int getColumn() {
+        return this.column;
+    }
+
+    public void setColumn(@Nonnegative int column) {
+        this.column = column;
+    }
+
+    @Override
+    public void removeChild(Node child) {
+        throw new IllegalArgumentException("Token has no children.");
+    }
+
+    @Override
+    public void replaceChild(Node prev, Node repl) {
+        throw new IllegalArgumentException("Token has no children.");
+    }
+
+    @Override
+    public void toStringBuilder(@Nonnull StringBuilder buf) {
+        buf.append(getText()).append(' ');
+    }
+
+    @Override
+    public String toString() {
+        return getText();
+    }
+}

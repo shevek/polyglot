@@ -1,0 +1,73 @@
+/* ${header} */
+package ${grammar.package.packageName}.analysis;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+import ${grammar.package.packageName}.node.*;
+
+public class DepthFirstVisitor<I, O, X extends Exception> extends VisitorAdapter<I, O, X> {
+
+    public O inDefault(@Nonnull Node node, I input) throws X {
+        return null;
+    }
+
+    public O outDefault(@Nonnull Node node, I input, O inResult) throws X {
+        return inResult;
+    }
+
+    public O inStart(@Nonnull Start node, I input) throws X {
+        return inDefault(node, input);
+    }
+
+    public O outStart(@Nonnull Start node, I input, O inResult) throws X {
+        return outDefault(node, input, inResult);
+    }
+
+    @Override
+    public O visitStart(Start node, I input) throws X {
+        O inResult = inStart(node, input);
+        node.get${grammar.astProductionRoot.javaMethodName}().apply(this, input);
+        node.getEOF().apply(this, input);
+        return outStart(node, input, inResult);
+    }
+
+#foreach ($production in $grammar.astProductions)
+    // Production: $production
+#foreach ($alternative in $production.alternatives)
+    // Alternative: $alternative
+    public O in${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
+        return inDefault(node, input);
+    }
+
+    public O out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input, O inResult) throws X {
+        return outDefault(node, input, inResult);
+    }
+
+    @Override
+    public O visit${alternative.javaMethodName}(${alternative.javaTypeName} node, I input) throws X {
+        O inResult = in${alternative.javaMethodName}(node, input);
+
+#foreach ($element in $alternative.elements)
+#if ($element.list)
+        {
+            List<${element.javaTypeName}> copy = new ArrayList<${element.javaTypeName}>(node.get${element.javaMethodName}());
+            for (${element.javaTypeName} e : copy)
+                e.apply(this, input);
+        }
+#else##list
+        {
+            ${element.javaTypeName} e = node.get${element.javaMethodName}();
+            if (e != null)
+                e.apply(this, input);
+        }
+#end##list
+#end##foreach element
+
+        return out${alternative.javaMethodName}(node, input, inResult);
+    }
+
+#end
+#end
+
+}

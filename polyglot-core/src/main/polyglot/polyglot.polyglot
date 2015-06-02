@@ -1,0 +1,451 @@
+Package org.anarres.polyglot;
+
+Helpers
+
+/* These are character sets and regular expressions used in the
+	definition of tokens. */
+
+	all = [0 .. 0xFFFF];
+	lowercase = ['a' .. 'z'];
+	uppercase = ['A' .. 'Z'];
+	digit = ['0' .. '9'];
+	hex_digit = [digit + [['a' .. 'f'] + ['A' .. 'F']]];
+
+	tab = 0x0009;
+	lf  = 0x000a;
+	ff  = 0x000c;
+	cr  = 0x000d;
+	eol = lf | cr | cr lf;
+	not_eol = [all - [cr + lf]];
+
+	not_star = [all - '*'];
+	not_star_slash = [not_star - '/'];
+
+	blank = (eol | tab | ' ')+ ;
+
+	id_part = lowercase (lowercase | digit)*;
+
+Tokens
+
+	kw_abstract    = 'Abstract';
+	kw_helpers     = 'Helpers';
+	kw_ignored     = 'Ignored';
+	kw_new         = 'New';
+	kw_null        = 'Null';
+	kw_package     = 'Package';
+	kw_productions = 'Productions';
+	kw_states      = 'States';
+	kw_syntax      = 'Syntax';
+	kw_tokens      = 'Tokens';
+	kw_tree        = 'Tree';
+
+	token_specifier      = 'T';
+	production_specifier = 'P';
+
+	tok_at       = '@';
+	tok_dot      = '.';
+	tok_dotdot   = '..';
+	tok_semi     = ';';
+	tok_eq       = '=';
+	tok_lsquare  = '[';
+	tok_rsquare  = ']';
+	tok_lpar     = '(';
+	tok_rpar     = ')';
+	tok_lbrace   = '{';
+	tok_rbrace   = '}';
+	tok_plus     = '+';
+	tok_minus    = '-';
+	tok_question = '?';
+	tok_star     = '*';
+	tok_bar      = '|';
+	tok_comma    = ',';
+	tok_slash    = '/';
+	tok_arrow    = '->';
+	tok_colon    = ':';
+
+	identifier = id_part ('_' id_part)*;
+
+	char = ''' not_eol ''';
+	dec_char = digit+;
+	hex_char = '0' ('x' | 'X') hex_digit+;
+
+	string = ''' [not_eol - ''']+ ''';
+
+	blank = (eol | tab | ' ')+ ;
+	javadoc_comment = '/**' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
+	c_comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
+	cpp_comment = '//' not_eol* eol ;
+
+Ignored Tokens
+
+	blank,
+	c_comment,
+	cpp_comment;
+
+Productions
+
+	grammar =
+		package section*
+			{ -> New grammar(package, [section]) } ;
+
+	section { -> section } =
+		{helpers}        helpers        { -> helpers.section } |
+		{states}         states         { -> states.section } |
+		{tokens}         tokens         { -> tokens.section } |
+		{ignored_tokens} ignored_tokens { -> ignored_tokens.section } |
+		{productions}    productions    { -> productions.section } |
+		{ast}            ast            { -> ast.section } ;
+
+	package { -> package } =
+		kw_package package_name tok_semi
+			{ -> New package([package_name.identifier]) };
+
+	package_name { -> identifier* } =
+		{single} identifier
+			{ -> [identifier] } |
+		{list} package_name tok_dot identifier
+			{ -> [package_name.identifier, identifier] } ;
+
+	helpers { -> section } =
+		kw_helpers [helpers]:helper*
+			{ -> New section.helpers([helpers]) };
+
+	helper =
+		identifier tok_eq matcher tok_semi
+			{ -> New helper(identifier, matcher) };
+
+	states { -> section } =
+		kw_states identifier_list tok_semi
+			{ -> New section.states([identifier_list.identifier]) };
+
+	tokens { -> section } =
+		kw_tokens [tokens]:token*
+			{ -> New section.tokens([tokens]) };
+
+	token =
+		javadoc_comment?
+		annotation* token_states? identifier tok_eq matcher /* token_look_ahead? */ tok_semi
+			{ -> New token(javadoc_comment, [token_states.token_state], identifier, matcher /*, token_look_ahead.matcher */, [annotation.annotation]) };
+
+	token_states { -> token_state* } =
+		tok_lbrace token_state_list tok_rbrace
+			{ -> [token_state_list.token_state] } ;
+
+	token_state_list { -> token_state* } =
+		{single} token_state
+			{ -> [token_state.token_state] } |
+		{list} token_state_list tok_comma token_state
+			{ -> [token_state_list.token_state, token_state.token_state] } ;
+
+	token_state =
+		{simple} [state]:identifier
+			{ -> New token_state(state, Null) } |
+		{transition} [state]:identifier tok_arrow [transition]:identifier
+			{ -> New token_state(state, transition) } ;
+
+	/*
+	token_look_ahead { -> matcher } =
+		tok_slash matcher
+			{ -> matcher };
+	*/
+
+	ignored_tokens { -> section } =
+		kw_ignored kw_tokens identifier_list? tok_semi
+			{ -> New section.ignored_tokens([identifier_list.identifier]) };
+
+	// Avoids generating an alternate of length 1.
+	matcher { -> matcher } =
+		{single} concat_matcher
+			{ -> concat_matcher.matcher } |
+		{list} [head]:concat_matcher [tail]:alternate_matcher+
+			{ -> New matcher.alternate([head.matcher, tail.matcher]) } ;
+
+	alternate_matcher { -> matcher } =
+		tok_bar concat_matcher
+			{ -> concat_matcher.matcher } ;
+
+	// Avoids generating a concat of length 1.
+	concat_matcher { -> matcher } =
+		{empty}
+			{ -> New matcher.concat([]) } |
+		{single} unary_matcher
+			{ -> unary_matcher.matcher } |
+		{list} [head]:unary_matcher [tail]:unary_matcher+
+			{ -> New matcher.concat([head.matcher, tail.matcher]) } ;
+
+	unary_matcher { -> matcher } =
+		{simple} atomic_matcher
+			{ -> atomic_matcher.matcher } |
+		{star} atomic_matcher tok_star
+			{ -> New matcher.star(atomic_matcher.matcher, tok_star) } |
+		{question} atomic_matcher tok_question
+			{ -> New matcher.question(atomic_matcher.matcher, tok_question) } |
+		{plus} atomic_matcher tok_plus
+			{ -> New matcher.plus(atomic_matcher.matcher, tok_plus) } ;
+
+	atomic_matcher { -> matcher } =
+		{char} charset_matcher
+			{ -> charset_matcher.matcher } |
+		{wrapped} tok_lpar matcher tok_rpar
+			{ -> matcher.matcher } |
+		{string} string
+			{ -> New matcher.string(string) } ;
+
+	charset_matcher { -> matcher } =
+		{union} tok_lsquare [left]:charset_matcher tok_plus [right]:charset_matcher tok_rsquare
+			{ -> New matcher.union(left.matcher, right.matcher, tok_plus) } |
+		{difference} tok_lsquare [left]:charset_matcher tok_minus [right]:charset_matcher tok_rsquare
+			{ -> New matcher.difference(left.matcher, right.matcher, tok_minus) } |
+		{interval} tok_lsquare [left]:char_matcher tok_dotdot [right]:char_matcher tok_rsquare
+			{ -> New matcher.interval(left.char, right.char, tok_dotdot) } |
+		{char} char_matcher
+			{ -> New matcher.char(char_matcher.char) } |
+		// A helper might name an NFA or a CharSet.
+		{helper} identifier
+			{ -> New matcher.helper(identifier) } ;
+
+	char_matcher { -> P.char } =
+		{char} char
+			{ -> New char.char(char) } |
+		{dec} dec_char
+			{ -> New char.dec(dec_char) } |
+		{hex} hex_char
+			{ -> New char.hex(hex_char) } ;
+
+	un_op =
+		{star} tok_star
+			{ -> New un_op.star(tok_star) } |
+		{question} tok_question
+			{ -> New un_op.question(tok_question) } |
+		{plus} tok_plus
+			{ -> New un_op.plus(tok_plus) } ;
+
+	productions { -> section } =
+		kw_productions [prods]:cst_production*
+			{ -> New section.productions([prods]) };
+
+	cst_production =
+		javadoc_comment?	// Ignored
+		identifier cst_production_transform? tok_eq cst_alternative_list tok_semi
+			{ -> New cst_production(identifier,
+				cst_production_transform.tok_arrow,
+				[cst_production_transform.element],
+				[cst_alternative_list.cst_alternative]) };
+
+	cst_production_transform { -> tok_arrow element* } =
+		tok_lbrace tok_arrow [elements]:element* tok_rbrace
+			{ -> tok_arrow [elements] } ;
+
+	cst_alternative_list { -> cst_alternative* } =
+		{single} cst_alternative
+			{ -> [cst_alternative] } |
+		{list} cst_alternative_list tok_bar cst_alternative
+			{ -> [cst_alternative_list.cst_alternative, cst_alternative] } ;
+
+	cst_alternative =
+		{anonymous}
+			[elements]:element* cst_transform?
+				{ -> New cst_alternative(Null,
+					[elements],
+					cst_transform.tok_arrow,
+					[cst_transform.expression]) } |
+		{named}
+			javadoc_comment?	// Ignored
+			alt_name [elements]:element* cst_transform?
+				{ -> New cst_alternative(alt_name.identifier,
+					[elements],
+					cst_transform.tok_arrow,
+					[cst_transform.expression]) } ;
+
+	cst_transform { -> tok_arrow expression* } =
+		tok_lbrace tok_arrow [terms]:expression* tok_rbrace
+			{ -> tok_arrow [terms] } ;
+
+	expression { -> expression } =
+		{list} tok_lsquare expression_list? tok_rsquare
+			{ -> New expression.list([expression_list.expression], tok_lsquare) } |
+		{new} kw_new identifier transform_specifier? tok_lpar expression_list? tok_rpar
+			{ -> New expression.new(identifier, transform_specifier.identifier, [expression_list.expression], kw_new) } |
+		{reference} /* specifier? */ identifier transform_specifier?
+			{ -> New expression.reference(/* specifier, */ identifier, transform_specifier.identifier) } |
+		{null} kw_null
+			{ -> New expression.null(kw_null) } ;
+
+	expression_list { -> expression* } =
+		{single} expression
+			{ -> [expression.expression] } |
+		{list} expression_list tok_comma expression
+			{ -> [expression_list.expression, expression.expression] } ;
+
+	ast { -> section } =
+		kw_abstract kw_syntax kw_tree [productions]:ast_production*
+			{ -> New section.ast([productions]) };
+
+	ast_production =
+		javadoc_comment?
+		annotation* identifier tok_eq ast_alternative_list tok_semi
+			{ -> New ast_production(javadoc_comment, identifier, [ast_alternative_list.ast_alternative], [annotation]) };
+
+	ast_alternative_list { -> ast_alternative* } =
+		{single} ast_alternative
+			{ -> [ast_alternative] } |
+		{list} ast_alternative_list tok_bar ast_alternative
+			{ -> [ast_alternative_list.ast_alternative, ast_alternative] } ;
+
+	ast_alternative =
+		// If we don't split this, we get a R/R conflict because
+		// the javadoc_comment might refer to the element.
+		{anonymous}
+			annotation* [elements]:element*
+				{ -> New ast_alternative(Null, Null, [elements], [annotation]) } |
+		{named} javadoc_comment?
+			annotation* alt_name [elements]:element*
+				{ -> New ast_alternative(javadoc_comment, alt_name.identifier, [elements], [annotation]) } ;
+
+	element =
+		javadoc_comment?
+		element_name? specifier? identifier un_op?
+			{ -> New element(javadoc_comment, element_name.identifier, specifier, identifier, un_op) };
+
+
+
+	// Generic
+	transform_specifier { -> identifier } =
+		tok_dot identifier
+			{ -> identifier } ;
+
+	// Generic
+	alt_name { -> identifier } =
+		tok_lbrace identifier tok_rbrace
+			{ -> identifier };
+
+	// Generic
+	element_name { -> identifier } =
+		tok_lsquare identifier tok_rsquare tok_colon
+			{ -> identifier };
+
+	// Generic
+	specifier =
+		{token} token_specifier tok_dot
+			{ -> New specifier.token(token_specifier) } |
+		{production} production_specifier tok_dot
+			{ -> New specifier.production(production_specifier) } ;
+
+	identifier_list { -> identifier* } =
+		{single} identifier
+			{ -> [identifier] } |
+		{list} identifier_list tok_comma identifier
+			{ -> [identifier_list.identifier, identifier] } ;
+
+	// Generic
+	annotation =
+		tok_at identifier tok_lpar string tok_rpar
+			{ -> New annotation(identifier, string) } ;
+
+Abstract Syntax Tree
+
+	grammar =
+		package
+		[sections]:section*
+		;
+
+	section =
+		{helpers}        [helpers]:helper* |
+		{states}         [names]:identifier* |
+		{tokens}         [tokens]:token* |
+		{ignored_tokens} [names]:identifier* |
+		{productions}    [productions]:cst_production* |
+		{ast}            [productions]:ast_production* ;
+
+	package =
+		[name]:identifier* ;
+
+	helper =
+		[name]:identifier matcher ;
+
+	token =
+		javadoc_comment?
+		[token_states]:token_state*
+		[name]:identifier matcher
+		/* [look_ahead]:matcher? */
+		[annotations]:annotation*
+		;
+
+	token_state = [state]:identifier [transition]:identifier? ;
+
+	matcher =
+		// NFA constructs
+		{alternate}  [matchers]:matcher* |
+		{concat}     [matchers]:matcher* |
+		// NFA operations
+		{star}       matcher [op]:tok_star |
+		{question}   matcher [op]:tok_question |
+		{plus}       matcher [op]:tok_plus |
+		// NFA atomics
+		{string}     string |
+		// Either an NFA or a CharSet
+		{helper}     [helper_name]:identifier |
+		// CharSet operations
+		{union}      [left]:matcher [right]:matcher [op]:tok_plus  |
+		{difference} [left]:matcher [right]:matcher [op]:tok_minus |
+		{interval}   [left]:P.char  [right]:P.char  [op]:tok_dotdot |
+		// Characters
+		{char}       P.char ;
+
+	char =
+		{char}  [token]:T.char |
+		{dec}   [token]:dec_char |
+		{hex}   [token]:hex_char ;
+
+	un_op =
+		{star}     tok_star 	|
+		{question} tok_question |
+		{plus}     tok_plus	;
+
+	cst_production =
+		[name]:identifier
+		[transform_sentinel]:tok_arrow?
+		[transform]:element*
+		[alternatives]:cst_alternative* ;
+
+	cst_alternative =
+		[name]:identifier?
+		[elements]:element*
+		[transform_sentinel]:tok_arrow?
+		[transform]:expression* ;
+
+	expression =
+		{new} [production_name]:identifier [alternative_name]:identifier? [arguments]:expression* [location]:kw_new |
+		{list} [items]:expression* [location]:tok_lsquare |
+		{reference} /* specifier? */ [element_name]:identifier [transform_name]:identifier? |
+		{null} [location]:kw_null ;
+
+	specifier =
+		{token} token_specifier |
+		{production} production_specifier ;
+
+	ast_production =
+		javadoc_comment?
+		[name]:identifier
+		[alternatives]:ast_alternative*
+		[annotations]:annotation*
+		;
+
+	ast_alternative =
+		javadoc_comment?
+		[name]:identifier?
+		[elements]:element*
+		[annotations]:annotation*
+		;
+
+	element =
+		javadoc_comment?
+		[name]:identifier?
+		specifier?
+		/** Refers to the name of an AST production. */
+		[symbol_name]:identifier
+		un_op?;
+
+	annotation =
+		[name]:identifier [value]:string ;
+

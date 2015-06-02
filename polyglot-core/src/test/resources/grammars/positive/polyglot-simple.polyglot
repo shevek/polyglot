@@ -1,0 +1,154 @@
+Package org.anarres.polyglot.simple;
+
+Helpers
+
+/* These are character sets and regular expressions used in the
+	definition of tokens. */
+
+	all = [0 .. 0xFFFF];
+	lowercase = ['a' .. 'z'];
+	uppercase = ['A' .. 'Z'];
+	digit = ['0' .. '9'];
+	hex_digit = [digit + [['a' .. 'f'] + ['A' .. 'F']]];
+
+	tab = 0x0009;
+	lf  = 0x000a;
+	ff  = 0x000c;
+	cr  = 0x000d;
+	eol = lf | cr | cr lf;
+	not_eol = [all - [cr + lf]];
+
+	not_star = [all - '*'];
+	not_star_slash = [not_star - '/'];
+
+	blank = (eol | tab | ' ')+ ;
+
+
+	id_part = lowercase (lowercase | digit)*;
+
+Tokens
+
+	kw_abstract    = 'Abstract';
+	kw_helpers     = 'Helpers';
+	kw_ignored     = 'Ignored';
+	kw_new         = 'New';
+	kw_null        = 'Null';
+	kw_package     = 'Package';
+	kw_productions = 'Productions';
+	kw_states      = 'States';
+	kw_syntax      = 'Syntax';
+	kw_tokens      = 'Tokens';
+	kw_tree        = 'Tree';
+
+	token_specifier      = 'T';
+	production_specifier = 'P';
+
+	tok_dot      = '.';
+	tok_dotdot   = '..';
+	tok_semi     = ';';
+	tok_eq       = '=';
+	tok_lsquare  = '[';
+	tok_rsquare  = ']';
+	tok_lpar     = '(';
+	tok_rpar     = ')';
+	tok_lbrace   = '{';
+	tok_rbrace   = '}';
+	tok_plus     = '+';
+	tok_minus    = '-';
+	tok_question = '?';
+	tok_star     = '*';
+	tok_bar      = '|';
+	tok_comma    = ',';
+	tok_slash    = '/';
+	tok_arrow    = '->';
+	tok_colon    = ':';
+
+	identifier = id_part ('_' id_part)*;
+
+	char = ''' not_eol ''';
+	dec_char = digit+;
+	hex_char = '0' ('x' | 'X') hex_digit+;
+
+	string = ''' [not_eol - ''']+ ''';
+
+	blank = (eol | tab | ' ')+ ;
+	c_comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
+	cpp_comment = '//' not_eol* eol ;
+
+Ignored Tokens
+
+	blank,
+	c_comment,
+	cpp_comment;
+
+Productions
+
+	grammar =
+		productions?
+			{ -> New grammar(
+				productions
+			) } ;
+
+	productions =
+		kw_productions [prods]:cst_alternative_list tok_semi
+			{ -> New productions([prods.cst_alternative]) };
+
+	cst_alternative_list { -> cst_alternative* } =
+		{single} cst_alternative
+			{ -> [cst_alternative] } ;
+
+	cst_alternative =
+		alt_name? [elems]:cst_element* cst_transform?
+			{ -> New cst_alternative(alt_name.identifier,
+				[elems],
+				cst_transform.tok_arrow,
+				[cst_transform.expression]) } ;
+
+	cst_element =
+		identifier
+			{ -> New cst_element(identifier) };
+
+	cst_transform { -> tok_arrow expression* } =
+		tok_lbrace tok_arrow [terms]:expression* tok_rbrace
+			{ -> tok_arrow [terms] } ;
+
+	expression { -> expression } =
+		{null} kw_null
+			{ -> New expression.null(kw_null) } ;
+
+	// Generic
+	transform_specifier { -> identifier } =
+		tok_dot identifier
+			{ -> identifier } ;
+
+	// Generic
+	alt_name { -> identifier } =
+		tok_lbrace identifier tok_rbrace
+			{ -> identifier };
+
+Abstract Syntax Tree
+
+	grammar =
+		productions?
+		;
+
+	productions =
+		[productions]:cst_alternative*;
+
+	cst_alternative =
+		[name]:identifier?
+		[elements]:cst_element*
+		[transform_sentinel]:tok_arrow?
+		[transform]:expression*
+		;
+
+	cst_element =
+		[symbol_name]:identifier
+		;
+
+	expression =
+		{new} [production_name]:identifier [alternative_name]:identifier? [arguments]:expression* [location]:kw_new |
+		{list} [items]:expression* [location]:tok_lsquare |
+		{reference} [transform_name]:identifier? |
+		{null} [location]:kw_null ;
+

@@ -1,0 +1,88 @@
+Package org.anarres.typeserializer.core.small ;
+
+Helpers
+
+	all = [0 .. 0xFFFF];
+
+	tab = 0x0009;
+	lf  = 0x000a;
+	cr  = 0x000d;
+	eol = lf | cr | cr lf; 
+	not_eol = [all - [cr + lf]];
+
+	not_star = [all - '*'];
+	not_star_slash = [not_star - '/'];
+
+	digit = ['0' .. '9'];
+	nondigit = ['_' + [['a' .. 'z'] + ['A' ..  'Z']]];
+	hex_digit = [digit + [['a' .. 'f'] + ['A' .. 'F']]];
+	hex_quad = hex_digit hex_digit hex_digit hex_digit;
+	universal_char_name = '\u' hex_quad;
+	identifier_nondigit = nondigit | universal_char_name;
+
+// include("helpers.sh")
+
+Tokens
+
+	tok_comma   = ',';
+	tok_and     = '&';
+	tok_gt      = '>';  
+	tok_lt      = '<';  
+	tok_dot     = '.';
+	tok_dollar  = '$';
+	tok_lsquare = '[';
+	tok_rsquare = ']';
+	tok_wildcard= '?';
+
+	// Handle com.foo.Bar and Foo$1 -- no identifier_nondigit prefix
+	identifier = /*identifier_nondigit*/ (digit | identifier_nondigit)*;
+
+	blank = (eol | tab | ' ')+;
+	comment = 
+		('//' not_eol* eol?) |
+		('/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/') ;
+
+Ignored Tokens
+	blank,
+	comment;
+
+Productions
+
+	java_type { -> type } = 
+		{class} java_class
+			{ -> java_class.type } |
+		{array} java_array
+			{ -> java_array.type } |
+		{parameterized} java_parameterized
+			{ -> java_parameterized.type } ;
+
+	java_class { -> type } =
+		java_class_outer
+			{ -> New type.class(
+				[java_class_outer.identifier]) } ;
+
+	java_array { -> type } =
+		java_type tok_lsquare tok_rsquare
+			{ -> New type.array(java_type.type) } ;
+
+	java_parameterized { -> type } =
+		java_class java_type_parameters tok_gt
+			{ -> New type.parameterized(
+				java_class.type,
+				[java_type_parameters.type]) } ;
+
+	java_type_parameters { -> type* } =
+		{concrete} tok_lt java_type
+			{ -> [java_type.type] } ;
+
+	java_class_outer { -> identifier* } =
+		{single} identifier
+			{ -> [identifier] } ;
+
+Abstract Syntax Tree
+
+	type = 
+		{class} [name]:identifier* |
+		{array} [element_type]:type |
+		{parameterized} [raw_type]:type [arguments]:type* ;
+

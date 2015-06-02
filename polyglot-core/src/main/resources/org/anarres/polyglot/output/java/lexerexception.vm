@@ -1,0 +1,20 @@
+/* ${header} */
+package ${grammar.package.packageName}.lexer;
+
+import javax.annotation.Nonnull;
+import ${grammar.package.packageName}.node.InvalidToken;
+
+public class LexerException extends Exception {
+
+    private final InvalidToken invalidToken;
+    
+    public LexerException(@Nonnull InvalidToken invalidToken, @Nonnull String message) {
+        super(message);
+        this.invalidToken = invalidToken;
+    }
+
+	@Nonnull 
+    public InvalidToken getToken() {
+        return this.invalidToken;
+    }
+}

@@ -1,0 +1,25 @@
+/* ${header} */
+package ${grammar.package.packageName}.analysis;
+
+import javax.annotation.Nonnull;
+import ${grammar.package.packageName}.node.*;
+
+/**
+ * A visitor interface.
+ */
+public interface Visitor<I, O, X extends Exception> {
+#foreach ($token in $grammar.tokens)
+    public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X;
+#end
+## Make sure we have an AST before we emit anything for Start.
+#if ($grammar.astProductionRoot)
+    public O visitStart(@Nonnull Start node, I input) throws X;
+#end
+#foreach ($production in $grammar.astProductions)
+#foreach ($alternative in $production.alternatives)
+    public O visit${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X;
+#end
+#end
+    public O visitEOF(@Nonnull EOF node, I input) throws X;
+    public O visitInvalidToken(@Nonnull InvalidToken node, I input) throws X;
+}

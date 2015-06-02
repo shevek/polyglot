@@ -1,0 +1,65 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import javax.annotation.Nonnull;
+import ${package}.analysis.Visitor;
+
+#if ($token.javadocComment)
+$token.javadocComment
+#end
+public final class ${token.javaTypeName} extends Token {
+
+    public ${token.javaTypeName}() {
+    }
+
+    public ${token.javaTypeName}(int offset, int line, int column) {
+        this();
+        setOffset(offset);
+        setLine(line);
+        setColumn(column);
+    }
+
+    public ${token.javaTypeName}(@Nonnull Token location) {
+        this(
+            location.getOffset(),
+            location.getLine(),
+            location.getColumn());
+    }
+
+    @Override
+    public int getTokenIndex() {
+#if ($token.ignored)
+        return -1;
+#else
+        return ${token.index};
+#end
+    }
+
+    @Override
+    public String getText() {
+        return "${token.javaText}";
+    }
+
+    @Override
+    public ${token.javaTypeName} clone() {
+        return clone(CloneListener.NONE);
+    }
+
+    @Override
+    public ${token.javaTypeName} clone(CloneListener listener) {
+        ${token.javaTypeName} clone = new ${token.javaTypeName}(getOffset(), getLine(), getColumn());
+        listener.fireNodeCloned(this, clone);
+        return clone;
+    }
+
+    @Override
+    public void apply(Switch s) {
+        s.case${token.javaMethodName}(this);
+    }
+
+    @Override
+    public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
+        return v.visit${token.javaMethodName}(this, input);
+    }
+
+}

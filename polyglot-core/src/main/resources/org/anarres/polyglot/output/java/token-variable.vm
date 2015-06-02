@@ -1,0 +1,72 @@
+/* ${header} */
+package ${grammar.package.packageName}.node;
+
+import javax.annotation.Nonnull;
+import ${package}.analysis.Visitor;
+
+#if ($token.javadocComment)
+$token.javadocComment
+#end
+public final class ${token.javaTypeName} extends Token {
+
+    private String text;
+
+    public ${token.javaTypeName}(@Nonnull String text) {
+        setText(text);
+    }
+
+    public ${token.javaTypeName}(@Nonnull String text, int offset, int line, int column) {
+        this(text);
+        setOffset(offset);
+        setLine(line);
+        setColumn(column);
+    }
+
+    public ${token.javaTypeName}(@Nonnull String text, @Nonnull Token location) {
+        this(text,
+            location.getOffset(),
+            location.getLine(),
+            location.getColumn());
+    }
+
+    @Override
+    public int getTokenIndex() {
+#if ($token.ignored)
+        return -1;
+#else
+        return ${token.index};
+#end
+    }
+
+    @Override
+    public String getText() {
+        return this.text;
+    }
+
+    public void setText(@Nonnull String text) {
+        this.text = text;
+    }
+
+    @Override
+    public ${token.javaTypeName} clone() {
+        return clone(CloneListener.NONE);
+    }
+
+    @Override
+    public ${token.javaTypeName} clone(CloneListener listener) {
+        ${token.javaTypeName} clone = new ${token.javaTypeName}(getText(), getOffset(), getLine(), getColumn());
+        listener.fireNodeCloned(this, clone);
+        return clone;
+    }
+
+    @Override
+    public void apply(Switch s) {
+        s.case${token.javaMethodName}(this);
+    }
+
+    @Override
+    public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
+        return v.visit${token.javaMethodName}(this, input);
+    }
+
+}

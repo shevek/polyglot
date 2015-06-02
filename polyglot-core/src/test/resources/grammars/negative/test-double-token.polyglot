@@ -1,0 +1,7 @@
+Package org.anarres.polyglot.test.negative ;
+
+Tokens
+
+	tok_a = '..' ;
+	tok_b = '..' ;
+

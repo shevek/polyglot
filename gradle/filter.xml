@@ -1,0 +1,15 @@
+<FindBugsFilter>
+
+<!--
+	<Match><Package name="org.anarres.polyglot.lexer" /></Match>
+	<Match><Package name="org.anarres.polyglot.parser" /></Match>
+	<Match><Package name="org.anarres.polyglot.node" /></Match>
+-->
+
+	<!-- Abstract class empty method. -->
+	<Match><Bug code="ACEM" /></Match>
+
+	<!-- Exception softening. -->
+	<Match><Bug code="EXS" /></Match>
+
+</FindBugsFilter>

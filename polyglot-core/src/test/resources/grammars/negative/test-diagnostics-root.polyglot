@@ -1,0 +1,25 @@
+Package org.anarres.polyglot.test.diagnosticroot ;
+
+Tokens
+
+	tok_a = 'a';
+	tok_lpar = '(' ;
+	tok_rpar = ')' ;
+
+Productions
+
+	program { -> } =
+		statement+ ;
+
+	statement { -> } =
+		{wrapped} tok_lpar statement tok_rpar |
+		{expression} expression ;
+
+	expression { -> } =
+		{a} tok_a |
+		{function} tok_a tok_lpar tok_rpar ;
+
+Abstract Syntax Tree
+
+	program = ;
+

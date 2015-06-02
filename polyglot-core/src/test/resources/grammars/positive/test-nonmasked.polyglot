@@ -1,0 +1,11 @@
+Package org.anarres.polyglot.test.nonmasked ;
+
+States
+	a, b, c ;
+
+Tokens
+
+	{a} tok_a = 'a' ;
+	{b} tok_b = 'a' ;
+	{c->a} tok_c = 'a' ;
+

@@ -1,0 +1,187 @@
+//This file was conributed by Indrek Mandree.
+
+
+//
+// This is a demonstration grammar file with transformation rules for the
+// new SableCC3 parser generator (rel sablecc-3-beta.3.altgen.20040327)
+//
+// Points to remember:
+//
+//  * Why CST and AST? Due to limitations of parser technology the
+//    human described grammar does not represent the "perfect" abstract
+//    form of the language parsed. To get the AST transformations are done.
+//    (AST - Abstract Syntax Tree; CST - Concrete Syntax Tree)
+//
+//  * The AST section must be complete, nothing from Productions is
+//    automatically placed there.
+//
+//  * In curly braces are things related to AST, eg. we built the AST in
+//    those things, so everything is built/transformed from the leaves to
+//    root.
+//
+//  * Transformation is divided into two parts - product transformation
+//    declaration that declares what the alternatives should be
+//    transformed to and alternatives transformations definitions that
+//    define how the transform is actually done.
+//
+//  * A production can be transformed to multiple elements as seen in the
+//    'random_x2' rule.
+//
+//  * Productions with same structure as in the AST can be directly
+//    transformed to AST - see the 'textual' rule. What really happens is
+//    that for productions and alternatives without transform specification
+//    default transformation rules are generated. This also means that you
+//    could omit the transform declaration at exp rule.
+//
+//  * Lists it seems are represented with brackets '[ elem1, elem2, .. ]' and
+//    not parenthesis as described in the doc. If element is also a list it
+//    is automatically expanded and used. Empty list is [].
+//
+//  * The output we get from the parser is as described in the AST. We only
+//    have to work with that. The productions section is no longer used.
+//
+//  * When you just want to get rid of a production declare and define
+//    it and its alternatives as {-> } or with the newer sablecc release
+//    you can just leave it without any rules. See the 'separator' rule.
+//
+//  * You can't place null-s into lists. When the expression is null
+//    (either by ?) or directly set in transformation and is later added
+//    to a list - it is eliminated by SableCC.
+//
+//  * With the latest sablecc release '?' and '+' are supported in
+//    the AST section. They are also enforced from productions.
+//    You'll see when errors start popping up.
+//
+//  * In the product transformation declaration you can similarily use
+//    renaming in the style 'productname { .. [use_name]:name .. } = ..'
+//    This can be very useful when using multiple elements of the same type
+//    at transform. See the 'random_x2' rule for example.
+//
+//  Written by Indrek Mandre <indrek (at) mare . ee> in July-August 2003
+//  Example constructed from the SableCC docs/Kevin Agbakpem and
+//  Etienne Bergeron e-mail. http://www.mare.ee/indrek/sablecc/
+//
+
+Package org.sablecc.test.expression;
+
+Helpers
+
+    digit = ['0' .. '9'];
+    tab = 9;
+    cr = 13;
+    lf = 10;
+    eol = cr lf | cr | lf;
+
+    blank = (' ' | tab | eol)+;
+
+Tokens
+    l_par = '(';
+    r_par = ')';
+    plus = '+';
+    minus = '-';
+    mult = '*';
+    div = '/';
+    semi = ';';
+
+    blank = blank;
+    number = digit+;
+
+    one = 'one';
+    two = 'two';
+    three = 'three';
+
+    random = 'random_digit';
+
+
+Ignored Tokens
+
+    blank;
+
+Productions
+
+    grammar           = exp_list                    {-> New grammar ([exp_list.exp])}
+                      ;
+
+    exp_list          {-> exp*} =
+                        {list}    exp_list separator exp {-> [exp_list.exp, exp.exp] }
+                      | {single}  exp               {-> [exp.exp] }
+                      ;
+
+    exp               {-> exp} =  
+                        {plus}    exp plus factor   {-> New exp.plus (exp.exp, factor.exp) }
+                      | {minus}   exp minus factor  {-> New exp.minus (exp.exp, factor.exp) }
+                      | {factor}  factor            {-> factor.exp }
+                      ;
+
+    factor            {-> exp} =
+                        {mult}    factor mult term  {-> New exp.mult (factor.exp, term.exp) }
+                      | {div}     factor div term   {-> New exp.div (factor.exp, term.exp) }
+                      | {term}    term              {-> term.exp }
+                      ;
+
+    term              {-> exp} =
+                        {number}  number            {-> New exp.number(number) }
+                      | {exp}     l_par exp r_par   {-> exp.exp }
+                      | {textual} textual+          {-> New exp.textual ([textual]) }
+                      | {random_x2} random_x2       {-> New exp.random_x2 (random_x2.ran1, random_x2.ran2) }
+                      ;
+
+    textual           =
+                        {t1}      one
+                      | {t2}      two
+                      | {t3}      three
+                      ;
+
+    random_x2         {-> [ran1]:random [ran2]:random} =
+                        [ran1]:random [ran2]:random {-> ran1 ran2 }
+                      ;
+
+    separator  {-> } =
+                        {semicolon} semi {-> }
+                      ;
+                      
+
+Abstract Syntax Tree
+
+    grammar           = exp+
+                      ;
+
+    exp               =
+                        {plus}    [l]:exp  [r]:exp |
+                        {minus}   [l]:exp  [r]:exp |
+                        {div}     [l]:exp  [r]:exp |
+                        {mult}    [l]:exp  [r]:exp |
+                        {textual} textual+ |
+                        {random_x2} [r1]:random [r2]:random |
+                        {number}  number
+                      ;
+
+    textual            =
+                        {t1}      one
+                      | {t2}      two
+                      | {t3}      three
+                      ;
+
+//
+// A few words about this grammar itself:
+//  - It is supposed to be a little integer based calculator with a few odd
+//    extensions to demonstrate sablecc transformations
+//  - You can use textual words to build up numbers (two one three -> 213)
+//    I didn't really bother to specify all the decimal textual numbers
+//  - The random number rule is a bit superficial, it just expects user to
+//    type 'random_digit random_digit' and produces a two-digit random
+//    number.  I didn't figure out any better way to make the multiple
+//    element transform rule "interesting" ;)
+//
+//  Valid expressions:
+//    (1 + 14  / (3 + 4)) * 14          -> 42
+//    one + 3 - two                     -> 2
+//    two one + three                   -> 24
+//    random_digit random_digit         -> ??
+//    random_digit random_digit + 1     -> ??
+//    1 + 3 ; 1 ; 4 + 5                 -> 4; 1; 9
+//
+// In the Calculate.java is the implementation of the tree visitor that
+// calculates the values.
+//
+

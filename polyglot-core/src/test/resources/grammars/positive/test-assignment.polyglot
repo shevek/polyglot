@@ -1,0 +1,35 @@
+Package org.anarres.polyglot.test.assignment;
+
+Tokens
+
+	tok_id = 'id' ;
+	tok_eq = '=' ;
+	tok_star = '*' ;
+
+Productions
+
+	// Page 229
+	// This should be LR(1) but not LR(0) or SLR(1).
+	program { -> expression } =
+		{assign} l tok_eq r
+			{ -> New expression.assign(l.expression, r.expression) } |
+		{rvalue} r
+			{ -> r.expression } ;
+
+	l { -> expression } =
+		{id} tok_id
+			{ -> New expression.id(tok_id) } |
+		{star} tok_star r
+			{ -> New expression.star(r.expression) } ;
+
+	r { -> expression } =
+		l
+			{ -> l.expression } ;
+
+Abstract Syntax Tree
+
+	expression =
+		{id} tok_id |
+		{star} expression |
+		{assign} [l]:expression [r]:expression ;
+

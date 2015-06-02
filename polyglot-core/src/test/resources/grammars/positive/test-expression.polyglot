@@ -1,0 +1,39 @@
+Package org.anarres.polyglot.test.expression.lr0;
+
+Tokens
+
+	tok_id = 'id' ;
+	tok_eq = '=' ;
+	tok_plus = '+' ;
+	tok_star = '*' ;
+	tok_lpar = '(' ;
+	tok_rpar = ')' ;
+
+Productions
+
+	// Page 222
+	e { -> expression } =
+		{plus} e tok_plus t
+			{ -> New expression.plus(e.expression, t.expression) } |
+		{term} t
+			{ -> t.expression } ;
+
+	t { -> expression } =
+		{star} t tok_star f
+			{ -> New expression.star(t.expression, f.expression) } |
+		{factor} f
+			{ -> f.expression } ;
+
+	f { -> expression } =
+		{wrapped} tok_lpar e tok_rpar
+			{ -> e.expression } |
+		{id} tok_id
+			{ -> New expression.id(tok_id) } ;
+
+Abstract Syntax Tree
+
+	expression =
+		{id} tok_id |
+		{star} [l]:expression [r]:expression |
+		{plus} [l]:expression [r]:expression ;
+
