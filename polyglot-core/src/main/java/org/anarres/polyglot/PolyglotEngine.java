@@ -217,6 +217,16 @@ public class PolyglotEngine {
         }
     }
 
+    @Nonnull
+    protected PolyglotExecutor newExecutor() {
+        if (!isOption(Option.PARALLEL))
+            return new PolyglotExecutor.Serial();
+        int nthreads = Runtime.getRuntime().availableProcessors();
+        if (nthreads == 1)
+            return new PolyglotExecutor.Serial();
+        return new PolyglotExecutor.Parallel(name, nthreads);
+    }
+
     @CheckForNull
     protected Start buildParseTree() throws IOException {
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -441,7 +451,7 @@ public class PolyglotEngine {
     public boolean run() throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
-        PolyglotExecutor executor = isOption(Option.PARALLEL) ? new PolyglotExecutor.Parallel(getName()) : new PolyglotExecutor.Serial();
+        PolyglotExecutor executor = newExecutor();
         LOG.info("{}: Starting with {} threads and options {}.", getName(), executor.getParallelism(), getOptions());
 
         try {

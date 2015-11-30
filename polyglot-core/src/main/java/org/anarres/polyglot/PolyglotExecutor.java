@@ -44,23 +44,18 @@ public abstract class PolyglotExecutor {
         }
 
         @Override
-        public void parallel(Callable<?> r) throws InterruptedException, ExecutionException {
-            execute(r);
-            await();
-        }
-
-        @Override
         public void shutdown() throws InterruptedException {
         }
     }
 
     public static class Parallel extends PolyglotExecutor {
 
-        private final int parallelism = Runtime.getRuntime().availableProcessors();
+        private final int parallelism;
         private final ExecutorService executor;
         private final BlockingQueue<Future<?>> futures = new LinkedBlockingQueue<>();
 
-        public Parallel(@Nonnull String name) {
+        public Parallel(@Nonnull String name, int parallelism) {
+            this.parallelism = parallelism;
             this.executor = Executors.newFixedThreadPool(parallelism, new ThreadFactoryBuilder().setNameFormat("polyglot-%d (" + name + ")").build());
         }
 
@@ -85,13 +80,6 @@ public abstract class PolyglotExecutor {
         }
 
         @Override
-        public void parallel(@Nonnull Callable<?> r) throws InterruptedException, ExecutionException {
-            for (int i = 0; i < parallelism; i++)
-                execute(r);
-            await();
-        }
-
-        @Override
         public void shutdown() throws InterruptedException {
             executor.shutdown();
             executor.awaitTermination(1, TimeUnit.SECONDS);
@@ -105,7 +93,11 @@ public abstract class PolyglotExecutor {
 
     public abstract void await() throws InterruptedException, ExecutionException;
 
-    public abstract void parallel(@Nonnull Callable<?> r) throws InterruptedException, ExecutionException;
+    public void parallel(@Nonnull Callable<?> r) throws InterruptedException, ExecutionException {
+        for (int i = 0; i < getParallelism(); i++)
+            execute(r);
+        await();
+    }
 
     public abstract void shutdown() throws InterruptedException;
 }

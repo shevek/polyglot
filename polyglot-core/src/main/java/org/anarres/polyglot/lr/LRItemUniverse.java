@@ -126,13 +126,13 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
     }
 
     /**
+     * Possibly adds a state to the automaton.
      *
-     * @param automaton
-     * @param queue
+     * @param automaton The automaton.
+     * @param queue The queue on which to enqueue the new state, if added.
      * @param tmpSet The temporary, reusable LRItem set. Invariant: Empty on call.
      * @param in The starting state.
-     * @param symbol
-     * @return
+     * @param symbol The follow symbol.
      */
     // @ThreadSafe
     private void addState(@Nonnull LRAutomaton automaton, @Nonnull Queue<? super LRState> queue, @Nonnull MutableIndexedSet<I> tmpSet, @Nonnull LRState source, @Nonnull CstProductionSymbol symbol) {

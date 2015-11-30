@@ -13,12 +13,18 @@ public abstract class Token extends Node {
     private int line;
     private int column;
 
+    /** Carries the token index from the lexer to the parser. */
     @CheckForSigned
     public abstract int getTokenIndex();
 
     @Nonnull
     public abstract String getText();
 
+    /**
+     * Returns the 0-based offset of this Token in the source text.
+     *
+     * @return the 0-based offset of this Token in the source text.
+     */
     public int getOffset() {
         return this.offset;
     }
@@ -64,6 +70,12 @@ public abstract class Token extends Node {
     public void replaceChild(Node prev, Node repl) {
         throw new IllegalArgumentException("Token has no children.");
     }
+
+    @Override
+    public abstract Token clone();
+
+    @Nonnull
+    public abstract Token clone(@Nonnull CloneListener listener);
 
     @Override
     public void toStringBuilder(@Nonnull StringBuilder buf) {
