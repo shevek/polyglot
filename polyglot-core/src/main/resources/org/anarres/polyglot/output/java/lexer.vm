@@ -168,6 +168,7 @@ public class Lexer implements ILexer {
                                 case ${transition.key.name}: state = State.${transition.value.name}; break;
 ## TODO: Have a default -> IllegalStateException here? Would we blow up the method limit?
 #end
+                                default: break;
                             }
 #end
 
