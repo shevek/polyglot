@@ -1,6 +1,7 @@
 package org.anarres.polyglot.gradle;
 
 import com.google.common.base.Throwables;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Closure;
 import java.io.File;
 import java.io.IOException;
@@ -153,6 +154,7 @@ public class PolyglotPlugin implements Plugin<Project> {
         Task polyglotResourcesTask = project.getTasks().create("polyglotResources", Copy.class, new Action<Copy>() {
 
             @Override
+            @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")   // into, from and include do have side effects.
             public void execute(Copy task) {
                 task.setDescription("Copies Polyglot resource files.");
                 task.into(mainSourceSet.getOutput().getResourcesDir());
