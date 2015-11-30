@@ -153,8 +153,9 @@ public class Tables {
             return buf.toByteArray();
         }
 
+        // This takes an argument with a different nullability annotation than the field.
         @Nonnull
-        private byte[] newParserTable() throws IOException {
+        private byte[] newParserTable(@Nonnull LRAutomaton automaton) throws IOException {
             ByteArrayOutputStream buf = new ByteArrayOutputStream();
             try (DataOutputStream out = new DataOutputStream(buf)) {
                 out.writeInt(automaton.getStates().size()); // parserStateCount
@@ -216,7 +217,7 @@ public class Tables {
             byte[] parserData = null;
             String parserDataText = null;
             if (automaton != null) {
-                parserData = newParserTable();
+                parserData = newParserTable(automaton);
                 parserDataText = newStringTable(parserData);
                 // LOG.debug("Parser table is " + parserDataText.length() + " characters from " + parserData.length + " bytes.");
                 if (parserDataText.length() > MAX_INLINE_TABLE_LENGTH)
