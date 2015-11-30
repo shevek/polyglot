@@ -194,7 +194,7 @@ public class Lexer implements ILexer {
         }
     }
 
-    private void unread_except(@Nonnegative int acceptLength) throws IOException {
+    private void unread_except(/* @Nonnegative */ int acceptLength) throws IOException {
         int length = this.text.length();
         for (int i = length - 1; i >= acceptLength; i--) {
             this.in.unread(this.text.charAt(i));
@@ -212,7 +212,7 @@ public class Lexer implements ILexer {
     }
 
     @Nonnull
-    private String getText(@Nonnegative int acceptLength) {
+    private String getText(/* @Nonnegative */ int acceptLength) {
         return this.text.substring(0, acceptLength);
     }
 
