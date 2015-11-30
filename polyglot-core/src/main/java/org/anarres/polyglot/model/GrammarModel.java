@@ -251,6 +251,7 @@ public class GrammarModel implements GraphVizScope {
      * @see #toTree()
      */
     @Nonnull
+    @SuppressFBWarnings("BC_VACUOUS_INSTANCEOF")    // LinkedHashMap below.
     public AGrammar toNode() {
         AGrammar grammar = new AGrammar();
 
