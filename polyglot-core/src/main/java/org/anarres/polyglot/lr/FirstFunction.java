@@ -111,11 +111,9 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
         do {
             modified = false;
             for (CstProductionModel production : grammar.cstProductions.values()) {
-                if (production == null)
-                    throw new IllegalStateException("No Production");
+                // if (production == null) throw new IllegalStateException("No Production");
                 Result firstSet = firstMap.get(production);
-                if (firstSet == null)
-                    throw new IllegalStateException("No FirstSet (Result) for " + production);
+                // if (firstSet == null) throw new IllegalStateException("No FirstSet (Result) for " + production);
                 for (CstAlternativeModel alternative : production.alternatives.values()) {
                     ELEMENT:
                     {
@@ -127,15 +125,11 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
                                 break ELEMENT;
                             } else {
                                 CstProductionModel subproduction = element.getCstProduction();
-                                if (subproduction == null)
-                                    throw new IllegalStateException("No SubProduction for " + element);
-                                if (grammar.cstProductions.get(subproduction.getName()) == null)
-                                    throw new IllegalStateException("Nonexistent SubProduction for " + element);
-                                if (subproduction != grammar.cstProductions.get(subproduction.getName()))
-                                    throw new IllegalStateException("Illegal SubProduction for " + element);
+                                // if (subproduction == null) throw new IllegalStateException("No SubProduction for " + element);
+                                // if (grammar.cstProductions.get(subproduction.getName()) == null) throw new IllegalStateException("Nonexistent SubProduction for " + element);
+                                // if (subproduction != grammar.cstProductions.get(subproduction.getName())) throw new IllegalStateException("Illegal SubProduction for " + element);
                                 Result subFirstSet = firstMap.get(subproduction);
-                                if (subFirstSet == null)
-                                    throw new IllegalStateException("No SubFirstSet (Result) for " + subproduction);
+                                // if (subFirstSet == null) throw new IllegalStateException("No SubFirstSet (Result) for " + subproduction);
                                 if (firstSet.addAll(subFirstSet))
                                     modified = true;
                                 if (!subFirstSet.isNullable())
