@@ -7,8 +7,8 @@ package org.anarres.polyglot.lr;
 
 import java.util.Objects;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.model.CstAlternativeModel;
+import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.runtime.AbstractParser;
 
 /**

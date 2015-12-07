@@ -8,9 +8,9 @@ package org.anarres.polyglot.model;
 import com.google.common.base.Preconditions;
 import java.util.Objects;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  * A reference to either a {@link TokenModel} or an {@link AstProductionModel}.

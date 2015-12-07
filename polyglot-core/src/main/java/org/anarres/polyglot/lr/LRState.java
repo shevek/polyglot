@@ -16,9 +16,9 @@ import java.util.SortedMap;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.model.CstProductionModel;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.model.CstProductionSymbol;
 import org.anarres.polyglot.model.TokenModel;
+import org.anarres.polyglot.output.TemplateProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -19,7 +19,6 @@ import javax.annotation.Nonnull;
 import org.anarres.polyglot.analysis.MatcherParserVisitor;
 import org.anarres.polyglot.analysis.NFABuilderVisitor;
 import org.anarres.polyglot.dfa.NFA;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.node.AAnnotation;
 import org.anarres.polyglot.node.ACharMatcher;
@@ -30,6 +29,7 @@ import org.anarres.polyglot.node.PAnnotation;
 import org.anarres.polyglot.node.PMatcher;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TJavadocComment;
+import org.anarres.polyglot.output.TemplateProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

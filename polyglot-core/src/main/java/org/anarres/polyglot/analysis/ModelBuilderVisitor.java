@@ -5,41 +5,43 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
-import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.AstAlternativeModel;
+import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstProductionModel;
+import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
+import org.anarres.polyglot.model.CstProductionModel;
+import org.anarres.polyglot.model.CstTransformExpressionModel;
+import org.anarres.polyglot.model.CstTransformPrototypeModel;
+import org.anarres.polyglot.model.ExternalModel;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.HelperModel;
 import org.anarres.polyglot.model.PackageModel;
-import org.anarres.polyglot.model.CstProductionModel;
+import org.anarres.polyglot.model.Specifier;
 import org.anarres.polyglot.model.StateModel;
 import org.anarres.polyglot.model.TokenModel;
-import org.anarres.polyglot.model.AstElementModel;
-import org.anarres.polyglot.model.CstTransformExpressionModel;
-import org.anarres.polyglot.model.CstTransformPrototypeModel;
-import org.anarres.polyglot.model.Specifier;
 import org.anarres.polyglot.model.UnaryOperator;
-import org.anarres.polyglot.node.ACstAlternative;
 import org.anarres.polyglot.node.AAstAlternative;
 import org.anarres.polyglot.node.AAstProduction;
+import org.anarres.polyglot.node.ACstAlternative;
+import org.anarres.polyglot.node.ACstProduction;
+import org.anarres.polyglot.node.AElement;
+import org.anarres.polyglot.node.AExternal;
 import org.anarres.polyglot.node.AGrammar;
 import org.anarres.polyglot.node.AHelper;
+import org.anarres.polyglot.node.AIgnoredTokensSection;
 import org.anarres.polyglot.node.AListExpression;
 import org.anarres.polyglot.node.ANewExpression;
 import org.anarres.polyglot.node.ANullExpression;
 import org.anarres.polyglot.node.APackage;
-import org.anarres.polyglot.node.ACstProduction;
-import org.anarres.polyglot.node.AElement;
-import org.anarres.polyglot.node.AIgnoredTokensSection;
 import org.anarres.polyglot.node.AReferenceExpression;
 import org.anarres.polyglot.node.AStatesSection;
 import org.anarres.polyglot.node.AToken;
 import org.anarres.polyglot.node.ATokenState;
 import org.anarres.polyglot.node.EOF;
 import org.anarres.polyglot.node.Node;
-import org.anarres.polyglot.node.PCstAlternative;
 import org.anarres.polyglot.node.PAstAlternative;
+import org.anarres.polyglot.node.PCstAlternative;
 import org.anarres.polyglot.node.PElement;
 import org.anarres.polyglot.node.PExpression;
 import org.anarres.polyglot.node.PTokenState;
@@ -86,7 +88,14 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
     // public final Map<Node, String> names = new HashMap<Node, String>();
     @Override
     public void caseAPackage(APackage node) {
-        grammar._package = PackageModel.fromNode(node);
+        grammar._package = PackageModel.forNode(node);
+    }
+
+    @Override
+    public void caseAExternal(AExternal node) {
+        ExternalModel external = ExternalModel.forNode(node);
+        if (!grammar.addExternal(external))
+            errors.addError(node.getName(), "Duplicate external name '" + external.getName() + "'.");
     }
 
     @Override

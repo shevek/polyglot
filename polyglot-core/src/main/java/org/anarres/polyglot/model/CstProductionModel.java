@@ -11,13 +11,13 @@ import java.util.Map;
 import java.util.TreeMap;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.node.ACstAlternative;
 import org.anarres.polyglot.node.ACstProduction;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TTokArrow;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  * A nonterminal symbol.
@@ -50,19 +50,14 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
         return index;
     }
 
-    /**
-     * @see #getTransformPrototype(int)
-     * @see CstAlternativeModel#getTransformExpressions()
-     * @see CstAlternativeModel#getTransformExpression(int)
-     * @return The list of transform prototypes.
-     */
-    @Nonnull
-    @TemplateProperty("parser.vm")
+    @Override
     public List<CstTransformPrototypeModel> getTransformPrototypes() {
         return transformPrototypes;
     }
 
     /**
+     * Returns the transform prototype at the given index.
+     *
      * @see #getTransformPrototypes()
      * @see CstAlternativeModel#getTransformExpressions()
      * @see CstAlternativeModel#getTransformExpression(int)

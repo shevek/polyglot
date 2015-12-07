@@ -8,6 +8,7 @@ Helpers
 	all = [0 .. 0xFFFF];
 	lowercase = ['a' .. 'z'];
 	uppercase = ['A' .. 'Z'];
+	nondigit = ['_' + [lowercase + uppercase]];
 	digit = ['0' .. '9'];
 	hex_digit = [digit + [['a' .. 'f'] + ['A' .. 'F']]];
 
@@ -23,11 +24,10 @@ Helpers
 
 	blank = (eol | tab | ' ')+ ;
 
-	id_part = lowercase (lowercase | digit)*;
-
 Tokens
 
 	kw_abstract    = 'Abstract';
+	kw_externals   = 'Externals';
 	kw_helpers     = 'Helpers';
 	kw_ignored     = 'Ignored';
 	kw_new         = 'New';
@@ -63,7 +63,7 @@ Tokens
 	tok_arrow    = '->';
 	tok_colon    = ':';
 
-	identifier = id_part ('_' id_part)*;
+	identifier = nondigit (nondigit | digit)* ;
 
 	char = ''' not_eol ''';
 	dec_char = digit+;
@@ -97,14 +97,23 @@ Productions
 		{ast}            ast            { -> ast.section } ;
 
 	package { -> package } =
-		kw_package package_name tok_semi
-			{ -> New package([package_name.identifier]) };
+		javadoc_comment?
+		kw_package qualified_name tok_semi
+			{ -> New package(javadoc_comment, [qualified_name.identifier], kw_package) };
 
-	package_name { -> identifier* } =
+	qualified_name { -> identifier* } =
 		{single} identifier
 			{ -> [identifier] } |
-		{list} package_name tok_dot identifier
-			{ -> [package_name.identifier, identifier] } ;
+		{list} qualified_name tok_dot identifier
+			{ -> [qualified_name.identifier, identifier] } ;
+
+	externals { -> section } =
+		kw_externals [externals]:external*
+			{ -> New section.externals([externals]) } ;
+
+	external =
+		identifier tok_eq qualified_name
+			{ -> New external(identifier, [qualified_name]) } ;
 
 	helpers { -> section } =
 		kw_helpers [helpers]:helper*
@@ -349,16 +358,23 @@ Abstract Syntax Tree
 		[sections]:section*
 		;
 
+	package =
+		javadoc_comment?
+		[name]:identifier*
+		[location]:kw_package ;
+
 	section =
 		{helpers}        [helpers]:helper* |
+		{externals}      [externals]:external* |
 		{states}         [names]:identifier* |
 		{tokens}         [tokens]:token* |
 		{ignored_tokens} [names]:identifier* |
 		{productions}    [productions]:cst_production* |
 		{ast}            [productions]:ast_production* ;
 
-	package =
-		[name]:identifier* ;
+	external =
+		[name]:identifier
+		[external_type]:identifier* ;
 
 	helper =
 		[name]:identifier matcher ;

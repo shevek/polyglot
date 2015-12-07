@@ -47,7 +47,7 @@ public class PolyglotPlugin implements Plugin<Project> {
 
         try {
             ProductMetadata product = new ProductMetadata(PolyglotPlugin.class.getClassLoader());
-            project.getLogger().info("Polyglot ProductMetadata is:\n" + product);
+            // project.getLogger().info("Polyglot ProductMetadata is:\n" + product);
             ProductMetadata.ModuleMetadata module = product.getModule("org.anarres.polyglot:polyglot-runtime");
             String version = (module != null) ? module.getVersion() : "+";
 
@@ -71,6 +71,7 @@ public class PolyglotPlugin implements Plugin<Project> {
 
                 task.conventionMapping("includeDirs", new Callable<List<File>>() {
                     @Override
+                    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
                     public List<File> call() {
                         List<Object> includeDirs = extension.includeDirs;
                         if (includeDirs == null)
@@ -165,6 +166,7 @@ public class PolyglotPlugin implements Plugin<Project> {
                         return doCall(spec);
                     }
 
+                    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")   // include does have side effects.
                     private Void doCall(CopySpec spec) {
                         spec.include("**/*.dat");
                         return null;

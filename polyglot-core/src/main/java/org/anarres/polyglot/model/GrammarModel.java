@@ -18,8 +18,8 @@ import javax.annotation.Nonnull;
 import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizScope;
 import org.anarres.graphviz.builder.GraphVizable;
-import org.anarres.polyglot.node.AAstSection;
 import org.anarres.polyglot.node.AAstProduction;
+import org.anarres.polyglot.node.AAstSection;
 import org.anarres.polyglot.node.ACstProduction;
 import org.anarres.polyglot.node.AGrammar;
 import org.anarres.polyglot.node.AHelper;
@@ -31,8 +31,8 @@ import org.anarres.polyglot.node.ATokensSection;
 import org.anarres.polyglot.node.EOF;
 import org.anarres.polyglot.node.PSection;
 import org.anarres.polyglot.node.Start;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  *
@@ -44,6 +44,7 @@ public class GrammarModel implements GraphVizScope {
     }
 
     public PackageModel _package;
+    private final Map<String, ExternalModel> externals = new DefaultMap<>();
     private final Map<String, HelperModel> helpers = new DefaultMap<>(); // Temporarily preserve order.
     public int stateIndex = 0;
     public final Map<String, StateModel> states = new DefaultMap<>();
@@ -63,6 +64,16 @@ public class GrammarModel implements GraphVizScope {
     @TemplateProperty
     public PackageModel getPackage() {
         return _package;
+    }
+
+    @CheckForNull
+    public ExternalModel getExternal(@Nonnull String name) {
+        return externals.get(name);
+    }
+
+    public boolean addExternal(@Nonnull ExternalModel model) {
+        Object prev = externals.put(model.getName(), model);
+        return prev == null;
     }
 
     @CheckForNull

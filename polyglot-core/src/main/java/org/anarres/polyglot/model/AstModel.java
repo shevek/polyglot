@@ -7,6 +7,7 @@ package org.anarres.polyglot.model;
 
 import com.google.common.collect.Multimap;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  *
@@ -15,17 +16,22 @@ import javax.annotation.Nonnull;
 public interface AstModel {
 
     @Nonnull
+    @TemplateProperty
     public String getJavadocComment();
 
     @Nonnull
+    @TemplateProperty
     public abstract String getJavaTypeName();
 
     @Nonnull
+    @TemplateProperty
     public String getJavaFieldName();
 
     @Nonnull
+    @TemplateProperty
     public String getJavaMethodName();
 
     @Nonnull
+    @TemplateProperty
     public Multimap<String, AnnotationModel> getAnnotations();
 }

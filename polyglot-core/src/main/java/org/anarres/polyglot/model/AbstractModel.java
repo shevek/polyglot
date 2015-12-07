@@ -16,6 +16,7 @@ import org.anarres.polyglot.analysis.NFABuilderVisitor;
 import org.anarres.polyglot.node.AAnnotation;
 import org.anarres.polyglot.node.PAnnotation;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.node.TJavadocComment;
 import org.anarres.polyglot.node.Token;
 
 /**
@@ -54,6 +55,7 @@ public abstract class AbstractModel implements Model {
     }
 
     private final Token location;
+    private TJavadocComment javadocComment;
 
     public AbstractModel(@Nonnull Token location) {
         this.location = Preconditions.checkNotNull(location, "Location was null.");
@@ -62,5 +64,23 @@ public abstract class AbstractModel implements Model {
     @Override
     public Token getLocation() {
         return location;
+    }
+
+    @CheckForNull
+    public TJavadocComment newJavadocCommentToken() {
+        if (javadocComment == null)
+            return null;
+        return javadocComment.clone();
+    }
+
+    @CheckForNull
+    public String getJavadocComment() {
+        if (javadocComment == null)
+            return null;
+        return javadocComment.getText();
+    }
+
+    public void setJavadocComment(@CheckForNull TJavadocComment javadocComment) {
+        this.javadocComment = javadocComment;
     }
 }

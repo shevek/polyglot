@@ -13,7 +13,6 @@ import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.lr.LRAction;
 import org.anarres.polyglot.node.ACstAlternative;
@@ -21,6 +20,7 @@ import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.PExpression;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TTokArrow;
+import org.anarres.polyglot.output.TemplateProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

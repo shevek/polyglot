@@ -14,8 +14,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AAstAlternative;
 import org.anarres.polyglot.node.AElement;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  *

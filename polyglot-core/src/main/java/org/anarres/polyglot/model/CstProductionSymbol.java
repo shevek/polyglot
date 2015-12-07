@@ -7,6 +7,7 @@ package org.anarres.polyglot.model;
 
 import java.util.List;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  * Either a terminal or a nonterminal.
@@ -15,7 +16,15 @@ import javax.annotation.Nonnull;
  */
 public interface CstProductionSymbol extends ProductionSymbol {
 
-    // Could add getTransformPrototypes, which for TokenModel, would return 'self', thus simplifying a lot.
+    /**
+     * Returns the list of transform prototypes.
+     *
+     * @see #getTransformPrototype(int)
+     * @see CstAlternativeModel#getTransformExpressions()
+     * @see CstAlternativeModel#getTransformExpression(int)
+     * @return The list of transform prototypes.
+     */
     @Nonnull
+    @TemplateProperty("parser.vm")
     public List<CstTransformPrototypeModel> getTransformPrototypes();
 }

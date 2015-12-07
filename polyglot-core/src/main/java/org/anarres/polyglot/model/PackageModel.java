@@ -10,27 +10,32 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.node.APackage;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.node.TKwPackage;
+import org.anarres.polyglot.node.Token;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  *
  * @author shevek
  */
-public class PackageModel {
+public class PackageModel extends AbstractModel {
 
     @Nonnull
-    public static PackageModel fromNode(@Nonnull APackage node) {
+    public static PackageModel forNode(@Nonnull APackage node) {
         List<String> packageNameParts = new ArrayList<>();
         for (TIdentifier part : node.getName())
             packageNameParts.add(part.getText());
-        return new PackageModel(packageNameParts);
+        PackageModel model = new PackageModel(node.getLocation(), packageNameParts);
+        model.setJavadocComment(node.getJavadocComment());
+        return model;
     }
 
     private final List<? extends String> packageNameParts;
 
-    public PackageModel(@Nonnull List<? extends String> packageNameParts) {
+    public PackageModel(@Nonnull Token location, @Nonnull List<? extends String> packageNameParts) {
+        super(location);
         this.packageNameParts = packageNameParts;
     }
 
@@ -50,11 +55,11 @@ public class PackageModel {
         return Joiner.on(File.separator).join(getPackageNameParts());
     }
 
-    @Nonnull
+    @Override
     public APackage toNode() {
         List<TIdentifier> name = new ArrayList<>();
         for (String part : getPackageNameParts())
             name.add(new TIdentifier(part));
-        return new APackage(name);
+        return new APackage(newJavadocCommentToken(), name, new TKwPackage(getLocation()));
     }
 }

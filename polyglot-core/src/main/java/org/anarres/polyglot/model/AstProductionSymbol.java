@@ -5,16 +5,9 @@
  */
 package org.anarres.polyglot.model;
 
-import javax.annotation.Nonnull;
-import org.anarres.polyglot.output.TemplateProperty;
-
 /**
  *
  * @author shevek
  */
 public interface AstProductionSymbol extends ProductionSymbol, AstModel {
-
-    @Nonnull
-    @TemplateProperty
-    public String getJavaTypeName();
 }

@@ -9,7 +9,6 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.node.AListExpression;
 import org.anarres.polyglot.node.ANewExpression;
 import org.anarres.polyglot.node.ANullExpression;
@@ -19,6 +18,7 @@ import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TKwNew;
 import org.anarres.polyglot.node.TTokLsquare;
 import org.anarres.polyglot.node.Token;
+import org.anarres.polyglot.output.TemplateProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -334,7 +334,7 @@ public abstract class CstTransformExpressionModel extends AbstractModel {
 
     public abstract <I, O, X extends Exception> O apply(Visitor<I, O, X> visitor, I input) throws X;
 
-    @Nonnull
+    @Override
     public abstract PExpression toNode();
 
     protected void toStringBuilder(@Nonnull StringBuilder buf, @Nonnull java.util.List<? extends CstTransformExpressionModel> l) {

@@ -8,7 +8,6 @@ package org.anarres.polyglot.lr;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSortedMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Table;
 import java.util.Collection;
 import java.util.HashMap;

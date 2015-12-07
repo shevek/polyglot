@@ -6,12 +6,10 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.node.TIdentifier;
-import org.anarres.polyglot.node.TJavadocComment;
 import org.anarres.polyglot.node.Token;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  * Really, this should only be inherited into AST objects which are generated to Java.
@@ -20,8 +18,6 @@ import org.anarres.polyglot.node.Token;
  * @author shevek
  */
 public abstract class AbstractNamedJavaModel extends AbstractNamedModel {
-
-    private TJavadocComment javadocComment;
 
     public AbstractNamedJavaModel(@Nonnull Token location, @Nonnull String name) {
         super(location, name);
@@ -49,23 +45,5 @@ public abstract class AbstractNamedJavaModel extends AbstractNamedModel {
     @TemplateProperty
     public String getJavaMethodName() {
         return getJavaTypeName();
-    }
-
-    @CheckForNull
-    public TJavadocComment newJavadocCommentToken() {
-        if (javadocComment == null)
-            return null;
-        return javadocComment.clone();
-    }
-
-    @CheckForNull
-    public String getJavadocComment() {
-        if (javadocComment == null)
-            return null;
-        return javadocComment.getText();
-    }
-
-    public void setJavadocComment(TJavadocComment javadocComment) {
-        this.javadocComment = javadocComment;
     }
 }
