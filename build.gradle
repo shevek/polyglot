@@ -4,7 +4,6 @@ buildscript {
 
 apply plugin: 'org.anarres.stdproject'
 stdproject {
-	javadocQuiet = true
 }
 
 subprojects {

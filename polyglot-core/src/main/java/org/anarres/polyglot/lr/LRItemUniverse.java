@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * It is universally true that the accepting production [S' -> S ., $] must have index 1.
+ * It is universally true that the accepting production [S' -&gt; S ., $] must have index 1.
  *
  * @author shevek
  */
