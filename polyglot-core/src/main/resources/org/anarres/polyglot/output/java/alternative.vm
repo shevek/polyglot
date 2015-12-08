@@ -27,7 +27,12 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
 #end##if element.list
 #end##foreach alternative.elements
 
-    /** Constructs a new ${alternative.javaTypeName} and sets all fields. */
+    /**
+     * Constructs a new ${alternative.javaTypeName} and sets all fields.
+#foreach ($element in $alternative.elements)
+     * @param _${element.javaFieldName} See {@link #get${element.javaMethodName}()}.
+#end
+     */
     public ${alternative.javaTypeName}(
 #foreach ($element in $alternative.elements)
         #if($element.nullable)@CheckForNull#{else}@Nonnull#{end}##

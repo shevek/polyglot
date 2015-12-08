@@ -41,13 +41,21 @@ public abstract class Token extends Node {
         this.line = line;
     }
 
-    /** Use getColumn(). */
+    /**
+     * Use getColumn().
+     *
+     * @return column The 1-based column of this Token.
+     */
     @Deprecated
     public int getPos() {
         return getColumn();
     }
 
-    /** Use setColumn(int). */
+    /**
+     * Use setColumn(int).
+     *
+     * @param column The 1-based column of this Token.
+     */
     @Deprecated
     public void setPos(int column) {
         setColumn(column);

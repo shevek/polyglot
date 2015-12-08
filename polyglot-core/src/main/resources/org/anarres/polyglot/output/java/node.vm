@@ -55,15 +55,30 @@ public abstract class Node implements Switchable, Visitable, Cloneable {
         this.parent.replaceChild(this, node);
     }
 
-    /** Recursively clones this node and all children. */
+    /**
+     * Recursively clones this node and all children.
+     *
+     * @return The clone of this node.
+     */
     @Override
     public abstract Node clone();
 
-    /** Recursively clones this node and all children, notifying the {@link CloneListener} of each node cloned. */
+    /**
+     * Recursively clones this node and all children, notifying the {@link CloneListener} of each node cloned.
+     *
+     * @param listener The listener to notify of each individual clone.
+     * @return The clone of this node.
+     */
     @Nonnull
     public abstract Node clone(@Nonnull CloneListener listener);
 
-    /** Recursively clones a possibly-null node and all children. */
+    /**
+     * Recursively clones a possibly-null node and all children.
+     *
+     * @param listener The listener to notify of each individual clone.
+     * @param node The node to clone.
+     * @return The clone of the node, or null.
+     */
     @SuppressWarnings("unchecked")
     protected <T extends Node> T cloneNode(@Nonnull CloneListener listener, @CheckForNull T node) {
         if (node == null)
@@ -71,7 +86,13 @@ public abstract class Node implements Switchable, Visitable, Cloneable {
 		return (T) node.clone(listener);
     }
 
-    /** Recursively clones a possibly-null list of nodes and all children. */
+    /**
+     * Recursively clones a possibly-null list of nodes and all children.
+     *
+     * @param listener The listener to notify of each individual clone.
+     * @param list The list of nodes to clone.
+     * @return The list of clones of the nodes.
+     */
     @SuppressWarnings("unchecked")
     protected <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @Nonnull List<? extends T> list) {
         List<T> out = new ArrayList<T>(list.size());

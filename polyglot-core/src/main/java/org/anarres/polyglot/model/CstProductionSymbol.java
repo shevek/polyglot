@@ -19,7 +19,7 @@ public interface CstProductionSymbol extends ProductionSymbol {
     /**
      * Returns the list of transform prototypes.
      *
-     * @see #getTransformPrototype(int)
+     * @see CstProductionModel#getTransformPrototype(int)
      * @see CstAlternativeModel#getTransformExpressions()
      * @see CstAlternativeModel#getTransformExpression(int)
      * @return The list of transform prototypes.
