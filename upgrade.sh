@@ -1,4 +1,4 @@
 #!/bin/sh
 
-./gradlew --daemon clean install
+./gradlew --daemon clean install -xjavadoc
 ./gradlew --stop
