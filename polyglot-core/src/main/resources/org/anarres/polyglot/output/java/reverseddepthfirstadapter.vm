@@ -2,6 +2,7 @@
 package ${grammar.package.packageName}.analysis;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
@@ -50,6 +51,7 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter {
 #if ($element.list)
         {
             List<${element.javaTypeName}> copy = new ArrayList<${element.javaTypeName}>(node.get${element.javaMethodName}());
+            Collections.reverse(copy);
             for (${element.javaTypeName} e : copy)
                 e.apply(this);
         }
