@@ -18,6 +18,7 @@ import org.anarres.polyglot.node.PAnnotation;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TJavadocComment;
 import org.anarres.polyglot.node.Token;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  *
@@ -74,6 +75,7 @@ public abstract class AbstractModel implements Model {
     }
 
     @CheckForNull
+    @TemplateProperty
     public String getJavadocComment() {
         if (javadocComment == null)
             return null;
