@@ -1,11 +1,12 @@
 /* ${header} */
-package ${grammar.package.packageName}.node;
+package ${package}.node;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+/** The superclass of all {@link Token}, production and alternative types. */
 public abstract class Node implements Switchable, Visitable, Cloneable {
 
     private Node parent;

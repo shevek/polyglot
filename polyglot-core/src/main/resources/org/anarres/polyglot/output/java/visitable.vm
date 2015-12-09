@@ -1,9 +1,14 @@
 /* ${header} */
-package ${grammar.package.packageName}.node;
+package ${package}.node;
 
 import javax.annotation.Nonnull;
-import ${grammar.package.packageName}.analysis.Visitor;
+import ${package}.analysis.Visitor;
 
+/**
+ * The target of the advanced visitor interface.
+ *
+ * @see Visitor
+ */
 public interface Visitable {
 
     /**

@@ -21,7 +21,12 @@ import ${package}.analysis.AnalysisAdapter;
 import ${package}.lexer.ILexer;
 import ${package}.lexer.LexerException;
 
-public class Parser extends org.anarres.polyglot.runtime.AbstractParser {
+public class Parser {
+
+    public static final int SHIFT = 0;
+    public static final int REDUCE = 1;
+    public static final int ACCEPT = 2;
+    public static final int ERROR = 3;
 
     private static class State extends ArrayList<Object> {
         int state;
@@ -183,7 +188,7 @@ public class Parser extends org.anarres.polyglot.runtime.AbstractParser {
 
 #end
 
-    /* Implements a kind of left-associative addition for lists and items.
+    /* Implements a kind of left-associative addition for lists and items. */
     private static class ListBuilder<T> extends ArrayList<T> {
         @Nonnull
         public ListBuilder<T> with(@Nonnull T value) {
@@ -197,7 +202,6 @@ public class Parser extends org.anarres.polyglot.runtime.AbstractParser {
             return this;
         }
     }
-*/
 
 #macro(list $root $indent)
 #if ($root.items.empty)
@@ -334,7 +338,6 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #end## large
     } */ ;
 
-/*
     private static void readArray(@Nonnull int[] out, @Nonnull DataInputStream in) throws IOException {
         for (int i = 0; i < out.length; i++)
             out[i] = in.readInt();
@@ -347,7 +350,6 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
             readArray(out[i], in);
         return out;
     }
-*/
 
     static {
         try {

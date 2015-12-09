@@ -1,8 +1,15 @@
 /* ${header} */
-package ${grammar.package.packageName}.node;
+package ${package}.node;
 
 import javax.annotation.Nonnull;
+import ${package}.analysis.Visitor;
 
+/**
+ * The target of the basic visitor interface.
+ *
+ * @see Switch
+ * @see Visitor
+ */
 public interface Switchable {
 
     /** Implements the Visitor pattern. */

@@ -4,7 +4,7 @@ package ${grammar.package.packageName}.node;
 import javax.annotation.Nonnull;
 
 /**
- * A visitor interface.
+ * A basic visitor interface.
  */
 public interface Switch {
 #foreach ($token in $grammar.tokens)

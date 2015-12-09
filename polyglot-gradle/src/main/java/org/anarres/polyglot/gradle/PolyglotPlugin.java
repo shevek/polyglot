@@ -52,7 +52,7 @@ public class PolyglotPlugin implements Plugin<Project> {
             String version = (module != null) ? module.getVersion() : "+";
 
             project.getDependencies().add(configuration.getName(), "org.anarres.polyglot:polyglot-core:" + version);
-            project.getDependencies().add(JavaPlugin.COMPILE_CONFIGURATION_NAME, "org.anarres.polyglot:polyglot-runtime:" + version);
+            // project.getDependencies().add(JavaPlugin.COMPILE_CONFIGURATION_NAME, "org.anarres.polyglot:polyglot-runtime:" + version);
         } catch (IOException e) {
             throw Throwables.propagate(e);
         }

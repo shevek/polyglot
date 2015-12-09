@@ -30,7 +30,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
     /**
      * Constructs a new ${alternative.javaTypeName} and sets all fields.
 #foreach ($element in $alternative.elements)
-     * @param _${element.javaFieldName} See {@link #get${element.javaMethodName}()}.
+     * @param _${element.javaFieldName}_ See {@link #get${element.javaMethodName}()}.
 #end
      */
     public ${alternative.javaTypeName}(
