@@ -132,6 +132,12 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
     }
 
     @Nonnull
+    @TemplateProperty("html")
+    public PMatcher getMatcher() {
+        return matcher;
+    }
+
+    @Nonnull
     public CstTransformPrototypeModel getTransformPrototype() {
         return transformPrototype;
     }

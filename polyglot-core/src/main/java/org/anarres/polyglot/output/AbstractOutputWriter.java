@@ -16,12 +16,14 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.PolyglotEngine;
 import org.anarres.polyglot.PolyglotExecutor;
@@ -31,6 +33,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.app.event.implement.ReportInvalidReferences;
 import org.apache.velocity.runtime.log.SystemLogChute;
+import org.apache.velocity.tools.generic.EscapeTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,26 +46,41 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOutputWriter.class);
     private final OutputLanguage language;
     private final File destinationDir;
-    protected final Map<? extends String, ? extends File> templates;
-    protected final Set<? extends Option> options;
-    protected final GrammarModel grammar;
-    protected final LRAutomaton automaton;
-    protected final Tables tables;
+    private final Set<? extends Option> options;
+    private final Map<? extends String, ? extends File> templates;
+    private final OutputData data;
 
     public AbstractOutputWriter(
             @Nonnull OutputLanguage language,
             @Nonnull File destinationDir,
-            @Nonnull Map<? extends String, ? extends File> templates,
             @Nonnull Set<? extends Option> options,
-            @Nonnull GrammarModel grammar,
-            @CheckForNull LRAutomaton automaton, @Nonnull Tables tables) {
+            @Nonnull Map<? extends String, ? extends File> templates,
+            @Nonnull OutputData data) {
         this.language = language;
         this.destinationDir = destinationDir;
-        this.templates = templates;
         this.options = options;
-        this.grammar = grammar;
-        this.automaton = automaton;
-        this.tables = tables;
+        this.templates = templates;
+        this.data = data;
+    }
+
+    @Nonnull
+    public File getDestinationDir() {
+        return destinationDir;
+    }
+
+    @Nonnull
+    protected GrammarModel getGrammar() {
+        return data.getGrammar();
+    }
+
+    @CheckForNull
+    protected LRAutomaton getAutomaton() {
+        return data.getAutomaton();
+    }
+
+    @Nonnull
+    protected Tables getTables() {
+        return data.getTables();
     }
 
     protected void setProperty(@Nonnull VelocityEngine engine, @Nonnull String name, @Nonnull Object value) {
@@ -71,16 +89,22 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     }
 
     @Nonnull
-    protected File newDestinationFile(@Nonnull String dstFilePath) throws IOException {
-        File dstRoot = new File(destinationDir, grammar._package.getPackagePath());
-        File dstFile = new File(dstRoot, dstFilePath);
+    protected File newDestinationFile(@Nonnull File dstFile) throws IOException {
         // Reconstruct this as dstFilePath may contain a slash.
         File dstDir = dstFile.getParentFile();
         PolyglotEngine.mkdirs(dstDir, "output directory");
         return dstFile;
     }
 
-    protected abstract void initContext(@Nonnull VelocityContext context);
+    @Nonnull
+    protected File newDestinationFile(@Nonnull String dstFilePath) throws IOException {
+        File dstFile = new File(getDestinationDir(), dstFilePath);
+        return newDestinationFile(dstFile);
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    protected void initContext(@Nonnull VelocityContext context) {
+    }
 
     protected void process(@Nonnull CharSource source, @Nonnull String dstFilePath, @Nonnull Map<String, Object> contextValues) throws IOException {
         VelocityEngine engine = new VelocityEngine();
@@ -99,11 +123,13 @@ public abstract class AbstractOutputWriter implements OutputWriter {
                 return internalPut(key, value);
             }
         };
+        context.put("esc", new EscapeTool());
+
         context.put("header", "This file was generated automatically by Polyglot. Edits will be lost.");
-        context.put("grammar", grammar);
-        context.put("automaton", automaton);
-        context.put("tables", tables);
-        context.put("package", grammar.getPackage().getPackageName());
+        context.put("grammar", getGrammar());
+        context.put("automaton", getAutomaton());
+        context.put("tables", getTables());
+        context.put("package", getGrammar().getPackage().getPackageName());
         initContext(context);
         for (Map.Entry<String, Object> e : contextValues.entrySet())
             context.put(e.getKey(), e.getValue());
@@ -139,8 +165,17 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         process(executor, srcResourceName, dstFilePath, ImmutableMap.<String, Object>of());
     }
 
-    protected void write(@CheckForNull byte[] data, String dstFilePath) throws IOException {
-        if (data != null)
+    protected void processTemplates(PolyglotExecutor executor) throws ExecutionException, IOException {
+        for (Map.Entry<? extends String, ? extends File> e : templates.entrySet()) {
+            String dstFilePath = e.getKey();
+            File template = e.getValue();
+            process(executor, Files.asCharSource(template, StandardCharsets.UTF_8), dstFilePath, ImmutableMap.<String, Object>of());
+        }
+    }
+
+    protected void write(PolyglotExecutor executor, @CheckForNull byte[] data, String dstFilePath) throws IOException {
+        if (data != null) {
             Files.write(data, newDestinationFile(dstFilePath));
+        }
     }
 }

@@ -124,9 +124,11 @@ public abstract class Node implements Switchable, Visitable, Cloneable {
         StringBuilder buf = new StringBuilder();
         toStringBuilder(buf);
         int length = buf.length();
-        while (length > 0)
+        while (length > 0) {
             if (!Character.isWhitespace(buf.charAt(length - 1)))
                 break;
+            length--;
+        }
         buf.setLength(length);
         return buf.toString();
     }

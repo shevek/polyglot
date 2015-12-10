@@ -88,7 +88,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
     // public final Map<Node, String> names = new HashMap<Node, String>();
     @Override
     public void caseAPackage(APackage node) {
-        grammar._package = PackageModel.forNode(node);
+        grammar.setPackage(PackageModel.forNode(node));
     }
 
     @Override

@@ -17,6 +17,7 @@ import java.io.PushbackReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,8 +55,9 @@ import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.StateModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.node.Start;
+import org.anarres.polyglot.output.OutputData;
 import org.anarres.polyglot.output.OutputLanguage;
-import org.anarres.polyglot.output.JavaOutputWriter;
+import org.anarres.polyglot.output.OutputWriter;
 import org.anarres.polyglot.output.Tables;
 import org.anarres.polyglot.parser.Parser;
 import org.anarres.polyglot.parser.ParserException;
@@ -103,7 +105,7 @@ public class PolyglotEngine {
     private final ErrorHandler errors = new ErrorHandler();
     private final String name;
     private final CharSource input;
-    private final File outputDir;
+    private final Map<OutputLanguage, File> outputDirs = new EnumMap<>(OutputLanguage.class);
     @Nonnull
     private DebugHandler debugHandler = DebugHandler.None.INSTANCE;
     public final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_TABLES, Option.CG_APIDOC, Option.CG_FINDBUGS, Option.PARALLEL);
@@ -112,7 +114,7 @@ public class PolyglotEngine {
     public PolyglotEngine(@Nonnull String name, @Nonnull CharSource input, @Nonnull File outputDir) {
         this.name = name;
         this.input = input;
-        this.outputDir = outputDir;
+        this.outputDirs.put(OutputLanguage.java, outputDir);
     }
 
     public PolyglotEngine(@Nonnull File input, @Nonnull File outputDir) {
@@ -166,6 +168,13 @@ public class PolyglotEngine {
 
     public void addTemplates(@Nonnull Map<String, File> templates) {
         this.templates.putAll(templates);
+    }
+
+    public void setOutputDir(@Nonnull OutputLanguage language, @CheckForNull File outputDir) {
+        if (outputDir != null)
+            outputDirs.put(language, outputDir);
+        else
+            outputDirs.remove(language);
     }
 
     private void dump(@CheckForNull CharSink sink, @Nonnull GraphVizable object) throws IOException {
@@ -433,8 +442,15 @@ public class PolyglotEngine {
     protected void buildOutputs(@Nonnull PolyglotExecutor executor, GrammarModel grammar, @CheckForNull LRAutomaton automaton, @Nonnull Tables tables) throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
         LOG.info("{}: Writing output.", getName());
-        JavaOutputWriter writer = new JavaOutputWriter(outputDir, templates, options, grammar, automaton, tables);
-        writer.run(executor);
+        OutputData data = new OutputData(grammar, automaton, tables);
+        try {
+            for (Map.Entry<OutputLanguage, File> e : outputDirs.entrySet()) {
+                OutputWriter writer = e.getKey().newOutputWriter(e.getValue(), options, templates, data);
+                writer.run(executor);
+            }
+        } finally {
+            executor.await();
+        }
         LOG.info("{}: Writing output took {}", getName(), stopwatch);
     }
 

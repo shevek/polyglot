@@ -65,6 +65,7 @@ project(':polyglot-core') {
 		compile 'it.unimi.dsi:fastutil:7.0.8'
 
 		compile "org.apache.velocity:velocity:1.7"
+		compile "org.apache.velocity:velocity-tools:2.0"
 
 		// For access to the runtime constants.
 		compile project(':polyglot-runtime')

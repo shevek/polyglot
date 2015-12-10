@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet" integrity="sha256-o8bM0Z5cFvrvvvQp0EJFi4LICvBA9FCx7iCNuojVsN8=" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" integrity="sha256-rsPUGdUPBXgalvIj4YKJrrUlmLXbOb6Cp7cdxn1qeUc=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+
+<h1>Tokens</h1>
+
+#foreach ($token in $grammar.tokens)
+    <!-- $esc.html($token) -->
+
+    <a name="T-${token.name}"></a>
+    <a name="CS-${token.name}"></a>
+    <a name="AS-${token.name}"></a>
+    <h2>${token}</h2>
+
+## Matcher: ${token.matcher}
+## Transitions: ${token.transitions}
+
+#end##token
+
+<h1>Productions</h1>
+
+#foreach ($production in $grammar.cstProductions)
+    <!-- $esc.html($production) -->
+
+    <a name="CP-${production.name}"></a>
+    <a name="CS-${production.name}"></a>
+    <h2>${production.name} { -&gt;
+#foreach ($transformPrototype in $production.transformPrototypes)
+        <a href="#J-${transformPrototype.javaTypeName}">${transformPrototype}</a>
+#end##transformPrototype
+    }</h2>
+
+#foreach ($alternative in $production.alternatives)
+    <!-- $esc.html($alternative) -->
+
+    <a name="CA-${alternative.name}"></a>
+    <h3>${alternative.name}</h3>
+
+	<div class="well">
+    =
+#foreach ($element in $alternative.elements)
+        <a href="#CS-${element.symbolName}">${element}</a>
+#end##element
+
+<br />
+
+    { ->
+#foreach ($transformExpression in $alternative.transformExpressions)
+    $transformExpression
+#end##transformExpression
+    } ;
+	</div>
+
+#end##alternative
+#end##production
+
+<h1>Abstract Syntax Tree</h1>
+
+#foreach ($production in $grammar.astProductions)
+    <!-- $esc.html($production) -->
+
+    <a name="AP-${production.name}"></a>
+    <a name="AS-${production.name}"></a>
+    <a name="J-${production.javaTypeName}"></a>
+    <h2>${production.name}</h2>
+#foreach ($alternative in $production.alternatives)
+    <!-- $esc.html($alternative) -->
+
+    <a name="AA-${alternative.name}"></a>
+    <a name="J-${alternative.javaTypeName}"></a>
+    <h3>${alternative.name}</h3>
+
+	<div class="well">
+    =
+#foreach ($element in $alternative.elements)
+        <a href="#AS-${element.symbolName}">${element}</a>
+#end##element
+        ;
+	</div>
+
+#end##alternative
+#end##production
+
+    </div>
+</body>
+</html>

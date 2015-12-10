@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot;
 
+import com.google.common.base.Preconditions;
 import com.google.common.io.CharSink;
 import com.google.common.io.Files;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +40,7 @@ public interface DebugHandler {
          * @param prefix The prefix to attach to all generated files.
          */
         public File(@Nonnull java.io.File dir, @Nonnull String prefix) {
+            Preconditions.checkArgument(dir.isDirectory(), "Directory does not exist: %s", dir);
             this.dir = dir;
             this.prefix = prefix;
         }

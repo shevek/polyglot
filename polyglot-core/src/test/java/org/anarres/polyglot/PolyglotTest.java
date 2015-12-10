@@ -5,14 +5,18 @@
  */
 package org.anarres.polyglot;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
 import com.google.testing.compile.JavaFileObjects;
 import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.tools.JavaFileObject;
+import org.anarres.polyglot.output.OutputLanguage;
 import org.apache.commons.lang.SystemUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,32 +33,56 @@ public class PolyglotTest {
     private static final Logger LOG = LoggerFactory.getLogger(PolyglotTest.class);
 
     public static final String DIR = "build/resources/test/grammars/positive";
+    private final File destinationDir = new File("../polyglot-tests/build/generated-sources/polyglot-java");
+
+    @Before
+    public void setUp() {
+        destinationDir.mkdirs();
+    }
 
     private void parse(@Nonnull File file) throws Exception {
         // File dst = new File("build/test/velocity/" + file.getName());
-        File dst = new File("../polyglot-tests/build/generated-sources/polyglot-java");
-        dst.mkdirs();
-        PolyglotEngine engine = new PolyglotEngine(file, dst);
-        engine.setDebugHandler(new DebugHandler.File(SystemUtils.getUserDir(), file.getName()));
+        PolyglotEngine engine = new PolyglotEngine(file, destinationDir);
+
+        File debugDir = new File(SystemUtils.getUserDir(), "build/polyglot-debug");
+        PolyglotEngine.mkdirs(debugDir, "Debug directory");
+        engine.setDebugHandler(new DebugHandler.File(debugDir, file.getName()));
+
+        File htmlDir = new File(SystemUtils.getUserDir(), "build/polyglot-html/" + file.getName());
+        PolyglotEngine.mkdirs(htmlDir, "HTML directory");
+        engine.setOutputDir(OutputLanguage.html, htmlDir);
+
         // engine.setOption(Option.SLR, false);
         // engine.setOption(Option.PARALLEL, false);
         if (file.getName().equals("php4.sablecc"))
             engine.setOption(Option.ALLOWMASKEDTOKENS, true);
         if (!engine.run())
             throw new Exception("Polyglot failed:\n" + engine.getErrors());
+    }
 
+    private void compile() throws MalformedURLException {
         List<JavaFileObject> javaFileObjects = new ArrayList<>();
-        for (File javaFile : Files.fileTreeTraverser().preOrderTraversal(dst)) {
-            if (!javaFile.isFile())
-                continue;
-            if (!javaFile.getName().endsWith(".java"))
-                continue;
-            javaFileObjects.add(JavaFileObjects.forResource(javaFile.toURI().toURL()));
+        {
+            LOG.info("Collecting file objects.");
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            for (File javaFile : Files.fileTreeTraverser().preOrderTraversal(destinationDir)) {
+                if (!javaFile.isFile())
+                    continue;
+                if (!javaFile.getName().endsWith(".java"))
+                    continue;
+                javaFileObjects.add(JavaFileObjects.forResource(javaFile.toURI().toURL()));
+            }
+            LOG.info("Collecting file objects took " + stopwatch);
         }
 
-        assert_().about(javaSources())
-                .that(javaFileObjects)
-                .compilesWithoutError();
+        {
+            LOG.info("Compiling.");
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            assert_().about(javaSources())
+                    .that(javaFileObjects)
+                    .compilesWithoutError();
+            LOG.info("Compiling took " + stopwatch);
+        }
 
         // assertTrue("Failing because conflicts exist.", automaton.getConflicts().isEmpty());
     }
@@ -107,5 +135,7 @@ public class PolyglotTest {
             // continue;
             parse(file);
         }
+
+        compile();
     }
 }

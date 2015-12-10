@@ -43,7 +43,7 @@ public class GrammarModel implements GraphVizScope {
     private static class DefaultMap<K, V> extends LinkedHashMap<K, V> {
     }
 
-    public PackageModel _package;
+    private PackageModel _package;
     private final Map<String, ExternalModel> externals = new DefaultMap<>();
     private final Map<String, HelperModel> helpers = new DefaultMap<>(); // Temporarily preserve order.
     public int stateIndex = 0;
@@ -64,6 +64,10 @@ public class GrammarModel implements GraphVizScope {
     @TemplateProperty
     public PackageModel getPackage() {
         return _package;
+    }
+
+    public void setPackage(@Nonnull PackageModel _package) {
+        this._package = _package;
     }
 
     @CheckForNull
@@ -374,6 +378,9 @@ public class GrammarModel implements GraphVizScope {
     @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
+
+        buf.append("Externals:\n");
+        buf.append(externals).append("\n");
 
         buf.append("Helpers:\n");
         buf.append(helpers).append("\n");
