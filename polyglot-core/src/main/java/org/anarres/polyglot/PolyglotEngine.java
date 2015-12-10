@@ -54,7 +54,8 @@ import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.StateModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.node.Start;
-import org.anarres.polyglot.output.OutputWriter;
+import org.anarres.polyglot.output.OutputLanguage;
+import org.anarres.polyglot.output.JavaOutputWriter;
 import org.anarres.polyglot.output.Tables;
 import org.anarres.polyglot.parser.Parser;
 import org.anarres.polyglot.parser.ParserException;
@@ -432,7 +433,7 @@ public class PolyglotEngine {
     protected void buildOutputs(@Nonnull PolyglotExecutor executor, GrammarModel grammar, @CheckForNull LRAutomaton automaton, @Nonnull Tables tables) throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
         LOG.info("{}: Writing output.", getName());
-        OutputWriter writer = new OutputWriter(outputDir, OutputWriter.Language.java, templates, options, grammar, automaton, tables);
+        JavaOutputWriter writer = new JavaOutputWriter(outputDir, templates, options, grammar, automaton, tables);
         writer.run(executor);
         LOG.info("{}: Writing output took {}", getName(), stopwatch);
     }

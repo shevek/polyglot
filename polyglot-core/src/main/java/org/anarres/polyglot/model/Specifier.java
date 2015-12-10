@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.analysis.AnalysisAdapter;
+import org.anarres.polyglot.node.AExternalSpecifier;
 import org.anarres.polyglot.node.AProductionSpecifier;
 import org.anarres.polyglot.node.ATokenSpecifier;
 import org.anarres.polyglot.node.Node;
@@ -25,37 +26,33 @@ public enum Specifier {
                 public PSpecifier newSpecifier() {
                     return null;
                 }
+
+                @Override
+                public boolean isAllowed(Specifier specifier) {
+                    return true;
+                }
             },
     TOKEN {
                 @Override
                 public PSpecifier newSpecifier() {
                     return new ATokenSpecifier();
                 }
-
-                @Override
-                public boolean isProductionAllowed() {
-                    return false;
-                }
             },
     PRODUCTION {
-
                 @Override
                 public PSpecifier newSpecifier() {
                     return new AProductionSpecifier();
                 }
-
+            },
+    EXTERNAL {
                 @Override
-                public boolean isTokenAllowed() {
-                    return false;
+                public PSpecifier newSpecifier() {
+                    return new AExternalSpecifier();
                 }
             };
 
-    public boolean isTokenAllowed() {
-        return true;
-    }
-
-    public boolean isProductionAllowed() {
-        return true;
+    public boolean isAllowed(@Nonnull Specifier specifier) {
+        return specifier == this;
     }
 
     @CheckForNull

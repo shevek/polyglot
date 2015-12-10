@@ -95,6 +95,7 @@ public class PolyglotTest {
             // if (!file.getName().equals("test-documentation.polyglot"))
             // if (!file.getName().equals("test-notransform.polyglot"))
             // if (!file.getName().equals("test-calculator.polyglot"))
+            // if (!file.getName().equals("test-externals.polyglot"))
             // if (!file.getName().equals("private-plsql-compiler.polyglot"))
             // if (!file.getName().equals("private-plsql-compiler-small.polyglot"))
             // if (!file.getName().equals("test-inlining.polyglot"))

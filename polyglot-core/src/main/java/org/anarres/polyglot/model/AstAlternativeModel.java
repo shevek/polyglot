@@ -34,6 +34,7 @@ public class AstAlternativeModel extends AbstractNamedJavaModel implements AstMo
     @CheckForNull
     private final TIdentifier alternativeName;
     public final List<AstElementModel> elements = new ArrayList<>();
+    public final List<AstElementModel> externals = new ArrayList<>();
     private final Multimap<String, AnnotationModel> annotations;
     // Cached
     private final String javaTypeName;
@@ -88,6 +89,12 @@ public class AstAlternativeModel extends AbstractNamedJavaModel implements AstMo
         return elements;
     }
 
+    @Nonnull
+    @TemplateProperty
+    public List<? extends AstElementModel> getExternals() {
+        return externals;
+    }
+
     @Override
     public Multimap<String, AnnotationModel> getAnnotations() {
         return annotations;
@@ -97,6 +104,8 @@ public class AstAlternativeModel extends AbstractNamedJavaModel implements AstMo
     public AAstAlternative toNode() {
         List<AElement> elements = new ArrayList<>();
         for (AstElementModel e : getElements())
+            elements.add(e.toNode());
+        for (AstElementModel e : getExternals())
             elements.add(e.toNode());
         return new AAstAlternative(newJavadocCommentToken(), alternativeName, elements, toAnnotations(annotations));
     }

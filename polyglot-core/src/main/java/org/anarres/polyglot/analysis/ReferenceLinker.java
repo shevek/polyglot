@@ -7,6 +7,8 @@ package org.anarres.polyglot.analysis;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
@@ -20,13 +22,16 @@ import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstProductionSymbol;
 import org.anarres.polyglot.model.CstTransformExpressionModel;
 import org.anarres.polyglot.model.CstTransformPrototypeModel;
+import org.anarres.polyglot.model.ExternalModel;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.ProductionSymbol;
+import org.anarres.polyglot.model.Specifier;
 import org.anarres.polyglot.model.TokenModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Links all elements and transforms to their respective targets, and moves externals to a separate data structure.
  *
  * @author shevek
  */
@@ -141,48 +146,136 @@ public class ReferenceLinker implements Runnable {
         this.grammar = grammar;
     }
 
-    private <S extends ProductionSymbol> void linkElement(@Nonnull AbstractElementModel<S> element, Map<? extends String, ? extends S> productions, @Nonnull String productionDesc, @Nonnull String targetDesc) {
+    private static class Linkage<S extends ProductionSymbol> {
+
+        private final String symbolDesc;
+        private final S symbol;
+        private final boolean legal;
+
+        public Linkage(@Nonnull String symbolDesc, @Nonnull S symbol, boolean legal) {
+            this.symbolDesc = symbolDesc;
+            this.symbol = symbol;
+            this.legal = legal;
+        }
+
+        public void toStringBuilder(StringBuilder buf, boolean name) {
+            buf.append(symbolDesc);
+            if (name)
+                buf.append(" '").append(symbol.getName()).append("'");
+            buf.append(" defined at ").append(ErrorHandler.toLocationString(symbol.getLocation()));
+        }
+
+        public String toString(boolean name) {
+            StringBuilder buf = new StringBuilder();
+            toStringBuilder(buf, name);
+            return buf.toString();
+        }
+
+        @Override
+        public String toString() {
+            return toString(false);
+        }
+    }
+
+    private static class Linkages<S extends ProductionSymbol> extends ArrayList<Linkage<S>> {
+
+        private int legalCount;
+        private Linkage<S> legalLinkage = null;
+
+        public Linkages() {
+            super(Specifier.values().length - 1);
+        }
+
+        @Override
+        public boolean add(Linkage<S> e) {
+            if (e.legal) {
+                legalCount++;
+                legalLinkage = e;
+            }
+
+            return super.add(e);
+        }
+
+        private String toString(boolean name) {
+            switch (size()) {
+                case 0:
+                    return "<no linkages>";
+                case 1:
+                    return get(0).toString(name);
+                default:
+                    StringBuilder buf = new StringBuilder();
+                    for (int i = 0; i < size() - 1; i++) {
+                        if (i > 0)
+                            buf.append(", ");
+                        get(i).toStringBuilder(buf, name);
+                    }
+                    buf.append(" or ");
+                    get(size() - 1).toStringBuilder(buf, name);
+                    return buf.toString();
+            }
+        }
+
+        @Override
+        public String toString() {
+            return toString(false);
+        }
+    }
+
+    private <S extends ProductionSymbol> void linkElement(@Nonnull AbstractElementModel<S> element, Map<? extends String, ? extends S> productions, @Nonnull String productionDesc, @Nonnull String targetDesc, boolean externalsLegal) {
         String symbolName = element.getSymbolName();
 
-        TokenModel token = null;
-        if (element.getSpecifier().isTokenAllowed())
-            token = grammar.getToken(symbolName);
+        Linkages<S> linkages = new Linkages<>();
 
-        S production = null;
-        if (element.getSpecifier().isProductionAllowed())
-            production = productions.get(symbolName);
+        TOKEN:
+        if (element.getSpecifier().isAllowed(Specifier.TOKEN)) {
+            TokenModel token = grammar.getToken(symbolName);
+            if (token == null)
+                break TOKEN;
+            linkages.add(new Linkage<>(token.isIgnored() ? "ignored token" : "token", (S) token, !token.isIgnored()));
+        }
 
-        if (production != null) {
-            if (token == null || token.isIgnored()) {
-                element.symbol = production;
+        PRODUCTION:
+        if (element.getSpecifier().isAllowed(Specifier.PRODUCTION)) {
+            S production = productions.get(symbolName);
+            if (production == null)
+                break PRODUCTION;
+            linkages.add(new Linkage<>(productionDesc, production, true));
+        }
+
+        EXTERNAL:
+        if (element.getSpecifier().isAllowed(Specifier.EXTERNAL)) {
+            ExternalModel external = grammar.getExternal(symbolName);
+            if (external == null)
+                break EXTERNAL;
+            linkages.add(new Linkage<>((externalsLegal ? "" : "illegal ") + "external", (S) external, externalsLegal));
+        }
+
+        switch (linkages.legalCount) {
+            case 1:
+                element.symbol = linkages.legalLinkage.symbol;
                 return;
-            }
-            errors.addError(element.getLocation(), "Ambiguous name '" + symbolName + "' in " + targetDesc + " could reference either"
-                    + " production at " + ErrorHandler.toLocationString(production.getLocation())
-                    + " or token at " + ErrorHandler.toLocationString(token.getLocation()) + ".");
-        } else if (token != null) {
-            if (!token.isIgnored()) {
-                @SuppressWarnings("unchecked")
-                S symbol = (S) token;
-                element.symbol = symbol;
-                return;
-            }
-            errors.addError(element.getLocation(), "Cannot reference ignored token '" + symbolName + "' for " + targetDesc + ".");
-        } else {
-            errors.addError(element.getLocation(), "No such token or " + productionDesc + " '" + symbolName + "' for " + targetDesc + ".");
+            case 0:
+                if (linkages.isEmpty())
+                    errors.addError(element.getLocation(), "No such token" + (externalsLegal ? ", external" : "") + " or " + productionDesc + " '" + symbolName + "' for " + targetDesc + ".");
+                else
+                    errors.addError(element.getLocation(), "Name '" + symbolName + "' in " + targetDesc + " cannot reference " + linkages.toString(true));
+                break;
+            default:
+                errors.addError(element.getLocation(), "Ambiguous name '" + symbolName + "' in " + targetDesc + " could reference either " + linkages.toString(false));
+                break;
         }
     }
 
     private void linkCstTransformPrototype(@Nonnull CstTransformPrototypeModel element) {
-        linkElement(element, grammar.astProductions, "AST production", "transform prototype");
+        linkElement(element, grammar.astProductions, "AST production", "transform prototype", false);
     }
 
     private void linkCstElement(@Nonnull CstElementModel element) {
-        linkElement(element, grammar.cstProductions, "CST production", "CST element");
+        linkElement(element, grammar.cstProductions, "CST production", "CST element", false);
     }
 
     private void linkAstElement(@Nonnull AstElementModel element) {
-        linkElement(element, grammar.astProductions, "AST production", "AST element");
+        linkElement(element, grammar.astProductions, "AST production", "AST element", true);
     }
 
     @Override
@@ -203,8 +296,14 @@ public class ReferenceLinker implements Runnable {
 
         for (AstProductionModel astProduction : grammar.getAstProductions()) {
             for (AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
-                for (AstElementModel astElement : astAlternative.getElements()) {
+                // for (AstElementModel astElement : astAlternative.getElements()) { linkAstElement(astElement); }
+                for (Iterator<AstElementModel> it = astAlternative.elements.iterator(); it.hasNext(); /* */) {
+                    AstElementModel astElement = it.next();
                     linkAstElement(astElement);
+                    if (astElement.symbol instanceof ExternalModel) {
+                        it.remove();
+                        astAlternative.externals.add(astElement);
+                    }
                 }
             }
         }

@@ -27,6 +27,10 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
 #end##if element.list
 #end##foreach alternative.elements
 
+#foreach ($external in $alternative.externals)
+    private ${external.javaTypeName} _${external.javaFieldName}_;
+#end##foreach alternative.externals
+
     /**
      * Constructs a new ${alternative.javaTypeName} and sets all fields.
 #foreach ($element in $alternative.elements)
@@ -56,39 +60,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
     }
 #end
 
-    @Override
-#if ($helper.isOption("CG_FINDBUGS"))
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("CN_IDIOM_NO_SUPER_CALL")
-#end
-    public ${alternative.javaTypeName} clone() {
-        return clone(CloneListener.NONE);
-    }
-
-    @Override
-    public ${alternative.javaTypeName} clone(CloneListener listener) {
-        ${alternative.javaTypeName} out = new ${alternative.javaTypeName}(
-#foreach ($element in $alternative.elements)
-#if ($element.list)
-            cloneList(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
-#else##if element.list
-            cloneNode(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
-#end##if element.list
-#end##foreach alternative.elements
-        );
-        listener.fireNodeCloned(this, out);
-        return out;
-    }
-
-    @Override
-    public void apply(Switch s) {
-        s.case${alternative.javaMethodName}(this);
-    }
-
-    @Override
-    public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
-        return v.visit${alternative.javaMethodName}(this, input);
-    }
-
+    // Elements
 #foreach ($element in $alternative.elements)
 #if ($element.list)
 
@@ -154,6 +126,29 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
 #end##if element.list
 #end##foreach alternative.elements
 
+    // Externals
+#foreach ($external in $alternative.externals)
+
+#if ($external.javadocComment)
+    $external.javadocComment
+#end
+#if ($external.nullable)
+    @CheckForNull
+#elseif (!$external.symbol.primitive)
+    @Nonnull
+#end
+    public ${external.javaTypeName} get${external.javaMethodName}() {
+        return this._${external.javaFieldName}_;
+    }
+
+#if ($external.javadocComment)
+    $external.javadocComment
+#end
+    public void set${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} ${external.javaTypeName} value) {
+        this._${external.javaFieldName}_ = value;
+    }
+#end##foreach alternative.external
+
     @Override
     public void removeChild(Node child) {
 #foreach ($element in $alternative.elements)
@@ -202,6 +197,39 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
 #end##foreach alternative.elements
 
         throw new RuntimeException("Not a child.");
+    }
+
+    @Override
+#if ($helper.isOption("CG_FINDBUGS"))
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("CN_IDIOM_NO_SUPER_CALL")
+#end
+    public ${alternative.javaTypeName} clone() {
+        return clone(CloneListener.NONE);
+    }
+
+    @Override
+    public ${alternative.javaTypeName} clone(CloneListener listener) {
+        ${alternative.javaTypeName} out = new ${alternative.javaTypeName}(
+#foreach ($element in $alternative.elements)
+#if ($element.list)
+            cloneList(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
+#else##if element.list
+            cloneNode(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
+#end##if element.list
+#end##foreach alternative.elements
+        );
+        listener.fireNodeCloned(this, out);
+        return out;
+    }
+
+    @Override
+    public void apply(Switch s) {
+        s.case${alternative.javaMethodName}(this);
+    }
+
+    @Override
+    public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
+        return v.visit${alternative.javaMethodName}(this, input);
     }
 
     @Override

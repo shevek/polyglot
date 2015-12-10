@@ -5,45 +5,62 @@
  */
 package org.anarres.polyglot.model;
 
-import com.google.common.base.Joiner;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.Multimap;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.analysis.MatcherParserVisitor;
 import org.anarres.polyglot.node.AExternal;
 import org.anarres.polyglot.node.Node;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.node.TString;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  *
  * @author shevek
  */
-public class ExternalModel extends AbstractNamedJavaModel /* implements AstProductionSymbol */ {
+public class ExternalModel extends AbstractNamedJavaModel implements AstProductionSymbol {
 
     @Nonnull
     public static ExternalModel forNode(@Nonnull AExternal node) {
-        List<String> typeParts = new ArrayList<>();
-        for (TIdentifier part : node.getExternalType())
-            typeParts.add(part.getText());
-        return new ExternalModel(node.getName(), typeParts);
+        ExternalModel model = new ExternalModel(node.getName(), node.getExternalType(), annotations(node.getAnnotations()));
+        model.setJavadocComment(node.getJavadocComment());
+        return model;
     }
 
-    private final List<? extends String> externalTypeParts;
+    private final TString externalType;
+    private final Multimap<String, AnnotationModel> annotations;
+    // Cached
+    private final String javaTypeName;
 
-    public ExternalModel(@Nonnull TIdentifier name, @Nonnull List<? extends String> externalTypeParts) {
+    public ExternalModel(@Nonnull TIdentifier name, @Nonnull TString externalType, Multimap<String, AnnotationModel> annotations) {
         super(name);
-        this.externalTypeParts = externalTypeParts;
+        this.externalType = externalType;
+        this.annotations = annotations;
+        this.javaTypeName = MatcherParserVisitor.parse(externalType);
+    }
+
+    @Override
+    public boolean isTerminal() {
+        return false;
+    }
+
+    @TemplateProperty("alternative.vm")
+    public boolean isPrimitive() {
+        return getJavaTypeName().toLowerCase().equals(getJavaTypeName());
     }
 
     @Override
     public String getJavaTypeName() {
-        return Joiner.on('.').join(externalTypeParts);
+        return javaTypeName;
+    }
+
+    @Override
+    public Multimap<String, AnnotationModel> getAnnotations() {
+        return annotations;
     }
 
     @Override
     public Node toNode() {
-        List<TIdentifier> externalType = new ArrayList<>();
-        for (String part : externalTypeParts)
-            externalType.add(new TIdentifier(part, getLocation()));
-        return new AExternal(toNameToken(), externalType);
+        return new AExternal(newJavadocCommentToken(), toNameToken(), externalType.clone(), toAnnotations(annotations));
     }
 }

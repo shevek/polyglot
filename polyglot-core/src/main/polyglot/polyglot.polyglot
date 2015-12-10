@@ -41,6 +41,7 @@ Tokens
 
 	token_specifier      = 'T';
 	production_specifier = 'P';
+	external_specifier   = 'E';
 
 	tok_at       = '@';
 	tok_dot      = '.';
@@ -93,6 +94,7 @@ Productions
 		{states}         states         { -> states.section } |
 		{tokens}         tokens         { -> tokens.section } |
 		{ignored_tokens} ignored_tokens { -> ignored_tokens.section } |
+		{externals}      externals      { -> externals.section } |
 		{productions}    productions    { -> productions.section } |
 		{ast}            ast            { -> ast.section } ;
 
@@ -112,8 +114,9 @@ Productions
 			{ -> New section.externals([externals]) } ;
 
 	external =
-		identifier tok_eq qualified_name
-			{ -> New external(identifier, [qualified_name]) } ;
+		javadoc_comment?
+		annotation* identifier tok_eq string tok_semi
+			{ -> New external(javadoc_comment, identifier, string, [annotation.annotation]) } ;
 
 	helpers { -> section } =
 		kw_helpers [helpers]:helper*
@@ -338,7 +341,9 @@ Productions
 		{token} token_specifier tok_dot
 			{ -> New specifier.token(token_specifier) } |
 		{production} production_specifier tok_dot
-			{ -> New specifier.production(production_specifier) } ;
+			{ -> New specifier.production(production_specifier) } |
+		{external} external_specifier tok_dot
+			{ -> New specifier.external(external_specifier) } ;
 
 	identifier_list { -> identifier* } =
 		{single} identifier
@@ -373,8 +378,11 @@ Abstract Syntax Tree
 		{ast}            [productions]:ast_production* ;
 
 	external =
+		javadoc_comment?
 		[name]:identifier
-		[external_type]:identifier* ;
+		[external_type]:string
+		[annotations]:annotation*
+		;
 
 	helper =
 		[name]:identifier matcher ;
@@ -438,7 +446,8 @@ Abstract Syntax Tree
 
 	specifier =
 		{token} token_specifier |
-		{production} production_specifier ;
+		{production} production_specifier |
+		{external} external_specifier ;
 
 	ast_production =
 		javadoc_comment?

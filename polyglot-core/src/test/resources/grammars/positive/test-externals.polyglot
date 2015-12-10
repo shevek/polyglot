@@ -1,0 +1,72 @@
+Package org.anarres.polyglot.test.externals;
+
+Helpers
+
+	digit = ['0'..'9'] ;
+
+Tokens
+
+	integer_constant = digit+ ;
+
+	tok_add = '+' ;
+	tok_sub = '-' ;
+	tok_mul = '*' ;
+	tok_div = '/' ;
+	tok_rem = '%' ;
+
+	blank = ' ';
+
+Ignored Tokens
+	blank;
+
+Productions
+
+	expression { -> expression } =
+		additive_expression
+			{ -> additive_expression.expression } ;
+
+	additive_expression { -> expression } =
+		{add} additive_expression tok_add multiplicative_expression
+			{ -> New expression.add(additive_expression, multiplicative_expression) } |
+		{sub} additive_expression tok_sub multiplicative_expression
+			{ -> New expression.sub(additive_expression, multiplicative_expression) } |
+		{no} multiplicative_expression
+			{ -> multiplicative_expression.expression } ;
+
+	multiplicative_expression { -> expression } =
+		{mul} multiplicative_expression tok_mul primary_expression
+			{ -> New expression.mul(multiplicative_expression, primary_expression) } |
+		{div} multiplicative_expression tok_div primary_expression
+			{ -> New expression.div(multiplicative_expression, primary_expression) } |
+		{rem} multiplicative_expression tok_rem primary_expression
+			{ -> New expression.rem(multiplicative_expression, primary_expression) } |
+		{no} primary_expression
+			{ -> primary_expression.expression } ;
+
+	primary_expression { -> expression } =
+		integer_constant
+			{ -> New expression.constant(integer_constant) } ;
+
+Externals
+	j_int    = 'int' ;
+	j_string = 'String' ;
+	j_map    = 'java.util.Map<String, Object>' ;
+
+Abstract Syntax Tree
+
+	/** An integer arithmetic expression. */
+	expression =
+		/** An addition expression. */
+		{add} [left]:expression [right]:expression [value]:j_int [description]:j_string [data]:j_map? |
+		/** A subtraction expression. */
+		{sub} [left]:expression [right]:expression [value]:j_int [description]:j_string |
+		/** A multiplication expression. */
+		{mul} [left]:expression [right]:expression [value]:j_int [description]:j_string |
+		/** A division expression. */
+		{div} [left]:expression [right]:expression [value]:j_int [description]:j_string |
+		/** A remainder expression. */
+		{rem} [left]:expression [right]:expression [value]:j_int [description]:j_string |
+		/** An integer constant expression. */
+		{constant} integer_constant [value]:j_int [description]:j_string ;
+
+

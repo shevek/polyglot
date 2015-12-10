@@ -9,8 +9,13 @@ $production.javadocComment
 #else
 ## No default javadoc - (a) information leakage, (b) javadoc performance sucks.
 ## /** ${production} */
+/** The abstract superclass of all ${production.name} alternatives. */
 #end
 public abstract class ${production.javaTypeName} extends Node {
+
+    /** Default nullary constructor. */
+    public ${production.javaTypeName}() {
+    }
 
     @Override
     public abstract ${production.javaTypeName} clone();

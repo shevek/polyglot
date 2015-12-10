@@ -8,6 +8,7 @@ package org.anarres.polyglot.model;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -52,6 +53,12 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
     public List<AstAlternativeModel> getAlternatives() {
         return new ArrayList<>(alternatives.values());
     }
+
+/*
+    public Map<String, String> getAbstractElements() {
+        Map<String, String> out = new HashMap<>();
+    }
+*/
 
     @Override
     public Multimap<String, AnnotationModel> getAnnotations() {
