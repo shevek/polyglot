@@ -11,8 +11,10 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.PolyglotExecutor;
+import org.apache.velocity.VelocityContext;
 
 /**
  *
@@ -20,8 +22,17 @@ import org.anarres.polyglot.PolyglotExecutor;
  */
 public class HtmlOutputWriter extends AbstractOutputWriter {
 
+    private final HtmlHelper helper;
+
     public HtmlOutputWriter(File destinationDir, Set<? extends Option> options, Map<? extends String, ? extends File> templates, OutputData data) {
         super(OutputLanguage.html, destinationDir, options, templates, data);
+        this.helper = new HtmlHelper();
+    }
+
+    @Override
+    protected void initContext(@Nonnull VelocityContext context) {
+        super.initContext(context);
+        context.put("helper", helper);
     }
 
     @Override

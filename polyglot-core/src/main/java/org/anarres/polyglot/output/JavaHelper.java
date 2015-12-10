@@ -8,6 +8,7 @@ package org.anarres.polyglot.output;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
@@ -57,11 +58,14 @@ public class JavaHelper {
         }
     }
 
+    @Nonnull
     private final Set<? extends Option> options;
+    @Nonnull
     private final GrammarModel grammar;
+    @CheckForNull
     private final LRAutomaton automaton;
 
-    public JavaHelper(@Nonnull Set<? extends Option> options, @Nonnull GrammarModel grammar, @Nonnull LRAutomaton automaton) {
+    public JavaHelper(@Nonnull Set<? extends Option> options, @Nonnull GrammarModel grammar, @CheckForNull LRAutomaton automaton) {
         this.options = options;
         this.grammar = grammar;
         this.automaton = automaton;
@@ -74,7 +78,12 @@ public class JavaHelper {
      */
     @TemplateProperty
     public boolean isLarge() {
-        return grammar.cstProductions.size() > ALTERNATIVE_GROUP_SIZE || automaton.getStates().size() > ALTERNATIVE_GROUP_SIZE;
+        if (grammar.cstProductions.size() > ALTERNATIVE_GROUP_SIZE)
+            return true;
+        if (automaton != null)
+            if (automaton.getStates().size() > ALTERNATIVE_GROUP_SIZE)
+                return true;
+        return false;
     }
 
     @Nonnegative

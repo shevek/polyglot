@@ -7,6 +7,7 @@ package org.anarres.polyglot.analysis;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -180,6 +181,7 @@ public class ReferenceLinker implements Runnable {
     private static class Linkages<S extends ProductionSymbol> extends ArrayList<Linkage<S>> {
 
         private int legalCount;
+        @SuppressFBWarnings("SE_BAD_FIELD")
         private Linkage<S> legalLinkage = null;
 
         public Linkages() {
