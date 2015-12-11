@@ -51,6 +51,7 @@ public abstract class AbstractNamedModel extends AbstractModel {
     }
 
     /** The unqualified name of this object, in the source. */
+    @Nonnull
     public String getSourceName() {
         return getName();
     }

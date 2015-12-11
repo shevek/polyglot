@@ -223,6 +223,7 @@ public class ReferenceLinker implements Runnable {
         }
     }
 
+    @SuppressWarnings("unchecked")  // Casts of TokenModel or ExternalModel to S are unchecked, but correct in this instance.
     private <S extends ProductionSymbol> void linkElement(@Nonnull AbstractElementModel<S> element, Map<? extends String, ? extends S> productions, @Nonnull String productionDesc, @Nonnull String targetDesc, boolean externalsLegal) {
         String symbolName = element.getSymbolName();
 

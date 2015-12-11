@@ -46,7 +46,7 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
     @Nonnull
     protected static CstAlternativeModel newInitialProduction(@Nonnull CstProductionModel rootProduction) {
         CstProductionModel production = new CstProductionModel(Integer.MAX_VALUE, new TIdentifier("Start"));
-        CstAlternativeModel alternative = CstAlternativeModel.forName(Integer.MAX_VALUE, production, null);
+        CstAlternativeModel alternative = CstAlternativeModel.forName(Integer.MAX_VALUE, production, new TIdentifier("<Start>"));
         CstElementModel element = new CstElementModel(
                 new TIdentifier(rootProduction.getName()),
                 Specifier.PRODUCTION,

@@ -9,13 +9,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.analysis.DepthFirstAdapter;
 import org.anarres.polyglot.analysis.NFABuilderVisitor;
 import org.anarres.polyglot.node.AAnnotation;
+import org.anarres.polyglot.node.Node;
 import org.anarres.polyglot.node.PAnnotation;
-import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TJavadocComment;
 import org.anarres.polyglot.node.Token;
 import org.anarres.polyglot.output.TemplateProperty;
@@ -26,11 +28,54 @@ import org.anarres.polyglot.output.TemplateProperty;
  */
 public abstract class AbstractModel implements Model {
 
+    private static class TokenFinder extends DepthFirstAdapter {
+
+        private static class LocationComparator implements Comparator<Token> {
+
+            private static final LocationComparator INSTANCE = new LocationComparator();
+
+            @Override
+            public int compare(Token o1, Token o2) {
+                int cmp = Integer.compare(o1.getLine(), o2.getLine());
+                if (cmp != 0)
+                    return cmp;
+                return Integer.compare(o1.getColumn(), o2.getColumn());
+            }
+        }
+
+        private Token token;
+
+        @Override
+        public void defaultCase(Node node) {
+            if (node instanceof Token) {
+                Token t = (Token) node;
+                if (this.token == null)
+                    this.token = t;
+                else if (LocationComparator.INSTANCE.compare(t, this.token) < 0)
+                    this.token = t;
+            }
+        }
+
+        @CheckForNull
+        public static Token find(@CheckForNull Node node) {
+            if (node instanceof Token)
+                return (Token) node;
+            if (node == null)
+                return null;
+            TokenFinder finder = new TokenFinder();
+            node.apply(finder);
+            return finder.token;
+        }
+    }
+
     /** Computes a location token for an alternative which might not have its own name. */
     @Nonnull
-    protected static Token location(@Nonnull AbstractModel parent, @CheckForNull TIdentifier name) {
-        if (name != null)
-            return name;
+    protected static Token location(@Nonnull AbstractModel parent, @Nonnull Node... nodes) {
+        for (Node node : nodes) {
+            Token token = TokenFinder.find(node);
+            if (token != null)
+                return token;
+        }
         return parent.getLocation();
     }
 

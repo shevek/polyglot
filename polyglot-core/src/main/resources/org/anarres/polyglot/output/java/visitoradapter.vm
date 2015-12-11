@@ -18,6 +18,10 @@ public class VisitorAdapter<I, O, X extends Exception> implements Visitor<I, O, 
         return null;
     }
 
+    public O visitDefaultToken(@Nonnull Token node, I input) {
+        return visitDefault(node, input);
+    }
+
 #if ($grammar.astProductionRoot)
     @Override
     public O visitStart(Start node, I input) throws X {
@@ -28,7 +32,7 @@ public class VisitorAdapter<I, O, X extends Exception> implements Visitor<I, O, 
 #foreach ($token in $grammar.tokens)
     @Override
     public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X {
-        return visitDefault(node, input);
+        return visitDefaultToken(node, input);
     }
 
 #end
@@ -44,12 +48,12 @@ public class VisitorAdapter<I, O, X extends Exception> implements Visitor<I, O, 
 
     @Override
     public O visitEOF(EOF node, I input) throws X {
-        return visitDefault(node, input);
+        return visitDefaultToken(node, input);
     }
 
     @Override
     public O visitInvalidToken(InvalidToken node, I input) throws X {
-        return visitDefault(node, input);
+        return visitDefaultToken(node, input);
     }
 
     /** Equivalent to node.apply(this, input) with safety against nulls. */

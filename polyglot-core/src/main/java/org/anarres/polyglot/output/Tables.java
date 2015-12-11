@@ -129,7 +129,7 @@ public class Tables {
 
         @Nonnull
         private byte[] newLexerTable() throws IOException {
-            ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            ByteArrayOutputStream buf = new ByteArrayOutputStream(8192);
             try (DataOutputStream out = new DataOutputStream(buf)) {
                 out.writeInt(grammar.states.size());
                 for (StateModel lexerState : grammar.states.values()) {
@@ -156,7 +156,7 @@ public class Tables {
         // This takes an argument with a different nullability annotation than the field.
         @Nonnull
         private byte[] newParserTable(@Nonnull LRAutomaton automaton) throws IOException {
-            ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            ByteArrayOutputStream buf = new ByteArrayOutputStream(8192);
             try (DataOutputStream out = new DataOutputStream(buf)) {
                 out.writeInt(automaton.getStates().size()); // parserStateCount
 

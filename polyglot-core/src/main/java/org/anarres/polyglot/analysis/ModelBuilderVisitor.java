@@ -196,7 +196,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
             grammar.cstProductionRoot = cstProduction;
         Object prev = grammar.cstProductions.put(cstProduction.getName(), cstProduction);
         if (prev != null)
-            errors.addError(cstProduction.getLocation(), "Duplicate name in CST production '" + cstProduction.getName() + "'.");
+            errors.addError(cstProduction.getLocation(), "Duplicate CST production name '" + cstProduction.getName() + "'.");
 
         // If a node is untransformed, attach a simple default transform.
         if (node.getTransformSentinel() == null) {
@@ -222,8 +222,12 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
     public void caseACstAlternative(ACstAlternative node) {
         cstAlternative = CstAlternativeModel.forNode(grammar.cstAlternativeIndex++, cstProduction, node);
         Object prev = cstProduction.alternatives.put(cstAlternative.getName(), cstAlternative);
-        if (prev != null)
-            errors.addError(cstAlternative.getLocation(), "Duplicate name in CST alternative '" + cstAlternative.getName() + "'.");
+        if (prev != null) {
+            if (node.getName() == null) // NOTREACHED due to $0 naming.
+                errors.addError(cstAlternative.getLocation(), "Multiple anonymous CST alternatives in production '" + cstProduction.getName() + "'.");
+            else
+                errors.addError(cstAlternative.getLocation(), "Duplicate CST alternative name '" + cstAlternative.getName() + "'.");
+        }
 
         for (PElement element : node.getElements()) {
             element.apply(this);
@@ -310,7 +314,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         // LOG.info("AstProductionModel " + astProduction);
         Object prev = grammar.astProductions.put(astProduction.getName(), astProduction);
         if (prev != null)
-            errors.addError(astProduction.getLocation(), "Duplicate name in AST production '" + astProduction.getName() + "'");
+            errors.addError(astProduction.getLocation(), "Duplicate AST production name '" + astProduction.getName() + "'");
 
         for (PAstAlternative alternative : node.getAlternatives()) {
             alternative.apply(this);
@@ -323,8 +327,12 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
     public void caseAAstAlternative(AAstAlternative node) {
         astAlternative = AstAlternativeModel.forNode(astProduction, node);
         Object prev = astProduction.alternatives.put(astAlternative.getName(), astAlternative);
-        if (prev != null)
-            errors.addError(astAlternative.getLocation(), "Duplicate name in AST alternative '" + astAlternative.getName() + "'.");
+        if (prev != null) {
+            if (node.getName() == null)
+                errors.addError(astAlternative.getLocation(), "Multiple anonymous AST alternatives in production '" + astProduction.getName() + "'.");
+            else
+                errors.addError(astAlternative.getLocation(), "Duplicate AST alternative name '" + astAlternative.getName() + "'.");
+        }
 
         for (PElement element : node.getElements()) {
             element.apply(this);

@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AAstAlternative;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.node.Token;
 import org.anarres.polyglot.output.TemplateProperty;
 
 /**
@@ -25,7 +27,8 @@ public class AstAlternativeModel extends AbstractNamedJavaModel implements AstMo
 
     @Nonnull
     public static AstAlternativeModel forNode(@Nonnull AstProductionModel production, @Nonnull AAstAlternative node) {
-        AstAlternativeModel model = new AstAlternativeModel(production, node.getName(), annotations(node.getAnnotations()));
+        Token location = location(production, node.getName(), node.getJavadocComment(), Iterables.getFirst(node.getElements(), null));
+        AstAlternativeModel model = new AstAlternativeModel(production, location, node.getName(), annotations(node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }
@@ -39,9 +42,9 @@ public class AstAlternativeModel extends AbstractNamedJavaModel implements AstMo
     // Cached
     private final String javaTypeName;
 
-    public AstAlternativeModel(@Nonnull AstProductionModel production, @CheckForNull TIdentifier name, Multimap<String, AnnotationModel> annotations) {
+    public AstAlternativeModel(@Nonnull AstProductionModel production, @Nonnull Token location, @CheckForNull TIdentifier name, Multimap<String, AnnotationModel> annotations) {
         // TODO: This is a really bad choice for Location as it points to the production not the elements.
-        super(location(production, name), name(production, name));
+        super(location, name(production, name));
         this.production = production;
         this.alternativeName = name;
         this.annotations = annotations;

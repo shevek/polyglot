@@ -30,7 +30,9 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
 
     @Nonnull
     public static CstProductionModel forNode(@Nonnegative int index, @Nonnull ACstProduction node) {
-        return new CstProductionModel(index, node.getName());
+        CstProductionModel model = new CstProductionModel(index, node.getName());
+        model.setJavadocComment(node.getJavadocComment());
+        return model;
     }
 
     private final int index;
@@ -96,7 +98,7 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
         List<ACstAlternative> alternatives = new ArrayList<>();
         for (Map.Entry<String, CstAlternativeModel> e : this.alternatives.entrySet())
             alternatives.add(e.getValue().toNode());
-        return new ACstProduction(toNameToken(), new TTokArrow(), transform, alternatives);
+        return new ACstProduction(newJavadocCommentToken(), toNameToken(), new TTokArrow(), transform, alternatives);
     }
 
     @Override

@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -31,9 +32,10 @@ public abstract class PolyglotExecutor {
         }
 
         @Override
-        public void execute(Callable<?> r) throws ExecutionException {
+        public <V> Future<V> execute(Callable<V> r) throws ExecutionException {
             try {
-                r.call();
+                V value = r.call();
+                return Futures.immediateCheckedFuture(value);
             } catch (Exception e) {
                 throw new ExecutionException("Failed to execute " + r + ": " + e, e);
             }
@@ -65,8 +67,10 @@ public abstract class PolyglotExecutor {
         }
 
         @Override
-        public void execute(@Nonnull Callable<?> r) throws ExecutionException {
-            futures.add(executor.submit(r));
+        public <V> Future<V> execute(@Nonnull Callable<V> r) throws ExecutionException {
+            Future<V> out = executor.submit(r);
+            futures.add(out);
+            return out;
         }
 
         @Override
@@ -89,7 +93,8 @@ public abstract class PolyglotExecutor {
     @Nonnegative
     public abstract int getParallelism();
 
-    public abstract void execute(@Nonnull Callable<?> r) throws ExecutionException;
+    @Nonnull
+    public abstract <V> Future<V> execute(@Nonnull Callable<V> r) throws ExecutionException;
 
     public abstract void await() throws InterruptedException, ExecutionException;
 

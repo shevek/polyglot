@@ -7,6 +7,7 @@ package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.PExpression;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TTokArrow;
+import org.anarres.polyglot.node.Token;
 import org.anarres.polyglot.output.TemplateProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,15 +37,19 @@ public class CstAlternativeModel extends AbstractNamedModel implements Indexed, 
 
     @Nonnull
     public static CstAlternativeModel forNode(int index, CstProductionModel production, ACstAlternative node) {
+        Token location = location(production, node.getName(), node.getJavadocComment(), Iterables.getFirst(node.getElements(), null));
         TIdentifier name = node.getName();
         // if (name == null) name = new TIdentifier("$" + cstProduction.alternativeIndex++, cstProduction.getLocation());
-        return forName(index, production, name);
+        int alternativeIndex = production.alternativeIndex++;
+        CstAlternativeModel model = new CstAlternativeModel(index, production, location, name, alternativeIndex);
+        model.setJavadocComment(node.getJavadocComment());
+        return model;
     }
 
     @Nonnull
-    public static CstAlternativeModel forName(@Nonnegative int index, @Nonnull CstProductionModel production, @CheckForNull TIdentifier name) {
+    public static CstAlternativeModel forName(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull TIdentifier name) {
         int alternativeIndex = production.alternativeIndex++;
-        return new CstAlternativeModel(index, production, name, alternativeIndex);
+        return new CstAlternativeModel(index, production, name, name, alternativeIndex);
     }
 
     @Nonnull
@@ -66,9 +72,9 @@ public class CstAlternativeModel extends AbstractNamedModel implements Indexed, 
     public final List<CstTransformExpressionModel> transformExpressions = new ArrayList<>();
     public final LRAction.Reduce reduceActionCache = new LRAction.Reduce(this);
 
-    private CstAlternativeModel(@Nonnegative int index, @Nonnull CstProductionModel production, @CheckForNull TIdentifier name, @Nonnegative int alternativeIndex) {
+    private CstAlternativeModel(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull Token location, @CheckForNull TIdentifier name, @Nonnegative int alternativeIndex) {
         // TODO: This is a really bad choice for Location as it points to the production not the elements.
-        super(location(production, name), name(production, name, alternativeIndex));
+        super(location, name(production, name, alternativeIndex));
         this.index = index;
         this.production = Preconditions.checkNotNull(production, "CstProductionModel was null.");
         this.alternativeName = name;
@@ -173,7 +179,7 @@ public class CstAlternativeModel extends AbstractNamedModel implements Indexed, 
         List<PExpression> transform = new ArrayList<>();
         for (CstTransformExpressionModel e : getTransformExpressions())
             transform.add(e.toNode());
-        return new ACstAlternative(alternativeName, elements, new TTokArrow(), transform);
+        return new ACstAlternative(newJavadocCommentToken(), alternativeName, elements, new TTokArrow(), transform);
     }
 
     @Override
