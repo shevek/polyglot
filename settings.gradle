@@ -4,5 +4,5 @@ include 'polyglot-runtime',
 	'polyglot-cmd',
 	'polyglot-gradle',
 	'polyglot-ant',
-	'polyglot-maven',
-	'polyglot-tests'
+	'polyglot-maven'
+	// 'polyglot-tests'

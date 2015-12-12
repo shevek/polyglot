@@ -126,16 +126,3 @@ project(':polyglot-maven') {
 		testCompile 'org.apache.maven.shared:maven-plugin-testing-harness:1.1'
 	}
 }
-
-project(':polyglot-tests') {
-	dependencies {
-		compile project(':polyglot-runtime')
-	}
-
-	sourceSets.main.java.srcDir 'build/generated-sources/polyglot-java'
-	processResources {
-		from ('build/generated-sources/polyglot-java') {
-			include '**/*.dat'
-		}
-	}
-}
