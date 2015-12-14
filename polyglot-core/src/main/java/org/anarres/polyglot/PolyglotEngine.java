@@ -365,6 +365,7 @@ public class PolyglotEngine {
         LRConflict.Map conflicts = automaton.getConflicts();
         if (conflicts.isEmpty())
             return automaton;
+        // This has to be INFO or gradle -i doesn't show it.
         if (isOption(Option.VERBOSE))
             LOG.info("{}: SLR conflicts are\n{}", getName(), conflicts);
 
@@ -390,8 +391,9 @@ public class PolyglotEngine {
             LRConflict.Map conflicts = automaton.getConflicts();
             if (conflicts.isEmpty())
                 return automaton;
+            // This has to be INFO or gradle -i doesn't show it.
             if (isOption(Option.VERBOSE))
-                LOG.debug("{}: LR(1) conflicts are\n{}", getName(), conflicts);
+                LOG.info("{}: LR(1) conflicts are\n{}", getName(), conflicts);
 
             stopwatch = Stopwatch.createStarted();
             Inliner inliner = new Inliner(errors, grammar);
@@ -416,15 +418,19 @@ public class PolyglotEngine {
     @Nonnull
     protected void buildDiagnosis(@Nonnull GrammarModel grammar, @Nonnull LRConflict.Map conflicts) {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        LRDiagnoser diagnoser = new LRDiagnoser(grammar);
-        StringBuilder buf = new StringBuilder();
-        for (LRConflict conflict : conflicts.values()) {
-            LRDiagnosis diagnosis = diagnoser.diagnose(conflict);
-            diagnosis.toStringBuilder(buf);
-            // LOG.debug("{}: LR conflict diagnosis is\n{}", getName(), diagnosis);
+        if (isOption(Option.DIAGNOSIS)) {
+            LRDiagnoser diagnoser = new LRDiagnoser(grammar);
+            StringBuilder buf = new StringBuilder();
+            for (LRConflict conflict : conflicts.values()) {
+                LRDiagnosis diagnosis = diagnoser.diagnose(conflict);
+                diagnosis.toStringBuilder(buf);
+                // LOG.debug("{}: LR conflict diagnosis is\n{}", getName(), diagnosis);
+            }
+            errors.addError(null, "Failed to generate an LR automaton:\n" + buf);
+            LOG.info("{}: Diagnosing took {}", getName(), stopwatch);
+        } else {
+            LOG.info("{}: Not diagnosing (DIAGNOSIS disabled). Final conflicts are:\n{}", conflicts);
         }
-        errors.addError(null, "Failed to generate an LR automaton:\n" + buf);
-        LOG.info("{}: Diagnosing took {}", getName(), stopwatch);
     }
 
     @Nonnull

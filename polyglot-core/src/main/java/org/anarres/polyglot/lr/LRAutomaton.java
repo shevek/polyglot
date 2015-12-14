@@ -94,10 +94,12 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
     @Nonnull
     protected abstract Iterable<? extends TokenModel> getLookaheads(@Nonnull LRItem item);
 
+    // TODO: Make multithreaded.
     @Nonnull
     /* pp */ void buildMaps() {
-        LRActionMapBuilder actionBuilder = new LRActionMapBuilder();
-        Map<String, Integer> errorMap = new LinkedHashMap<>();
+        LRActionMapBuilder actionBuilder = new LRActionMapBuilder();    // NOTTHREADSAFE
+        // @GuardedBy("errorMap")
+        final Map<String, Integer> errorMap = new LinkedHashMap<>();
 
         for (LRState state : getStates()) {
 

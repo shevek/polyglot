@@ -80,7 +80,7 @@ public class TypeChecker implements Runnable {
                 if (expression.getArguments().size() != parameters.size()) {
                     errors.addError(expression.getLocation(), "AST alternative " + expression.astAlternative.getName()
                             + " has " + parameters.size() + " fields,"
-                            + " but constructed with only " + expression.getArguments().size() + " arguments.");
+                            + " but constructed with " + expression.getArguments().size() + " arguments.");
                     break ARGUMENTS;
                 }
 

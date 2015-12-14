@@ -27,4 +27,6 @@ public enum Option {
     VERBOSE,
     /** Allow token masking, that is, tokens which can never match. */
     ALLOWMASKEDTOKENS,
+    /** Perform advanced diagnosis (not yet reliable). */
+    DIAGNOSIS,
 }
