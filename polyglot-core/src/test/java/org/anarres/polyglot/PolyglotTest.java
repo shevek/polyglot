@@ -9,6 +9,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
 import com.google.testing.compile.JavaFileObjects;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,29 +29,16 @@ import static org.junit.Assert.*;
  *
  * @author shevek
  */
-public class PolyglotTest {
+public class PolyglotTest extends AbstractPolyglotTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(PolyglotTest.class);
 
     public static final String DIR = "build/resources/test/grammars/positive";
-    private final File destinationDir = new File("../polyglot-tests/build/generated-sources/polyglot-java");
-
-    @Before
-    public void setUp() {
-        destinationDir.mkdirs();
-    }
 
     private void parse(@Nonnull File file) throws Exception {
         // File dst = new File("build/test/velocity/" + file.getName());
         PolyglotEngine engine = new PolyglotEngine(file, destinationDir);
-
-        File debugDir = new File(SystemUtils.getUserDir(), "build/polyglot-debug");
-        PolyglotEngine.mkdirs(debugDir, "Debug directory");
-        engine.setDebugHandler(new DebugHandler.File(debugDir, file.getName()));
-
-        File htmlDir = new File(SystemUtils.getUserDir(), "build/polyglot-html/" + file.getName());
-        PolyglotEngine.mkdirs(htmlDir, "HTML directory");
-        engine.setOutputDir(OutputLanguage.html, htmlDir);
+        setUp(engine, file);
 
         // engine.setOption(Option.SLR, false);
         // engine.setOption(Option.PARALLEL, false);

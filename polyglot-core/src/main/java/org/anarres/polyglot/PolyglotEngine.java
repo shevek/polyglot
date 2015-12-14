@@ -76,7 +76,7 @@ public class PolyglotEngine {
     /**
      * Deletes just the children of a directory.
      *
-     * Deleting the cirectory itself confuses the hell out of NetBeans,
+     * Deleting the directory itself confuses the hell out of NetBeans,
      * as it can fail to see the recreation of a source root, whereas
      * it will tend to see the recreation of files within a source root.
      */
@@ -376,7 +376,7 @@ public class PolyglotEngine {
     protected LRAutomaton buildParserLr1(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar) throws IOException, InterruptedException, ExecutionException {
         LRAutomaton automaton = null;
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; true; i++) {
             Stopwatch stopwatch = Stopwatch.createStarted();
 
             // LOG.info("\n===\n=== Building LR(1) automaton, round {}\n===", i);
@@ -404,15 +404,18 @@ public class PolyglotEngine {
             if (!inliner_success)
                 return automaton;
 
+            if (i >= 5) {
+                errors.addError(null, getName() + ": Too many substitution attempts without success.");
+                return automaton;
+            }
+
             // Help the GC, so two automata don't exist at the same time.
             universe = null;
             conflicts = null;
             automaton = null;
         }
 
-        errors.addError(null, getName() + ": Too many substitution attempts without success.");
-
-        return automaton;
+        // NOTREACHED. Terminating the loop "normally" would return null here. :-(
     }
 
     @Nonnull
@@ -429,7 +432,7 @@ public class PolyglotEngine {
             errors.addError(null, "Failed to generate an LR automaton:\n" + buf);
             LOG.info("{}: Diagnosing took {}", getName(), stopwatch);
         } else {
-            LOG.info("{}: Not diagnosing (DIAGNOSIS disabled). Final conflicts are:\n{}", conflicts);
+            LOG.info("{}: Not diagnosing (DIAGNOSIS disabled). Final conflicts are:\n{}", getName(), conflicts);
         }
     }
 

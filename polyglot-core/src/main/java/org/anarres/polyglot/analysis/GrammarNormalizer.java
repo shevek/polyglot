@@ -50,7 +50,14 @@ public class GrammarNormalizer implements Runnable {
         private final List<CstTransformExpressionModel> transformExpressions = new ArrayList<>();
 
         public CstAlternativeSubstitute(@Nonnull CstAlternativeModel alternative) {
-            this.name.append(alternative.getSourceName());
+            // We can't use alternative.getSourceName() here because
+            // two elements may have the same source name.
+            // We need at least the alternativeIndex.
+            TIdentifier name = alternative.getAlternativeName();
+            if (name != null)
+                this.name.append(name.getText());
+            else
+                this.name.append('$').append(alternative.getAlternativeIndex());
             this.transformExpressions.addAll(alternative.getTransformExpressions());
         }
 
@@ -289,7 +296,8 @@ public class GrammarNormalizer implements Runnable {
         if (substitutes.size() != 1) {
             CstProductionModel cstProduction = cstAlternative.getProduction();
             // i.e. if we had at least one star or questionmark operator.
-            cstProduction.removeAlterative(cstAlternative);
+            if (!cstProduction.removeAlterative(cstAlternative))
+                throw new IllegalStateException("Failed to remove CST alternative " + cstAlternative.getName());
 
             for (CstAlternativeSubstitute substitute : substitutes) {
                 cstProduction.addAlternative(substitute.toCstAlternative(grammar, cstProduction, cstAlternative.getLocation()));

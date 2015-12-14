@@ -9,6 +9,8 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.CheckForSigned;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AAlternateMatcher;
 import org.anarres.polyglot.node.AAstAlternative;
@@ -52,6 +54,8 @@ import org.anarres.polyglot.node.PMatcher;
 import org.anarres.polyglot.node.PSpecifier;
 import org.anarres.polyglot.node.PUnOp;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.node.TJavadocComment;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -68,6 +72,18 @@ public class GrammarWriterVisitor extends DepthFirstAdapter {
     @Override
     public void caseTIdentifier(TIdentifier node) {
         out.append(node.getText());
+    }
+
+    private void caseAJavadocComment(@CheckForNull TJavadocComment javadocComment, @CheckForSigned int indent) {
+        if (javadocComment == null)
+            return;
+        if (indent > 0)
+            out.append(StringUtils.repeat("\t", indent));
+        out.append(javadocComment.getText());
+        if (indent >= 0)
+            out.append('\n');
+        else
+            out.append(' ');
     }
 
     private void caseAList(List<? extends Node> nodes, String sep) {
@@ -135,7 +151,6 @@ public class GrammarWriterVisitor extends DepthFirstAdapter {
         out.append(op);
         right.apply(this);
         out.append("]");
-
     }
 
     @Override
@@ -249,6 +264,7 @@ public class GrammarWriterVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseACstProduction(ACstProduction node) {
+        caseAJavadocComment(node.getJavadocComment(), 1);
         out.append("\t").append(node.getName().getText());
         if (node.getTransformSentinel() != null) {
             out.append(" { -> ");
@@ -262,6 +278,7 @@ public class GrammarWriterVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseACstAlternative(ACstAlternative node) {
+        caseAJavadocComment(node.getJavadocComment(), 2);
         out.append("\t\t");
         TIdentifier name = node.getName();
         if (name != null) {
@@ -324,6 +341,7 @@ public class GrammarWriterVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseAAstProduction(AAstProduction node) {
+        caseAJavadocComment(node.getJavadocComment(), 1);
         out.append("\t").append(node.getName().getText()).append(" =\n");
         caseAList(node.getAlternatives(), " |\n");
         out.append(" ;\n");
@@ -331,6 +349,7 @@ public class GrammarWriterVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseAAstAlternative(AAstAlternative node) {
+        caseAJavadocComment(node.getJavadocComment(), 2);
         out.append("\t\t");
         TIdentifier name = node.getName();
         if (name != null) {
@@ -341,6 +360,7 @@ public class GrammarWriterVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseAElement(AElement node) {
+        caseAJavadocComment(node.getJavadocComment(), -1);
         TIdentifier name = node.getName();
         if (name != null)
             out.append("[").append(name.getText()).append("]:");

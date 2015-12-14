@@ -81,11 +81,17 @@ public class CstAlternativeModel extends AbstractNamedModel implements Indexed, 
         this.alternativeIndex = alternativeIndex;
     }
 
-    /** CstAlternativeModel uses index for reduction rules in the parser. */
+    /**
+     * The global index of this alternative in the grammar.
+     * CstAlternativeModel uses index for reduction rules in the parser.
+     *
+     * @return The global index of this alternative in the grammar.
+     */
     @Override
     public int getIndex() {
         return index;
     }
+
 
     /*
      @Override
@@ -102,6 +108,15 @@ public class CstAlternativeModel extends AbstractNamedModel implements Indexed, 
         return production;
     }
 
+    /**
+     * The index of this alternative in the production.
+     *
+     * @return The index of this alternative in the production.
+     */
+    public int getAlternativeIndex() {
+        return alternativeIndex;
+    }
+
     @CheckForNull
     public TIdentifier getAlternativeName() {
         return alternativeName;
@@ -112,6 +127,7 @@ public class CstAlternativeModel extends AbstractNamedModel implements Indexed, 
         if (alternativeName != null)
             return alternativeName.getText();
         return getProduction().getSourceName();   // Must be unqualified.
+        // return "$" + alternativeIndex;
     }
 
     @Nonnull

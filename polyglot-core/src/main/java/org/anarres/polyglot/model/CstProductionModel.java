@@ -6,9 +6,9 @@
 package org.anarres.polyglot.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.lr.Indexed;
@@ -38,7 +38,7 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
     private final int index;
     /** @see CstAlternativeModel#transformExpressions */
     public final List<CstTransformPrototypeModel> transformPrototypes = new ArrayList<>();
-    public final Map<String, CstAlternativeModel> alternatives = new TreeMap<>();
+    public final Map<String, CstAlternativeModel> alternatives = new LinkedHashMap<>();
     /* pp */ int alternativeIndex = 0;
 
     public CstProductionModel(@Nonnegative int index, @Nonnull TIdentifier name) {
@@ -78,7 +78,9 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
     }
 
     public void addAlternative(@Nonnull CstAlternativeModel alternative) {
-        alternatives.put(alternative.getName(), alternative);
+        Object prev = alternatives.put(alternative.getName(), alternative);
+        if (prev != null)
+            throw new IllegalStateException("Clobbered CST alternative " + prev);
     }
 
     public boolean removeAlterative(@Nonnull CstAlternativeModel alternative) {

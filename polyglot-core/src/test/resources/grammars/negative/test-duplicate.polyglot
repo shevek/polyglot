@@ -1,0 +1,22 @@
+Package org.anarres.polyglot.test.duplicate ;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+
+Productions
+
+	program =
+		tok_a tok_c?
+			{ -> New program.a() } |
+		tok_a tok_c?
+			{ -> New program.b() } ;
+
+Abstract Syntax Tree
+
+	program =
+		{a} |
+		{b} ;
+

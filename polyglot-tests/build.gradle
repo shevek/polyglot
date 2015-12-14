@@ -1,0 +1,10 @@
+dependencies {
+	compile project(':polyglot-runtime')
+}
+
+sourceSets.main.java.srcDir 'build/generated-sources/polyglot-java'
+processResources {
+	from ('build/generated-sources/polyglot-java') {
+		include '**/*.dat'
+	}
+}
