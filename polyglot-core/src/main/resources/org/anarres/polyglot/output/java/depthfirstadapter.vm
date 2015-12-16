@@ -6,6 +6,13 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
 
+/**
+ * An AnalysisAdapter which walks the tree depth first, in a left-to-right manner.
+ *
+ * You may prefer to use {@link DepthFirstVisitor} for new code,
+ * as it has the ability to pass and return state on the stack, rather
+ * than using a separate state store.
+ */
 public class DepthFirstAdapter extends AnalysisAdapter {
 
     public void defaultIn(@Nonnull Node node) {

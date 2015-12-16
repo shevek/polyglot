@@ -8,6 +8,13 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
 
+/**
+ * A default implementation of the {@link Analysis} interface.
+ *
+ * You may prefer to use {@link VisitorAdapter} for new code,
+ * as it has the ability to pass and return state on the stack, rather
+ * than using a separate state store.
+ */
 public class AnalysisAdapter implements Analysis {
 
     @CheckForNull

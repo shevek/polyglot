@@ -7,6 +7,9 @@ import ${package}.analysis.Visitor;
 /**
  * The target of the basic visitor interface.
  *
+ * All {@link Node Nodes} implement both Switchable and {@link Visitable}.
+ * You may prefer to use the Visitable interface for new code.
+ *
  * @see Switch
  * @see Visitor
  */

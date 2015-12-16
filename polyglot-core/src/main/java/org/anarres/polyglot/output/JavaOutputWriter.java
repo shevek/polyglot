@@ -93,6 +93,7 @@ public class JavaOutputWriter extends AbstractOutputWriter {
 
         process(executor, "visitable.vm", "node/Visitable.java");
         process(executor, "visitor.vm", "analysis/Visitor.java");
+        process(executor, "abstractvisitoradapter.vm", "analysis/AbstractVisitorAdapter.java");
         process(executor, "visitoradapter.vm", "analysis/VisitorAdapter.java");
 
         process(executor, "analysis.vm", "analysis/Analysis.java");

@@ -6,6 +6,13 @@ import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.Node;
 import ${grammar.package.packageName}.node.Switch;
 
+/**
+ * An analysis which stores state per-node.
+ *
+ * You may prefer to use the {@link Visitor} interface for new code,
+ * as it has the ability to pass and return state on the stack, rather
+ * than using a separate state store.
+ */
 public interface Analysis extends Switch {
 
     public Object getIn(@Nonnull Node node);

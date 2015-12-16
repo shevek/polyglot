@@ -6,6 +6,10 @@ import ${grammar.package.packageName}.node.*;
 
 /**
  * An advanced visitor interface.
+ *
+ * This interface has a method per token and alternative in the grammar.
+ * @see AbstractVisitorAdapter
+ * @see VisitorAdapter
  */
 public interface Visitor<I, O, X extends Exception> {
 #foreach ($token in $grammar.tokens)

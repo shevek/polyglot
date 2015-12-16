@@ -146,8 +146,7 @@ public class ImmutableIndexedSet<IndexedItem extends Indexed> extends AbstractIn
             return false;
         if (!getClass().equals(o.getClass()))
             return false;
-        @SuppressWarnings("unchecked")
-        ImmutableIndexedSet<IndexedItem> s = (ImmutableIndexedSet<IndexedItem>) o;
+        ImmutableIndexedSet<?> s = (ImmutableIndexedSet<?>) o;
         return universe == s.universe
                 && hashCode == s.hashCode
                 && Arrays.equals(indices, s.indices);

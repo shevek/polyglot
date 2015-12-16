@@ -5,6 +5,8 @@ import javax.annotation.Nonnull;
 
 /**
  * A basic visitor interface.
+ *
+ * You may prefer to use the {@link Visitor} interface for new code.
  */
 public interface Switch {
 #foreach ($token in $grammar.tokens)

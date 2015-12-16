@@ -12,30 +12,14 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
 
-public class VisitorAdapter<I, O, X extends Exception> implements Visitor<I, O, X> {
+/**
+ * A default implementation of {@link Visitor} which returns null for all nodes.
+ *
+ * @see Visitor
+ * @see AbstractVisitorAdapter
+ */
+public class VisitorAdapter<I, O, X extends Exception> extends AbstractVisitorAdapter<I, O, X> {
 
-    public O visitDefault(@Nonnull Node node, I input) {
-        return null;
-    }
-
-    public O visitDefaultToken(@Nonnull Token node, I input) {
-        return visitDefault(node, input);
-    }
-
-#if ($grammar.astProductionRoot)
-    @Override
-    public O visitStart(Start node, I input) throws X {
-        return visitDefault(node, input);
-    }
-#end
-
-#foreach ($token in $grammar.tokens)
-    @Override
-    public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X {
-        return visitDefaultToken(node, input);
-    }
-
-#end
 #foreach ($production in $grammar.astProductions)
 #foreach ($alternative in $production.alternatives)
     @Override
@@ -45,49 +29,4 @@ public class VisitorAdapter<I, O, X extends Exception> implements Visitor<I, O, 
 
 #end
 #end
-
-    @Override
-    public O visitEOF(EOF node, I input) throws X {
-        return visitDefaultToken(node, input);
-    }
-
-    @Override
-    public O visitInvalidToken(InvalidToken node, I input) throws X {
-        return visitDefaultToken(node, input);
-    }
-
-    /** Equivalent to node.apply(this, input) with safety against nulls. */
-    @CheckForNull
-    public O applyTo(@CheckForNull Node node, I input) throws X {
-        if (node == null)
-            return null;
-        return node.apply(this, input);
-    }
-
-    /** Equivalent to for (node in nodes) node.apply(this) with safety against nulls. */
-    @Nonnull
-    public List<? extends O> applyTo(@CheckForNull Collection<? extends Node> nodes, I input) throws X {
-        if (nodes == null)
-            return Collections.<O>emptyList();
-        if (nodes.isEmpty())
-            return Collections.<O>emptyList();
-        List<O> out = new ArrayList<O>();
-        for (Node node : nodes)
-            out.add(applyTo(node, input));
-        return out;
-    }
-
-    /** Equivalent to for (node in nodes) node.apply(this) with safety against nulls. */
-    @Nonnull
-    public List<? extends O> applyTo(@CheckForNull Iterable<? extends Node> nodes, I input) throws X {
-        if (nodes == null)
-            return Collections.<O>emptyList();
-        List<O> out = new ArrayList<O>();
-        for (Node node : nodes)
-            out.add(applyTo(node, input));
-        if (out.isEmpty())
-            return Collections.<O>emptyList();
-        return out;
-    }
-
 }

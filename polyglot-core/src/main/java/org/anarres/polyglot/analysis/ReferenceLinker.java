@@ -91,7 +91,9 @@ public class ReferenceLinker implements Runnable {
                         break ELEMENT;
                     }
                 }
-                errors.addError(expression.getLocation(), "No such element '" + elementName + "' in transform of alternative '" + cstAlternative.getName() + "'; existing are " + Joiner.on(", ").join(cstAlternative.getElements()));
+                errors.addError(expression.getLocation(), "In transform of alternative '" + cstAlternative.getName() + "',"
+                        + " reference '" + elementName + "' does not match any production element"
+                        + "; element names are " + Joiner.on(", ").join(cstAlternative.getElements()));
                 return null;
             }
 
