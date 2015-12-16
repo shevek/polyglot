@@ -41,6 +41,16 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
 
     private static final Logger LOG = LoggerFactory.getLogger(TokenModel.class);
 
+    public static class Comparator implements java.util.Comparator<TokenModel> {
+
+        public static final Comparator INSTANCE = new Comparator();
+
+        @Override
+        public int compare(TokenModel o1, TokenModel o2) {
+            return Integer.compare(o1.getIndex(), o2.getIndex());
+        }
+    }
+
     // public static class Comparator implements java.util.Comparator<TokenModel> {
     // public static final Comparator INSTANCE = new Comparator();
     // @Override public int compare(TokenModel o1, TokenModel o2) { return Integer.compare(o1.getIndex(), o2.getIndex()); }

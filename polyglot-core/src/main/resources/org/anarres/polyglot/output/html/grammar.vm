@@ -14,10 +14,7 @@
 #foreach ($token in $grammar.tokens)
     <!-- $esc.html($token) -->
 
-    <a name="T-${token.name}"></a>
-    <a name="CS-${token.name}"></a>
-    <a name="AS-${token.name}"></a>
-    <h2>${token}</h2>
+    <h2 id="$helper.a($token)">${token}</h2>
 
 ## Matcher: ${token.matcher}
 ## Transitions: ${token.transitions}
@@ -29,24 +26,21 @@
 #foreach ($production in $grammar.cstProductions)
     <!-- $esc.html($production) -->
 
-    <a name="CP-${production.name}"></a>
-    <a name="CS-${production.name}"></a>
-    <h2>${production.name} { -&gt;
+    <h2 id="$helper.a($production)">${production.name} { -&gt;
 #foreach ($transformPrototype in $production.transformPrototypes)
-        <a href="#J-${transformPrototype.javaTypeName}">${transformPrototype}</a>
+        <a href="#$helper.a($transformPrototype.symbol)">${transformPrototype}</a>
 #end##transformPrototype
     }</h2>
 
 #foreach ($alternative in $production.alternatives)
     <!-- $esc.html($alternative) -->
 
-    <a name="CA-${alternative.name}"></a>
-    <h3>${alternative.name}</h3>
+    <h3 id="$helper.a($alternative)">${alternative.name}</h3>
 
 	<div class="well">
     =
 #foreach ($element in $alternative.elements)
-        <a href="#CS-${element.symbolName}">${element}</a>
+        <a href="#$helper.a($element.symbol)">${element}</a>
 #end##element
 
 <br />
@@ -66,21 +60,16 @@
 #foreach ($production in $grammar.astProductions)
     <!-- $esc.html($production) -->
 
-    <a name="AP-${production.name}"></a>
-    <a name="AS-${production.name}"></a>
-    <a name="J-${production.javaTypeName}"></a>
-    <h2>${production.name}</h2>
+    <h2 id="$helper.a($production)">${production.name}</h2>
 #foreach ($alternative in $production.alternatives)
     <!-- $esc.html($alternative) -->
 
-    <a name="AA-${alternative.name}"></a>
-    <a name="J-${alternative.javaTypeName}"></a>
-    <h3>${alternative.name}</h3>
+    <h3 id="$helper.a($alternative)">${alternative.name}</h3>
 
 	<div class="well">
     =
 #foreach ($element in $alternative.elements)
-        <a href="#AS-${element.symbolName}">${element}</a>
+        <a href="#$helper.a($element.symbol)">${element}</a>
 #end##element
         ;
 	</div>
