@@ -217,7 +217,7 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
          */
 
         // LOG.debug("Building internal maps.");
-        automaton.buildMaps();
+        automaton.buildMaps(executor);
         return automaton;
     }
 

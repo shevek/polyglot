@@ -21,6 +21,7 @@ import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizLabel;
 import org.anarres.graphviz.builder.GraphVizScope;
 import org.anarres.graphviz.builder.GraphVizable;
+import org.anarres.polyglot.PolyglotExecutor;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstProductionSymbol;
 import org.anarres.polyglot.model.TokenModel;
@@ -96,8 +97,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
 
     // TODO: Make multithreaded.
     @Nonnull
-    /* pp */ void buildMaps() {
-        LRActionMapBuilder actionBuilder = new LRActionMapBuilder();    // NOTTHREADSAFE
+    /* pp */ void buildMaps(@Nonnull PolyglotExecutor executor) {
         // @GuardedBy("errorMap")
         final Map<String, Integer> errorMap = new LinkedHashMap<>();
 
@@ -106,31 +106,30 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
             ACTION:
             {
                 // MultimapBuilder.hashKeys().arrayListValues(1);
-                actionBuilder.clear();
+                LRMapBuilder mapBuilder = new LRMapBuilder();    // NOTTHREADSAFE
                 for (LRItem item : state.getItems()) {
                     // LOG.info("Building action for " + getName() + " / " + item);
                     if (item.getIndex() == 1) { // [S' -> S, $] is always item 1.
-                        actionBuilder.addAction(item, TokenModel.EOF.INSTANCE, new LRAction.Accept());
+                        mapBuilder.addAction(item, TokenModel.EOF.INSTANCE, new LRAction.Accept());
                     } else {
                         CstProductionSymbol symbol = item.getSymbol();
                         if (symbol == null) {
                             // Reduce on lookahead (LR1) or follow (LR0)
                             LRAction.Reduce reduceAction = item.getProductionAlternative().reduceActionCache;
                             for (TokenModel token : getLookaheads(item))
-                                actionBuilder.addAction(item, token, reduceAction);
+                                mapBuilder.addAction(item, token, reduceAction);
                             // transitionMap.get(item.getProductionAlternative().getProduction());
                         } else if (symbol.isTerminal()) {
                             // Shift.
                             LRState target = state.getTransitionMap().get(symbol);
-                            actionBuilder.addAction(item, (TokenModel) symbol, target.shiftActionCache);
+                            mapBuilder.addAction(item, (TokenModel) symbol, target.shiftActionCache);
                         }
                     }
                 }
-                Collection<? extends LRConflict> stateConflicts = actionBuilder.getConflicts(state);
-                state.actionMap = actionBuilder.toMap();
+                Collection<? extends LRConflict> stateConflicts = mapBuilder.getConflicts(state);
+                state.actionMap = mapBuilder.toMap();
                 state.conflicts = stateConflicts;
                 conflicts.addConflicts(stateConflicts);
-                actionBuilder.clear();
             }
 
             GOTO:
@@ -151,10 +150,13 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
                 List<TokenModel> tokens = new ArrayList<>(state.getActionMap().keySet());
                 Collections.sort(tokens, TokenModel.Comparator.INSTANCE);
                 String error = "Expected " + tokens;
-                Integer errorIndex = errorMap.get(error);
-                if (errorIndex == null) {
-                    errorIndex = errorMap.size();
-                    errorMap.put(error, errorIndex);
+                Integer errorIndex;
+                synchronized (errorMap) {
+                    errorIndex = errorMap.get(error);
+                    if (errorIndex == null) {
+                        errorIndex = errorMap.size();
+                        errorMap.put(error, errorIndex);
+                    }
                 }
                 state.errorIndex = errorIndex;
             }

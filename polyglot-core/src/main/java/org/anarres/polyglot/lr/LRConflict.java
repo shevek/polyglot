@@ -23,15 +23,21 @@ public class LRConflict {
     /** Ignore the key type in this Map. */
     public static class Map extends HashMap<IntSet, LRConflict> {
 
+        private static final Object lock = new Object();
+
+        // @ThreadSafe
         public void addConflict(@Nonnull LRConflict conflict) {
             IntSet key = ImmutableIndexedSet.toIntSet(conflict.getItems().values());
-            LRConflict prev = get(key);
-            if (prev != null)
-                if (prev.getState().getStack().size() <= conflict.getState().getStack().size())
-                    return;
-            put(key, conflict);
+            synchronized (lock) {
+                LRConflict prev = get(key);
+                if (prev != null)
+                    if (prev.getState().getStack().size() <= conflict.getState().getStack().size())
+                        return;
+                put(key, conflict);
+            }
         }
 
+        // @ThreadSafe
         public void addConflicts(@Nonnull Collection<? extends LRConflict> conflicts) {
             for (LRConflict conflict : conflicts)
                 addConflict(conflict);
