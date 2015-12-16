@@ -5,15 +5,17 @@
  */
 package org.anarres.polyglot.lr;
 
-import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.UnmodifiableIterator;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntIterator;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.model.TokenModel;
 
@@ -24,12 +26,11 @@ import org.anarres.polyglot.model.TokenModel;
 public class TokenMap<V> extends AbstractMap<TokenModel, V> {
 
     private final TokenUniverse universe;
-    private final List<V> values = new ArrayList<>();
+    // private final List<V> values = new ArrayList<>();
+    private final Int2ObjectOpenHashMap<V> values = new Int2ObjectOpenHashMap<>();
 
     public TokenMap(@Nonnull TokenUniverse universe) {
         this.universe = universe;
-        for (int i = 0; i < universe.size(); i++)
-            values.add(null);
     }
 
     @Override
@@ -38,15 +39,13 @@ public class TokenMap<V> extends AbstractMap<TokenModel, V> {
             return null;
         TokenModel key = (TokenModel) _key;
         int index = key.getIndex();
-        return /* values.size() <= index ? null : */ values.get(index);
+        return values.get(index);
     }
 
     @Override
     public V put(TokenModel key, V value) {
         int index = key.getIndex();
-        V prev = values.get(index);
-        values.set(index, value);
-        return prev;
+        return values.put(index, value);
     }
 
     @Override
@@ -56,31 +55,26 @@ public class TokenMap<V> extends AbstractMap<TokenModel, V> {
         TokenModel key = (TokenModel) _key;
         int index = key.getIndex();
         // for (int i = values.size() - 1; i < index; i++) values.add(null);
-        V prev = values.get(index);
-        values.set(index, null);
-        return prev;
+        return values.remove(index);
     }
 
     @Override
-    public boolean containsKey(Object key) {
-        return get(key) != null;
+    public boolean containsKey(Object _key) {
+        if (!(_key instanceof TokenModel))
+            return false;
+        TokenModel key = (TokenModel) _key;
+        int index = key.getIndex();
+        return values.containsKey(key);
     }
 
     @Override
     public int size() {
-        int size = 0;
-        for (int i = 0; i < values.size(); i++)
-            if (values.get(i) != null)
-                size++;
-        return size;
+        return values.size();
     }
 
     @Override
     public boolean isEmpty() {
-        for (int i = 0; i < values.size(); i++)
-            if (values.get(i) != null)
-                return false;
-        return true;
+        return values.isEmpty();
     }
 
     @Override
@@ -99,29 +93,37 @@ public class TokenMap<V> extends AbstractMap<TokenModel, V> {
         public boolean isEmpty() {
             return TokenMap.this.isEmpty();
         }
-    }
-
-    private abstract class BaseIterator<T> extends AbstractIterator<T> {
-
-        private int i = -1;
 
         @Override
-        protected T computeNext() {
-            while (++i < values.size()) {
-                V value = values.get(i);
-                if (value != null)
-                    return computeNext(i, value);
-            }
-            return endOfData();
+        public void clear() {
+            TokenMap.this.clear();
+        }
+    }
+
+    private static class KeyIterator extends UnmodifiableIterator<TokenModel> {
+
+        private final TokenUniverse universe;
+        private final IntIterator it;
+
+        public KeyIterator(TokenUniverse universe, IntIterator it) {
+            this.universe = universe;
+            this.it = it;
         }
 
-        protected abstract T computeNext(@Nonnegative int index, @Nonnull V value);
+        @Override
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        @Override
+        public TokenModel next() {
+            return universe.getItemByIndex(it.nextInt());
+        }
     }
 
     @Override
     public Set<TokenModel> keySet() {
         return new BaseSet<TokenModel>() {
-
             @Override
             public boolean contains(Object o) {
                 return containsKey(o);
@@ -129,29 +131,52 @@ public class TokenMap<V> extends AbstractMap<TokenModel, V> {
 
             @Override
             public Iterator<TokenModel> iterator() {
-                return new BaseIterator<TokenModel>() {
-                    @Override
-                    protected TokenModel computeNext(int index, V value) {
-                        return universe.getItemByIndex(index);
-                    }
-                };
+                return new KeyIterator(universe, values.keySet().iterator());
             }
         };
+    }
+
+    @Override
+    public Collection<V> values() {
+        return values.values();
+    }
+
+    private static class EntryIterator<V> extends UnmodifiableIterator<Entry<TokenModel, V>> {
+
+        private final TokenUniverse universe;
+        private final ObjectIterator<Int2ObjectMap.Entry<V>> it;
+        // = values.int2ObjectEntrySet().fastIterator();
+
+        public EntryIterator(TokenUniverse universe, ObjectIterator<Int2ObjectMap.Entry<V>> it) {
+            this.universe = universe;
+            this.it = it;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        @Override
+        public Entry<TokenModel, V> next() {
+            Int2ObjectMap.Entry<V> e = it.next();
+            TokenModel key = universe.getItemByIndex(e.getIntKey());
+            return new SimpleImmutableEntry<>(key, e.getValue());
+        }
     }
 
     @Override
     public Set<Entry<TokenModel, V>> entrySet() {
         return new BaseSet<Map.Entry<TokenModel, V>>() {
             @Override
-            public Iterator<Entry<TokenModel, V>> iterator() {
-                return new BaseIterator<Entry<TokenModel, V>>() {
-                    @Override
-                    protected Entry<TokenModel, V> computeNext(int index, V value) {
-                        return new SimpleImmutableEntry<>(universe.getItemByIndex(index), value);
-                    }
-                };
+            public boolean contains(Object o) {
+                return values.containsValue(o);
             }
 
+            @Override
+            public Iterator<Entry<TokenModel, V>> iterator() {
+                return new EntryIterator<>(universe, values.int2ObjectEntrySet().fastIterator());
+            }
         };
     }
 }
