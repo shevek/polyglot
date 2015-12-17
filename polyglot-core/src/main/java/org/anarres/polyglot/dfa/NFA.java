@@ -42,6 +42,7 @@ import org.anarres.polyglot.model.TokenModel;
  */
 public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
 
+    @Nonnull
     public final State[] states;
 
     private NFA(@Nonnegative int size) {

@@ -69,8 +69,10 @@ public class JavaOutputWriter extends AbstractOutputWriter {
 
         // Lexer
         process(executor, "ilexer.vm", "lexer/ILexer.java");
-        process(executor, "lexer.vm", "lexer/Lexer.java");
         process(executor, "lexerexception.vm", "lexer/LexerException.java");
+        if (!grammar.tokens.isEmpty()) {
+            process(executor, "lexer.vm", "lexer/Lexer.java");
+        }
 
         // Nodes and tokens
         process(executor, "node.vm", "node/Node.java");

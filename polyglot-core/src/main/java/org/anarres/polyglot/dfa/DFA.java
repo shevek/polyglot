@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.dfa;
 
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -91,7 +92,7 @@ public class DFA implements GraphVizable, GraphVizScope {
             this.errors = errors;
             this.grammar = grammar;
             this.mask = mask;
-            this.nfa = nfa;
+            this.nfa = Preconditions.checkNotNull(nfa, "NFA was null.");
         }
 
         // This is a parallel array and should go into the NFA?

@@ -103,6 +103,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // if (!file.getName().equals("test-expression-lr1.polyglot"))
             // if (!file.getName().equals("test-transform.polyglot"))
             // if (!file.getName().equals("test-no-parser.polyglot"))
+            // if (!file.getName().equals("test-no-lexer.polyglot"))
             // if (!file.getName().equals("test-token-constant.polyglot"))
             // if (!file.getName().equals("test-documentation.polyglot"))
             // if (!file.getName().equals("test-notransform.polyglot"))

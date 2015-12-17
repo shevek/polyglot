@@ -296,6 +296,8 @@ public class PolyglotEngine {
         DFA.TokenMask mask = new DFA.TokenMask(grammar);
 
         for (StateModel state : grammar.states.values()) {
+            if (state.nfa == null)
+                continue;
             dump(debugHandler.forTarget(STATE_NFA, "." + state.getName() + ".nfa.dot"), state.nfa);
 
             DFA.Builder builder = new DFA.Builder(errors, grammar, mask, state.nfa);

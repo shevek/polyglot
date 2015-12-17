@@ -1,7 +1,8 @@
 /* ${header} */
-package ${grammar.package.packageName}.node;
+package ${package}.node;
 
 import javax.annotation.Nonnull;
+import ${package}.analysis.Visitor;
 
 /**
  * A basic visitor interface.

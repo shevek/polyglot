@@ -1,0 +1,11 @@
+Package org.anarres.polyglot.test.nolexer;
+
+Externals
+
+	e_string = 'java.lang.String' ;
+
+Abstract Syntax Tree
+
+	program = e_string ;
+
+

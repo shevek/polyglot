@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Tables {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Tables.class);
     public static final int MAX_INLINE_TABLE_LENGTH = 64000;
 
     @CheckForNull
@@ -113,6 +114,7 @@ public class Tables {
 
     public static class Builder {
 
+        private static final Logger LOG = LoggerFactory.getLogger(Builder.class);
         @Nonnull
         private final GrammarModel grammar;
         @CheckForNull
@@ -125,15 +127,18 @@ public class Tables {
             this.inline = inline;
         }
 
-        private static final Logger LOG = LoggerFactory.getLogger(Builder.class);
-
         @Nonnull
         private byte[] newLexerTable() throws IOException {
             ByteArrayOutputStream buf = new ByteArrayOutputStream(8192);
             try (DataOutputStream out = new DataOutputStream(buf)) {
                 out.writeInt(grammar.states.size());
-                for (StateModel lexerState : grammar.states.values()) {
+                for (StateModel lexerState : grammar.getStates()) {
                     DFA dfa = lexerState.dfa;
+                    if (dfa == null) {
+                        out.writeInt(0);
+                        continue;
+                    }
+
                     out.writeInt(dfa.getStates().size());
 
                     for (DFA.State dfaState : dfa.getStates()) {
@@ -206,13 +211,17 @@ public class Tables {
 
         @Nonnull
         public Tables build() throws IOException {
-            byte[] lexerData = newLexerTable();
-            String lexerDataText = newStringTable(lexerData);
-            // LOG.debug("Lexer table is " + lexerDataText.length() + " characters from " + lexerData.length + " bytes.");
-            if (lexerDataText.length() > MAX_INLINE_TABLE_LENGTH)
-                lexerDataText = null;
-            if (!inline)
-                lexerDataText = null;
+            byte[] lexerData = null;
+            String lexerDataText = null;
+            if (!grammar.tokens.isEmpty()) {
+                lexerData = newLexerTable();
+                lexerDataText = newStringTable(lexerData);
+                // LOG.debug("Lexer table is " + lexerDataText.length() + " characters from " + lexerData.length + " bytes.");
+                if (lexerDataText.length() > MAX_INLINE_TABLE_LENGTH)
+                    lexerDataText = null;
+                if (!inline)
+                    lexerDataText = null;
+            }
 
             byte[] parserData = null;
             String parserDataText = null;

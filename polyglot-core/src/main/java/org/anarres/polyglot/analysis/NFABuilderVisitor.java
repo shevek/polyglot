@@ -231,7 +231,7 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
                 }
             }
 
-            // TODO: Check stateNfa is non-null.
+            // If we have no tokens in the state, then the state NFA is still null.
             state.nfa = stateNfa;
 
             // LOG.info(state.getName() + " -> " + stateNfa);

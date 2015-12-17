@@ -221,9 +221,11 @@ public class Lexer implements ILexer {
 #foreach ($state in $grammar.states)
         // Transitions for ${state.name}, indexed by DFA state. Value is [start, end, dfa-state].
         {
+#if ($state.dfa)
 #foreach ($dfaState in $state.dfa.states)
             { #foreach ($dfaTransition in $dfaState.transitions){$dfaTransition.startCode, $dfaTransition.endCode, $dfaTransition.destination.index}, #end}, // DFA State ${dfaState.index}
-#end
+#end##dfaState
+#end##state.dfa
         },
 #end
     } */ ;
@@ -231,7 +233,7 @@ public class Lexer implements ILexer {
     private static final int[][] acceptTable /* = {
 #foreach ($state in $grammar.states)
         // Accept table for ${state.name}, indexed by DFA state. Value is token index.
-        { #foreach ($dfaState in $state.dfa.states)${dfaState.acceptTokenIndex}, #end},
+        { #if($state.dfa)#foreach ($dfaState in $state.dfa.states)${dfaState.acceptTokenIndex}, #end#end},
 #end
     } */ ;
 
