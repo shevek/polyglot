@@ -85,6 +85,19 @@ project(':polyglot-cmd') {
 		compile project(':polyglot-core')
 		compile 'net.sf.jopt-simple:jopt-simple:4.8'
 	}
+
+	shadowJar {
+		dependencies {
+			exclude "org/apache/tools/ant/**"
+			exclude "it/unimi/dsi/fastutil/booleans/**"
+			exclude "it/unimi/dsi/fastutil/bytes/**"
+			exclude "it/unimi/dsi/fastutil/chars/**"
+			exclude "it/unimi/dsi/fastutil/floats/**"
+			exclude "it/unimi/dsi/fastutil/longs/**"
+			exclude "it/unimi/dsi/fastutil/objects/**"
+			exclude "it/unimi/dsi/fastutil/shorts/**"
+		}
+	}
 }
 
 project(':polyglot-gradle') {

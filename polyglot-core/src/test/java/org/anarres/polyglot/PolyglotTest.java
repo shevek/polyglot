@@ -117,6 +117,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // if (!file.getName().equals("test-cstnames.polyglot"))
             // if (!file.getName().equals("test-nonmasked.polyglot"))
             // if (!file.getName().equals("private-vertica.polyglot"))
+            // if (!file.getName().equals("test-annotations.polyglot"))
             // continue;
             parse(file);
         }
