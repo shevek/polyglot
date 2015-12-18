@@ -49,7 +49,7 @@ public class Polyglot extends MatchingTask {
                     engine.setDebugHandler(new DebugHandler.File(debugDirectory, file.getName()));
                 }
                 if (!engine.run())
-                    throw new BuildException("PolyglotEngine failed:\n" + engine.getErrors());
+                    throw new BuildException("PolyglotEngine failed:\n" + engine.getErrors().toString(engine.getInput()));
             } catch (BuildException e) {
                 throw e;
             } catch (Exception e) {

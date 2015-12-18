@@ -121,6 +121,11 @@ public class PolyglotEngine {
         this(input.getName(), Files.asCharSource(input, StandardCharsets.UTF_8), outputDir);
     }
 
+    @Nonnull
+    public CharSource getInput() {
+        return input;
+    }
+
     /**
      * Returns the ErrorHandler which contains the list of {@link ErrorHandler.Error Errors}.
      *
@@ -247,8 +252,11 @@ public class PolyglotEngine {
             Start ast = parser.parse();
             // dump("Parsed grammar", ast);
             return ast;
-        } catch (LexerException | ParserException e) {
-            errors.addError(null, "Failed to parse source file: " + e);
+        } catch (LexerException e) {
+            errors.addError(e.getToken(), "Failed to lex source file: " + e);
+            return null;
+        } catch (ParserException e) {
+            errors.addError(e.getToken(), "Failed to lex source file: " + e);
             return null;
         } finally {
             LOG.info("{}: Parsing took {}", getName(), stopwatch);
@@ -434,7 +442,8 @@ public class PolyglotEngine {
             errors.addError(null, "Failed to generate an LR automaton:\n" + buf);
             LOG.info("{}: Diagnosing took {}", getName(), stopwatch);
         } else {
-            LOG.info("{}: Not diagnosing (DIAGNOSIS disabled). Final conflicts are:\n{}", getName(), conflicts);
+            errors.addError(null, "Failed to generate an LR automaton (DIAGNOSIS disabled):\n" + conflicts);
+            // LOG.info("{}: Not diagnosing (DIAGNOSIS disabled). Final conflicts are:\n{}", getName(), conflicts);
         }
     }
 

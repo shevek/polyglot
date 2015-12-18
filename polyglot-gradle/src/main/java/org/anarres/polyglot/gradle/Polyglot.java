@@ -168,7 +168,7 @@ public class Polyglot extends ConventionTask {
                     if (templates != null)
                         engine.addTemplates(templates);
                     if (!engine.run())
-                        throw new GradleException("Failed to process " + fvd + ":\n" + engine.getErrors());
+                        throw new GradleException("Failed to process " + fvd + ":\n" + engine.getErrors().toString(engine.getInput()));
                 } catch (GradleException e) {
                     throw e;
                 } catch (Exception e) {

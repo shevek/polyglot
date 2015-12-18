@@ -72,7 +72,7 @@ public class PolyglotMojo extends AbstractMojo {
                     engine.setDebugHandler(new DebugHandler.File(debugDirectory, file.getName()));
                 }
                 if (!engine.run())
-                    throw new MojoExecutionException("Polyglot failed:\n" + engine.getErrors());
+                    throw new MojoExecutionException("Polyglot failed:\n" + engine.getErrors().toString(engine.getInput()));
             }
         } catch (MojoExecutionException e) {
             throw e;

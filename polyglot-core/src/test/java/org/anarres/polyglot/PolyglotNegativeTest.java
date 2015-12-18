@@ -30,7 +30,7 @@ public class PolyglotNegativeTest extends AbstractPolyglotTest {
 
         if (engine.run())
             throw new Exception("Polyglot succeeded unexpectedly");
-        LOG.info("Diagnostics are:\n" + engine.getErrors());
+        LOG.info("Diagnostics are:\n" + engine.getErrors().toString(engine.getInput()));
         // assertTrue("Failing because conflicts exist.", automaton.getConflicts().isEmpty());
     }
 
@@ -50,8 +50,7 @@ public class PolyglotNegativeTest extends AbstractPolyglotTest {
             if (!file.getName().endsWith(".polyglot"))
                 continue;
 
-            if (!file.getName().equals("test-duplicate.polyglot"))
-                continue;
+            // if (!file.getName().equals("test-duplicate.polyglot")) continue;
             parse(file);
         }
     }

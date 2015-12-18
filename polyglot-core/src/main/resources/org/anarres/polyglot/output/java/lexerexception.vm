@@ -17,4 +17,9 @@ public class LexerException extends Exception {
     public InvalidToken getToken() {
         return this.invalidToken;
     }
+
+    @Override
+    public String toString() {
+        return "[" + invalidToken.getLine() + "," + invalidToken.getColumn() + "] " + getMessage();
+    }
 }
