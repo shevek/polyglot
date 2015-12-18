@@ -6,6 +6,9 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AElement;
@@ -18,7 +21,7 @@ import org.anarres.polyglot.output.TemplateProperty;
  * @see AstProductionSymbol
  * @author shevek
  */
-public class AstElementModel extends AbstractElementModel<AstProductionSymbol> {
+public class AstElementModel extends AbstractElementModel<AstProductionSymbol> implements AstModel {
 
     /**
      * Returns the most specific possible java type name for the symbol.
@@ -52,20 +55,24 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> {
                 name(node),
                 Specifier.toSpecifier(node.getSpecifier()),
                 node.getSymbolName(),
-                UnaryOperator.toUnaryOperator(node.getUnOp()));
+                UnaryOperator.toUnaryOperator(node.getUnOp()),
+                annotations(node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }
 
     @Nonnull
     public static AstElementModel forToken(@Nonnull TokenModel token) {
-        AstElementModel out = new AstElementModel(token.toNameToken(), Specifier.TOKEN, token.toNameToken(), UnaryOperator.NONE);
+        AstElementModel out = new AstElementModel(token.toNameToken(), Specifier.TOKEN, token.toNameToken(), UnaryOperator.NONE, HashMultimap.<String, AnnotationModel>create());
         out.symbol = token;
         return out;
     }
 
-    public AstElementModel(@Nonnull TIdentifier name, @Nonnull Specifier specifier, @Nonnull TIdentifier symbolName, @Nonnull UnaryOperator unaryOperator) {
+    private final Multimap<String, AnnotationModel> annotations;
+
+    public AstElementModel(@Nonnull TIdentifier name, @Nonnull Specifier specifier, @Nonnull TIdentifier symbolName, @Nonnull UnaryOperator unaryOperator, Multimap<String, AnnotationModel> annotations) {
         super(name, specifier, symbolName, unaryOperator);
+        this.annotations = annotations;
     }
 
     @Nonnull
@@ -80,6 +87,11 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> {
     }
 
     @Override
+    public Multimap<String, AnnotationModel> getAnnotations() {
+        return annotations;
+    }
+
+    @Override
     public AElement toNode() {
         TIdentifier nameToken = Objects.equals(getName(), getSymbolName()) ? null : toNameToken();
         return new AElement(
@@ -87,6 +99,7 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> {
                 nameToken,
                 toSpecifier(),
                 new TIdentifier(getSymbolName(), getLocation()),
-                getUnaryOperator().newUnOp());
+                getUnaryOperator().newUnOp(),
+                toAnnotations(getAnnotations()));
     }
 }

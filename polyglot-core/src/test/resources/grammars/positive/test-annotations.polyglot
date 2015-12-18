@@ -1,0 +1,17 @@
+Package org.anarres.polyglot.test.annotations;
+
+Tokens
+	@javaImplements('java.io.Serializable')
+	@javaAnnotation('@net.jcip.annotations.ThreadSafe')
+	foo = 'foo' ;
+
+Abstract Syntax Tree
+
+	@javaImplements('java.io.Serializable')
+	@javaAnnotation('@net.jcip.annotations.ThreadSafe')
+	program =
+		@javaImplements('java.io.Serializable')
+		@javaAnnotation('@net.jcip.annotations.ThreadSafe')
+		{foo} @javaAnnotation('@javax.annotation.CheckForSigned') foo ;
+
+

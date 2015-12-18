@@ -21,6 +21,8 @@ public enum Option {
     CG_APIDOC,
     /** Enables findbugs annotation generation. */
     CG_FINDBUGS,
+    /** Enables usage of common runtime interfaces. */
+    CG_RUNTIME,
     /** Enables threaded execution, which can generate simpler error messages. */
     PARALLEL,
     /** Log additional debugging information. */

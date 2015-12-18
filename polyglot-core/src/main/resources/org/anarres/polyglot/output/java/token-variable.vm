@@ -4,10 +4,15 @@ package ${grammar.package.packageName}.node;
 import javax.annotation.Nonnull;
 import ${package}.analysis.Visitor;
 
+#parse("org/anarres/polyglot/output/java/macros.vm")
+
 #if ($token.javadocComment)
 $token.javadocComment
 #end
-public final class ${token.javaTypeName} extends Token {
+#annotate($token)
+public final class ${token.javaTypeName} extends Token
+#implement($token)
+        {
 
     private String text;
 

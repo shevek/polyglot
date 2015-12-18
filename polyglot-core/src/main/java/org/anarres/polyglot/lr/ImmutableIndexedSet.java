@@ -6,6 +6,7 @@
 package org.anarres.polyglot.lr;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.Arrays;
@@ -23,7 +24,7 @@ public class ImmutableIndexedSet<IndexedItem extends Indexed> extends AbstractIn
     }
 
     @Nonnull
-    public static int[] toSortedIntArray(@Nonnull IntSet indices) {
+    public static int[] toSortedIntArray(@Nonnull IntCollection indices) {
         int[] tmp = indices.toIntArray();
         Arrays.sort(tmp);
         return tmp;
@@ -49,7 +50,7 @@ public class ImmutableIndexedSet<IndexedItem extends Indexed> extends AbstractIn
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP2")
-    public ImmutableIndexedSet(@Nonnull IndexedUniverse<IndexedItem> universe, @Nonnull IntSet indices) {
+    public ImmutableIndexedSet(@Nonnull IndexedUniverse<IndexedItem> universe, @Nonnull IntCollection indices) {
         this(universe, toSortedIntArray(indices));
     }
 

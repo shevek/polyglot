@@ -6,8 +6,10 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.Preconditions;
+import java.util.Collections;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.node.AAnnotation;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.output.TemplateProperty;
@@ -55,6 +57,7 @@ public class CstTransformPrototypeModel extends AbstractElementModel<AstProducti
                 nameToken,
                 toSpecifier(),
                 new TIdentifier(getSymbolName(), getLocation()),
-                getUnaryOperator().newUnOp());
+                getUnaryOperator().newUnOp(),
+                Collections.<AAnnotation>emptyList());
     }
 }

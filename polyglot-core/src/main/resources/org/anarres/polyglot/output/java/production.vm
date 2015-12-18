@@ -4,6 +4,8 @@ package ${grammar.package.packageName}.node;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+#parse("org/anarres/polyglot/output/java/macros.vm")
+
 #if ($production.javadocComment)
 $production.javadocComment
 #else
@@ -11,7 +13,10 @@ $production.javadocComment
 ## /** ${production} */
 /** The abstract superclass of all ${production.name} alternatives. */
 #end
-public abstract class ${production.javaTypeName} extends Node {
+#annotate($production)
+public abstract class ${production.javaTypeName} extends Node
+#implement($production)
+        {
 
     /** Default nullary constructor. */
     public ${production.javaTypeName}() {

@@ -13,6 +13,7 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URL;
@@ -32,7 +33,10 @@ import org.anarres.polyglot.model.GrammarModel;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.app.event.implement.ReportInvalidReferences;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.log.SystemLogChute;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 import org.apache.velocity.tools.generic.EscapeTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,11 +110,22 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     protected void initContext(@Nonnull VelocityContext context) {
     }
 
+    public static class Loader extends ClasspathResourceLoader {
+
+        @Override
+        public InputStream getResourceStream(String name) throws ResourceNotFoundException {
+            // LOG.info("Loading " + name);
+            return super.getResourceStream(name);
+        }
+
+    }
+
     protected void process(@Nonnull CharSource source, @Nonnull String dstFilePath, @Nonnull Map<String, Object> contextValues) throws IOException {
         VelocityEngine engine = new VelocityEngine();
         setProperty(engine, VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS, SystemLogChute.class.getName());
-        setProperty(engine, VelocityEngine.RESOURCE_LOADER, "file");
-        setProperty(engine, VelocityEngine.FILE_RESOURCE_LOADER_CACHE, "true");
+        setProperty(engine, VelocityEngine.RESOURCE_LOADER, "classpath");
+        setProperty(engine, "classpath.resource.loader.class", Loader.class.getName());  // Needs to be in this JAR file.
+        // setProperty(engine, VelocityEngine.FILE_RESOURCE_LOADER_CACHE, "true");
         setProperty(engine, VelocityEngine.EVENTHANDLER_INVALIDREFERENCES, ReportInvalidReferences.class.getName());
         setProperty(engine, VelocityEngine.RUNTIME_REFERENCES_STRICT, true);
         // setProperty(engine, VelocityEngine.FILE_RESOURCE_LOADER_PATH, includeBuf.toString());

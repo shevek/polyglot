@@ -13,6 +13,8 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.lr.LRAutomaton;
+import org.anarres.polyglot.model.AnnotationModel;
+import org.anarres.polyglot.model.AstModel;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
@@ -119,6 +121,19 @@ public class JavaHelper {
 
     public boolean isOption(@Nonnull String name) {
         return options.contains(Option.valueOf(name));
+    }
+
+    @Nonnull
+    public boolean hasAnnotations(@Nonnull AstModel model, @Nonnull String name) {
+        return !model.getAnnotations().get(name).isEmpty();
+    }
+
+    @Nonnull
+    public List<String> getAnnotations(@Nonnull AstModel model, @Nonnull String name) {
+        List<String> out = new ArrayList<>();
+        for (AnnotationModel annotation : model.getAnnotations().get(name))
+            out.add(annotation.getValue());
+        return out;
     }
 
 }

@@ -1,0 +1,16 @@
+#macro(implement $object)
+#if ($helper.hasAnnotations($object, "javaImplements"))
+    implements
+#foreach ($interface in $helper.getAnnotations($object, "javaImplements"))
+        $interface#if($velocityHasNext),#end
+#end
+#end
+#end
+##
+#macro(annotate $object)
+#if ($helper.hasAnnotations($object, "javaAnnotation"))
+#foreach ($annotation in $helper.getAnnotations($object, "javaAnnotation"))
+    $annotation
+#end
+#end
+#end

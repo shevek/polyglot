@@ -9,6 +9,8 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import ${package}.analysis.Visitor;
 
+#parse("org/anarres/polyglot/output/java/macros.vm")
+
 #if ($alternative.javadocComment)
 $alternative.javadocComment
 #elseif ($alternative.production.javadocComment)
@@ -17,7 +19,10 @@ $production.javadocComment
 ## No default javadoc - (a) information leakage, (b) javadoc performance sucks.
 ## /** ${alternative} */
 #end
-public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
+#annotate($alternative)
+public class ${alternative.javaTypeName} extends ${production.javaTypeName}
+#implement($alternative)
+        {
 
 #foreach ($element in $alternative.elements)
 #if ($element.list)
@@ -68,6 +73,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
     $element.javadocComment
 #end
     @Nonnull
+#annotate($element)
     public List<${element.javaTypeName}> get${element.javaMethodName}() {
         return this._${element.javaFieldName}_;
     }
@@ -102,6 +108,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
 #else
     @Nonnull
 #end
+#annotate($element)
     public ${element.javaTypeName} get${element.javaMethodName}() {
         return this._${element.javaFieldName}_;
     }
@@ -137,6 +144,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName} {
 #elseif (!$external.symbol.primitive)
     @Nonnull
 #end
+#annotate($external)
     public ${external.javaTypeName} get${external.javaMethodName}() {
         return this._${external.javaFieldName}_;
     }

@@ -309,18 +309,21 @@ Productions
 
 	ast_alternative =
 		// If we don't split this, we get a R/R conflict because
-		// the javadoc_comment might refer to the element.
+		// the javadoc_comment or annotations might refer to the element.
 		{anonymous}
-			annotation* [elements]:element*
-				{ -> New ast_alternative(Null, Null, [elements], [annotation]) } |
-		{named} javadoc_comment?
-			annotation* alt_name [elements]:element*
+			[elements]:element*
+				{ -> New ast_alternative(Null, Null, [elements], []) } |
+		{named}
+			javadoc_comment?
+			annotation*
+			alt_name [elements]:element*
 				{ -> New ast_alternative(javadoc_comment, alt_name.identifier, [elements], [annotation]) } ;
 
 	element =
 		javadoc_comment?
+		annotation*
 		element_name? specifier? identifier un_op?
-			{ -> New element(javadoc_comment, element_name.identifier, specifier, identifier, un_op) };
+			{ -> New element(javadoc_comment, element_name.identifier, specifier, identifier, un_op, [annotation]) };
 
 
 
@@ -474,7 +477,9 @@ Abstract Syntax Tree
 		specifier?
 		/** Refers to the name of an AST production. */
 		[symbol_name]:identifier
-		un_op?;
+		un_op?
+		[annotations]:annotation*
+		;
 
 	annotation =
 		[name]:identifier [value]:string ;

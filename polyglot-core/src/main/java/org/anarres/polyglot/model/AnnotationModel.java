@@ -37,7 +37,7 @@ public class AnnotationModel extends AbstractModel {
 
     @Override
     public AAnnotation toNode() {
-        return new AAnnotation(name, new TString(value));
+        return new AAnnotation(name, new TString("'" + value + "'"));
     }
 
 }
