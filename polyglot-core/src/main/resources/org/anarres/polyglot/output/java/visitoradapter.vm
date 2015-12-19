@@ -15,6 +15,10 @@ import ${grammar.package.packageName}.node.*;
 /**
  * A default implementation of {@link Visitor} which returns null for all nodes.
  *
+ * @param <I> The type of the auxiliary argument to the visitor methods; use Void and pass null if not required.
+ * @param <O> The return type of the visitor methods; use Void and return null if not required.
+ * @param <X> The common supertype of checked exceptions thrown by the visitor methods; use RuntimeException if not required.
+ *
  * @see Visitor
  * @see AbstractVisitorAdapter
  */

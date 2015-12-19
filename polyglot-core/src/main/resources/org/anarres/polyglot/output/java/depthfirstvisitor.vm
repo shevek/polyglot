@@ -6,6 +6,17 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
 
+/**
+ * A VisitorAdapter which walks the tree depth first, in a left-to-right manner.
+ *
+ * @param <I> The type of the auxiliary argument to the visitor methods; use Void and pass null if not required.
+ * @param <O> The return type of the visitor methods; use Void and return null if not required.
+ * @param <X> The common supertype of checked exceptions thrown by the visitor methods; use RuntimeException if not required.
+ *
+ * @see VisitorAdapter
+ * @see AbstractVisitorAdapter
+ * @see DepthFirstAdapter
+ */
 public class DepthFirstVisitor<I, O, X extends Exception> extends VisitorAdapter<I, O, X> {
 
     public O inDefault(@Nonnull Node node, I input) throws X {

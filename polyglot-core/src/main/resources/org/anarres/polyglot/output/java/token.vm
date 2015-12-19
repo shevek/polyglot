@@ -17,6 +17,14 @@ public abstract class Token extends Node {
     @CheckForSigned
     public abstract int getTokenIndex();
 
+    /**
+     * Returns the textual content of this token.
+     *
+     * If the token represents a nontrivial lexical form, such as a C string,
+     * further parsing is required to extract a semantic value.
+     *
+     * @return the textual content of this token.
+     */
     @Nonnull
     public abstract String getText();
 
@@ -33,6 +41,11 @@ public abstract class Token extends Node {
         this.offset = offset;
     }
 
+    /**
+     * Returns The 1-based line of this Token.
+     *
+     * @return The 1-based line of this Token.
+     */
     public int getLine() {
         return this.line;
     }
@@ -61,6 +74,11 @@ public abstract class Token extends Node {
         setColumn(column);
     }
 
+    /**
+     * Returns The 1-based column of this Token.
+     *
+     * @return The 1-based column of this Token.
+     */
     public int getColumn() {
         return this.column;
     }
