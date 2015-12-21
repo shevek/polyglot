@@ -64,7 +64,7 @@ public class TokenMap<V> extends AbstractMap<TokenModel, V> {
             return false;
         TokenModel key = (TokenModel) _key;
         int index = key.getIndex();
-        return values.containsKey(key);
+        return values.containsKey(index);
     }
 
     @Override
