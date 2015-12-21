@@ -8,7 +8,6 @@ package org.anarres.polyglot.lr;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,20 +32,26 @@ import org.slf4j.LoggerFactory;
  */
 public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
 
-    private static class TokenMap<V> extends ArrayList<V> {
+    private static class TokenMap<V> {
+
+        private final Object[] data;
 
         public TokenMap(@Nonnegative int size) {
-            super(size);
-            for (int i = 0; i < size; i++)
-                add(null);
+            this.data = new Object[size];
         }
 
+        @Nonnull
         public V get(@Nonnull TokenModel token) {
-            return get(token.getIndex());
+            return (V) data[token.getIndex()];
+        }
+
+        @Nonnull
+        public V get(@Nonnull int index) {
+            return (V) data[index];
         }
 
         public void put(@Nonnull TokenModel token, @Nonnull V value) {
-            set(token.getIndex(), value);
+            data[token.getIndex()] = value;
         }
     }
 
@@ -162,7 +167,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
                 // for (int lookahead = lookaheads.nextSetBit(0); lookahead >= 0; lookahead = lookaheads.nextSetBit(lookahead + 1)) {
                 // The only trouble with fastutil is that we can't iterate without allocating.
                 for (IntIterator it = lookaheads.iterator(); it.hasNext(); /* */) {
-                // for (int lookahead : lookaheads) {
+                    // for (int lookahead : lookaheads) {
                     int lookahead = it.nextInt();
                     // TokenModel lookahead = tokenUniverse.getItemByIndex(i);
                     // Allocation-free version of new LR1Item(subalternative, 0);
