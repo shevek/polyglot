@@ -128,6 +128,15 @@ public class JavaHelper {
         return !model.getAnnotations().get(name).isEmpty();
     }
 
+    /**
+     * Returns the list of values of annotations on the given model with the given name.
+     *
+     * The returned list may contain nulls for annotations which did not specify a value.
+     *
+     * @param model The model from which to retrieve annotations.
+     * @param name The name of the annotations to retrieve.
+     * @return The list of values of annotations on the given model with the given name.
+     */
     @Nonnull
     public List<String> getAnnotations(@Nonnull AstModel model, @Nonnull String name) {
         List<String> out = new ArrayList<>();

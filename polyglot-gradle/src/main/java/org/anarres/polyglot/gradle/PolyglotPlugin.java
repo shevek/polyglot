@@ -42,8 +42,12 @@ public class PolyglotPlugin implements Plugin<Project> {
 
     @Override
     public void apply(final Project project) {
+        // project.getPluginManager().apply(JavaPlugin.class);
+
         final PolyglotPluginExtension extension = project.getExtensions().create("polyglot", PolyglotPluginExtension.class);
-        final Configuration configuration = project.getConfigurations().create("polyglot");
+        final Configuration configuration = project.getConfigurations().create("polyglot")
+                // .setVisible(false)
+                .setDescription("The Polyglot parser generator used by this build.");
 
         try {
             ProductMetadata product = new ProductMetadata(PolyglotPlugin.class.getClassLoader());

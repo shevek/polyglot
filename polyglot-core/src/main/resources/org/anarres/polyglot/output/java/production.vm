@@ -15,6 +15,7 @@ $production.javadocComment
 #end
 #annotate($production)
 public abstract class ${production.javaTypeName} extends Node
+        implements IProduction
 #implement($production)
         {
 

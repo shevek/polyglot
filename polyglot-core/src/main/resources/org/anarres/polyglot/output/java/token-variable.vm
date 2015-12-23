@@ -11,6 +11,7 @@ $token.javadocComment
 #end
 #annotate($token)
 public final class ${token.javaTypeName} extends Token
+        implements IToken
 #implement($token)
         {
 

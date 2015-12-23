@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AAnnotation;
 import org.anarres.polyglot.node.TIdentifier;
@@ -19,7 +20,7 @@ public class AnnotationModel extends AbstractModel {
     private final TIdentifier name;
     private final String value;
 
-    public AnnotationModel(TIdentifier name, String value) {
+    public AnnotationModel(@Nonnull TIdentifier name, @CheckForNull String value) {
         super(name);
         this.name = name;
         this.value = value;
@@ -30,7 +31,7 @@ public class AnnotationModel extends AbstractModel {
         return name.getText();
     }
 
-    @Nonnull
+    @CheckForNull
     public String getValue() {
         return value;
     }

@@ -76,6 +76,7 @@ public class JavaOutputWriter extends AbstractOutputWriter {
 
         // Nodes and tokens
         process(executor, "node.vm", "node/Node.java");
+        process(executor, "itoken.vm", "node/IToken.java");
         process(executor, "token.vm", "node/Token.java");
 
         process(executor, "token-fixed.vm", "node/EOF.java", ImmutableMap.<String, Object>of("token", TokenModel.EOF.INSTANCE));
@@ -109,6 +110,8 @@ public class JavaOutputWriter extends AbstractOutputWriter {
             // process(executor, "reverseddepthfirstadapter.vm", "analysis/ReversedDepthFirstAdapter.java");
 
             process(executor, "start.vm", "node/Start.java");
+            process(executor, "iproduction.vm", "node/IProduction.java");
+            process(executor, "ialternative.vm", "node/IAlternative.java");
             for (AstProductionModel production : grammar.astProductions.values()) {
                 process(executor, "production.vm", "node/" + production.getJavaTypeName() + ".java", ImmutableMap.<String, Object>of("production", production));
                 for (AstAlternativeModel alternative : production.alternatives.values()) {

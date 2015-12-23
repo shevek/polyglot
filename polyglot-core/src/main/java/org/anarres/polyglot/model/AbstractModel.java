@@ -19,6 +19,7 @@ import org.anarres.polyglot.node.AAnnotation;
 import org.anarres.polyglot.node.Node;
 import org.anarres.polyglot.node.PAnnotation;
 import org.anarres.polyglot.node.TJavadocComment;
+import org.anarres.polyglot.node.TString;
 import org.anarres.polyglot.node.Token;
 import org.anarres.polyglot.output.TemplateProperty;
 
@@ -85,7 +86,8 @@ public abstract class AbstractModel implements Model {
         if (nodes != null) {
             for (PAnnotation node : nodes) {
                 AAnnotation a = (AAnnotation) node;
-                AnnotationModel m = new AnnotationModel(a.getName(), NFABuilderVisitor.parse(a.getValue()));
+                TString value = a.getValue();
+                AnnotationModel m = new AnnotationModel(a.getName(), value == null ? null : NFABuilderVisitor.parse(a.getValue()));
                 out.put(m.getName(), m);
             }
         }
