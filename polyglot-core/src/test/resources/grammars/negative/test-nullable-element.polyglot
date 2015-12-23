@@ -1,0 +1,26 @@
+/** ERROR: nullable */
+Package org.anarres.polyglot.test.nullable.element;
+
+Tokens
+
+	tok_lpar = '(' ;
+	tok_rpar = ')' ;
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+
+Productions
+
+	expression =
+		tok_a [arguments]:arguments_nonnull?
+			{ -> New expression(tok_a, arguments.tok_c) } ;
+
+	arguments_nonnull { -> tok_c } =
+		tok_lpar tok_c tok_rpar
+			{ -> tok_c } ;
+
+Abstract Syntax Tree
+
+	expression =
+		tok_a tok_c ;
+

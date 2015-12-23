@@ -92,6 +92,11 @@ public abstract class CstTransformExpressionModel extends AbstractModel {
         }
 
         @Override
+        public boolean isNullableValue() {
+            return true;
+        }
+
+        @Override
         public <I, O, X extends Exception> O apply(Visitor<I, O, X> visitor, I input) throws X {
             return visitor.visitNull(this, input);
         }
@@ -155,6 +160,11 @@ public abstract class CstTransformExpressionModel extends AbstractModel {
         @Override
         public boolean isListValue() {
             return getTransform().getUnaryOperator().isList();
+        }
+
+        @Override
+        public boolean isNullableValue() {
+            return getTransform().getUnaryOperator().isNullable();
         }
 
         @Override
@@ -325,10 +335,20 @@ public abstract class CstTransformExpressionModel extends AbstractModel {
     /**
      * If we are adding this to a list, do we use add() or addAll()?
      *
-     * Yes if this is an explicit list OR if it's a list-typed variable (reference to a list).
+     * @return true if this is an explicit list OR if it's a list-typed variable (reference to a list).
      */
     @TemplateProperty
     public boolean isListValue() {
+        return false;
+    }
+
+    /**
+     * Returns whether this is an explicit null or a reference to a nullable value.
+     *
+     * @return true if this is an explicit null or a reference to a nullable value.
+     */
+    @TemplateProperty
+    public boolean isNullableValue() {
         return false;
     }
 

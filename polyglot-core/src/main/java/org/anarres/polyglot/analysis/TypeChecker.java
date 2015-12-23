@@ -91,6 +91,8 @@ public class TypeChecker implements Runnable {
                     // LOG.info(parameter + " <<-- " + result + " list " + isList(argument) + ": " + argument + ":: " + argument.getClass());
                     if (!isAssignableFrom(parameter.symbol, result) || isList(argument) != parameter.isList())
                         errors.addError(argument.getLocation(), "Cannot pass argument of type " + toTypeName(result, isList(argument)) + " for parameter " + parameter + " of " + expression.astAlternative.getName());
+                    else if (!parameter.isNullable() && argument.isNullableValue())
+                        errors.addError(argument.getLocation(), "Cannot pass nullable argument for parameter " + parameter + " of " + expression.astAlternative.getName());
 
                     // Allow construction with an empty list.
                     if (isList(argument) && result == null)
@@ -151,6 +153,8 @@ public class TypeChecker implements Runnable {
                     if (!isAssignableFrom(transformPrototype.getSymbol(), result)
                             || transformPrototype.isList() != isList(transformExpression))
                         errors.addError(transformExpression.getLocation(), "Transform expression " + i + " of type " + toTypeName(result, isList(transformExpression)) + " does not satisfy transform prototype " + transformPrototype);
+                    else if (!transformPrototype.isNullable() && transformExpression.isNullableValue())
+                        errors.addError(transformExpression.getLocation(), "Transform expression '" + transformExpression + "' is nullable, and does not satisfy non-nullable transform prototype '" + transformPrototype + "'.");
                 }
             }
         }

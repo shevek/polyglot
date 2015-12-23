@@ -359,8 +359,12 @@ Productions
 
 	// Generic
 	annotation =
-		tok_at identifier tok_lpar string tok_rpar
-			{ -> New annotation(identifier, string) } ;
+		tok_at identifier annotation_value?
+			{ -> New annotation(identifier, annotation_value) } ;
+
+	annotation_value { -> string? } =
+		tok_lpar string? tok_rpar
+			{ -> string } ;
 
 Abstract Syntax Tree
 
@@ -482,5 +486,5 @@ Abstract Syntax Tree
 		;
 
 	annotation =
-		[name]:identifier [value]:string ;
+		[name]:identifier [value]:string? ;
 

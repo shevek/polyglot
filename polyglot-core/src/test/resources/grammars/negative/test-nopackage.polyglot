@@ -1,0 +1,15 @@
+Tokens
+
+	tok_a = 'a' ;
+
+Productions
+
+	expression =
+		tok_a
+			{ -> New expression(tok_a) } ;
+
+Abstract Syntax Tree
+
+	expression =
+		tok_a ;
+

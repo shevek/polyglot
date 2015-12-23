@@ -1,0 +1,32 @@
+Package org.anarres.polyglot.test.nullable.correct;
+
+Tokens
+
+	tok_lpar = '(' ;
+	tok_rpar = ')' ;
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+
+Productions
+
+	expression =
+		{a} tok_a [arguments]:arguments_nonnull?
+			{ -> New expression.a(tok_a, arguments.tok_c) } |
+		{b} tok_b [arguments]:arguments_nullable
+			{ -> New expression.b(tok_b, arguments.tok_c) } ;
+
+	arguments_nonnull { -> tok_c } =
+		tok_lpar tok_c tok_rpar
+			{ -> tok_c } ;
+
+	arguments_nullable { -> tok_c? } =
+		tok_lpar tok_c? tok_rpar
+			{ -> tok_c } ;
+
+Abstract Syntax Tree
+
+	expression =
+		{a} tok_a tok_c? |
+		{b} tok_b tok_c? ;
+

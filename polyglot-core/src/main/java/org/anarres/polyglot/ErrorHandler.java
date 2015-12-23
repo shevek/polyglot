@@ -38,7 +38,7 @@ public class ErrorHandler {
 
         @VisibleForTesting
         @Nonnull
-        /* pp */ String toDescription(@Nonnull Token location, @CheckForNull String source) {
+        /* pp */ String toDescription(@Nonnull Token location, @Nonnull String source) {
             if (source == null)
                 return "<no-text>";
             if (location == null)
@@ -65,7 +65,8 @@ public class ErrorHandler {
                 buf.append(message);
             } else {
                 buf.append(location.getLine()).append(':').append(location.getColumn()).append(": ").append(message);
-                buf.append('\n').append(toDescription(location, source));
+                if (source != null)
+                    buf.append('\n').append(toDescription(location, source));
             }
         }
 

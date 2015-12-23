@@ -70,6 +70,14 @@ public class GrammarModel implements GraphVizScope {
         this._package = _package;
     }
 
+    @Nonnull
+    @TemplateProperty
+    public List<ExternalModel> getExternals() {
+        List<ExternalModel> out = new ArrayList<>(externals.values());
+        Collections.sort(out, ExternalModel.NameComparator.INSTANCE);
+        return out;
+    }
+
     @CheckForNull
     public ExternalModel getExternal(@Nonnull String name) {
         return externals.get(name);

@@ -41,7 +41,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
         if (file.getName().equals("php4.sablecc"))
             engine.setOption(Option.ALLOWMASKEDTOKENS, true);
         if (!engine.run())
-            throw new Exception("Polyglot failed:\n" + engine.getErrors());
+            throw new Exception("Polyglot failed:\n" + engine.getErrors().toString(engine.getInput()));
     }
 
     private void compile() throws MalformedURLException {
@@ -108,6 +108,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // if (!file.getName().equals("test-documentation.polyglot"))
             // if (!file.getName().equals("test-notransform.polyglot"))
             // if (!file.getName().equals("test-calculator.polyglot"))
+            // if (!file.getName().equals("test-nullable.polyglot"))
             // if (!file.getName().equals("test-externals.polyglot"))
             // if (!file.getName().equals("private-plsql-compiler.polyglot"))
             // if (!file.getName().equals("private-plsql-compiler-small.polyglot"))
