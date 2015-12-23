@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.lr;
 
+import java.util.Comparator;
 import javax.annotation.Nonnegative;
 
 /**
@@ -13,9 +14,9 @@ import javax.annotation.Nonnegative;
  */
 public interface Indexed {
 
-    public static class Comparator implements java.util.Comparator<Indexed> {
+    public static class IndexComparator implements Comparator<Indexed> {
 
-        public static final Comparator INSTANCE = new Comparator();
+        public static final IndexComparator INSTANCE = new IndexComparator();
 
         @Override
         public int compare(Indexed o1, Indexed o2) {

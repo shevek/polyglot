@@ -135,7 +135,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
 
             GOTO:
             {
-                SortedMap<CstProductionModel, LRState> map = new TreeMap<>(CstProductionModel.Comparator.INSTANCE);
+                SortedMap<CstProductionModel, LRState> map = new TreeMap<>(CstProductionModel.IndexComparator.INSTANCE);
                 for (Map.Entry<? extends CstProductionSymbol, ? extends LRState> e : state.getTransitionMap().entrySet()) {
                     CstProductionSymbol symbol = e.getKey();
                     if (symbol.isTerminal())
@@ -149,7 +149,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
             ERROR:
             {
                 List<TokenModel> tokens = new ArrayList<>(state.getActionMap().keySet());
-                Collections.sort(tokens, TokenModel.Comparator.INSTANCE);
+                Collections.sort(tokens, TokenModel.IndexComparator.INSTANCE);
                 String error = "Expected " + tokens;
                 Integer errorIndex = errorMap.get(error);
                 if (errorIndex == null) {

@@ -12,6 +12,7 @@ import com.google.common.escape.Escapers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +42,9 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
 
     private static final Logger LOG = LoggerFactory.getLogger(TokenModel.class);
 
-    public static class Comparator implements java.util.Comparator<TokenModel> {
+    public static class IndexComparator implements Comparator<TokenModel> {
 
-        public static final Comparator INSTANCE = new Comparator();
+        public static final IndexComparator INSTANCE = new IndexComparator();
 
         @Override
         public int compare(TokenModel o1, TokenModel o2) {

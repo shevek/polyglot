@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import java.util.Comparator;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.TIdentifier;
@@ -15,6 +16,16 @@ import org.anarres.polyglot.node.Token;
  * @author shevek
  */
 public abstract class AbstractNamedModel extends AbstractModel {
+
+    public static class NameComparator implements Comparator<AbstractNamedModel> {
+
+        public static final NameComparator INSTANCE = new NameComparator();
+
+        @Override
+        public int compare(AbstractNamedModel o1, AbstractNamedModel o2) {
+            return o1.getName().compareTo(o2.getName());
+        }
+    }
 
     @Nonnull
     public static String name(@Nonnull AbstractNamedModel parent, @CheckForNull TIdentifier name) {

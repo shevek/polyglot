@@ -59,6 +59,6 @@ public class LRActionMapBuilder {
 
     @Nonnull
     public SortedMap<TokenModel, LRAction> toMap() {
-        return ImmutableSortedMap.copyOf(actions, TokenModel.Comparator.INSTANCE);
+        return ImmutableSortedMap.copyOf(actions, TokenModel.IndexComparator.INSTANCE);
     }
 }

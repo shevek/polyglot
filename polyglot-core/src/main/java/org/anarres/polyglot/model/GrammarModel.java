@@ -108,7 +108,7 @@ public class GrammarModel implements GraphVizScope {
     @Nonnull
     public List<StateModel> getStates() {
         List<StateModel> out = new ArrayList<>(states.values());
-        Collections.sort(out, StateModel.Comparator.INSTANCE);
+        Collections.sort(out, StateModel.IndexComparator.INSTANCE);
         return out;
     }
 
@@ -116,7 +116,7 @@ public class GrammarModel implements GraphVizScope {
     @TemplateProperty
     public List<TokenModel> getTokens() {
         List<TokenModel> out = new ArrayList<>(tokens.values());
-        Collections.sort(out, TokenModel.Comparator.INSTANCE);
+        Collections.sort(out, TokenModel.IndexComparator.INSTANCE);
         return out;
     }
 
@@ -138,7 +138,7 @@ public class GrammarModel implements GraphVizScope {
     @TemplateProperty("parser.vm")
     public List<CstProductionModel> getCstProductions() {
         List<CstProductionModel> out = new ArrayList<>(cstProductions.values());
-        Collections.sort(out, CstProductionModel.Comparator.INSTANCE);
+        Collections.sort(out, CstProductionModel.IndexComparator.INSTANCE);
         return out;
     }
 
