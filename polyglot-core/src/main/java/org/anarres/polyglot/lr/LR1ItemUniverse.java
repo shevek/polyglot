@@ -41,13 +41,14 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
         }
 
         @Nonnull
-        public V get(@Nonnull TokenModel token) {
-            return (V) data[token.getIndex()];
+        @SuppressWarnings("unchecked")
+        public V get(@Nonnull int index) {
+            return (V) data[index];
         }
 
         @Nonnull
-        public V get(@Nonnull int index) {
-            return (V) data[index];
+        public V get(@Nonnull TokenModel token) {
+            return get(token.getIndex());
         }
 
         public void put(@Nonnull TokenModel token, @Nonnull V value) {

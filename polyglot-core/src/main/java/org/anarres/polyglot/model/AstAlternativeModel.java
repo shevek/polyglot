@@ -98,6 +98,14 @@ public class AstAlternativeModel extends AbstractNamedJavaModel implements AstMo
         return externals;
     }
 
+    @Nonnull
+    @TemplateProperty
+    public List<? extends AstElementModel> getExternalsReversed() {
+        List<AstElementModel> externals = new ArrayList<>(getExternals());
+        Collections.reverse(externals);
+        return externals;
+    }
+
     @Override
     public Multimap<String, AnnotationModel> getAnnotations() {
         return annotations;
