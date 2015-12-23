@@ -50,6 +50,10 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter {
     public void case${alternative.javaMethodName}(${alternative.javaTypeName} node) {
         in${alternative.javaMethodName}(node);
 
+#foreach ($external in $alternative.externalsReversed)
+        // External $external.name
+#end##foreach alternative.externals
+
 #foreach ($element in $alternative.elementsReversed)
 #if ($element.list)
         {

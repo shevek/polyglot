@@ -25,6 +25,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
         {
 
 #foreach ($element in $alternative.elements)
+    /** Element ${element.name}. */
 #if ($element.list)
     private final List<${element.javaTypeName}> _${element.javaFieldName}_ = new ArrayList<${element.javaTypeName}>();
 #else##if element.list
@@ -33,6 +34,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
 #end##foreach alternative.elements
 
 #foreach ($external in $alternative.externals)
+    /** External ${external.name}. */
     private ${external.javaTypeName} _${external.javaFieldName}_;
 #end##foreach alternative.externals
 
@@ -69,18 +71,14 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
 #foreach ($element in $alternative.elements)
 #if ($element.list)
 
-#if ($element.javadocComment)
-    $element.javadocComment
-#end
+    $!element.javadocComment
     @Nonnull
 #annotate($element)
     public List<${element.javaTypeName}> get${element.javaMethodName}() {
         return this._${element.javaFieldName}_;
     }
 
-#if ($element.javadocComment)
-    $element.javadocComment
-#end
+    $!element.javadocComment
     public void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} Iterable<? extends ${element.javaTypeName}> list)
     {
         for (${element.javaTypeName} e : this._${element.javaFieldName}_) {
@@ -100,9 +98,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
     }
 #else##if element.list
 
-#if ($element.javadocComment)
-    $element.javadocComment
-#end
+    $!element.javadocComment
 #if ($element.nullable)
     @CheckForNull
 #else
@@ -113,9 +109,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
         return this._${element.javaFieldName}_;
     }
 
-#if ($element.javadocComment)
-    $element.javadocComment
-#end
+    $!element.javadocComment
     public void set${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} ${element.javaTypeName} node) {
         if (this._${element.javaFieldName}_ != null) {
             this._${element.javaFieldName}_.parent(null);
@@ -136,9 +130,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
     // Externals
 #foreach ($external in $alternative.externals)
 
-#if ($external.javadocComment)
-    $external.javadocComment
-#end
+    $!external.javadocComment
 #if ($external.nullable)
     @CheckForNull
 #elseif (!$external.symbol.primitive)
@@ -149,9 +141,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
         return this._${external.javaFieldName}_;
     }
 
-#if ($external.javadocComment)
-    $external.javadocComment
-#end
+    $!external.javadocComment
     public void set${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} ${external.javaTypeName} value) {
         this._${external.javaFieldName}_ = value;
     }
@@ -226,6 +216,9 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
 #end##if element.list
 #end##foreach alternative.elements
         );
+#foreach ($external in $alternative.externals)
+        out.set${external.javaMethodName}(get${external.javaMethodName}());
+#end##foreach alternative.externals
         listener.fireNodeCloned(this, out);
         return out;
     }

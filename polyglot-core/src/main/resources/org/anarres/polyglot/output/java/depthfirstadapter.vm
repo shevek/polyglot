@@ -69,6 +69,10 @@ public class DepthFirstAdapter extends AnalysisAdapter {
 #end##list
 #end##foreach element
 
+#foreach ($external in $alternative.externals)
+        // External $external.name
+#end##foreach alternative.externals
+
         out${alternative.javaMethodName}(node);
     }
 

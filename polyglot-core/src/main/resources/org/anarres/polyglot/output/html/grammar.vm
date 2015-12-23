@@ -55,22 +55,44 @@
 #end##alternative
 #end##production
 
+#if (!$grammar.externals.isEmpty())
+<h1>Externals</h1>
+
+#foreach ($external in $grammar.externals)
+    <!-- $esc.html($external) -->
+
+    <h2 id="$helper.a($external)">${external.name} (${external.javaTypeName})</h2>
+
+#end##external
+#end
+
 <h1>Abstract Syntax Tree</h1>
 
 #foreach ($production in $grammar.astProductions)
     <!-- $esc.html($production) -->
 
-    <h2 id="$helper.a($production)">${production.name}</h2>
+    <h2 id="$helper.a($production)">${production.name} (${production.javaTypeName})</h2>
 #foreach ($alternative in $production.alternatives)
     <!-- $esc.html($alternative) -->
 
-    <h3 id="$helper.a($alternative)">${alternative.name}</h3>
+    <h3 id="$helper.a($alternative)">${alternative.name} (${alternative.javaTypeName})</h3>
 
 	<div class="well">
     =
+<ul>
 #foreach ($element in $alternative.elements)
-        <a href="#$helper.a($element.symbol)">${element}</a>
+        <li><a href="#$helper.a($element.symbol)">${element}</a>
+        <ul>
+            <li>Java: ${element.javaTypeName} get${element.javaMethodName}()
+        </ul>
 #end##element
+#foreach ($external in $alternative.externals)
+        <li><a href="#$helper.a($external.symbol)">${external}</a>
+        <ul>
+            <li>Java: ${external.javaTypeName} get${external.javaMethodName}()
+        </ul>
+#end##element
+</ul>
         ;
 	</div>
 

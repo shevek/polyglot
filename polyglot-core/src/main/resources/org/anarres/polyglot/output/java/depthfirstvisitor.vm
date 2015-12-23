@@ -75,6 +75,10 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends VisitorAdapter
 #end##list
 #end##foreach element
 
+#foreach ($external in $alternative.externals)
+        // External $external.name
+#end##foreach alternative.externals
+
         return out${alternative.javaMethodName}(node, input, inResult);
     }
 
