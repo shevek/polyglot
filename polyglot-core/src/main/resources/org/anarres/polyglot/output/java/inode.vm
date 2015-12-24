@@ -3,5 +3,5 @@ package ${grammar.package.packageName}.node;
 
 import javax.annotation.Nonnull;
 
-public interface IAlternative extends IProduction {
+public interface INode {
 }

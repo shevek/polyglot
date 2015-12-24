@@ -40,7 +40,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
 #end##foreach alternative.externals
 
     /**
-     * Constructs a new ${alternative.javaTypeName} and sets all fields.
+     * Constructs a new ${alternative.javaTypeName} and sets all elements.
 #foreach ($element in $alternative.elements)
      * @param _${element.javaFieldName}_ See {@link #get${element.javaMethodName}()}.
 #end
@@ -163,7 +163,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
 #end##if element.list
 #end##foreach alternative.elements
 
-        throw new RuntimeException("Not a child.");
+        throw new IllegalArgumentException("Not a child.");
     }
 
     @Override
@@ -195,7 +195,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
 #end##if element.list
 #end##foreach alternative.elements
 
-        throw new RuntimeException("Not a child.");
+        throw new IllegalArgumentException("Not a child.");
     }
 
     @Override

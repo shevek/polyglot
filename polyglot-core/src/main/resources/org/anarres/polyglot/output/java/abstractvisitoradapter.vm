@@ -27,6 +27,20 @@ import ${package}.node.*;
  */
 public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implements Visitor<I, O, X> {
 
+## If there is no AST, then there are no externals.
+#if ($grammar.astProductionRoot)
+#foreach ($externalType in $helper.externalTypes)
+    /**
+     * By default, returns null.
+     *
+     * @return null
+     */
+    public O ${helper.getExternalMethodName($externalType)}(@Nonnull IAlternative node, String name, $externalType value, I input) {
+        return null;
+    }
+#end
+#end
+
     /**
      * By default, returns null.
      *

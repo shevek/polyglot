@@ -6,6 +6,7 @@
 package org.anarres.polyglot.output;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.CheckForNull;
@@ -145,4 +146,29 @@ public class JavaHelper {
         return out;
     }
 
+    @Nonnull
+    public List<String> getExternalTypes() {
+        return Arrays.asList("boolean", "byte", "char", "short", "int", "long", "float", "double", "Object");
+    }
+
+    @Nonnull
+    private static String capitalize(@Nonnull String word) {
+        if (word.isEmpty())
+            return word;
+        StringBuilder buf = new StringBuilder();
+        buf.append(Character.toUpperCase(word.charAt(0)));
+        buf.append(word, 1, word.length());
+        return buf.toString();
+    }
+
+    @Nonnull
+    public String getExternalMethodName(@Nonnull String externalType) {
+        for (int i = 0; i < externalType.length(); i++) {
+            char c = externalType.charAt(i);
+            // If it's a dot, or uppercase, then it's not a primitive.
+            if (!Character.isLowerCase(c))
+                return "visitExternalObject";
+        }
+        return "visitExternal" + capitalize(externalType);
+    }
 }

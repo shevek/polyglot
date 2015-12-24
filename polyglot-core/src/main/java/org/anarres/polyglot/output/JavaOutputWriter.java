@@ -75,6 +75,7 @@ public class JavaOutputWriter extends AbstractOutputWriter {
         }
 
         // Nodes and tokens
+        process(executor, "inode.vm", "node/INode.java");
         process(executor, "node.vm", "node/Node.java");
         process(executor, "itoken.vm", "node/IToken.java");
         process(executor, "token.vm", "node/Token.java");
