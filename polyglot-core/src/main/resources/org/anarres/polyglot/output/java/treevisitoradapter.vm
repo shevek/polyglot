@@ -1,0 +1,72 @@
+/* ${header} */
+package ${package}.analysis;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import ${package}.node.*;
+
+/**
+ * A {@link Visitor} which supports walking the tree.
+ *
+ * @param <I> The type of the auxiliary argument to the visitor methods; use Void and pass null if not required.
+ * @param <O> The return type of the visitor methods; use Void and return null if not required.
+ * @param <X> The common supertype of checked exceptions thrown by the visitor methods; use RuntimeException if not required.
+ *
+ * @see VisitorAdapter
+ * @see AbstractVisitorAdapter
+ * @see DepthFirstVisitor
+ */
+public class TreeVisitorAdapter<I, O, X extends Exception> extends VisitorAdapter<I, O, X> {
+
+    public O inExternals(@Nonnull IAlternative node, @Nonnegative int externalCount, I input) {
+        return null;
+    }
+
+    public O outExternals(@Nonnull IAlternative node, @Nonnegative int externalCount, I input) {
+        return null;
+    }
+
+#foreach ($externalType in $helper.externalTypes)
+    /**
+     * By default, returns null.
+     *
+     * @return null
+     */
+    public O ${helper.getExternalMethodName($externalType)}(@Nonnull IAlternative node, String name, $externalType value, I input) {
+        return null;
+    }
+#end
+
+    public O inDefault(@Nonnull Node node, I input) throws X {
+        return null;
+    }
+
+    public O outDefault(@Nonnull Node node, I input, O inResult) throws X {
+        return inResult;
+    }
+
+    public O inStart(@Nonnull Start node, I input) throws X {
+        return inDefault(node, input);
+    }
+
+    public O outStart(@Nonnull Start node, I input, O inResult) throws X {
+        return outDefault(node, input, inResult);
+    }
+
+#foreach ($production in $grammar.astProductions)
+    // Production: $production
+#foreach ($alternative in $production.alternatives)
+    // Alternative: $alternative
+    public O in${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
+        return inDefault(node, input);
+    }
+
+    public O out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input, O inResult) throws X {
+        return outDefault(node, input, inResult);
+    }
+#end
+#end
+
+}

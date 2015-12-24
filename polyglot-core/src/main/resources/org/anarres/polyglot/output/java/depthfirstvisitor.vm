@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
 
 /**
- * A VisitorAdapter which walks the tree depth first, in a left-to-right manner.
+ * A {@link Visitor} which walks the tree depth first, in a left-to-right manner.
  *
  * @param <I> The type of the auxiliary argument to the visitor methods; use Void and pass null if not required.
  * @param <O> The return type of the visitor methods; use Void and return null if not required.
@@ -15,25 +15,10 @@ import ${grammar.package.packageName}.node.*;
  *
  * @see VisitorAdapter
  * @see AbstractVisitorAdapter
+ * @see TreeVisitorAdapter
  * @see DepthFirstAdapter
  */
-public class DepthFirstVisitor<I, O, X extends Exception> extends VisitorAdapter<I, O, X> {
-
-    public O inDefault(@Nonnull Node node, I input) throws X {
-        return null;
-    }
-
-    public O outDefault(@Nonnull Node node, I input, O inResult) throws X {
-        return inResult;
-    }
-
-    public O inStart(@Nonnull Start node, I input) throws X {
-        return inDefault(node, input);
-    }
-
-    public O outStart(@Nonnull Start node, I input, O inResult) throws X {
-        return outDefault(node, input, inResult);
-    }
+public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAdapter<I, O, X> {
 
     @Override
     public O visitStart(Start node, I input) throws X {
@@ -47,14 +32,6 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends VisitorAdapter
     // Production: $production
 #foreach ($alternative in $production.alternatives)
     // Alternative: $alternative
-    public O in${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
-        return inDefault(node, input);
-    }
-
-    public O out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input, O inResult) throws X {
-        return outDefault(node, input, inResult);
-    }
-
     @Override
     public O visit${alternative.javaMethodName}(${alternative.javaTypeName} node, I input) throws X {
         O inResult = in${alternative.javaMethodName}(node, input);
@@ -76,9 +53,11 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends VisitorAdapter
 #end##foreach element
 
         // These are emitted in order of definition, but universally after elements.
+        inExternals(node, $alternative.externals.size(), input);
 #foreach ($external in $alternative.externals)
         $helper.getExternalMethodName($external.javaTypeName)(node, "${external.name}", node.get${external.javaMethodName}(), input);
 #end##foreach alternative.externals
+        outExternals(node, $alternative.externals.size(), input);
 
         return out${alternative.javaMethodName}(node, input, inResult);
     }

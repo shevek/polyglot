@@ -148,7 +148,7 @@ public class JavaHelper {
 
     @Nonnull
     public List<String> getExternalTypes() {
-        return Arrays.asList("boolean", "byte", "char", "short", "int", "long", "float", "double", "Object");
+        return Arrays.asList("boolean", "byte", "char", "short", "int", "long", "float", "double", "String", "Object");
     }
 
     @Nonnull
@@ -163,12 +163,19 @@ public class JavaHelper {
 
     @Nonnull
     public String getExternalMethodName(@Nonnull String externalType) {
-        for (int i = 0; i < externalType.length(); i++) {
-            char c = externalType.charAt(i);
-            // If it's a dot, or uppercase, then it's not a primitive.
-            if (!Character.isLowerCase(c))
-                return "visitExternalObject";
+        PRIMITIVE:
+        {
+            for (int i = 0; i < externalType.length(); i++) {
+                char c = externalType.charAt(i);
+                // If it's a dot, or uppercase, then it's not a primitive.
+                if (!Character.isLowerCase(c))
+                    break PRIMITIVE;
+            }
+            return "visitExternal" + capitalize(externalType);
         }
-        return "visitExternal" + capitalize(externalType);
+        if (String.class.getSimpleName().equals(externalType)
+                || String.class.getName().equals(externalType))
+            return "visitExternalString";
+        return "visitExternalObject";
     }
 }

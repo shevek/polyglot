@@ -104,6 +104,7 @@ public class JavaOutputWriter extends AbstractOutputWriter {
         process(executor, "analysisadapter.vm", "analysis/AnalysisAdapter.java");
 
         if (grammar.astProductionRoot != null) {
+            process(executor, "treevisitoradapter.vm", "analysis/TreeVisitorAdapter.java");
             process(executor, "depthfirstadapter.vm", "analysis/DepthFirstAdapter.java");
             process(executor, "reverseddepthfirstadapter.vm", "analysis/ReversedDepthFirstAdapter.java");
 
