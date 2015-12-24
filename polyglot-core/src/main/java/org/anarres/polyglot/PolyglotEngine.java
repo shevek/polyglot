@@ -411,8 +411,10 @@ public class PolyglotEngine {
             LOG.info("{}: Inlining took {} and created {} substitutions.", getName(), stopwatch, inliner.getSubstitutions());
             dump(debugHandler.forTarget(GRAMMAR_SUBSTITUTED, ".substituted.v" + i + ".grammar"), grammar);
             // if (isOption(Option.VERBOSE)) LOG.debug("{}: Substitutions created {}", getName(), substitutions);
-            if (!inliner_success)
+            if (!inliner_success) {
+                errors.addError(null, "Inliner rejected inlining: Too many substitutions?");
                 return automaton;
+            }
 
             if (i >= 5) {
                 errors.addError(null, getName() + ": Too many substitution attempts without success.");

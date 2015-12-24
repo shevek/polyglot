@@ -201,7 +201,7 @@ public class Inliner {
                 }
                 if (resultAlternative != haystackAlternative) {
                     // We just signal failure on overload; the caller can work out what to do with this.
-                    if (++substitutions > 128)
+                    if (++substitutions > 512)
                         return false;
                 }
             }
