@@ -148,7 +148,8 @@ public class JavaHelper {
 
     @Nonnull
     public List<String> getExternalTypes() {
-        return Arrays.asList("boolean", "byte", "char", "short", "int", "long", "float", "double", "String", "Object");
+        // return Arrays.asList("boolean", "byte", "char", "short", "int", "long", "float", "double", "String", "Object");
+        return Arrays.asList("long", "double", "Object");
     }
 
     @Nonnull
@@ -163,19 +164,22 @@ public class JavaHelper {
 
     @Nonnull
     public String getExternalMethodName(@Nonnull String externalType) {
-        PRIMITIVE:
-        {
-            for (int i = 0; i < externalType.length(); i++) {
-                char c = externalType.charAt(i);
-                // If it's a dot, or uppercase, then it's not a primitive.
-                if (!Character.isLowerCase(c))
-                    break PRIMITIVE;
-            }
-            return "visitExternal" + capitalize(externalType);
+        switch (externalType) {
+            case "byte":
+            case "char":
+            case "short":
+            case "int":
+            case "long":
+                // All widen losslessly to long.
+                return "visitExternalLong";
+            case "float":
+            case "double":
+                // All widen losslessly to double.
+                return "visitExternalDouble";
+            // Autoboxing booleans is allocation-free.
+            case "boolean":
+            default:
+                return "visitExternalObject";
         }
-        if (String.class.getSimpleName().equals(externalType)
-                || String.class.getName().equals(externalType))
-            return "visitExternalString";
-        return "visitExternalObject";
     }
 }

@@ -20,21 +20,24 @@ import ${package}.node.*;
  */
 public class TreeVisitorAdapter<I, O, X extends Exception> extends VisitorAdapter<I, O, X> {
 
-    public O inExternals(@Nonnull IAlternative node, @Nonnegative int externalCount, I input) {
+## Externals could use ialternative rather than Node.
+    public O inExternals(@Nonnull Node node, I input, @Nonnegative int externalCount) {
         return null;
     }
 
-    public O outExternals(@Nonnull IAlternative node, @Nonnegative int externalCount, I input) {
+    public O outExternals(@Nonnull Node node, I input, @Nonnegative int externalCount) {
         return null;
     }
-
 #foreach ($externalType in $helper.externalTypes)
+
     /**
+     * A default handler for externals which can losslessly be converted to ${externalType}.
+     *
      * By default, returns null.
      *
      * @return null
      */
-    public O ${helper.getExternalMethodName($externalType)}(@Nonnull IAlternative node, String name, $externalType value, I input) {
+    public O ${helper.getExternalMethodName($externalType)}(@Nonnull Node node, I input, @Nonnull String name, $externalType value) {
         return null;
     }
 #end
@@ -43,30 +46,39 @@ public class TreeVisitorAdapter<I, O, X extends Exception> extends VisitorAdapte
         return null;
     }
 
-    public O outDefault(@Nonnull Node node, I input, O inResult) throws X {
-        return inResult;
+    public O outDefault(@Nonnull Node node, I input) throws X {
+        return null;
     }
 
     public O inStart(@Nonnull Start node, I input) throws X {
         return inDefault(node, input);
     }
 
-    public O outStart(@Nonnull Start node, I input, O inResult) throws X {
-        return outDefault(node, input, inResult);
+    public O outStart(@Nonnull Start node, I input) throws X {
+        return outDefault(node, input);
     }
 
 #foreach ($production in $grammar.astProductions)
+
     // Production: $production
 #foreach ($alternative in $production.alternatives)
+
     // Alternative: $alternative
     public O in${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
         return inDefault(node, input);
     }
 
-    public O out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input, O inResult) throws X {
-        return outDefault(node, input, inResult);
+    public O out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
+        return outDefault(node, input);
     }
-#end
-#end
+
+#foreach ($external in $alternative.externals)
+    /** Handles the external '${alternative.name}.${external.name}'. */
+    public O visitExternal${alternative.javaMethodName}${external.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input, ${external.javaTypeName} value) {
+        return $helper.getExternalMethodName($external.javaTypeName)(node, input, "${external.name}", value);
+    }
+#end##external
+#end##alternative
+#end##production
 
 }

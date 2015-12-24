@@ -22,10 +22,10 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
 
     @Override
     public O visitStart(Start node, I input) throws X {
-        O inResult = inStart(node, input);
+        inStart(node, input);
         node.get${grammar.astProductionRoot.javaMethodName}().apply(this, input);
         node.getEOF().apply(this, input);
-        return outStart(node, input, inResult);
+        return outStart(node, input);
     }
 
 #foreach ($production in $grammar.astProductions)
@@ -34,7 +34,7 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
     // Alternative: $alternative
     @Override
     public O visit${alternative.javaMethodName}(${alternative.javaTypeName} node, I input) throws X {
-        O inResult = in${alternative.javaMethodName}(node, input);
+        in${alternative.javaMethodName}(node, input);
 
 #foreach ($element in $alternative.elements)
 #if ($element.list)
@@ -53,13 +53,13 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
 #end##foreach element
 
         // These are emitted in order of definition, but universally after elements.
-        inExternals(node, $alternative.externals.size(), input);
+        inExternals(node, input, $alternative.externals.size());
 #foreach ($external in $alternative.externals)
-        $helper.getExternalMethodName($external.javaTypeName)(node, "${external.name}", node.get${external.javaMethodName}(), input);
+        visitExternal${alternative.javaMethodName}${external.javaMethodName}(node, input, node.get${external.javaMethodName}());
 #end##foreach alternative.externals
-        outExternals(node, $alternative.externals.size(), input);
+        outExternals(node, input, $alternative.externals.size());
 
-        return out${alternative.javaMethodName}(node, input, inResult);
+        return out${alternative.javaMethodName}(node, input);
     }
 
 #end
