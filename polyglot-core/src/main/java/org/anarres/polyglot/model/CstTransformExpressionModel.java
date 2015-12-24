@@ -281,12 +281,18 @@ public abstract class CstTransformExpressionModel extends AbstractModel {
 
         @Override
         public void addTransformExpression(CstTransformExpressionModel expression) {
-            items.add(expression);
+            addItem(expression);
         }
 
         @TemplateProperty
         public java.util.List<CstTransformExpressionModel> getItems() {
             return items;
+        }
+
+        public void addItem(@Nonnull CstTransformExpressionModel expression) {
+            if (expression instanceof List)
+                throw new IllegalArgumentException("Cannot put a List in a List.");
+            items.add(expression);
         }
 
         @Nonnull

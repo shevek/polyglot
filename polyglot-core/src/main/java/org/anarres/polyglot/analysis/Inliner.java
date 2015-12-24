@@ -40,12 +40,12 @@ public class Inliner {
     private static final Logger LOG = LoggerFactory.getLogger(Inliner.class);
     private static final boolean DEBUG = false;
     private final ExpressionSubstituteVisitor substituteVisitor = new ExpressionSubstituteVisitor();
-    private final ErrorHandler errors;
+    // private final ErrorHandler errors;
     private final GrammarModel grammar;
     private int substitutions = 0;
 
     public Inliner(@Nonnull ErrorHandler errors, @Nonnull GrammarModel grammar) {
-        this.errors = errors;
+        // this.errors = errors;
         this.grammar = grammar;
     }
 

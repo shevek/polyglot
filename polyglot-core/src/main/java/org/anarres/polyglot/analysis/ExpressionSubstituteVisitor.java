@@ -132,6 +132,19 @@ public class ExpressionSubstituteVisitor implements CstTransformExpressionModel.
         return out;
     }
 
+    private void addItem(@Nonnull CstTransformExpressionModel.List out, @Nonnull CstTransformExpressionModel item) {
+        if (item instanceof CstTransformExpressionModel.List) {
+            CstTransformExpressionModel.List in = (CstTransformExpressionModel.List) item;
+            for (CstTransformExpressionModel subitem : in.getItems()) {
+                // This should never recurse a second time - if it does, we screwed up elsewhere.
+                // addItem(out, subitem);
+                out.addItem(subitem);
+            }
+        } else {
+            out.addItem(item);
+        }
+    }
+
     @Override
     public CstTransformExpressionModel visitList(CstTransformExpressionModel.List expression, SubstitutionMap input) throws RuntimeException {
         List<? extends CstTransformExpressionModel> arguments = visitChildren(expression.getItems(), input, true);
@@ -139,7 +152,11 @@ public class ExpressionSubstituteVisitor implements CstTransformExpressionModel.
             return expression;
         CstTransformExpressionModel.List out = new CstTransformExpressionModel.List(expression.getLocation());
         out.elementType = expression.elementType;
-        out.getItems().addAll(arguments);
+        // If we are substituting a list-valued expression into an expression which also expresses the list nature,
+        // we can accidentally double the list nature.
+        // Since a list can never be embedded in a list, we just decapsulate once here.
+        for (CstTransformExpressionModel argument : arguments)
+            addItem(out, argument);
         return out;
     }
 
