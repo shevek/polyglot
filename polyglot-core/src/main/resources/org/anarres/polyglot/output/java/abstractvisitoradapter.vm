@@ -12,6 +12,20 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import ${package}.node.*;
 
+#macro(javadocVisitToken)
+    /**
+     * By default, calls {@link ${esc.h}visitToken(Token, Object)}.
+     *
+     * @return The return value of {@link ${esc.h}visitToken(Token, Object)}.
+     */
+#end
+#macro(javadocVisitDefault)
+    /**
+     * By default, calls {@link ${esc.h}visitDefault(Node, Object)}.
+     *
+     * @return The return value of {@link ${esc.h}visitDefault(Node, Object)}.
+     */
+#end
 /**
  * A default implementation of {@link Visitor} which returns null for all tokens.
  *
@@ -36,21 +50,13 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
         return null;
     }
 
-    /**
-     * By default, calls {@link ${esc.h}visitDefault(Node, I)}.
-     *
-     * @return The return value of {@link ${esc.h}visitDefault(Node, I)}.
-     */
+#javadocVisitDefault()
     public O visitToken(@Nonnull Token node, I input) throws X {
         return visitDefault(node, input);
     }
 
 #if ($grammar.astProductionRoot)
-    /**
-     * By default, calls {@link ${esc.h}visitDefault(Node, I)}.
-     *
-     * @return The return value of {@link ${esc.h}visitDefault(Node, I)}.
-     */
+#javadocVisitDefault()
     @Override
     public O visitStart(Start node, I input) throws X {
         return visitDefault(node, input);
@@ -58,11 +64,7 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
 #end
 
 #foreach ($token in $grammar.tokens)
-    /**
-     * By default, calls {@link ${esc.h}visitToken(Token, I)}.
-     *
-     * @return The return value of {@link ${esc.h}visitToken(Token, I)}.
-     */
+#javadocVisitToken()
     @Override
     public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X {
         return visitToken(node, input);
@@ -70,21 +72,13 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
 
 #end
 
-    /**
-     * By default, calls {@link ${esc.h}visitToken(Token, I)}.
-     *
-     * @return The return value of {@link ${esc.h}visitToken(Token, I)}.
-     */
+#javadocVisitToken()
     @Override
     public O visitEOF(EOF node, I input) throws X {
         return visitToken(node, input);
     }
 
-    /**
-     * By default, calls {@link ${esc.h}visitToken(Token, I)}.
-     *
-     * @return The return value of {@link ${esc.h}visitToken(Token, I)}.
-     */
+#javadocVisitToken()
     @Override
     public O visitInvalidToken(InvalidToken node, I input) throws X {
         return visitToken(node, input);

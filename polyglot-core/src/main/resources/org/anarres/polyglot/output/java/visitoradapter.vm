@@ -27,9 +27,9 @@ public class VisitorAdapter<I, O, X extends Exception> extends AbstractVisitorAd
 #foreach ($production in $grammar.astProductions)
 #foreach ($alternative in $production.alternatives)
     /**
-     * By default, calls {@link ${esc.h}visitDefault(Node, I)}.
+     * By default, calls {@link ${esc.h}visitDefault(Node, Object)}.
      *
-     * @return The return value of {@link ${esc.h}visitDefault(Node, I)}.
+     * @return The return value of {@link ${esc.h}visitDefault(Node, Object)}.
      */
     @Override
     public O visit${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
