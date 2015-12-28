@@ -52,12 +52,14 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
 #end##list
 #end##foreach element
 
-        // These are emitted in order of definition, but universally after elements.
+#if (!$alternative.externals.empty)
+        // Externals are emitted in order of definition, but universally after elements.
         inExternals(node, input, $alternative.externals.size());
 #foreach ($external in $alternative.externals)
         visitExternal${alternative.javaMethodName}${external.javaMethodName}(node, input, node.get${external.javaMethodName}());
 #end##foreach alternative.externals
         outExternals(node, input, $alternative.externals.size());
+#end
 
         return out${alternative.javaMethodName}(node, input);
     }

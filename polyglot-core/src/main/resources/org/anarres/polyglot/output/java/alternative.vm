@@ -62,6 +62,45 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
 #end##foreach alternative.elements
     }
 
+#if (!$alternative.externals.empty)
+    /**
+     * Constructs a new ${alternative.javaTypeName} and sets all elements and externals.
+#foreach ($element in $alternative.elements)
+     * @param _${element.javaFieldName}_ See {@link #get${element.javaMethodName}()}.
+#end
+#foreach ($external in $alternative.externals)
+     * @param _${external.javaFieldName}_ See {@link #get${external.javaMethodName}()}.
+#end
+     */
+    public ${alternative.javaTypeName}(
+#foreach ($element in $alternative.elements)
+        #if($element.nullable)@CheckForNull#{else}@Nonnull#{end}##
+#if ($element.list)
+        Iterable<? extends ${element.javaTypeName}> _${element.javaFieldName}_,
+#else##if element.list
+        ${element.javaTypeName} _${element.javaFieldName}_,
+#end##if element.list
+#end##foreach alternative.elements
+#foreach ($external in $alternative.externals)
+        #if($external.nullable)@CheckForNull#{else}@Nonnull#{end}##
+#if ($external.list)
+        Iterable<? extends ${external.javaTypeName}> _${external.javaFieldName}_#if($velocityHasNext),#end
+
+#else##if external.list
+        ${external.javaTypeName} _${external.javaFieldName}_#if($velocityHasNext),#end
+
+#end##if external.list
+#end##foreach alternative.externals
+        ) {
+#foreach ($element in $alternative.elements)
+        set${element.javaMethodName}(_${element.javaFieldName}_);
+#end##foreach alternative.elements
+#foreach ($external in $alternative.externals)
+        set${external.javaMethodName}(_${external.javaFieldName}_);
+#end##foreach alternative.elements
+    }
+#end##!externals.empty
+
 #if (!$alternative.elements.empty)
     /** Constructs a new ${alternative.javaTypeName} without setting any fields. */
     public ${alternative.javaTypeName}() {
@@ -212,8 +251,10 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
 #foreach ($element in $alternative.elements)
 #if ($element.list)
             cloneList(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
+
 #else##if element.list
             cloneNode(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
+
 #end##if element.list
 #end##foreach alternative.elements
         );
