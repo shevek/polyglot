@@ -279,12 +279,16 @@ Productions
 	expression { -> expression } =
 		{list} tok_lsquare expression_list? tok_rsquare
 			{ -> New expression.list([expression_list.expression], tok_lsquare) } |
-		{new} kw_new identifier transform_specifier? tok_lpar expression_list? tok_rpar
-			{ -> New expression.new(identifier, transform_specifier.identifier, [expression_list.expression], kw_new) } |
+		{new} kw_new identifier transform_specifier? tok_lpar [arguments]:expression_list/*_trailing*/? tok_rpar
+			{ -> New expression.new(identifier, transform_specifier.identifier, [arguments.expression], kw_new) } |
 		{reference} /* specifier? */ identifier transform_specifier?
 			{ -> New expression.reference(/* specifier, */ identifier, transform_specifier.identifier) } |
 		{null} kw_null
 			{ -> New expression.null(kw_null) } ;
+
+	expression_list_trailing { -> expression* } =
+		expression_list tok_comma?
+			{ -> [expression_list.expression] } ;
 
 	expression_list { -> expression* } =
 		{single} expression
