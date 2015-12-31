@@ -13,7 +13,10 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import javax.annotation.Nonnull;
+import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizUtils;
+import org.anarres.graphviz.builder.GraphVizable;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.PolyglotExecutor;
 
@@ -27,10 +30,16 @@ public class GraphvizOutputWriter extends AbstractOutputWriter {
         super(OutputLanguage.graphviz, destinationDir, options, templates, data);
     }
 
+    private void write(@Nonnull File file, @Nonnull GraphVizable object) throws IOException {
+        GraphVizGraph graph = GraphVizUtils.toGraphVizGraph(object);
+        // This would be a good time to mutate the graph, highlight orphans, etc.
+        graph.writeTo(file);
+    }
+
     @Override
     public void run(PolyglotExecutor executor) throws InterruptedException, ExecutionException, IOException {
-        GraphVizUtils.toGraphVizFile(newDestinationFile("ast.dot"), getGrammar().getAstGraphVizable());
-        GraphVizUtils.toGraphVizFile(newDestinationFile("cst.dot"), getGrammar().getCstGraphVizable());
+        write(newDestinationFile("ast.dot"), getGrammar().getAstGraphVizable());
+        write(newDestinationFile("cst.dot"), getGrammar().getCstGraphVizable());
         URL resource = Resources.getResource(getClass(), "graphviz/Makefile");
         Resources.asByteSource(resource).copyTo(Files.asByteSink(newDestinationFile("Makefile")));
         processTemplates(executor);
