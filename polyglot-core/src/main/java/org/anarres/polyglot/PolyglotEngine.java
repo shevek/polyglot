@@ -7,6 +7,8 @@ package org.anarres.polyglot;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.google.common.io.CharSink;
 import com.google.common.io.CharSource;
 import com.google.common.io.Files;
@@ -109,12 +111,12 @@ public class PolyglotEngine {
     @Nonnull
     private DebugHandler debugHandler = DebugHandler.None.INSTANCE;
     public final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_TABLES, Option.CG_APIDOC, Option.CG_FINDBUGS, Option.PARALLEL);
-    private final Map<String, File> templates = new HashMap<>();
+    private final Table<OutputLanguage, String, File> templates = HashBasedTable.create();
 
     public PolyglotEngine(@Nonnull String name, @Nonnull CharSource input, @Nonnull File outputDir) {
         this.name = name;
         this.input = input;
-        this.outputDirs.put(OutputLanguage.java, outputDir);
+        setOutputDir(OutputLanguage.java, outputDir);
     }
 
     public PolyglotEngine(@Nonnull File input, @Nonnull File outputDir) {
@@ -171,8 +173,8 @@ public class PolyglotEngine {
         return options.contains(option);
     }
 
-    public void addTemplates(@Nonnull Map<String, File> templates) {
-        this.templates.putAll(templates);
+    public void addTemplates(@Nonnull OutputLanguage language, Map<String, File> templates) {
+        this.templates.row(language).putAll(templates);
     }
 
     public void setOutputDir(@Nonnull OutputLanguage language, @CheckForNull File outputDir) {
@@ -467,7 +469,7 @@ public class PolyglotEngine {
         OutputData data = new OutputData(grammar, automaton, tables);
         try {
             for (Map.Entry<OutputLanguage, File> e : outputDirs.entrySet()) {
-                OutputWriter writer = e.getKey().newOutputWriter(e.getValue(), options, templates, data);
+                OutputWriter writer = e.getKey().newOutputWriter(e.getValue(), options, templates.row(e.getKey()), data);
                 writer.run(executor);
             }
         } finally {

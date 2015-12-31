@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 import org.anarres.polyglot.DebugHandler;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.PolyglotEngine;
+import org.anarres.polyglot.output.OutputLanguage;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.file.EmptyFileVisitor;
@@ -154,6 +155,9 @@ public class Polyglot extends ConventionTask {
                 getLogger().info("Visiting " + fvd);
                 try {
                     PolyglotEngine engine = new PolyglotEngine(fvd.getFile().getAbsoluteFile(), outputDir.getAbsoluteFile());
+                    File reportsDir = new File(getProject().getBuildDir(), "reports/polyglot");
+                    engine.setOutputDir(OutputLanguage.html, new File(reportsDir, engine.getName()));
+                    engine.setOutputDir(OutputLanguage.graphviz, new File(reportsDir, engine.getName()));
                     File debugDir = getDebugDir();
                     if (debugDir != null) {
                         PolyglotEngine.mkdirs(debugDir, "debug directory");
@@ -166,7 +170,7 @@ public class Polyglot extends ConventionTask {
                     }
                     Map<String, File> templates = getTemplates();
                     if (templates != null)
-                        engine.addTemplates(templates);
+                        engine.addTemplates(OutputLanguage.java, templates);
                     if (!engine.run())
                         throw new GradleException("Failed to process " + fvd + ":\n" + engine.getErrors().toString(engine.getInput()));
                 } catch (GradleException e) {

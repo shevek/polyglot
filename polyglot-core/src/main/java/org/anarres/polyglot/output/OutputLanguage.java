@@ -22,10 +22,17 @@ public enum OutputLanguage {
                 public OutputWriter newOutputWriter(File destinationDir, Set<? extends Option> options, Map<? extends String, ? extends File> templates, OutputData data) {
                     return new JavaOutputWriter(destinationDir, options, templates, data);
                 }
-            }, html {
+            },
+    html {
                 @Override
                 public OutputWriter newOutputWriter(File destinationDir, Set<? extends Option> options, Map<? extends String, ? extends File> templates, OutputData data) {
                     return new HtmlOutputWriter(destinationDir, options, templates, data);
+                }
+            },
+    graphviz {
+                @Override
+                public OutputWriter newOutputWriter(File destinationDir, Set<? extends Option> options, Map<? extends String, ? extends File> templates, OutputData data) {
+                    return new GraphvizOutputWriter(destinationDir, options, templates, data);
                 }
             };
 

@@ -68,6 +68,11 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     }
 
     @Nonnull
+    public OutputLanguage getLanguage() {
+        return language;
+    }
+
+    @Nonnull
     public File getDestinationDir() {
         return destinationDir;
     }
@@ -171,7 +176,7 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     }
 
     protected void process(PolyglotExecutor executor, String srcResourceName, final String dstFilePath, final Map<String, Object> contextValues) throws ExecutionException, IOException {
-        URL resource = Resources.getResource(JavaOutputWriter.class, language.name() + "/" + srcResourceName);
+        URL resource = Resources.getResource(getClass(), language.name() + "/" + srcResourceName);
         final CharSource source = Resources.asCharSource(resource, Charsets.UTF_8);
         process(executor, source, dstFilePath, contextValues);
     }

@@ -59,7 +59,7 @@ project(':polyglot-core') {
 		compile 'com.google.code.findbugs:annotations:2.0.3'
 		compile 'com.google.guava:guava:18.0'
 		compile 'org.anarres:jcpp:1.4.11'
-		compile 'org.anarres.graphviz:graphviz-builder:1.0.0'
+		compile 'org.anarres.graphviz:graphviz-builder:1.0.2'
 		compile 'org.anarres.jdiagnostics:jdiagnostics:1.0.2'
 		// compile 'com.googlecode.javaewah:JavaEWAH:1.1.2'	// Slower than BitSet.
 		compile 'it.unimi.dsi:fastutil:7.0.8'
