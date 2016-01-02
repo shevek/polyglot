@@ -1,0 +1,21 @@
+Package org.anarres.polyglot.test.abstracts;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+	tok_d = 'd' ;
+	tok_e = 'e' ;
+
+Externals
+	j_string = 'String' ;
+	j_int    = 'int' ;
+
+Abstract Syntax Tree
+
+	program =
+		{a} [a]:tok_a [b]:j_string? [c]:tok_c [d]:j_int [e]:tok_e |
+		{b} [a]:tok_a [b]:j_string? [c]:j_int [d]:j_int [e]:tok_e |
+		{c} [a]:tok_a [b]:j_string? [c]:tok_c /* missing */ [e]:tok_e? ;
+

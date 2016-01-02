@@ -8,7 +8,6 @@ package org.anarres.polyglot.model;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AElement;
@@ -87,8 +86,13 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
     }
 
     @Override
-    public Multimap<String, AnnotationModel> getAnnotations() {
+    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
         return annotations;
+    }
+
+    @Nonnull
+    public AstAbstractElementModel toAbstractElementModel() {
+        return new AstAbstractElementModel(getName(), getJavaTypeName(), getUnaryOperator());
     }
 
     @Override

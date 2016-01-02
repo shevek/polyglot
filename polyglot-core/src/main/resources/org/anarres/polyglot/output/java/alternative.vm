@@ -119,8 +119,7 @@ public class ${alternative.javaTypeName} extends ${production.javaTypeName}
     }
 
     $!element.javadocComment
-    public void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} Iterable<? extends ${element.javaTypeName}> list)
-    {
+    public void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} Iterable<? extends ${element.javaTypeName}> list) {
         for (${element.javaTypeName} e : this._${element.javaFieldName}_) {
             e.parent(null);
         }

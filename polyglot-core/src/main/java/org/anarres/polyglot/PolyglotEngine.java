@@ -283,10 +283,10 @@ public class PolyglotEngine {
         new ConflictChecker(errors, grammar).run();
         if (errors.isFatal())
             return grammar;
-        new GrammarNormalizer(errors, grammar).run();
-        dump(debugHandler.forTarget(GRAMMAR_NORMALIZED, ".normalized.grammar"), grammar);
         dump(debugHandler.forTarget(GRAMMAR_CST, ".cst.dot"), grammar.getCstGraphVizable());
         dump(debugHandler.forTarget(GRAMMAR_AST, ".ast.dot"), grammar.getAstGraphVizable());
+        new GrammarNormalizer(errors, grammar).run();
+        dump(debugHandler.forTarget(GRAMMAR_NORMALIZED, ".normalized.grammar"), grammar);
         if (errors.isFatal())
             return grammar;
 

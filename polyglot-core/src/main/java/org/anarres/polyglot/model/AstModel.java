@@ -33,5 +33,5 @@ public interface AstModel {
 
     @Nonnull
     @TemplateProperty
-    public Multimap<String, AnnotationModel> getAnnotations();
+    public Multimap<String, ? extends AnnotationModel> getAnnotations();
 }

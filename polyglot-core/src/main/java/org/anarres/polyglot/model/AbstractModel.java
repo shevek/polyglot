@@ -95,7 +95,7 @@ public abstract class AbstractModel implements Model {
     }
 
     @Nonnull
-    public List<AAnnotation> toAnnotations(@Nonnull Multimap<String, AnnotationModel> annotations) {
+    public List<AAnnotation> toAnnotations(@Nonnull Multimap<? extends String, ? extends AnnotationModel> annotations) {
         List<AAnnotation> out = new ArrayList<>();
         for (AnnotationModel a : annotations.values())
             out.add(a.toNode());

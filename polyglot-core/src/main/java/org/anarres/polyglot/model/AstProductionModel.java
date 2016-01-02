@@ -6,9 +6,12 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multiset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -54,14 +57,31 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
         return new ArrayList<>(alternatives.values());
     }
 
-/*
-    public Map<String, String> getAbstractElements() {
-        Map<String, String> out = new HashMap<>();
+    @Nonnull
+    private void addAbstractElements(
+            @Nonnull Multiset<AstAbstractElementModel> out,
+            @Nonnull Iterable<? extends AstElementModel> in) {
+        for (AstElementModel e : in)
+            out.add(e.toAbstractElementModel());
     }
-*/
+
+    @Nonnull
+    @TemplateProperty
+    public List<AstAbstractElementModel> getAbstractElements() {
+        Multiset<AstAbstractElementModel> elements = HashMultiset.create();
+        for (AstAlternativeModel alternative : alternatives.values()) {
+            addAbstractElements(elements, alternative.getElements());
+            addAbstractElements(elements, alternative.getExternals());
+        }
+        List<AstAbstractElementModel> out = new ArrayList<>();
+        for (Multiset.Entry<AstAbstractElementModel> e : elements.entrySet())
+            if (e.getCount() == alternatives.size())
+                out.add(e.getElement());
+        return out;
+    }
 
     @Override
-    public Multimap<String, AnnotationModel> getAnnotations() {
+    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
         return annotations;
     }
 
