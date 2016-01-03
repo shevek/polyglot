@@ -15,6 +15,7 @@ Externals
 Abstract Syntax Tree
 
 	program =
+		@abstract {abstract} [a]:tok_a [b]:j_string? [e]:tok_e? |
 		{a} [a]:tok_a [b]:j_string? [c]:tok_c [d]:j_int [e]:tok_e |
 		{b} [a]:tok_a [b]:j_string? [c]:j_int [d]:j_int [e]:tok_e |
 		{c} [a]:tok_a [b]:j_string? [c]:tok_c /* missing */ [e]:tok_e? ;

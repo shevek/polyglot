@@ -92,7 +92,7 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
 
     @Nonnull
     public AstAbstractElementModel toAbstractElementModel() {
-        return new AstAbstractElementModel(getName(), getJavaTypeName(), getUnaryOperator());
+        return new AstAbstractElementModel(getName(), getJavadocComment(), getJavaTypeName(), getUnaryOperator());
     }
 
     @Override

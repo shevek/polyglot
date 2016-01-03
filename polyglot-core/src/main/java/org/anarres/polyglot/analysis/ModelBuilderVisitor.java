@@ -326,18 +326,31 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
     @Override
     public void caseAAstAlternative(AAstAlternative node) {
         astAlternative = AstAlternativeModel.forNode(astProduction, node);
-        Object prev = astProduction.alternatives.put(astAlternative.getName(), astAlternative);
-        if (prev != null) {
-            if (node.getName() == null)
-                errors.addError(astAlternative.getLocation(), "Multiple anonymous AST alternatives in production '" + astProduction.getName() + "'.");
-            else
-                errors.addError(astAlternative.getLocation(), "Duplicate AST alternative name '" + astAlternative.getName() + "'.");
-        }
 
         for (PElement element : node.getElements()) {
             element.apply(this);
         }
         setOut(node, astAlternative);
+
+        // We have to do this second, so we can decide whether to convert
+        // the alternative to a list of abstract elements.
+        // LOG.info("Annotations are " + astAlternative.getAnnotations());
+        if (false && astAlternative.getAnnotations().containsKey("abstract")) {
+            Object prev = astProduction.abstractAlternative;
+            if (prev != null)
+                errors.addError(astAlternative.getLocation(), "Multiple abstract AST alternatives in production '" + astProduction.getName() + "'.");
+            // TODO: Convert to abstract here - although we have to link first!
+            astProduction.abstractAlternative = astAlternative;
+        } else {
+            Object prev = astProduction.alternatives.put(astAlternative.getName(), astAlternative);
+            if (prev != null) {
+                if (node.getName() == null)
+                    errors.addError(astAlternative.getLocation(), "Multiple anonymous AST alternatives in production '" + astProduction.getName() + "'.");
+                else
+                    errors.addError(astAlternative.getLocation(), "Duplicate AST alternative name '" + astAlternative.getName() + "'.");
+            }
+        }
+
         astAlternative = null;
     }
 

@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import com.google.common.base.MoreObjects;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AAnnotation;
@@ -41,4 +42,8 @@ public class AnnotationModel extends AbstractModel {
         return new AAnnotation(name, new TString("'" + value + "'"));
     }
 
+    @Override
+    public String toString() {
+        return "@" + getName() + "(" + MoreObjects.firstNonNull(getValue(), "") + ")";
+    }
 }

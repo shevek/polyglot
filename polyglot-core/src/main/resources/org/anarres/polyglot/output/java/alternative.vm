@@ -20,7 +20,8 @@ $production.javadocComment
 ## /** ${alternative} */
 #end
 #annotate($alternative)
-public class ${alternative.javaTypeName} extends ${production.javaTypeName}
+public class ${alternative.javaTypeName}
+        extends $helper.getSuperClass($alternative, ${production.javaTypeName})
         implements IAlternative
 #implement($alternative)
         {

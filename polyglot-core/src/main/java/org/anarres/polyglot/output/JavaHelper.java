@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.output;
 
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -144,6 +145,12 @@ public class JavaHelper {
         for (AnnotationModel annotation : model.getAnnotations().get(name))
             out.add(annotation.getValue());
         return out;
+    }
+
+    @Nonnull
+    public String getSuperClass(@Nonnull AstModel model, @Nonnull String defaultValue) {
+        List<String> values = getAnnotations(model, "javaExtends");
+        return Iterables.getFirst(values, defaultValue);
     }
 
     @Nonnull

@@ -6,12 +6,10 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,6 +36,8 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
     }
 
     public final Map<String, AstAlternativeModel> alternatives = new TreeMap<>();
+    @Deprecated // Not used
+    public AstAlternativeModel abstractAlternative;
     private final Multimap<String, AnnotationModel> annotations;
 
     public AstProductionModel(TIdentifier name, Multimap<String, AnnotationModel> annotations) {
@@ -58,6 +58,7 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
     }
 
     @Nonnull
+    @Deprecated // Not used
     private void addAbstractElements(
             @Nonnull Multiset<AstAbstractElementModel> out,
             @Nonnull Iterable<? extends AstElementModel> in) {
@@ -67,16 +68,25 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
 
     @Nonnull
     @TemplateProperty
+    @Deprecated // Not used
     public List<AstAbstractElementModel> getAbstractElements() {
-        Multiset<AstAbstractElementModel> elements = HashMultiset.create();
-        for (AstAlternativeModel alternative : alternatives.values()) {
-            addAbstractElements(elements, alternative.getElements());
-            addAbstractElements(elements, alternative.getExternals());
-        }
+        /*
+         Multiset<AstAbstractElementModel> elements = HashMultiset.create();
+         for (AstAlternativeModel alternative : alternatives.values()) {
+         addAbstractElements(elements, alternative.getElements());
+         addAbstractElements(elements, alternative.getExternals());
+         }
+         List<AstAbstractElementModel> out = new ArrayList<>();
+         for (Multiset.Entry<AstAbstractElementModel> e : elements.entrySet())
+         if (e.getCount() == alternatives.size())
+         out.add(e.getElement());
+         */
+
+        if (abstractAlternative == null)
+            return Collections.emptyList();
         List<AstAbstractElementModel> out = new ArrayList<>();
-        for (Multiset.Entry<AstAbstractElementModel> e : elements.entrySet())
-            if (e.getCount() == alternatives.size())
-                out.add(e.getElement());
+        for (AstElementModel element : abstractAlternative.elements)
+            out.add(element.toAbstractElementModel());
         return out;
     }
 

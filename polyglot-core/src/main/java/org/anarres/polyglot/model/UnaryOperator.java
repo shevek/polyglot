@@ -121,4 +121,16 @@ public enum UnaryOperator {
         return Preconditions.checkNotNull(visitor.operator, "Got no UnaryOperator from " + node.getClass());
     }
 
+    @CheckForNull
+    @Deprecated // Not used.
+    public static UnaryOperator merge(@Nonnull UnaryOperator a, @Nonnull UnaryOperator b) {
+        // List changes are not nullable.
+        if (a.isList() != b.isList())
+            return null;
+        // Return the nullable one, if present.
+        if (a.isNullable())
+            return a;
+        // Either b is nullable, or neither is.
+        return b;
+    }
 }

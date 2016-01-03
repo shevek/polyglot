@@ -22,12 +22,16 @@ import org.anarres.polyglot.node.TJavadocComment;
 import org.anarres.polyglot.node.TString;
 import org.anarres.polyglot.node.Token;
 import org.anarres.polyglot.output.TemplateProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author shevek
  */
 public abstract class AbstractModel implements Model {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractModel.class);
 
     private static class TokenFinder extends DepthFirstAdapter {
 
@@ -88,9 +92,11 @@ public abstract class AbstractModel implements Model {
                 AAnnotation a = (AAnnotation) node;
                 TString value = a.getValue();
                 AnnotationModel m = new AnnotationModel(a.getName(), value == null ? null : NFABuilderVisitor.parse(a.getValue()));
+                // LOG.info("Annotation: " + m);
                 out.put(m.getName(), m);
             }
         }
+        // LOG.info("Annotations: " + out);
         return out;
     }
 

@@ -31,6 +31,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizable;
+import org.anarres.polyglot.analysis.AbstractChecker;
 import org.anarres.polyglot.analysis.ConflictChecker;
 import org.anarres.polyglot.analysis.GrammarNormalizer;
 import org.anarres.polyglot.analysis.GrammarWriterVisitor;
@@ -281,6 +282,9 @@ public class PolyglotEngine {
         dump(debugHandler.forTarget(GRAMMAR_LINKED, ".linked.grammar"), grammar);
         // dump("Linked model", grammar);
         new ConflictChecker(errors, grammar).run();
+        if (errors.isFatal())
+            return grammar;
+        new AbstractChecker(errors, grammar).run();
         if (errors.isFatal())
             return grammar;
         dump(debugHandler.forTarget(GRAMMAR_CST, ".cst.dot"), grammar.getCstGraphVizable());

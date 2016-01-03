@@ -15,7 +15,8 @@ $production.javadocComment
 /** The abstract superclass of all ${production.name} alternatives. */
 #end
 #annotate($production)
-public abstract class ${production.javaTypeName} extends Node
+public abstract class ${production.javaTypeName}
+        extends $helper.getSuperClass($production, "Node")
         implements IProduction
 #implement($production)
         {
@@ -35,6 +36,7 @@ public abstract class ${production.javaTypeName} extends Node
     $!element.javadocComment
     public abstract void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} Iterable<? extends ${element.javaTypeName}> list);
 #else##$element.list
+
     $!element.javadocComment
 #if ($element.nullable)
     @CheckForNull
