@@ -42,7 +42,7 @@ public class Polyglot extends ConventionTask {
     private File outputDir;
     @CheckForNull
     private File debugDir;
-    @CheckForNull
+    @Nonnull
     private final Map<String, PolyglotTemplateSet> templates = new HashMap<>();
     @CheckForNull
     private Map<Option, Boolean> options;
