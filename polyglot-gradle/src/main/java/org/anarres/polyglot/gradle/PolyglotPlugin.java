@@ -2,6 +2,7 @@ package org.anarres.polyglot.gradle;
 
 import com.google.common.base.Throwables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import groovy.lang.Closure;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.file.CopySpec;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.plugins.JavaPluginConvention;
@@ -130,6 +132,11 @@ public class PolyglotPlugin implements Plugin<Project> {
 
         project.getTasks().getByName(sourceSet.getCompileJavaTaskName()).dependsOn(polyglotParserTask);
 
-        sourceSet.getResources().srcDir(polyglotParserTask.getOutputDir()).include("**/*.dat");
+        CopySpec processResourcesTask = (CopySpec) project.getTasks().getByName(sourceSet.getProcessResourcesTaskName());
+        processResourcesTask.with(
+                project.copySpec(Closure.IDENTITY)
+                .from(polyglotParserTask.getOutputDir())
+                .include("**/*.dat")
+        );
     }
 }
