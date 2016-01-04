@@ -2,9 +2,7 @@ package org.anarres.polyglot.gradle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -18,17 +16,9 @@ public class PolyglotPluginExtension {
 
     private static final Logger LOG = LoggerFactory.getLogger(PolyglotPluginExtension.class);
     @Nonnull
-    public Object inputDir = "src/main/polyglot";
-    @Nonnull
     public List<Object> includeDirs = new ArrayList<Object>();
-    @Nonnull
-    public Object intermediateDir = "build/generated-sources/polyglot-grammar";
-    @Nonnull
-    public Object outputDir = "build/generated-sources/polyglot-java";
     @CheckForNull
     public Object debugDir;
-    @Nonnull
-    public Map<String, Object> templates = new HashMap<>();
     @Nonnull
     public List<String> options = new ArrayList<>();
 
@@ -39,11 +29,6 @@ public class PolyglotPluginExtension {
         } else {
             debugDir = null;
         }
-    }
-
-    public void template(@Nonnull String dstFilePath, @Nonnull Object srcTemplate) {
-        templates.put(dstFilePath, srcTemplate);
-        // LOG.info("Templates are now " + templates);
     }
 
     public void option(@Nonnull String... options) {

@@ -178,6 +178,10 @@ public class PolyglotEngine {
         this.templates.row(language).putAll(templates);
     }
 
+    public void addTemplate(@Nonnull OutputLanguage language, @Nonnull String dstPath, @Nonnull File srcFile) {
+        this.templates.put(language, dstPath, srcFile);
+    }
+
     public void setOutputDir(@Nonnull OutputLanguage language, @CheckForNull File outputDir) {
         if (outputDir != null)
             outputDirs.put(language, outputDir);

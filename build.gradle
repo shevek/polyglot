@@ -113,7 +113,7 @@ project(':polyglot-gradle') {
 			exclude group: 'com.google.guava', module: 'guava'
 		}
 		compile gradleApi()
-		compile 'org.anarres.gradle:gradle-velocity-plugin:1.0.5'
+		compile 'org.anarres.gradle:gradle-velocity-plugin:1.0.6'
 	}
 
 	animalsniffer {

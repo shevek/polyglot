@@ -5,11 +5,13 @@
  */
 package org.anarres.polyglot.gradle;
 
+import com.google.common.collect.Table;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -17,6 +19,7 @@ import org.anarres.polyglot.DebugHandler;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.PolyglotEngine;
 import org.anarres.polyglot.output.OutputLanguage;
+import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.file.EmptyFileVisitor;
@@ -40,7 +43,7 @@ public class Polyglot extends ConventionTask {
     @CheckForNull
     private File debugDir;
     @CheckForNull
-    private Map<String, File> templates;
+    private final Map<String, PolyglotTemplateSet> templates = new HashMap<>();
     @CheckForNull
     private Map<Option, Boolean> options;
 
@@ -86,26 +89,29 @@ public class Polyglot extends ConventionTask {
     }
 
     @Input
-    public Map<String, File> getTemplates() {
+    public Map<String, PolyglotTemplateSet> getTemplates() {
         return templates;
     }
 
     @InputFiles
     /* pp */ Collection<? extends File> getTemplateFiles() {
-        Map<?, File> t = getTemplates();    // Access through convention.
-        if (t == null)
-            return Collections.<File>emptyList();
-        return t.values();
+        List<File> out = new ArrayList<>();
+        for (PolyglotTemplateSet templateSet : templates.values())
+            out.addAll(templateSet.getTemplates().values());
+        return out;
     }
 
-    public void setTemplates(Map<String, File> templates) {
-        this.templates = templates;
+    public void templates(@Nonnull String glob, @Nonnull Action<? super PolyglotTemplateSet> action) {
+        PolyglotTemplateSet templateSet = templates.get(glob);
+        if (templateSet == null) {
+            templateSet = new PolyglotTemplateSet(glob);
+            templates.put(glob, templateSet);
+        }
+        action.execute(templateSet);
     }
 
-    public void template(@Nonnull String path, @Nonnull Object file) {
-        if (templates == null)
-            templates = new HashMap<>();
-        templates.put(path, getProject().file(file));
+    public void templates(@Nonnull Action<? super PolyglotTemplateSet> action) {
+        templates("*", action);
     }
 
     @Input
@@ -155,7 +161,7 @@ public class Polyglot extends ConventionTask {
                 getLogger().info("Visiting " + fvd);
                 try {
                     PolyglotEngine engine = new PolyglotEngine(fvd.getFile().getAbsoluteFile(), outputDir.getAbsoluteFile());
-                    File reportsDir = new File(getProject().getBuildDir(), "reports/polyglot");
+                    final File reportsDir = new File(getProject().getBuildDir(), "reports/polyglot");
                     engine.setOutputDir(OutputLanguage.html, new File(reportsDir, engine.getName()));
                     engine.setOutputDir(OutputLanguage.graphviz, new File(reportsDir, engine.getName()));
                     File debugDir = getDebugDir();
@@ -168,9 +174,12 @@ public class Polyglot extends ConventionTask {
                             engine.setOption(e.getKey(), e.getValue().booleanValue());
                         }
                     }
-                    Map<String, File> templates = getTemplates();
-                    if (templates != null)
-                        engine.addTemplates(OutputLanguage.java, templates);
+                    for (PolyglotTemplateSet templateSet : templates.values()) {
+                        if (!templateSet.toSpec().isSatisfiedBy(fvd))
+                            continue;
+                        for (Map.Entry<OutputLanguage, Map<String, File>> e : templateSet.getTemplates().rowMap().entrySet())
+                            engine.addTemplates(e.getKey(), e.getValue());
+                    }
                     if (!engine.run())
                         throw new GradleException("Failed to process " + fvd + ":\n" + engine.getErrors().toString(engine.getInput()));
                 } catch (GradleException e) {

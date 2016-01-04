@@ -2,13 +2,10 @@ package org.anarres.polyglot.gradle;
 
 import com.google.common.base.Throwables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import groovy.lang.Closure;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -19,13 +16,11 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.file.CopySpec;
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.plugins.JavaPluginConvention;
-import org.gradle.api.tasks.Copy;
+import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 
 /**
  *
@@ -61,17 +56,30 @@ public class PolyglotPlugin implements Plugin<Project> {
             throw Throwables.propagate(e);
         }
 
-        final Task polyglotGrammarTask = project.getTasks().create("polyglotGrammar", VelocityTask.class, new Action<VelocityTask>() {
+        project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(
+                new Action<SourceSet>() {
+                    @Override
+                    public void execute(SourceSet t) {
+                        apply(project, t, extension);
+                    }
+                });
+    }
+
+    private void apply(@Nonnull final Project project, @Nonnull final SourceSet sourceSet, @Nonnull final PolyglotPluginExtension extension) {
+        final PolyglotSourceSet polyglotSourceSet = new PolyglotSourceSet(sourceSet.getName(), fileResolver);
+        new DslObject(sourceSet).getConvention().getPlugins().put("polyglot", polyglotSourceSet);
+        final String srcDir = String.format("src/%s/polyglot", sourceSet.getName());
+        polyglotSourceSet.getPolyglot().srcDir(srcDir);
+        sourceSet.getAllSource().source(polyglotSourceSet.getPolyglot());
+
+        final String intermediateDir = String.format("build/generated-sources/polyglot/%s/grammar", sourceSet.getName());
+        final String outputDir = String.format("build/generated-sources/polyglot/%s/java", sourceSet.getName());
+
+        String polyglotGrammarTaskName = sourceSet.getTaskName("polyglot", "Grammar");
+        final VelocityTask polyglotGrammarTask = project.getTasks().create(polyglotGrammarTaskName, VelocityTask.class, new Action<VelocityTask>() {
 
             @Override
             public void execute(VelocityTask task) {
-
-                task.conventionMapping("inputDir", new Callable<File>() {
-                    @Override
-                    public File call() throws Exception {
-                        return project.file(extension.inputDir);
-                    }
-                });
 
                 task.conventionMapping("includeDirs", new Callable<List<File>>() {
                     @Override
@@ -86,37 +94,17 @@ public class PolyglotPlugin implements Plugin<Project> {
                         return out;
                     }
                 });
-
-                task.conventionMapping("outputDir", new Callable<File>() {
-                    @Override
-                    public File call() throws Exception {
-                        return project.file(extension.intermediateDir);
-                    }
-                });
-
-                task.setIncludeFilter("**/*.polyglot", "**/*.sablecc");
             }
         });
+        polyglotGrammarTask.setSource(polyglotSourceSet.getPolyglot());
+        polyglotGrammarTask.setOutputDir(project.file(intermediateDir));
 
-        final Task polyglotParserTask = project.getTasks().create("polyglotParser", Polyglot.class, new Action<Polyglot>() {
+        String polyglotParserTaskName = sourceSet.getTaskName("polyglot", "Parser");
+        final Polyglot polyglotParserTask = project.getTasks().create(polyglotParserTaskName, Polyglot.class, new Action<Polyglot>() {
             @Override
             public void execute(Polyglot task) {
                 task.dependsOn(polyglotGrammarTask);
                 task.setDescription("Preprocesses Polyglot grammar files.");
-
-                task.conventionMapping("inputDir", new Callable<File>() {
-                    @Override
-                    public File call() throws Exception {
-                        return project.file(extension.intermediateDir);
-                    }
-                });
-
-                task.conventionMapping("outputDir", new Callable<File>() {
-                    @Override
-                    public File call() throws Exception {
-                        return project.file(extension.outputDir);
-                    }
-                });
 
                 task.conventionMapping("debugDir", new Callable<File>() {
                     @Override
@@ -127,59 +115,21 @@ public class PolyglotPlugin implements Plugin<Project> {
                     }
                 });
 
-                task.conventionMapping("templates", new Callable<Map<String, File>>() {
-                    @Override
-                    public Map<String, File> call() throws Exception {
-                        Map<String, File> out = new HashMap<>();
-                        for (Map.Entry<String, Object> e : extension.templates.entrySet())
-                            out.put(e.getKey(), project.file(e.getValue()));
-                        return out;
-                    }
-                });
+                // task.conventionMapping("options", new Callable<>(){});
             }
         });
-
-        project.getTasks().getByName("compileJava").dependsOn(polyglotParserTask);
-        SourceSetContainer sourceSets = project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets();
-
-        /*
-         sourceSets.all(new Action<SourceSet>() {
-         @Override
-         public void execute(SourceSet t) {
-         // Add a source set convention?
-         DefaultPolyglotSourceSet polyglotSourceSet = new DefaultPolyglotSourceSet(((DefaultSourceSet) t).getDisplayName(), fileResolver);
-         new DslObject(t).getConvention().getPlugins().put("polyglot", polyglotSourceSet);
-         polyglotSourceSet.getPolyglot().srcDir(String.format("src/%s/groovy", sourceSet.getName()));
-         }
-         });
-         */
-        final SourceSet mainSourceSet = sourceSets.getByName("main");
-        mainSourceSet.getJava().srcDir(extension.outputDir);
-
-        Task polyglotResourcesTask = project.getTasks().create("polyglotResources", Copy.class, new Action<Copy>() {
-
+        polyglotParserTask.onlyIf(new Spec<Task>() {
             @Override
-            @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")   // into, from and include do have side effects.
-            public void execute(Copy task) {
-                task.setDescription("Copies Polyglot resource files.");
-                task.into(mainSourceSet.getOutput().getResourcesDir());
-                task.from(extension.outputDir, new Closure<Void>(PolyglotPlugin.this) {
-                    @Override
-                    public Void call(Object... args) {
-                        CopySpec spec = (CopySpec) args[0];
-                        return doCall(spec);
-                    }
-
-                    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")   // include does have side effects.
-                    private Void doCall(CopySpec spec) {
-                        spec.include("**/*.dat");
-                        return null;
-                    }
-                });
+            public boolean isSatisfiedBy(Task t) {
+                return ((Polyglot) t).getInputDir().exists();
             }
         });
-        project.getTasks().getByName("classes").dependsOn(polyglotResourcesTask);
+        polyglotParserTask.setInputDir(polyglotGrammarTask.getOutputDir());
+        polyglotParserTask.setOutputDir(project.file(outputDir));
+        sourceSet.getJava().srcDir(polyglotParserTask.getOutputDir());
 
+        project.getTasks().getByName(sourceSet.getCompileJavaTaskName()).dependsOn(polyglotParserTask);
+
+        sourceSet.getResources().srcDir(polyglotParserTask.getOutputDir()).include("**/*.dat");
     }
-
 }
