@@ -23,8 +23,8 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
     @Override
     public O visitStart(Start node, I input) throws X {
         inStart(node, input);
-        node.get${grammar.astProductionRoot.javaMethodName}().apply(this, input);
-        node.getEOF().apply(this, input);
+        applyTo(node.get${grammar.astProductionRoot.javaMethodName}(), input);
+        applyTo(node.getEOF(), input);
         return outStart(node, input);
     }
 
