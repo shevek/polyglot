@@ -5,7 +5,6 @@
  */
 package org.anarres.polyglot.gradle;
 
-import com.google.common.collect.Table;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,22 +20,21 @@ import org.anarres.polyglot.PolyglotEngine;
 import org.anarres.polyglot.output.OutputLanguage;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
-import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.file.EmptyFileVisitor;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileVisitDetails;
-import org.gradle.api.internal.ConventionTask;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 
 /**
  *
  * @author shevek
  */
-public class Polyglot extends ConventionTask {
+public class Polyglot extends SourceTask {
 
     private File inputDir;
     private File outputDir;
@@ -47,14 +45,9 @@ public class Polyglot extends ConventionTask {
     @CheckForNull
     private Map<Option, Boolean> options;
 
-    @Nonnull
-    @InputDirectory
-    public File getInputDir() {
-        return inputDir;
-    }
-
+    @Deprecated // Use setSource.
     public void setInputDir(File inputDir) {
-        this.inputDir = inputDir;
+        setSource(inputDir);
     }
 
     @Nonnull
@@ -152,8 +145,7 @@ public class Polyglot extends ConventionTask {
         PolyglotEngine.deleteChildren(outputDir, "output directory");
         PolyglotEngine.mkdirs(outputDir, "output directory");
 
-        ConfigurableFileTree inputFiles = getProject().fileTree(getInputDir());
-        inputFiles.include("**/*.polyglot", "**/*.sablecc");
+        FileTree inputFiles = getSource();
         getLogger().info("Polyglot file tree is " + inputFiles);
         inputFiles.visit(new EmptyFileVisitor() {
             @Override

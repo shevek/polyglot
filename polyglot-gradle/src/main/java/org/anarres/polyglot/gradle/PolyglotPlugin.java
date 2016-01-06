@@ -120,13 +120,7 @@ public class PolyglotPlugin implements Plugin<Project> {
                 // task.conventionMapping("options", new Callable<>(){});
             }
         });
-        polyglotParserTask.onlyIf(new Spec<Task>() {
-            @Override
-            public boolean isSatisfiedBy(Task t) {
-                return ((Polyglot) t).getInputDir().exists();
-            }
-        });
-        polyglotParserTask.setInputDir(polyglotGrammarTask.getOutputDir());
+        polyglotParserTask.setSource(polyglotGrammarTask);
         polyglotParserTask.setOutputDir(project.file(outputDir));
         sourceSet.getJava().srcDir(polyglotParserTask.getOutputDir());
 

@@ -168,6 +168,12 @@ public class GrammarModel implements GraphVizScope {
         return astProductionRoot;
     }
 
+    @CheckForNull
+    @TemplateProperty
+    public AstProductionModel getAstProduction(@Nonnull String name) {
+        return astProductions.get(name);
+    }
+
     private boolean isSingleAlternativeProduction(@Nonnull CstProductionModel production) {
         return production.alternatives.size() == 1;
     }
