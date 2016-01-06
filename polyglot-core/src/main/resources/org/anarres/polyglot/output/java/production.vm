@@ -21,6 +21,8 @@ public abstract class ${production.javaTypeName}
 #implement($production)
         {
 
+    public static final ${production.javaTypeName}[] EMPTY_ARRAY = new ${production.javaTypeName}[0];
+
     /** Default nullary constructor. */
     public ${production.javaTypeName}() {
     }

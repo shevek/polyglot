@@ -26,6 +26,8 @@ public class ${alternative.javaTypeName}
 #implement($alternative)
         {
 
+    public static final ${alternative.javaTypeName}[] EMPTY_ARRAY = new ${alternative.javaTypeName}[0];
+
 #foreach ($element in $alternative.elements)
     /** Element ${element.name}. */
 #if ($element.list)

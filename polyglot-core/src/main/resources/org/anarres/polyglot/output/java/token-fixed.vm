@@ -15,6 +15,8 @@ public final class ${token.javaTypeName} extends Token
 #implement($token)
         {
 
+    public static final ${token.javaTypeName}[] EMPTY_ARRAY = new ${token.javaTypeName}[0];
+
     public ${token.javaTypeName}() {
     }
 

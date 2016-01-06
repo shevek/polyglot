@@ -39,16 +39,12 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
 #foreach ($element in $alternative.elements)
 #if ($element.list)
         {
-            List<${element.javaTypeName}> copy = new ArrayList<${element.javaTypeName}>(node.get${element.javaMethodName}());
+            ${element.javaTypeName}[] copy = node.get${element.javaMethodName}().toArray(${element.javaTypeName}.EMPTY_ARRAY);
             for (${element.javaTypeName} e : copy)
-                e.apply(this, input);
+                applyTo(e, input);
         }
 #else##list
-        {
-            ${element.javaTypeName} e = node.get${element.javaMethodName}();
-            if (e != null)
-                e.apply(this, input);
-        }
+        applyTo(node.get${element.javaMethodName}(), input);
 #end##list
 #end##foreach element
 

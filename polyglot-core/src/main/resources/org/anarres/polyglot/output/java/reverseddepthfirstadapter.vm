@@ -1,6 +1,7 @@
 /* ${header} */
 package ${grammar.package.packageName}.analysis;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,8 +30,8 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter {
     @Override
     public void caseStart(Start node) {
         inStart(node);
-        node.get${grammar.astProductionRoot.javaMethodName}().apply(this);
-        node.getEOF().apply(this);
+        applyTo(node.getEOF());
+        applyTo(node.get${grammar.astProductionRoot.javaMethodName}());
         outStart(node);
     }
 
@@ -57,17 +58,12 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter {
 #foreach ($element in $alternative.elementsReversed)
 #if ($element.list)
         {
-            List<${element.javaTypeName}> copy = new ArrayList<${element.javaTypeName}>(node.get${element.javaMethodName}());
-            Collections.reverse(copy);
-            for (${element.javaTypeName} e : copy)
-                e.apply(this);
+            ${element.javaTypeName}[] copy = node.get${element.javaMethodName}().toArray(${element.javaTypeName}.EMPTY_ARRAY);
+            for (int i = copy.length - 1; i >= 0; i--)
+                applyTo(copy[i]);
         }
 #else##list
-        {
-            ${element.javaTypeName} e = node.get${element.javaMethodName}();
-            if (e != null)
-                e.apply(this);
-        }
+        applyTo(node.get${element.javaMethodName}());
 #end##list
 #end##foreach element
 

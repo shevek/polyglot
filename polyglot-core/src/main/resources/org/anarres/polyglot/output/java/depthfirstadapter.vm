@@ -32,8 +32,8 @@ public class DepthFirstAdapter extends AnalysisAdapter {
     @Override
     public void caseStart(Start node) {
         inStart(node);
-        node.get${grammar.astProductionRoot.javaMethodName}().apply(this);
-        node.getEOF().apply(this);
+        applyTo(node.get${grammar.astProductionRoot.javaMethodName}());
+        applyTo(node.getEOF());
         outStart(node);
     }
 
@@ -56,16 +56,12 @@ public class DepthFirstAdapter extends AnalysisAdapter {
 #foreach ($element in $alternative.elements)
 #if ($element.list)
         {
-            List<${element.javaTypeName}> copy = new ArrayList<${element.javaTypeName}>(node.get${element.javaMethodName}());
+            ${element.javaTypeName}[] copy = node.get${element.javaMethodName}().toArray(${element.javaTypeName}.EMPTY_ARRAY);
             for (${element.javaTypeName} e : copy)
-                e.apply(this);
+                applyTo(e);
         }
 #else##list
-        {
-            ${element.javaTypeName} e = node.get${element.javaMethodName}();
-            if (e != null)
-                e.apply(this);
-        }
+        applyTo(node.get${element.javaMethodName}());
 #end##list
 #end##foreach element
 
