@@ -311,14 +311,6 @@ public class ReferenceLinker implements Runnable {
                     }
                 }
             }
-
-            AstAlternativeModel astAlternative = astProduction.abstractAlternative;
-            if (astAlternative != null) {
-                for (AstElementModel astElement : astAlternative.elements) {
-                    linkAstElement(astElement);
-                    // But do not transfer to externals.
-                }
-            }
         }
     }
 }

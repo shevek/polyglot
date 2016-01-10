@@ -36,8 +36,6 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
     }
 
     public final Map<String, AstAlternativeModel> alternatives = new TreeMap<>();
-    @Deprecated // Not used
-    public AstAlternativeModel abstractAlternative;
     private final Multimap<String, AnnotationModel> annotations;
 
     public AstProductionModel(TIdentifier name, Multimap<String, AnnotationModel> annotations) {
@@ -55,39 +53,6 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
     @TemplateProperty
     public List<AstAlternativeModel> getAlternatives() {
         return new ArrayList<>(alternatives.values());
-    }
-
-    @Nonnull
-    @Deprecated // Not used
-    private void addAbstractElements(
-            @Nonnull Multiset<AstAbstractElementModel> out,
-            @Nonnull Iterable<? extends AstElementModel> in) {
-        for (AstElementModel e : in)
-            out.add(e.toAbstractElementModel());
-    }
-
-    @Nonnull
-    @TemplateProperty
-    @Deprecated // Not used
-    public List<AstAbstractElementModel> getAbstractElements() {
-        /*
-         Multiset<AstAbstractElementModel> elements = HashMultiset.create();
-         for (AstAlternativeModel alternative : alternatives.values()) {
-         addAbstractElements(elements, alternative.getElements());
-         addAbstractElements(elements, alternative.getExternals());
-         }
-         List<AstAbstractElementModel> out = new ArrayList<>();
-         for (Multiset.Entry<AstAbstractElementModel> e : elements.entrySet())
-         if (e.getCount() == alternatives.size())
-         out.add(e.getElement());
-         */
-
-        if (abstractAlternative == null)
-            return Collections.emptyList();
-        List<AstAbstractElementModel> out = new ArrayList<>();
-        for (AstElementModel element : abstractAlternative.elements)
-            out.add(element.toAbstractElementModel());
-        return out;
     }
 
     @Override

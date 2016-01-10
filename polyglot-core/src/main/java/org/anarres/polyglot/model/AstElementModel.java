@@ -90,11 +90,6 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
         return annotations;
     }
 
-    @Nonnull
-    public AstAbstractElementModel toAbstractElementModel() {
-        return new AstAbstractElementModel(getName(), getJavadocComment(), getJavaTypeName(), getUnaryOperator());
-    }
-
     @Override
     public AElement toNode() {
         TIdentifier nameToken = Objects.equals(getName(), getSymbolName()) ? null : toNameToken();

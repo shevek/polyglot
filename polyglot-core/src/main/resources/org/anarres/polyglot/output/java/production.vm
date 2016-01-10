@@ -27,31 +27,6 @@ public abstract class ${production.javaTypeName}
     public ${production.javaTypeName}() {
     }
 
-#foreach ($element in $production.abstractElements)
-#if ($element.list)
-
-    $!element.javadocComment
-    @Nonnull
-#annotate($element)
-    public abstract List<${element.javaTypeName}> get${element.javaMethodName}();
-
-    $!element.javadocComment
-    public abstract void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} Iterable<? extends ${element.javaTypeName}> list);
-#else##$element.list
-
-    $!element.javadocComment
-#if ($element.nullable)
-    @CheckForNull
-#else
-    @Nonnull
-#end
-#annotate($element)
-    public abstract ${element.javaTypeName} get${element.javaMethodName}();
-
-    $!element.javadocComment
-    public abstract void set${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} ${element.javaTypeName} value);
-#end##$element.list
-#end##$element
 
     @Override
     public abstract ${production.javaTypeName} clone();

@@ -78,6 +78,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
 
         assertTrue(root.isDirectory());
 
+        Stopwatch stopwatch = Stopwatch.createStarted();
         for (File file : Files.fileTreeTraverser().preOrderTraversal(root)) {
             LOG.info("File is " + file);
             if (!file.isFile())
@@ -122,6 +123,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // continue;
             parse(file);
         }
+        LOG.info("Generaring all parsers took " + stopwatch);
 
         compile();
     }

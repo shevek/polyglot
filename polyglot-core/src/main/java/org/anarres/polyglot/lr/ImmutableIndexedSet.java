@@ -39,12 +39,22 @@ public class ImmutableIndexedSet<IndexedItem extends Indexed> extends AbstractIn
         return indices;
     }
 
+    private static long toBloomFilter(@Nonnull int[] indices) {
+        long out = 0;
+        for (int index : indices)
+            out |= (1L << (index & (Long.SIZE - 1)));
+        return out;
+    }
+
+    // There's no point having a bloom filter here, as we never call contains().
+    // private final long bloomFilter;
     private final int[] indices;
     private final int hashCode;
 
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public ImmutableIndexedSet(@Nonnull IndexedUniverse<IndexedItem> universe, @Nonnull int[] indices) {
         super(universe);
+        // this.bloomFilter = toBloomFilter(indices);
         this.indices = indices;
         this.hashCode = Arrays.hashCode(indices);
     }
@@ -81,12 +91,10 @@ public class ImmutableIndexedSet<IndexedItem extends Indexed> extends AbstractIn
 
     @Override
     public boolean contains(Object o) {
-        if (!isCompatibleObject(o))
-            return false;
         @SuppressWarnings("unchecked")
         IndexedItem i = (IndexedItem) o;
         int index = i.getIndex();
-        return Arrays.binarySearch(indices, index) >= 0;
+        return Arrays.binarySearch(indices, index) >= 0 && isCompatibleObject(o);
     }
 
     private static final class Itr<IndexedItem extends Indexed> implements Iterator<IndexedItem> {
@@ -98,18 +106,18 @@ public class ImmutableIndexedSet<IndexedItem extends Indexed> extends AbstractIn
         public Itr(@Nonnull IndexedUniverse<IndexedItem> universe, @Nonnull int[] indices) {
             this.universe = universe;
             this.indices = indices;
-            this.index = -1;
+            this.index = 0;
         }
 
         @Override
         public boolean hasNext() {
-            return index < (indices.length - 1);
+            return index < indices.length;
         }
 
         // This routine is a performance hotspot.
         @Override
         public IndexedItem next() {
-            int curr = indices[++index];
+            int curr = indices[index++];
             return universe.getItemByIndex(curr);
         }
 
