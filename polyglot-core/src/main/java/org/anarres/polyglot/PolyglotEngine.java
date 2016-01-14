@@ -31,6 +31,7 @@ import javax.annotation.Nonnull;
 import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizable;
 import org.anarres.polyglot.analysis.ConflictChecker;
+import org.anarres.polyglot.analysis.EpsilonChecker;
 import org.anarres.polyglot.analysis.GrammarNormalizer;
 import org.anarres.polyglot.analysis.GrammarWriterVisitor;
 import org.anarres.polyglot.analysis.Inliner;
@@ -283,6 +284,9 @@ public class PolyglotEngine {
             return grammar;
         dump(debugHandler.forTarget(GRAMMAR_LINKED, ".linked.grammar"), grammar);
         // dump("Linked model", grammar);
+        new EpsilonChecker(errors, grammar).run();
+        if (errors.isFatal())
+            return grammar;
         new ConflictChecker(errors, grammar).run();
         if (errors.isFatal())
             return grammar;
