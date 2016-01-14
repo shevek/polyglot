@@ -37,7 +37,7 @@ public class TreeVisitorAdapter<I, O, X extends Exception> extends VisitorAdapte
      *
      * @return null
      */
-    public O ${helper.getExternalMethodName($externalType)}(@Nonnull Node node, I input, @Nonnull String name, $externalType value) {
+    public O visitExternal${helper.getExternalMethodName($externalType)}(@Nonnull Node node, I input, @Nonnull String name, $externalType value) {
         return null;
     }
 #end
@@ -75,7 +75,7 @@ public class TreeVisitorAdapter<I, O, X extends Exception> extends VisitorAdapte
 #foreach ($external in $alternative.externals)
     /** Handles the external '${alternative.name}.${external.name}'. */
     public O visitExternal${alternative.javaMethodName}${external.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input, ${external.javaTypeName} value) {
-        return $helper.getExternalMethodName($external.javaTypeName)(node, input, "${external.name}", value);
+        return visitExternal$helper.getExternalMethodName($external.javaTypeName)(node, input, "${external.name}", value);
     }
 #end##external
 #end##alternative

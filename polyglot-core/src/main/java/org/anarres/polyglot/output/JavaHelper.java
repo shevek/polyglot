@@ -178,15 +178,15 @@ public class JavaHelper {
             case "int":
             case "long":
                 // All widen losslessly to long.
-                return "visitExternalLong";
+                return "Long";
             case "float":
             case "double":
                 // All widen losslessly to double.
-                return "visitExternalDouble";
+                return "Double";
             // Autoboxing booleans is allocation-free.
             case "boolean":
             default:
-                return "visitExternalObject";
+                return "Object";
         }
     }
 }
