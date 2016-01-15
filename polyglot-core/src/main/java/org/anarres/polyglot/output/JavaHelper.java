@@ -147,6 +147,23 @@ public class JavaHelper {
         return out;
     }
 
+    /**
+     * Returns the value of the unique annotation on the given model with the given name.
+     *
+     * If the annotation is missing or not unique, an exception is thrown.
+     * If the annotation has a null or no value, a null is returned.
+     * Note: A null return value does NOT mean that the annotation was missing.
+     *
+     * @param model The model from which to retrieve annotations.
+     * @param name The name of the annotations to retrieve.
+     * @return The value of the unique annotation on the given model with the given name.
+     */
+    @CheckForNull
+    public String getAnnotation(@Nonnull AstModel model, @Nonnull String name) {
+        AnnotationModel annotation = Iterables.getOnlyElement(model.getAnnotations().get(name));
+        return annotation.getValue();
+    }
+
     @Nonnull
     public String getSuperClass(@Nonnull AstModel model, @Nonnull String defaultValue) {
         List<String> values = getAnnotations(model, "javaExtends");
