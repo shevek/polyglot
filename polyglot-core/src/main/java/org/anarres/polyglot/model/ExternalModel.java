@@ -40,6 +40,11 @@ public class ExternalModel extends AbstractNamedJavaModel implements AstProducti
     }
 
     @Override
+    public String getDescriptiveName() {
+        return getDescriptiveName(getAnnotations());
+    }
+
+    @Override
     public boolean isTerminal() {
         return false;
     }
@@ -55,7 +60,7 @@ public class ExternalModel extends AbstractNamedJavaModel implements AstProducti
     }
 
     @Override
-    public Multimap<String, AnnotationModel> getAnnotations() {
+    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
         return annotations;
     }
 

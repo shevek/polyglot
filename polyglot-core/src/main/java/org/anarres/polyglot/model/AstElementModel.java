@@ -86,6 +86,11 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
     }
 
     @Override
+    public String getDescriptiveName() {
+        return getDescriptiveName(getAnnotations());
+    }
+
+    @Override
     public Multimap<String, ? extends AnnotationModel> getAnnotations() {
         return annotations;
     }

@@ -7,9 +7,7 @@ package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multiset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -53,6 +51,11 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
     @TemplateProperty
     public List<AstAlternativeModel> getAlternatives() {
         return new ArrayList<>(alternatives.values());
+    }
+
+    @Override
+    public String getDescriptiveName() {
+        return getDescriptiveName(getAnnotations());
     }
 
     @Override

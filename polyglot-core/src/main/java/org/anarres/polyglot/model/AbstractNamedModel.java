@@ -5,6 +5,9 @@
  */
 package org.anarres.polyglot.model;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import java.util.Comparator;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -43,7 +46,8 @@ public abstract class AbstractNamedModel extends AbstractModel {
         return text;
     }
 
-    protected final String name;
+    private final String name;
+    // private final Multimap<String, AnnotationModel> annotations;
 
     public AbstractNamedModel(@Nonnull Token location, @Nonnull String name) {
         super(location);
@@ -61,10 +65,23 @@ public abstract class AbstractNamedModel extends AbstractModel {
         return name;
     }
 
+    @Nonnull
+    public String getDescriptiveName() {
+        return getName();
+    }
+
     /** The unqualified name of this object, in the source. */
     @Nonnull
     public String getSourceName() {
         return getName();
+    }
+
+    @Nonnull
+    protected String getDescriptiveName(@Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
+        AnnotationModel annotation = Iterables.getFirst(annotations.get(AnnotationName.name.name()), null);
+        if (annotation == null)
+            return getName();
+        return MoreObjects.firstNonNull(annotation.getValue(), getName());
     }
 
     @Nonnull

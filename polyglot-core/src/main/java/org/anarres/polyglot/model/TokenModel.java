@@ -142,6 +142,11 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
         return index;
     }
 
+    @Override
+    public String getDescriptiveName() {
+        return getDescriptiveName(getAnnotations());
+    }
+
     @Nonnull
     @TemplateProperty("html")
     public PMatcher getMatcher() {
@@ -164,7 +169,7 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
     }
 
     @Override
-    public Multimap<String, AnnotationModel> getAnnotations() {
+    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
         return annotations;
     }
 

@@ -107,7 +107,12 @@ public class AstAlternativeModel extends AbstractNamedJavaModel implements AstMo
     }
 
     @Override
-    public Multimap<String, AnnotationModel> getAnnotations() {
+    public String getDescriptiveName() {
+        return getDescriptiveName(getAnnotations());
+    }
+
+    @Override
+    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
         return annotations;
     }
 

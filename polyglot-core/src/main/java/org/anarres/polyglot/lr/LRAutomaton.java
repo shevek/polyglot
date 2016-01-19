@@ -5,7 +5,9 @@
  */
 package org.anarres.polyglot.lr;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +25,7 @@ import org.anarres.graphviz.builder.GraphVizScope;
 import org.anarres.graphviz.builder.GraphVizable;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstProductionSymbol;
+import org.anarres.polyglot.model.ProductionSymbol;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.output.TemplateProperty;
 import org.slf4j.Logger;
@@ -150,7 +153,12 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
             {
                 List<TokenModel> tokens = new ArrayList<>(state.getActionMap().keySet());
                 Collections.sort(tokens, TokenModel.IndexComparator.INSTANCE);
-                String error = "Expected " + tokens;
+                StringBuilder buf = new StringBuilder("After [");
+                Joiner.on(' ').appendTo(buf, Iterables.transform(state.getStack(), ProductionSymbol.FUNCTION_GET_DESCRIPTIVE_NAME));
+                buf.append("], expected [");
+                Joiner.on(", ").appendTo(buf, Iterables.transform(tokens, ProductionSymbol.FUNCTION_GET_DESCRIPTIVE_NAME));
+                buf.append("]");
+                String error = buf.toString();
                 Integer errorIndex = errorMap.get(error);
                 if (errorIndex == null) {
                     errorIndex = errorMap.size();
