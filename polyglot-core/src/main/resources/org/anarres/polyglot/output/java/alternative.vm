@@ -187,6 +187,12 @@ public class ${alternative.javaTypeName}
     public void set${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} ${external.javaTypeName} value) {
         this._${external.javaFieldName}_ = value;
     }
+
+    @Nonnull
+    public ${alternative.javaTypeName} with${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} ${external.javaTypeName} value) {
+        set${external.javaMethodName}(value);
+        return this;
+    }
 #end##foreach alternative.external
 
     @Override
