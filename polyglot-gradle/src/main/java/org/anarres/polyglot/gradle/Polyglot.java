@@ -150,16 +150,17 @@ public class Polyglot extends SourceTask {
         inputFiles.visit(new EmptyFileVisitor() {
             @Override
             public void visitFile(FileVisitDetails fvd) {
-                getLogger().info("Visiting " + fvd);
+                File file = fvd.getFile();
+                getLogger().info("Visiting " + file);
                 try {
-                    PolyglotEngine engine = new PolyglotEngine(fvd.getFile().getAbsoluteFile(), outputDir.getAbsoluteFile());
+                    PolyglotEngine engine = new PolyglotEngine(file.getAbsoluteFile(), outputDir.getAbsoluteFile());
                     final File reportsDir = new File(getProject().getBuildDir(), "reports/polyglot");
                     engine.setOutputDir(OutputLanguage.html, new File(reportsDir, engine.getName()));
                     engine.setOutputDir(OutputLanguage.graphviz, new File(reportsDir, engine.getName()));
                     File debugDir = getDebugDir();
                     if (debugDir != null) {
                         PolyglotEngine.mkdirs(debugDir, "debug directory");
-                        engine.setDebugHandler(new DebugHandler.File(debugDir, fvd.getName()));
+                        engine.setDebugHandler(new DebugHandler.File(debugDir, file.getName()));
                     }
                     if (options != null) {
                         for (Map.Entry<Option, Boolean> e : options.entrySet()) {
@@ -167,18 +168,18 @@ public class Polyglot extends SourceTask {
                         }
                     }
                     for (PolyglotTemplateSet templateSet : templates.values()) {
-                        if (!templateSet.toSpec().isSatisfiedBy(fvd))
+                        if (!templateSet.toSpec().isSatisfiedBy(file))
                             continue;
                         for (Map.Entry<OutputLanguage, Map<String, File>> e : templateSet.getTemplates().rowMap().entrySet())
                             engine.addTemplates(e.getKey(), e.getValue());
                     }
                     if (!engine.run())
-                        throw new GradleException("Failed to process " + fvd + ":\n" + engine.getErrors().toString(engine.getInput()));
+                        throw new GradleException("Failed to process " + file + ":\n" + engine.getErrors().toString(engine.getInput()));
                 } catch (GradleException e) {
                     throw e;
                 } catch (Exception e) {
-                    getLogger().error("Failed to process " + fvd + ": " + e);
-                    throw new GradleException("Failed to process " + fvd, e);
+                    getLogger().error("Failed to process " + file + ": " + e);
+                    throw new GradleException("Failed to process " + file, e);
                 }
             }
         });

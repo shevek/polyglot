@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.output.OutputLanguage;
-import org.gradle.api.file.FileTreeElement;
 import org.gradle.api.specs.Spec;
 
 /**
@@ -40,27 +39,27 @@ public class PolyglotTemplateSet implements Serializable {
         return templates;
     }
 
-    public void template(String language, String dstPath, File srcFile) {
+    public void template(@Nonnull String language, @Nonnull String dstPath, @Nonnull File srcFile) {
         templates.put(OutputLanguage.valueOf(language), dstPath, srcFile);
     }
 
-    public void java(String dstPath, File srcFile) {
+    public void java(@Nonnull String dstPath, @Nonnull File srcFile) {
         templates.put(OutputLanguage.java, dstPath, srcFile);
     }
 
-    public void html(String dstPath, File srcFile) {
+    public void html(@Nonnull String dstPath, @Nonnull File srcFile) {
         templates.put(OutputLanguage.html, dstPath, srcFile);
     }
 
-    public void graphviz(String dstPath, File srcFile) {
+    public void graphviz(@Nonnull String dstPath, @Nonnull File srcFile) {
         templates.put(OutputLanguage.graphviz, dstPath, srcFile);
     }
 
     @Nonnull
-    public Spec<? super FileTreeElement> toSpec() {
-        return new Spec<FileTreeElement>() {
+    public Spec<? super File> toSpec() {
+        return new Spec<File>() {
             @Override
-            public boolean isSatisfiedBy(FileTreeElement t) {
+            public boolean isSatisfiedBy(File t) {
                 String glob = getName();
                 String name = t.getName();
                 return "*".equals(glob) || name.contains(glob);

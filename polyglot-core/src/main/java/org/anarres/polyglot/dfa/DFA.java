@@ -389,8 +389,17 @@ public class DFA implements GraphVizable, GraphVizScope {
 
     }
 
+    /**
+     * A data structure for detecting which {@link TokenModel tokens}
+     * can never be matched by any DFA state.
+     */
     public static class TokenMask extends TokenMap<TokenSet> {
 
+        /**
+         * Initially, all tokens are maskable, as none of them has an accepting state.
+         *
+         * @param universe The universe of tokens.
+         */
         public TokenMask(@Nonnull TokenUniverse universe) {
             super(universe);
             for (TokenModel token : universe.getItems())
@@ -402,12 +411,25 @@ public class DFA implements GraphVizable, GraphVizScope {
             this(new TokenUniverse(grammar));
         }
 
+        /**
+         * If a given token has not yet been accepted by any state,
+         * records that it has been masked in some state.
+         *
+         * @param masked The token which was masked.
+         * @param by The token by which it was masked.
+         */
         public void mask(@Nonnull TokenModel masked, @Nonnull TokenModel by) {
             TokenSet set = get(masked);
             if (set != null)
                 set.add(by);
         }
 
+        /**
+         * Records that a token was accepted by some state.
+         * Throws away all masking information.
+         *
+         * @param accept The accepted token.
+         */
         public void accept(@CheckForNull TokenModel accept) {
             remove(accept);
         }

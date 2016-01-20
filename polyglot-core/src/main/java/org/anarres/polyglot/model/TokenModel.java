@@ -59,9 +59,10 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
     public static class EOF extends TokenModel {
 
         public static final EOF INSTANCE = new EOF();
+        public static final int INDEX = 0;
 
         public EOF() {
-            super(0, new TIdentifier("<eof>"), new AStringMatcher(), Collections.<AAnnotation>emptyList());
+            super(INDEX, new TIdentifier("<eof>"), new AStringMatcher(), Collections.<AAnnotation>emptyList());
             setJavadocComment(new TJavadocComment("/** A magic end-of-input token returned from the Lexer. */"));
         }
 
