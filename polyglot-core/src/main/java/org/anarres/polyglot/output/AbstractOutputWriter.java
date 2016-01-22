@@ -36,7 +36,6 @@ import org.apache.velocity.app.event.implement.ReportInvalidReferences;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.log.SystemLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 import org.apache.velocity.tools.generic.EscapeTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +121,6 @@ public abstract class AbstractOutputWriter implements OutputWriter {
             // LOG.info("Loading " + name);
             return super.getResourceStream(name);
         }
-
     }
 
     protected void process(@Nonnull CharSource source, @Nonnull String dstFilePath, @Nonnull Map<String, Object> contextValues) throws IOException {
@@ -175,17 +173,17 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         });
     }
 
-    protected void process(PolyglotExecutor executor, String srcResourceName, final String dstFilePath, final Map<String, Object> contextValues) throws ExecutionException, IOException {
+    protected void process(@Nonnull PolyglotExecutor executor, @Nonnull String srcResourceName, @Nonnull final String dstFilePath, @Nonnull final Map<String, Object> contextValues) throws ExecutionException, IOException {
         URL resource = Resources.getResource(getClass(), language.name() + "/" + srcResourceName);
         final CharSource source = Resources.asCharSource(resource, Charsets.UTF_8);
         process(executor, source, dstFilePath, contextValues);
     }
 
-    protected void process(PolyglotExecutor executor, String srcResourceName, String dstFilePath) throws ExecutionException, IOException {
+    protected void process(@Nonnull PolyglotExecutor executor, @Nonnull String srcResourceName, @Nonnull String dstFilePath) throws ExecutionException, IOException {
         process(executor, srcResourceName, dstFilePath, ImmutableMap.<String, Object>of());
     }
 
-    protected void processTemplates(PolyglotExecutor executor) throws ExecutionException, IOException {
+    protected void processTemplates(@Nonnull PolyglotExecutor executor) throws ExecutionException, IOException {
         for (Map.Entry<? extends String, ? extends File> e : templates.entrySet()) {
             String dstFilePath = e.getKey();
             File template = e.getValue();
@@ -193,7 +191,7 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         }
     }
 
-    protected void write(PolyglotExecutor executor, @CheckForNull byte[] data, String dstFilePath) throws IOException {
+    protected void write(@Nonnull PolyglotExecutor executor, @CheckForNull byte[] data, String dstFilePath) throws IOException {
         if (data != null) {
             Files.write(data, newDestinationFile(dstFilePath));
         }
