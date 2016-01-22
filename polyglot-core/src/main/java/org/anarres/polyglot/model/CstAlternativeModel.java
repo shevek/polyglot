@@ -7,6 +7,7 @@ package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class CstAlternativeModel extends AbstractNamedModel implements Indexed, 
 
     private CstAlternativeModel(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull Token location, @CheckForNull TIdentifier name, @Nonnegative int alternativeIndex) {
         // TODO: This is a really bad choice for Location as it points to the production not the elements.
-        super(location, name(production, name, alternativeIndex));
+        super(location, name(production, name, alternativeIndex), ImmutableMultimap.<String, AnnotationModel>of());
         this.index = index;
         this.production = Preconditions.checkNotNull(production, "CstProductionModel was null.");
         this.alternativeName = name;

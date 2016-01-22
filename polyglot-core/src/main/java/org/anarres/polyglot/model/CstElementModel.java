@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMultimap;
 import java.util.Collections;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -50,7 +51,7 @@ public class CstElementModel extends AbstractElementModel<CstProductionSymbol> {
     }
 
     public CstElementModel(TIdentifier name, Specifier specifier, TIdentifier symbolName, UnaryOperator unaryOperator) {
-        super(name, specifier, symbolName, unaryOperator);
+        super(name, specifier, symbolName, unaryOperator, ImmutableMultimap.<String, AnnotationModel>of());
     }
 
     @Nonnull

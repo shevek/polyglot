@@ -28,20 +28,13 @@ public class ExternalModel extends AbstractNamedJavaModel implements AstProducti
     }
 
     private final TString externalType;
-    private final Multimap<String, AnnotationModel> annotations;
     // Cached
     private final String javaTypeName;
 
-    public ExternalModel(@Nonnull TIdentifier name, @Nonnull TString externalType, Multimap<String, AnnotationModel> annotations) {
-        super(name);
+    public ExternalModel(@Nonnull TIdentifier name, @Nonnull TString externalType, Multimap<String, ? extends AnnotationModel> annotations) {
+        super(name, annotations);
         this.externalType = externalType;
-        this.annotations = annotations;
         this.javaTypeName = MatcherParserVisitor.parse(externalType);
-    }
-
-    @Override
-    public String getDescriptiveName() {
-        return getDescriptiveName(getAnnotations());
     }
 
     @Override
@@ -60,12 +53,11 @@ public class ExternalModel extends AbstractNamedJavaModel implements AstProducti
     }
 
     @Override
-    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
-        return annotations;
-    }
-
-    @Override
     public Node toNode() {
-        return new AExternal(newJavadocCommentToken(), toNameToken(), externalType.clone(), toAnnotations(annotations));
+        return new AExternal(
+                newJavadocCommentToken(),
+                toNameToken(),
+                externalType.clone(),
+                toAnnotations(getAnnotations()));
     }
 }

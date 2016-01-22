@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
@@ -122,17 +123,15 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
     private final PMatcher matcher;
     public final Map<StateModel, StateModel> transitions = new HashMap<>();
     private final CstTransformPrototypeModel transformPrototype;
-    private final Multimap<String, AnnotationModel> annotations;
     public boolean ignored;
     public NFA nfa;
     // Cached
     private final String javaTypeName;
 
     public TokenModel(int index, @Nonnull TIdentifier name, @Nonnull PMatcher matcher, @Nonnull Iterable<? extends PAnnotation> annotations) {
-        super(name);
+        super(name, annotations(annotations));
         this.index = index;
         this.matcher = matcher;
-        this.annotations = annotations(annotations);
         this.transformPrototype = new CstTransformPrototypeModel(name, Specifier.TOKEN, name, UnaryOperator.NONE);
         this.transformPrototype.symbol = this;
         this.javaTypeName = "T" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, getName());
@@ -141,11 +140,6 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
     @Override
     public int getIndex() {
         return index;
-    }
-
-    @Override
-    public String getDescriptiveName() {
-        return getDescriptiveName(getAnnotations());
     }
 
     @Nonnull
@@ -167,11 +161,6 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
     @Override
     public String getJavaTypeName() {
         return javaTypeName;
-    }
-
-    @Override
-    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
-        return annotations;
     }
 
     @TemplateProperty
@@ -248,6 +237,6 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
                 states,
                 toNameToken(),
                 matcher.clone(),
-                toAnnotations(annotations));
+                toAnnotations(getAnnotations()));
     }
 }

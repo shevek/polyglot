@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMultimap;
 import java.util.Collections;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -34,7 +35,7 @@ public class CstTransformPrototypeModel extends AbstractElementModel<AstProducti
     }
 
     public CstTransformPrototypeModel(@Nonnull TIdentifier name, @Nonnull Specifier specifier, @Nonnull TIdentifier symbolName, @Nonnull UnaryOperator unaryOperator) {
-        super(name, specifier, symbolName, unaryOperator);
+        super(name, specifier, symbolName, unaryOperator, ImmutableMultimap.<String, AnnotationModel>of());
         // LOG.info(name.getText() + ":" + symbolName.getText() + "." + unaryOperator + "@" + System.identityHashCode(this), new Exception());
     }
 

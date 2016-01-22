@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.Multimap;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.Token;
@@ -19,12 +20,12 @@ import org.anarres.polyglot.output.TemplateProperty;
  */
 public abstract class AbstractNamedJavaModel extends AbstractNamedModel {
 
-    public AbstractNamedJavaModel(@Nonnull Token location, @Nonnull String name) {
-        super(location, name);
+    public AbstractNamedJavaModel(@Nonnull Token location, @Nonnull String name, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
+        super(location, name, annotations);
     }
 
-    public AbstractNamedJavaModel(@Nonnull TIdentifier name) {
-        super(name);
+    public AbstractNamedJavaModel(@Nonnull TIdentifier name, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
+        super(name, annotations);
     }
 
     /** Typically {@link CaseFormat#UPPER_CAMEL}. */

@@ -5,13 +5,23 @@
  */
 package org.anarres.polyglot.model;
 
-import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.analysis.NFABuilderVisitor;
+import org.anarres.polyglot.node.AAnnotation;
+import org.anarres.polyglot.node.PAnnotation;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.node.TString;
 import org.anarres.polyglot.node.Token;
 
 /**
@@ -46,17 +56,47 @@ public abstract class AbstractNamedModel extends AbstractModel {
         return text;
     }
 
-    private final String name;
-    // private final Multimap<String, AnnotationModel> annotations;
-
-    public AbstractNamedModel(@Nonnull Token location, @Nonnull String name) {
-        super(location);
-        this.name = name;
+    @Nonnull
+    protected static Multimap<String, ? extends AnnotationModel> annotations(@CheckForNull Iterable<? extends PAnnotation> nodes) {
+        if (nodes == null)
+            return ImmutableMultimap.of();
+        Multimap<String, AnnotationModel> out = HashMultimap.create();
+        if (nodes != null) {
+            for (PAnnotation node : nodes) {
+                AAnnotation a = (AAnnotation) node;
+                TString value = a.getValue();
+                AnnotationModel m = new AnnotationModel(a.getName(), value == null ? null : NFABuilderVisitor.parse(a.getValue()));
+                // LOG.info("Annotation: " + m);
+                out.put(m.getName(), m);
+            }
+        }
+        // LOG.info("Annotations: " + out);
+        return out;
     }
 
-    public AbstractNamedModel(TIdentifier name) {
+    @Nonnull
+    public List<? extends AAnnotation> toAnnotations(@Nonnull Multimap<? extends String, ? extends AnnotationModel> annotations) {
+        if (annotations.isEmpty())
+            return Collections.<AAnnotation>emptyList();
+        List<AAnnotation> out = new ArrayList<>();
+        for (AnnotationModel a : annotations.values())
+            out.add(a.toNode());
+        return out;
+    }
+
+    private final String name;
+    private final Multimap<String, ? extends AnnotationModel> annotations;
+
+    public AbstractNamedModel(@Nonnull Token location, @Nonnull String name, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
+        super(location);
+        this.name = name;
+        this.annotations = annotations;
+    }
+
+    public AbstractNamedModel(@Nonnull TIdentifier name, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
         super(name);
         this.name = name.getText();
+        this.annotations = annotations;
     }
 
     /** The qualified name of this object, in the object model. */
@@ -67,6 +107,9 @@ public abstract class AbstractNamedModel extends AbstractModel {
 
     @Nonnull
     public String getDescriptiveName() {
+        AnnotationModel annotation = Iterables.getFirst(getAnnotations(AnnotationName.Named), null);
+        if (annotation != null)
+            return Preconditions.checkNotNull(annotation.getValue(), "@Named annotation requires a value.");
         return getName();
     }
 
@@ -77,11 +120,18 @@ public abstract class AbstractNamedModel extends AbstractModel {
     }
 
     @Nonnull
-    protected String getDescriptiveName(@Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
-        AnnotationModel annotation = Iterables.getFirst(annotations.get(AnnotationName.name.name()), null);
-        if (annotation == null)
-            return getName();
-        return MoreObjects.firstNonNull(annotation.getValue(), getName());
+    public final Multimap<String, ? extends AnnotationModel> getAnnotations() {
+        return annotations;
+    }
+
+    @Nonnull
+    public Collection<? extends AnnotationModel> getAnnotations(@Nonnull String name) {
+        return annotations.get(name);
+    }
+
+    @Nonnull
+    public Collection<? extends AnnotationModel> getAnnotations(@Nonnull AnnotationName name) {
+        return getAnnotations(name.name());
     }
 
     @Nonnull

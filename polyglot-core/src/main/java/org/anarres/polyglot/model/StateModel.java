@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import com.google.common.collect.ImmutableMultimap;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.dfa.DFA;
 import org.anarres.polyglot.dfa.NFA;
@@ -28,7 +29,7 @@ public class StateModel extends AbstractNamedModel implements Indexed {
     public DFA dfa;
 
     public StateModel(int index, TIdentifier name) {
-        super(name, name(name));
+        super(name, name(name), ImmutableMultimap.<String, AnnotationModel>of());
         this.index = index;
     }
 

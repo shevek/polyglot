@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
  */
 public enum AnnotationName {
 
-    name,
+    Named,
     javaExtends, javaImplements, javaAnnotation;
 
     public static boolean isKnownAnnotation(@Nonnull String text) {

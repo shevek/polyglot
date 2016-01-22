@@ -7,6 +7,7 @@ package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Multimap;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AElement;
@@ -36,8 +37,13 @@ public abstract class AbstractElementModel<S extends ProductionSymbol> extends A
     private UnaryOperator unaryOperator;
     public S symbol;
 
-    public AbstractElementModel(@Nonnull TIdentifier name, @Nonnull Specifier specifier, @Nonnull TIdentifier symbolName, @Nonnull UnaryOperator unaryOperator) {
-        super(name);
+    public AbstractElementModel(
+            @Nonnull TIdentifier name,
+            @Nonnull Specifier specifier,
+            @Nonnull TIdentifier symbolName,
+            @Nonnull UnaryOperator unaryOperator,
+            @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
+        super(name, annotations);
         this.specifier = specifier;
         this.symbolName = symbolName;
         this.unaryOperator = unaryOperator;

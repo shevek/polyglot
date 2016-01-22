@@ -34,11 +34,9 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
     }
 
     public final Map<String, AstAlternativeModel> alternatives = new TreeMap<>();
-    private final Multimap<String, AnnotationModel> annotations;
 
-    public AstProductionModel(TIdentifier name, Multimap<String, AnnotationModel> annotations) {
-        super(name);
-        this.annotations = annotations;
+    public AstProductionModel(TIdentifier name, Multimap<String, ? extends AnnotationModel> annotations) {
+        super(name, annotations);
     }
 
     @Override
@@ -51,16 +49,6 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
     @TemplateProperty
     public List<AstAlternativeModel> getAlternatives() {
         return new ArrayList<>(alternatives.values());
-    }
-
-    @Override
-    public String getDescriptiveName() {
-        return getDescriptiveName(getAnnotations());
-    }
-
-    @Override
-    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
-        return annotations;
     }
 
     @Override
@@ -90,6 +78,10 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
         List<AAstAlternative> alternatives = new ArrayList<>();
         for (Map.Entry<String, AstAlternativeModel> e : this.alternatives.entrySet())
             alternatives.add(e.getValue().toNode());
-        return new AAstProduction(newJavadocCommentToken(), toNameToken(), alternatives, toAnnotations(annotations));
+        return new AAstProduction(
+                newJavadocCommentToken(),
+                toNameToken(),
+                alternatives,
+                toAnnotations(getAnnotations()));
     }
 }

@@ -6,7 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -62,16 +62,13 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
 
     @Nonnull
     public static AstElementModel forToken(@Nonnull TokenModel token) {
-        AstElementModel out = new AstElementModel(token.toNameToken(), Specifier.TOKEN, token.toNameToken(), UnaryOperator.NONE, HashMultimap.<String, AnnotationModel>create());
+        AstElementModel out = new AstElementModel(token.toNameToken(), Specifier.TOKEN, token.toNameToken(), UnaryOperator.NONE, ImmutableMultimap.<String, AnnotationModel>of());
         out.symbol = token;
         return out;
     }
 
-    private final Multimap<String, AnnotationModel> annotations;
-
-    public AstElementModel(@Nonnull TIdentifier name, @Nonnull Specifier specifier, @Nonnull TIdentifier symbolName, @Nonnull UnaryOperator unaryOperator, Multimap<String, AnnotationModel> annotations) {
-        super(name, specifier, symbolName, unaryOperator);
-        this.annotations = annotations;
+    public AstElementModel(@Nonnull TIdentifier name, @Nonnull Specifier specifier, @Nonnull TIdentifier symbolName, @Nonnull UnaryOperator unaryOperator, Multimap<String, ? extends AnnotationModel> annotations) {
+        super(name, specifier, symbolName, unaryOperator, annotations);
     }
 
     @Nonnull
@@ -83,16 +80,6 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
     @TemplateProperty
     public String getJavaTypeName() {
         return getJavaTypeName(getSymbol());
-    }
-
-    @Override
-    public String getDescriptiveName() {
-        return getDescriptiveName(getAnnotations());
-    }
-
-    @Override
-    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
-        return annotations;
     }
 
     @Override

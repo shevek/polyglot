@@ -38,16 +38,14 @@ public class AstAlternativeModel extends AbstractNamedJavaModel implements AstMo
     private final TIdentifier alternativeName;
     public final List<AstElementModel> elements = new ArrayList<>();
     public final List<AstElementModel> externals = new ArrayList<>();
-    private final Multimap<String, AnnotationModel> annotations;
     // Cached
     private final String javaTypeName;
 
-    public AstAlternativeModel(@Nonnull AstProductionModel production, @Nonnull Token location, @CheckForNull TIdentifier name, Multimap<String, AnnotationModel> annotations) {
+    public AstAlternativeModel(@Nonnull AstProductionModel production, @Nonnull Token location, @CheckForNull TIdentifier name, Multimap<String, ? extends AnnotationModel> annotations) {
         // TODO: This is a really bad choice for Location as it points to the production not the elements.
-        super(location, name(production, name));
+        super(location, name(production, name), annotations);
         this.production = production;
         this.alternativeName = name;
-        this.annotations = annotations;
 
         StringBuilder buf = new StringBuilder("A");
         if (alternativeName != null)
@@ -107,22 +105,16 @@ public class AstAlternativeModel extends AbstractNamedJavaModel implements AstMo
     }
 
     @Override
-    public String getDescriptiveName() {
-        return getDescriptiveName(getAnnotations());
-    }
-
-    @Override
-    public Multimap<String, ? extends AnnotationModel> getAnnotations() {
-        return annotations;
-    }
-
-    @Override
     public AAstAlternative toNode() {
         List<AElement> elements = new ArrayList<>();
         for (AstElementModel e : getElements())
             elements.add(e.toNode());
         for (AstElementModel e : getExternals())
             elements.add(e.toNode());
-        return new AAstAlternative(newJavadocCommentToken(), alternativeName, elements, toAnnotations(annotations));
+        return new AAstAlternative(
+                newJavadocCommentToken(),
+                alternativeName,
+                elements,
+                toAnnotations(getAnnotations()));
     }
 }

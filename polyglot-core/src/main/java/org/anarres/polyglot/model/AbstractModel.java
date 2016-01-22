@@ -6,20 +6,12 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.analysis.DepthFirstAdapter;
-import org.anarres.polyglot.analysis.NFABuilderVisitor;
-import org.anarres.polyglot.node.AAnnotation;
 import org.anarres.polyglot.node.Node;
-import org.anarres.polyglot.node.PAnnotation;
 import org.anarres.polyglot.node.TJavadocComment;
-import org.anarres.polyglot.node.TString;
 import org.anarres.polyglot.node.Token;
 import org.anarres.polyglot.output.TemplateProperty;
 import org.slf4j.Logger;
@@ -82,30 +74,6 @@ public abstract class AbstractModel implements Model {
                 return token;
         }
         return parent.getLocation();
-    }
-
-    @Nonnull
-    protected static Multimap<String, AnnotationModel> annotations(@CheckForNull Iterable<? extends PAnnotation> nodes) {
-        Multimap<String, AnnotationModel> out = HashMultimap.create();
-        if (nodes != null) {
-            for (PAnnotation node : nodes) {
-                AAnnotation a = (AAnnotation) node;
-                TString value = a.getValue();
-                AnnotationModel m = new AnnotationModel(a.getName(), value == null ? null : NFABuilderVisitor.parse(a.getValue()));
-                // LOG.info("Annotation: " + m);
-                out.put(m.getName(), m);
-            }
-        }
-        // LOG.info("Annotations: " + out);
-        return out;
-    }
-
-    @Nonnull
-    public List<AAnnotation> toAnnotations(@Nonnull Multimap<? extends String, ? extends AnnotationModel> annotations) {
-        List<AAnnotation> out = new ArrayList<>();
-        for (AnnotationModel a : annotations.values())
-            out.add(a.toNode());
-        return out;
     }
 
     private final Token location;

@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import com.google.common.collect.ImmutableMultimap;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AHelper;
 import org.anarres.polyglot.node.PMatcher;
@@ -30,7 +31,7 @@ public class HelperModel extends AbstractNamedModel {
     public Value value;   // CharSet or NFA.
 
     public HelperModel(TIdentifier name, PMatcher matcher) {
-        super(name);
+        super(name, ImmutableMultimap.<String, AnnotationModel>of());
         this.matcher = matcher;
     }
 

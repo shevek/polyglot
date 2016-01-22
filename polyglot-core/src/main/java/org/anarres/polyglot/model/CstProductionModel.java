@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import com.google.common.collect.ImmutableMultimap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,7 +43,7 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
     /* pp */ int alternativeIndex = 0;
 
     public CstProductionModel(@Nonnegative int index, @Nonnull TIdentifier name) {
-        super(name);
+        super(name, ImmutableMultimap.<String, AnnotationModel>of());
         this.index = index;
     }
 
