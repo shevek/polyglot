@@ -136,8 +136,8 @@ Productions
 
 	token =
 		javadoc_comment?
-		annotation* token_states? identifier tok_eq matcher /* token_look_ahead? */ tok_semi
-			{ -> New token(javadoc_comment, [token_states.token_state], identifier, matcher /*, token_look_ahead.matcher */, [annotation.annotation]) };
+		annotation* token_states? identifier tok_eq matcher tok_semi
+			{ -> New token(javadoc_comment, [token_states.token_state], identifier, matcher, [annotation.annotation]) };
 
 	token_states { -> token_state* } =
 		tok_lbrace token_state_list tok_rbrace
@@ -154,12 +154,6 @@ Productions
 			{ -> New token_state(state, Null) } |
 		{transition} [state]:identifier tok_arrow [transition]:identifier
 			{ -> New token_state(state, transition) } ;
-
-	/*
-	token_look_ahead { -> matcher } =
-		tok_slash matcher
-			{ -> matcher };
-	*/
 
 	ignored_tokens { -> section } =
 		kw_ignored kw_tokens identifier_list? tok_semi
@@ -405,7 +399,6 @@ Abstract Syntax Tree
 		javadoc_comment?
 		[token_states]:token_state*
 		[name]:identifier matcher
-		/* [look_ahead]:matcher? */
 		[annotations]:annotation*
 		;
 
