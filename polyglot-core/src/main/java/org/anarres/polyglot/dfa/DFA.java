@@ -6,6 +6,7 @@
 package org.anarres.polyglot.dfa;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class DFA implements GraphVizable, GraphVizScope {
                 label = graph.edge(this, state, transition.destination).label();
                 if (!label.isEmpty())
                     label.append(", ");
-                label.append(transition.toInterval().toString());
+                label.append(transition.toIntervalString());
             }
         }
     }
@@ -193,21 +194,20 @@ public class DFA implements GraphVizable, GraphVizScope {
                             // It's an epsilon-transition, and the destination is already included in nfaStates.
                             if (nfaTransition.chars == null)
                                 continue;
-                            // TODO: ...
 
                             // We're looking for the shortest common interval in all transitions starting from 'start'.
-                            CharSet.Interval overlap = nfaTransition.chars.findFirstOverlappingInterval(start, end);
+                            CharInterval overlap = CharInterval.findFirstOverlappingInterval(nfaTransition.chars.getIntervals(), start, end);
                             if (overlap != null) {
-                                if (overlap.start > start) {
+                                if (overlap.getStart() > start) {
                                     // Consider the previous region only.
                                     // But we didn't find an actual transition here.
-                                    end = (char) (overlap.start - 1);
+                                    end = (char) (overlap.getStart() - 1);
                                 } else {
                                     dstNfaStates.set(nfaTransition.destination);
                                     transitionFound = true;
-                                    if (overlap.end < end) {
+                                    if (overlap.getEnd() < end) {
                                         // And we might be talking about a restricted region.
-                                        end = overlap.end;
+                                        end = overlap.getEnd();
                                     }
                                 }
                             }
@@ -228,7 +228,8 @@ public class DFA implements GraphVizable, GraphVizScope {
 
                         }
 
-                        dfaState.transitions.add(new Transition(start, end, dfaStateTarget));
+                        // These are generated in strictly ascending order.
+                        dfaState.addTransition(new Transition(start, end, dfaStateTarget));
                     }
 
                     // Look for the next character range.
@@ -245,7 +246,7 @@ public class DFA implements GraphVizable, GraphVizScope {
         private final int index;
         private final BitSet nfaStates;
         public final TokenModel acceptToken;
-        public final SortedSet<Transition> transitions = new TreeSet<>();
+        public final List<Transition> transitions = new ArrayList<>();
 
         public State(int index, BitSet nfaStates, @CheckForNull TokenModel accept) {
             this.index = index;
@@ -278,8 +279,15 @@ public class DFA implements GraphVizable, GraphVizScope {
 
         @TemplateProperty
         @Nonnull
-        public SortedSet<Transition> getTransitions() {
+        public List<? extends Transition> getTransitions() {
             return transitions;
+        }
+
+        private void addTransition(@Nonnull Transition transition) {
+            if (!transitions.isEmpty())
+                if (transition.compareTo(Iterables.getLast(transitions)) <= 0)
+                    throw new IllegalArgumentException("Transition out of order: " + transition);
+            transitions.add(transition);
         }
 
         @Override
@@ -294,24 +302,13 @@ public class DFA implements GraphVizable, GraphVizScope {
     }
 
     @Immutable
-    public static final class Transition implements Comparable<Transition> {
+    public static final class Transition extends CharInterval {
 
-        private final char start;
-        private final char end;
         private final State destination;
 
         public Transition(char start, char end, @Nonnull State destination) {
-            this.start = start;
-            this.end = end;
+            super(start, end);
             this.destination = destination;
-        }
-
-        public char getStart() {
-            return start;
-        }
-
-        public char getEnd() {
-            return end;
         }
 
         /** Converts the char to valid Java code for constructing it. */
@@ -354,13 +351,8 @@ public class DFA implements GraphVizable, GraphVizScope {
         }
 
         @Override
-        public int compareTo(Transition o) {
-            return Integer.compare(start, o.start);
-        }
-
-        @Override
         public int hashCode() {
-            return start << 16 ^ end ^ System.identityHashCode(destination);
+            return getStart() << 16 ^ getEnd() ^ System.identityHashCode(destination);
         }
 
         @Override
@@ -372,19 +364,14 @@ public class DFA implements GraphVizable, GraphVizScope {
             if (!getClass().equals(obj.getClass()))
                 return false;
             Transition o = (Transition) obj;
-            return start == o.start
-                    && end == o.end
+            return getStart() == o.getStart()
+                    && getEnd() == o.getEnd()
                     && destination == o.destination;
-        }
-
-        @Nonnull
-        public CharSet.Interval toInterval() {
-            return new CharSet.Interval(getStart(), getEnd());
         }
 
         @Override
         public String toString() {
-            return getDestination().index + ":[" + toInterval() + "]";
+            return getDestination().index + ":[" + toIntervalString() + "]";
         }
 
     }
