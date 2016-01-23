@@ -7,6 +7,10 @@ package org.anarres.polyglot.dfa;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -54,6 +58,60 @@ public class DFA implements GraphVizable, GraphVizScope {
     @Nonnull
     public List<? extends State> getStates() {
         return states;
+    }
+
+    @Nonnull
+    private DFA minimize() {
+        Int2IntMap stateToGroup = new Int2IntOpenHashMap();
+        Int2ObjectMap<BitSet> groupToStates = new Int2ObjectOpenHashMap<>();
+        for (State state : getStates()) {
+            int group = state.getAcceptTokenIndex();
+            stateToGroup.put(state.getIndex(), group);
+            BitSet groupStates = groupToStates.get(group);
+            if (groupStates == null) {
+                groupStates = new BitSet();
+                groupToStates.put(group, groupStates);
+            }
+            groupStates.set(state.getIndex());
+        }
+
+        boolean done = true;
+        do {
+            for (BitSet groupStates : groupToStates.values()) {
+                char start = 0;
+                char end;
+                do {
+                    end = (char) 0xffff;
+
+                    for (int dfaStateIdx = groupStates.nextSetBit(0); dfaStateIdx >= 0; dfaStateIdx = groupStates.nextSetBit(dfaStateIdx + 1)) {
+                        State dfaState = states.get(dfaStateIdx);
+
+                        // We're looking for the shortest common interval in all transitions starting from 'start'.
+                        CharInterval overlap = CharInterval.findFirstOverlappingInterval(dfaState.getTransitions(), start, end);
+                        if (overlap != null) {
+                            if (overlap.getStart() > start) {
+                                // Consider the previous region only.
+                                // But we didn't find an actual transition here.
+                                end = (char) (overlap.getStart() - 1);
+                            } else {
+                                // dstNfaStates.set(nfaTransition.destination);
+                                // transitionFound = true;
+                                if (overlap.getEnd() < end) {
+                                    // And we might be talking about a restricted region.
+                                    end = overlap.getEnd();
+                                }
+                            }
+                        }
+
+                    }
+
+                    // Look for the next character range.
+                    start = (char) (end + 1);
+                } while (end != (char) 0xffff);
+            }
+        } while (!done);
+
+        return null;
     }
 
     @Override
