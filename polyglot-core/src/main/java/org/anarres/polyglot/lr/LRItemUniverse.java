@@ -87,6 +87,7 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
      */
     @Nonnull
     private ImmutableIndexedSet<? extends I> closure(@Nonnull I root) {
+        // This allocates, but this method is only called once per build.
         MutableIndexedSet<I> out = new MutableIndexedSet<>(this);
         closure(out, new ArrayDeque<I>(), root, new IntOpenHashSet());
         // LOG.info("Closure of " + root + " is " + out);
@@ -108,8 +109,8 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         // ImmutableIndexedSet rather than just Set to enable this allocation optimization.
         int[] indices = source.getItems().getIndices();
         // for (int index = indices.nextSetBit(0); index >= 0; index = indices.nextSetBit(index + 1)) {
+        // for (I item : items) {   // Allocates an iterator.
         for (int index : indices) {
-            // for (I item : items) {
             I item = getItemByIndex(index);
             CstProductionSymbol productionSymbol = item.getSymbol();
             if (symbol.equals(productionSymbol)) {
@@ -157,8 +158,9 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         // This doesn't make it any faster.
         // Set<Set<? extends I>> seenStates = new HashSet<>();
         // We allocate exactly one of these.
-        MutableIndexedSet<I> tmpSet = new MutableIndexedSet<>(this);
-        Set<CstProductionSymbol> follow = new HashSet<>();
+        MutableIndexedSet<I> tmpSet = new MutableIndexedSet<>(this, size() >> 3);
+        // Set<CstProductionSymbol> follow = new HashSet<>();   // This allocates.
+        SymbolFilter follow = new SymbolFilter();
         for (;;) {
             LRState state = queue.poll(50, TimeUnit.MILLISECONDS);
             if (state == null)
@@ -169,7 +171,9 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
             // we walk the state set, and only handle those tokens which actually appear.
             // This optimization makes the loop about twice as fast.
             follow.clear(); // Make sure we process each follow symbol at most once.
-            for (LRItem item : state.getItems()) {
+            // for (LRItem item : state.getItems()) {   // Allocates an iterator.
+            for (int index : state.getItems().getIndices()) {
+                I item = getItemByIndex(index);
                 CstProductionSymbol symbol = item.getSymbol();
                 if (symbol == null)
                     continue;
