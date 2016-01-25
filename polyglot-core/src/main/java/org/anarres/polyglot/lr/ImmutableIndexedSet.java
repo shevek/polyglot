@@ -14,6 +14,11 @@ import java.util.Iterator;
 import javax.annotation.Nonnull;
 
 /**
+ * An immutable hash set of {@link IndexedItem IndexedItems}.
+ *
+ * This class violates the traditional contract for hashCode() and equals()
+ * on collections, and is only equal to identical instances of
+ * ImmutableIndexedSet.
  *
  * @author shevek
  */

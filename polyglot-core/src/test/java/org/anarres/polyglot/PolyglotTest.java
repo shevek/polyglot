@@ -89,8 +89,8 @@ public class PolyglotTest extends AbstractPolyglotTest {
                 if (!file.getName().endsWith(".sablecc"))
                     continue;
 
-            // if (file.getName().equals("private-vertica.polyglot")) continue;
-            // if (file.getName().equals("private-plsql-compiler.polyglot")) continue;
+            // if (!file.getName().equals("private-vertica.polyglot")) continue;
+            // if (!file.getName().equals("private-plsql-compiler.polyglot")) continue;
             // if (!file.getName().equals("java-type.polyglot"))
             // if (!file.getName().equals("php4.sablecc"))
             // if (!file.getName().equals("polyglot.polyglot"))
@@ -120,7 +120,8 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // if (!file.getName().equals("test-nonmasked.polyglot"))
             // if (!file.getName().equals("private-vertica.polyglot"))
             // if (!file.getName().equals("test-annotations.polyglot"))
-            // continue;
+            // if (!file.getName().equals("test-abstracts.polyglot"))
+            // if (file.length() > 16384) continue;
             parse(file);
         }
         LOG.info("Generaring all parsers took " + stopwatch);
