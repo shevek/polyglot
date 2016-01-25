@@ -145,8 +145,10 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         tmpSet.clear();
         LRState target = automaton.addStateAndTransition(source, out, symbol);
         if (target != null) {
-            if ((target.getIndex() & 511) == 0)
+            if ((target.getIndex() & 511) == 0) {
                 LOG.debug("Created {} with {} remaining.", target.getName(), queue.size());
+                // tmpSet.trim();  // This prevents us from continuously blowing the size of the array, but hurts the GC a lot.
+            }
             queue.add(target);
         }
     }
@@ -158,7 +160,7 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         // This doesn't make it any faster.
         // Set<Set<? extends I>> seenStates = new HashSet<>();
         // We allocate exactly one of these.
-        MutableIndexedSet<I> tmpSet = new MutableIndexedSet<>(this, size() >> 3);
+        MutableIndexedSet<I> tmpSet = new MutableIndexedSet<>(this);
         // Set<CstProductionSymbol> follow = new HashSet<>();   // This allocates.
         SymbolFilter follow = new SymbolFilter();
         for (;;) {

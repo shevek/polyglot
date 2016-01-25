@@ -13,7 +13,6 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +24,12 @@ import org.slf4j.LoggerFactory;
 public class MutableIndexedSet<IndexedItem extends Indexed> extends AbstractIndexedSet<IndexedItem> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MutableIndexedSet.class);
-    private final IntSet indices;
+    private final IntOpenHashSet indices;
 
     public MutableIndexedSet(@Nonnull IndexedUniverse<IndexedItem> universe) {
         super(universe);
         // this.indices = new BitSet(universe.size());
         this.indices = new IntOpenHashSet();
-    }
-
-    public MutableIndexedSet(@Nonnull IndexedUniverse<IndexedItem> universe, @Nonnegative int expectedSize) {
-        super(universe);
-        // this.indices = new BitSet(universe.size());
-        this.indices = new IntOpenHashSet(expectedSize);
     }
 
     /** Exposed to allow for allocation-free iteration. */
@@ -196,6 +189,10 @@ public class MutableIndexedSet<IndexedItem extends Indexed> extends AbstractInde
     @Override
     public int size() {
         return indices.size();
+    }
+
+    public boolean trim() {
+        return indices.trim();
     }
 
     @Override
