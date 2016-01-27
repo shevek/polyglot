@@ -6,6 +6,8 @@
 package org.anarres.polyglot;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -270,7 +272,7 @@ public class PolyglotEngine {
     }
 
     @Nonnull
-    protected GrammarModel buildModel(@Nonnull Start ast) throws IOException {
+    protected GrammarModel buildModel(@Nonnull PolyglotExecutor executor, @Nonnull Start ast) throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
         GrammarModel grammar = new GrammarModel();
@@ -292,6 +294,9 @@ public class PolyglotEngine {
             return grammar;
         dump(debugHandler.forTarget(GRAMMAR_CST, ".cst.dot"), grammar.getCstGraphVizable());
         dump(debugHandler.forTarget(GRAMMAR_AST, ".ast.dot"), grammar.getAstGraphVizable());
+        buildOutputs(executor, grammar, null, new Tables(null, null, null, null),
+                Predicates.equalTo(OutputLanguage.html));
+
         new GrammarNormalizer(errors, grammar).run();
         dump(debugHandler.forTarget(GRAMMAR_NORMALIZED, ".normalized.grammar"), grammar);
         if (errors.isFatal())
@@ -470,14 +475,18 @@ public class PolyglotEngine {
         return tables;
     }
 
-    protected void buildOutputs(@Nonnull PolyglotExecutor executor, GrammarModel grammar, @CheckForNull LRAutomaton automaton, @Nonnull Tables tables) throws IOException, InterruptedException, ExecutionException {
+    protected void buildOutputs(@Nonnull PolyglotExecutor executor,
+            @Nonnull GrammarModel grammar, @CheckForNull LRAutomaton automaton, @Nonnull Tables tables,
+            Predicate<? super OutputLanguage> languages) throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
         LOG.info("{}: Writing output.", getName());
         OutputData data = new OutputData(grammar, automaton, tables);
         try {
             for (Map.Entry<OutputLanguage, File> e : outputDirs.entrySet()) {
-                OutputWriter writer = e.getKey().newOutputWriter(e.getValue(), options, templates.row(e.getKey()), data);
-                writer.run(executor);
+                if (languages.apply(e.getKey())) {
+                    OutputWriter writer = e.getKey().newOutputWriter(e.getValue(), options, templates.row(e.getKey()), data);
+                    writer.run(executor);
+                }
             }
         } finally {
             executor.await();
@@ -506,7 +515,7 @@ public class PolyglotEngine {
             Start ast = buildParseTree();
             if (errors.isFatal() || ast == null)
                 return false;
-            GrammarModel grammar = buildModel(ast);
+            GrammarModel grammar = buildModel(executor, ast);
             if (errors.isFatal())
                 return false;
             // dump("Parsed grammar", ast);
@@ -552,7 +561,8 @@ public class PolyglotEngine {
             Tables tables = buildTables(grammar, automaton);
             if (errors.isFatal())
                 return false;
-            buildOutputs(executor, grammar, automaton, tables);
+            buildOutputs(executor, grammar, automaton, tables,
+                    Predicates.not(Predicates.equalTo(OutputLanguage.html)));
             if (errors.isFatal())
                 return false;
 

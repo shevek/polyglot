@@ -26,7 +26,7 @@ public class HtmlOutputWriter extends AbstractOutputWriter {
 
     public HtmlOutputWriter(File destinationDir, Set<? extends Option> options, Map<? extends String, ? extends File> templates, OutputData data) {
         super(OutputLanguage.html, destinationDir, options, templates, data);
-        this.helper = new HtmlHelper();
+        this.helper = new HtmlHelper(data);
     }
 
     @Override

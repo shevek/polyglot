@@ -6,24 +6,90 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" integrity="sha256-rsPUGdUPBXgalvIj4YKJrrUlmLXbOb6Cp7cdxn1qeUc=" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
 </head>
+
+#macro(usage $context $objects)
+#if (!$objects.isEmpty())
+	<li>Usage ($context):
+#foreach ($object in $objects)
+    <a href="#$helper.a($object)">$object.name</a>
+#end
+	</li>
+#end##isEmpty
+#end##macro
+
+#macro(expression $root)
+##	$root
+##
+#if ($root.type == "null")
+	Null
+#elseif ($root.type == "list")
+	[
+	#foreach ($item in $root.items)##
+	#expression($item)#if($velocityHasNext),#{end}
+	#end##item
+	]
+#elseif ($root.type == "new")
+	New <a href="#$helper.a($root.astAlternative)">${root.astAlternative.name}</a>(
+	#foreach ($argument in $root.arguments)
+	#expression($argument)#if($velocityHasNext),#{end}
+	#end##argument
+	)
+#elseif ($root.type == "reference")
+	${root.element}##
+#else
+#stop("ERROR: Unknown type $root.type")
+#end
+##
+#end
+
 <body>
     <div class="container">
 
-<h1>Tokens</h1>
+#if (!$grammar.helpers.isEmpty())
+<h1>Helpers</h1>
 
-#foreach ($token in $grammar.tokens)
+	<div class="well pg-helpers">
+<ul>
+#foreach ($token in $grammar.helpersAlphabetical)
     <!-- $esc.html($token) -->
 
-    <h2 id="$helper.a($token)">${token}</h2>
+    <li id="$helper.a($token)">
+		${token} = $helper.toRegex($token.matcher)
+	</li>
+
+#end##helper
+</ul>
+	</div>
+#end##helpers
+
+
+#if (!$grammar.tokens.isEmpty())
+<h1>Tokens</h1>
+
+	<div class="well pg-tokens">
+<ul>
+#foreach ($token in $grammar.tokensAlphabetical)
+    <!-- $esc.html($token) -->
 
 ## Matcher: ${token.matcher}
 ## Transitions: ${token.transitions}
 
+    <li id="$helper.a($token)">
+		${token} = $helper.toRegex($token.matcher)
+	</li>
+	<ul>
+		#usage("CST", $helper.getCstTokenUsage($token))
+		#usage("AST", $helper.getAstTokenUsage($token))
+	</ul>
+
 #end##token
+</ul>
+	</div>
+#end
 
 <h1>Productions</h1>
 
-#foreach ($production in $grammar.cstProductions)
+#foreach ($production in $grammar.cstProductionsAlphabetical)
     <!-- $esc.html($production) -->
 
     <h2 id="$helper.a($production)">${production.name} { -&gt;
@@ -32,73 +98,80 @@
 #end##transformPrototype
     }</h2>
 
+	<div class="well pg-cst pg-alternatives">
+	<ul>
 #foreach ($alternative in $production.alternatives)
     <!-- $esc.html($alternative) -->
 
-    <h3 id="$helper.a($alternative)">${alternative.name}</h3>
+    <li id="$helper.a($alternative)">${alternative.name} =
 
-	<div class="well">
-    =
 #foreach ($element in $alternative.elements)
         <a href="#$helper.a($element.symbol)">${element}</a>
 #end##element
-
-<br />
-
-    { ->
+	</li>
+	<ul>
+		<li>{ -&gt;
 #foreach ($transformExpression in $alternative.transformExpressions)
-    $transformExpression
+    #expression($transformExpression)
 #end##transformExpression
-    } ;
-	</div>
+		}</li>
+	</ul>
 
 #end##alternative
+	</ul>
+	</div>
+
+	<div class="well pg-cst pg-usage">
+		<ul>
+			#usage("CST", $helper.getCstCstUsage($production))
+		</ul>
+	</div>
 #end##production
 
 #if (!$grammar.externals.isEmpty())
 <h1>Externals</h1>
 
+<ul>
 #foreach ($external in $grammar.externals)
     <!-- $esc.html($external) -->
-
-    <h2 id="$helper.a($external)">${external.name} (${external.javaTypeName})</h2>
-
+    <li id="$helper.a($external)">${external.name} (${external.javaTypeName})</li>
 #end##external
-#end
+</ul>
+#end##externals
 
 <h1>Abstract Syntax Tree</h1>
 
-#foreach ($production in $grammar.astProductions)
+#foreach ($production in $grammar.astProductionsAlphabetical)
     <!-- $esc.html($production) -->
 
     <h2 id="$helper.a($production)">${production.name} (${production.javaTypeName})</h2>
+
+	<div class="well pg-ast pg-alternatives">
 #foreach ($alternative in $production.alternatives)
     <!-- $esc.html($alternative) -->
 
-    <h3 id="$helper.a($alternative)">${alternative.name} (${alternative.javaTypeName})</h3>
+    <div class="pg-name" id="$helper.a($alternative)" title="${alternative.javaTypeName}">${alternative.name} =</div>
 
-	<div class="well">
-    =
 <ul>
 #foreach ($element in $alternative.elements)
-        <li><a href="#$helper.a($element.symbol)">${element}</a>
-        <ul>
-            <li>Java: ${element.javaTypeName} get${element.javaMethodName}()
-        </ul>
+        <li><a href="#$helper.a($element.symbol)" title="${element.javaTypeName} get${element.javaMethodName}()">${element}</a>
 #end##element
 #foreach ($external in $alternative.externals)
-        <li><a href="#$helper.a($external.symbol)">${external}</a>
-        <ul>
-            <li>Java: ${external.javaTypeName} get${external.javaMethodName}()
-        </ul>
+        <li><a href="#$helper.a($external.symbol)" title="${external.javaTypeName} get${external.javaMethodName}()">${external}</a>
 #end##element
+			#usage("CST", $helper.getCstAstUsage($alternative))
 </ul>
-        ;
-	</div>
 
 #end##alternative
+	</div>
+
+	<div class="well pg-ast pg-usage">
+		<ul>
+			#usage("AST", $helper.getAstAstUsage($production))
+		</ul>
+	</div>
+
 #end##production
 
-    </div>
 </body>
 </html>

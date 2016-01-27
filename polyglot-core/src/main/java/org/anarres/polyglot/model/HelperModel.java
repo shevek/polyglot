@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AHelper;
 import org.anarres.polyglot.node.PMatcher;
 import org.anarres.polyglot.node.TIdentifier;
+import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  *
@@ -33,6 +34,11 @@ public class HelperModel extends AbstractNamedModel {
     public HelperModel(TIdentifier name, PMatcher matcher) {
         super(name, ImmutableMultimap.<String, AnnotationModel>of());
         this.matcher = matcher;
+    }
+
+    @TemplateProperty("html")
+    public PMatcher getMatcher() {
+        return matcher;
     }
 
     public Value getValue() {

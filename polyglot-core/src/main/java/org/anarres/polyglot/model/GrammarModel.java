@@ -8,6 +8,7 @@ package org.anarres.polyglot.model;
 import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -88,6 +89,18 @@ public class GrammarModel implements GraphVizScope {
         return prev == null;
     }
 
+    @TemplateProperty("html")
+    public List<HelperModel> getHelpersAlphabetical() {
+        List<HelperModel> out = new ArrayList<>(helpers.values());
+        Collections.sort(out, HelperModel.NameComparator.INSTANCE);
+        return out;
+    }
+
+    @Nonnull
+    public Collection<? extends HelperModel> getHelpers() {
+        return helpers.values();
+    }
+
     @CheckForNull
     public HelperModel getHelper(@Nonnull String name) {
         return helpers.get(name);
@@ -113,10 +126,18 @@ public class GrammarModel implements GraphVizScope {
     }
 
     @Nonnull
-    @TemplateProperty
+    @TemplateProperty("java")
     public List<TokenModel> getTokens() {
         List<TokenModel> out = new ArrayList<>(tokens.values());
         Collections.sort(out, TokenModel.IndexComparator.INSTANCE);
+        return out;
+    }
+
+    @Nonnull
+    @TemplateProperty("html")
+    public List<TokenModel> getTokensAlphabetical() {
+        List<TokenModel> out = new ArrayList<>(tokens.values());
+        Collections.sort(out, TokenModel.NameComparator.INSTANCE);
         return out;
     }
 
@@ -142,6 +163,14 @@ public class GrammarModel implements GraphVizScope {
         return out;
     }
 
+    @Nonnull
+    @TemplateProperty("html")
+    public List<CstProductionModel> getCstProductionsAlphabetical() {
+        List<CstProductionModel> out = new ArrayList<>(cstProductions.values());
+        Collections.sort(out, CstProductionModel.NameComparator.INSTANCE);
+        return out;
+    }
+
     @CheckForNull
     public CstProductionModel getCstProduction(@Nonnull String name) {
         return cstProductions.get(name);
@@ -159,6 +188,13 @@ public class GrammarModel implements GraphVizScope {
     public List<AstProductionModel> getAstProductions() {
         List<AstProductionModel> out = new ArrayList<>(astProductions.values());
         // Collections.sort(out, AstProductionModel.Comparator.INSTANCE);
+        return out;
+    }
+
+    @Nonnull
+    public List<AstProductionModel> getAstProductionsAlphabetical() {
+        List<AstProductionModel> out = new ArrayList<>(astProductions.values());
+        Collections.sort(out, AstProductionModel.NameComparator.INSTANCE);
         return out;
     }
 
