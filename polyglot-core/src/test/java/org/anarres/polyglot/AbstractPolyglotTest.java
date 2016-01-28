@@ -30,8 +30,12 @@ public abstract class AbstractPolyglotTest {
         PolyglotEngine.mkdirs(debugDir, "Debug directory");
         engine.setDebugHandler(new DebugHandler.File(debugDir, file.getName()));
 
-        File htmlDir = new File(SystemUtils.getUserDir(), "build/polyglot-html/" + file.getName());
+        File htmlDir = new File(SystemUtils.getUserDir(), "build/polyglot-output/" + file.getName() + "/html");
         PolyglotEngine.mkdirs(htmlDir, "HTML directory");
         engine.setOutputDir(OutputLanguage.html, htmlDir);
+
+        File graphvizDir = new File(SystemUtils.getUserDir(), "build/polyglot-output/" + file.getName() + "/graphviz");
+        PolyglotEngine.mkdirs(graphvizDir, "GraphViz directory");
+        engine.setOutputDir(OutputLanguage.graphviz, graphvizDir);
     }
 }

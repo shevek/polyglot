@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.graphviz.builder.GraphVizGraph;
+import org.anarres.graphviz.builder.GraphVizNode;
 import org.anarres.graphviz.builder.GraphVizScope;
 import org.anarres.graphviz.builder.GraphVizable;
 import org.anarres.polyglot.node.AAstProduction;
@@ -270,6 +271,13 @@ public class GrammarModel implements GraphVizScope {
         return isSingleAlternativeProduction((AstProductionModel) symbol);
     }
 
+    private boolean isLeafAlternative(@Nonnull AstAlternativeModel alternative) {
+        for (AstElementModel element : alternative.elements)
+            if (!element.isTerminal())
+                return false;
+        return true;
+    }
+
     public void toGraphVizAst(@Nonnull GraphVizGraph graph) {
         if (false)
             for (Map.Entry<String, TokenModel> e : tokens.entrySet()) {
@@ -279,21 +287,27 @@ public class GrammarModel implements GraphVizScope {
             }
         for (Map.Entry<String, AstProductionModel> e : astProductions.entrySet()) {
             AstProductionModel production = e.getValue();
+            GraphVizNode productionNode = null;
             if (!isSingleAlternativeProduction(production))
-                graph.node(this, production).label(e.getKey());
+                productionNode = graph.node(this, production).label(e.getKey());
+            ALTERNATIVE:
             for (Map.Entry<String, AstAlternativeModel> f : production.alternatives.entrySet()) {
                 AstAlternativeModel alternative = f.getValue();
-                graph.node(this, alternative).label(f.getKey());
-                if (!isSingleAlternativeProduction(production))
-                    graph.edge(this, production, alternative);
-                for (AstElementModel element : alternative.elements) {
-                    if (element.symbol instanceof TokenModel)
-                        // graph.node(this, element.symbol).label(((TokenModel) element.symbol).getName());
-                        continue;
-                    if (!isSingleAlternativeProduction(element.symbol))
-                        graph.edge(this, alternative, Preconditions.checkNotNull(element.symbol, "Null symbol in " + f.getKey()));
-                    else
-                        graph.edge(this, alternative, ((AstProductionModel) element.symbol).alternatives.values().iterator().next());
+                if (productionNode != null && isLeafAlternative(alternative)) {
+                    productionNode.label().append("\n(").append(f.getKey()).append(")");
+                } else {
+                    graph.node(this, alternative).label(f.getKey());
+                    if (!isSingleAlternativeProduction(production))
+                        graph.edge(this, production, alternative);
+                    for (AstElementModel element : alternative.elements) {
+                        if (element.symbol instanceof TokenModel)
+                            // graph.node(this, element.symbol).label(((TokenModel) element.symbol).getName());
+                            continue;
+                        if (!isSingleAlternativeProduction(element.symbol))
+                            graph.edge(this, alternative, Preconditions.checkNotNull(element.symbol, "Null symbol in " + f.getKey()));
+                        else
+                            graph.edge(this, alternative, ((AstProductionModel) element.symbol).alternatives.values().iterator().next());
+                    }
                 }
             }
         }

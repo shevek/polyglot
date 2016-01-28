@@ -54,6 +54,7 @@
     <!-- $esc.html($token) -->
 
     <li id="$helper.a($token)">
+		$helper.toJavadocText($token)
 		${token} = $helper.toRegex($token.matcher)
 	</li>
 
@@ -75,6 +76,7 @@
 ## Transitions: ${token.transitions}
 
     <li id="$helper.a($token)">
+		$helper.toJavadocText($token)
 		${token} = $helper.toRegex($token.matcher)
 	</li>
 	<ul>
@@ -98,6 +100,8 @@
 #end##transformPrototype
     }</h2>
 
+	$helper.toJavadocText($production)
+
 	<div class="well pg-cst pg-alternatives">
 	<ul>
 #foreach ($alternative in $production.alternatives)
@@ -108,6 +112,7 @@
 #foreach ($element in $alternative.elements)
         <a href="#$helper.a($element.symbol)">${element}</a>
 #end##element
+		$helper.toJavadocText($alternative)
 	</li>
 	<ul>
 		<li>{ -&gt;
@@ -134,7 +139,9 @@
 <ul>
 #foreach ($external in $grammar.externals)
     <!-- $esc.html($external) -->
-    <li id="$helper.a($external)">${external.name} (${external.javaTypeName})</li>
+    <li id="$helper.a($external)">${external.name} (${external.javaTypeName})
+		$helper.toJavadocText($external)
+	</li>
 #end##external
 </ul>
 #end##externals
@@ -145,19 +152,23 @@
     <!-- $esc.html($production) -->
 
     <h2 id="$helper.a($production)">${production.name} (${production.javaTypeName})</h2>
+		$helper.toJavadocText($production)
 
 	<div class="well pg-ast pg-alternatives">
 #foreach ($alternative in $production.alternatives)
     <!-- $esc.html($alternative) -->
 
     <div class="pg-name" id="$helper.a($alternative)" title="${alternative.javaTypeName}">${alternative.name} =</div>
+			$helper.toJavadocText($alternative)
 
 <ul>
 #foreach ($element in $alternative.elements)
         <li><a href="#$helper.a($element.symbol)" title="${element.javaTypeName} get${element.javaMethodName}()">${element}</a>
+			$helper.toJavadocText($element)
 #end##element
 #foreach ($external in $alternative.externals)
         <li><a href="#$helper.a($external.symbol)" title="${external.javaTypeName} get${external.javaMethodName}()">${external}</a>
+			$helper.toJavadocText($external)
 #end##element
 			#usage("CST", $helper.getCstAstUsage($alternative))
 </ul>

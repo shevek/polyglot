@@ -11,6 +11,7 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.analysis.DepthFirstAdapter;
+import org.anarres.polyglot.model.AbstractModel;
 import org.anarres.polyglot.model.AbstractNamedModel;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
@@ -39,6 +40,7 @@ import org.anarres.polyglot.node.AStringMatcher;
 import org.anarres.polyglot.node.AUnionMatcher;
 import org.anarres.polyglot.node.Node;
 import org.anarres.polyglot.node.PMatcher;
+import org.anarres.polyglot.node.TJavadocComment;
 
 /**
  *
@@ -237,6 +239,15 @@ public class HtmlHelper {
         MatcherVisitor visitor = new MatcherVisitor();
         matcher.apply(visitor);
         return visitor.buf.toString();
+    }
+
+    @Nonnull
+    public String toJavadocText(@Nonnull AbstractModel model) {
+        String text = model.getJavadocComment();
+        if (text == null)
+            return "";
+        // Pattern.compile("\n\\s*\\**").matcher(text).replaceAll("");
+        return text;
     }
 
     /** Returns CstAlternativeModels which use the given TokenModel. */
