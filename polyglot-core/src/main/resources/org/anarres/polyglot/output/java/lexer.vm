@@ -12,7 +12,7 @@ import ${grammar.package.packageName}.node.*;
 
 public class Lexer implements ILexer {
 
-    private final PushbackReader in;
+    protected final PushbackReader in;
     protected State state = State.${grammar.states.get(0).name};
     protected Token token;
 
@@ -65,8 +65,7 @@ public class Lexer implements ILexer {
         int start_line = this.line;
         int start_column = this.column;
 
-        int accept_state = -1;
-        int accept_token = -1;
+        int accept_token = 0;
         int accept_offset = -1;
         int accept_line = -1;
         int accept_column = -1;
@@ -129,9 +128,9 @@ public class Lexer implements ILexer {
             }
 
             if (dfa_state >= 0) {
+                // If there was a valid transition found on this character.
                 int acceptTableItem = acceptTableEntry[dfa_state];
-                if (acceptTableItem != -1) {
-                    accept_state = dfa_state;
+                if (acceptTableItem != 0) {
                     accept_token = acceptTableItem;
                     accept_length = this.text.length();
                     accept_offset = this.offset;
@@ -140,57 +139,55 @@ public class Lexer implements ILexer {
                 }
             }
             else {
-                if (accept_state != -1) {
-                    switch (accept_token) {
+                // If there was no valid transition found, then we accept from the last accept state.
+                switch (accept_token) {
 
 #foreach ($token in ${grammar.tokens})
-                        case ${token.index}: {
+                    case ${token.index}: {
 #if ($token.fixed)
-                            Token token = new ${token.javaTypeName}(
-                                start_offset,
-                                start_line + 1,
-                                start_column + 1);
+                        Token token = new ${token.javaTypeName}(
+                            start_offset,
+                            start_line + 1,
+                            start_column + 1);
 #else## token not fixed
-                            Token token = new ${token.javaTypeName}(
-                                getText(accept_length),
-                                start_offset,
-                                start_line + 1,
-                                start_column + 1);
-#end
-                            unread_except(accept_length);
-                            this.offset = accept_offset;
-                            this.column = accept_column;
-                            this.line = accept_line;
+                        Token token = new ${token.javaTypeName}(
+                            getText(accept_length),
+                            start_offset,
+                            start_line + 1,
+                            start_column + 1);
+#end## token.fixed
+                        unread_except(accept_length);
+                        accept_at(accept_offset, accept_line, accept_column);
 #if ($token.transitional)
 
-                            switch (state) {
+                        switch (state) {
 #foreach ($transition in $token.transitions)
-                                case ${transition.key.name}: state = State.${transition.value.name}; break;
+                            case ${transition.key.name}: state = State.${transition.value.name}; break;
 ## TODO: Have a default -> IllegalStateException here? Would we blow up the method limit?
-#end
-                                default: break;
-                            }
-#end
-
-                            return token;
+#end##foreach transition
+                            default: break;
                         }
-#end
-                        default:
-                            throw new IllegalStateException("Internal failure.");
-                    }   // switch (accept_token)
-                } else {
-                    if (this.text.length() > 0) {
-                        throw new LexerException(
-                            new InvalidToken(this.text.substring(0, 1), start_offset, start_line + 1, start_column + 1),
-                            "[" + (start_line + 1) + "," + (start_column + 1) + "]" +
-                            " Unknown token: " + this.text);
+#end##token.transitional
+                        return token;
+                    }
+#end##foreach token
+                    case 0: {
+                        if (this.text.length() > 0) {
+                            throw new LexerException(
+                                new InvalidToken(this.text.substring(0, 1), start_offset, start_line + 1, start_column + 1),
+                                "[" + (start_line + 1) + "," + (start_column + 1) + "]" +
+                                " Unknown token: " + this.text);
+                        }
+
+                        return new EOF(
+                            start_offset,
+                            start_line + 1,
+                            start_column + 1);
                     }
 
-                    return new EOF(
-                        start_offset,
-                        start_line + 1,
-                        start_column + 1);
-                }
+                    default:
+                        throw new IllegalStateException("Internal failure: accept_token=" + accept_token + ", but no handler found.");
+                }   // switch (accept_token)
             }
         }
     }
@@ -200,6 +197,12 @@ public class Lexer implements ILexer {
         for (int i = length - 1; i >= acceptLength; i--) {
             this.in.unread(this.text.charAt(i));
         }
+    }
+
+    private void accept_at(int offset, int line, int column) {
+        this.offset = offset;
+        this.line = line;
+        this.column = column;
     }
 
     protected void unread(@Nonnull Token token) throws IOException {
@@ -232,7 +235,7 @@ public class Lexer implements ILexer {
 
     private static final int[][] acceptTable /* = {
 #foreach ($state in $grammar.states)
-        // Accept table for ${state.name}, indexed by DFA state. Value is token index.
+        // Accept table for ${state.name}, indexed by DFA state. Value is token index. 0 is non-accepting.
         { #if($state.dfa)#foreach ($dfaState in $state.dfa.states)${dfaState.acceptTokenIndex}, #end#end},
 #end
     } */ ;

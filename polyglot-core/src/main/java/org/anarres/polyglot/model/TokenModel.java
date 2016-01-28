@@ -6,8 +6,6 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import java.util.ArrayList;

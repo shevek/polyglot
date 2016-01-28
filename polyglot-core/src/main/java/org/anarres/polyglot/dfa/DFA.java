@@ -274,7 +274,7 @@ public class DFA implements GraphVizable, GraphVizScope {
         @TemplateProperty
         @CheckForSigned
         public int getAcceptTokenIndex() {
-            return (acceptToken == null) ? -1 : acceptToken.getIndex();
+            return (acceptToken == null) ? 0 : acceptToken.getIndex();
         }
 
         @TemplateProperty
