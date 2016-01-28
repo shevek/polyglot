@@ -5,11 +5,24 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import ${grammar.package.packageName}.node.Token;
 
+/**
+ * The generic interface for a lexer, which may be used by a parser.
+ */
 public interface ILexer {
 
+	/**
+	 * Returns, but does not consume the next available token.
+	 *
+	 * @return the next available token.
+	 */
     @Nonnull
     public Token peek() throws IOException, LexerException;
 
+	/**
+	 * Returns and consumes the next available token.
+	 *
+	 * @return the next available token.
+	 */
     @Nonnull
     public Token next() throws IOException, LexerException;
 }
