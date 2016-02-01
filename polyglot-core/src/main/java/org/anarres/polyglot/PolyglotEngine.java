@@ -480,7 +480,7 @@ public class PolyglotEngine {
             Predicate<? super OutputLanguage> languages) throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
         LOG.info("{}: Writing output.", getName());
-        OutputData data = new OutputData(grammar, automaton, tables);
+        OutputData data = new OutputData(getName(), grammar, automaton, tables);
         try {
             for (Map.Entry<OutputLanguage, File> e : outputDirs.entrySet()) {
                 if (languages.apply(e.getKey())) {

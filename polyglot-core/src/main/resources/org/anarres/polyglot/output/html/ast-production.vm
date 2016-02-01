@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- ${header} -->
+#parse("org/anarres/polyglot/output/html/macros.vm")
+#head("AST Production", $model)
+#header("AST Production", $model)
+
+<div class="contentContainer">
+
+#@description($model)
+##<pre>{ -&gt; ##
+###foreach ($transformPrototype in $model.transformPrototypes)
+##        <a href="${helper.a($transformPrototype.symbol)}.html">${transformPrototype}</a>
+###end##transformPrototype
+##}</pre>
+#end
+
+#@section("summary")
+#@summary("alternative", "Alternative Summary")
+
+		<tr>
+			<th class="colFirst">AST Alternative</th>
+			<th class="colLast">AST Elements</th>
+			<th class="colLast">Description</th>
+		</tr>
+#foreach ($alternative in $model.alternatives)
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($alternative)}.html" title="${alternative.javaTypeName}">${alternative.name}</a></code></td>
+			<td class="colLast"><code>=
+#foreach ($element in $alternative.elements)
+				<a href="${helper.a($element.symbol)}.html" title="$helper.toJavaMethodPrototype($element)">${element}</a>
+#end
+			</code></td>
+			<td class="colLast">$helper.toJavadocSummary($alternative)</td>
+		</tr>
+#end##alternative
+
+#end##summary
+#end##section
+
+
+
+#@section("usage")
+
+#@summary("usage", "Usage Summary (References in AST)")
+		<tr>
+			<th class="colFirst">AST Alternative</th>
+			<th class="colLast">AST Elements</th>
+			<th class="colLast">Description</th>
+		</tr>
+#foreach ($alternative in $helper.getAstAstUsage($model))
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($alternative)}.html" title="${alternative.javaTypeName}">${alternative.name}</a></code></td>
+			<td class="colLast"><code>=
+#foreach ($element in $alternative.elements)
+				<a href="${helper.a($element.symbol)}.html" title="$helper.toJavaMethodPrototype($element)">${element}</a>
+#end
+			</code></td>
+			<td class="colLast">$helper.toJavadocSummary($alternative)</td>
+		</tr>
+#end##alternative
+#end##summary
+
+#@summary("construction", "Usage Summary (Construction by CST)")
+		<tr>
+			<th class="colFirst">CST Alternative</th>
+			<th class="colLast">CST Elements</th>
+			<th class="colLast">CST Transform Expression</th>
+		</tr>
+#foreach ($astAlternative in $model.alternatives)
+#foreach ($cstAlternative in $helper.getCstAstUsage($astAlternative))
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($cstAlternative)}.html">${cstAlternative.name}</a></code></td>
+			<td class="colLast"><code>=
+#foreach ($element in $cstAlternative.elements)
+				<a href="${helper.a($element.symbol)}.html">${element}</a>
+#end
+			</code></td>
+			<td class="colLast">
+#foreach ($expression in $cstAlternative.transformExpressions)
+#expression($expression)
+#end
+			</td>
+		</tr>
+#end##cstAlternative
+#end##astAlternative
+#end##summary
+
+#end##section
+
+
+
+#@section("detail")
+#@details("alternative", "Alternative Details")
+#foreach ($alternative in $model.alternatives)
+
+	<a name="$alternative.name"><!-- detailsitem --></a>
+	<ul class="blockList">
+		<li class="blockList">
+		<h4><a href="${helper.a($alternative)}.html">${alternative.name}</a> =
+#foreach ($element in $alternative.elements)
+				<a href="${helper.a($element.symbol)}.html" title="$helper.toJavaMethodPrototype($element)">${element}</a>
+#end
+		</h4>
+		$helper.toJavadocDetail($alternative)
+		<ul>
+#usage("CST", $helper.getCstAstUsage($alternative))
+		</ul>
+		</li>
+	</ul><!-- detailsitem -->
+
+#end##alternative
+#end##details
+#end##section
+
+</div><!-- contentContainer -->
+
+#foot($model)

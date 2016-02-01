@@ -1,0 +1,118 @@
+#macro(head $type $model)
+<html lang="en">
+<head>
+<title>${grammarName}: $type ${model.name}</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="Style">
+<script type="text/javascript" src="script.js"></script>
+</head>
+<body>
+
+<div class="topNav">
+	<a name="navbar.top"><!-- --></a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../../overview-summary.html">Overview</a></li>
+<li class="navBarCell1Rev">Object</li>
+</ul>
+</div>
+
+#end
+
+#macro(header $type $model)
+<div class="header">
+	<h2 title="${model.name}" class="title">$type ${model.name}</h2>
+</div>
+#end
+
+#macro(section $name)
+<div class="$name">
+	<ul class="blockList">
+		<li class="blockList">
+$!bodyContent
+		</li>
+	</ul>
+</div>
+#end
+
+#macro(description $model)
+#set($description_body = "$bodyContent")## Velocity bug workaroud with recursive macros.
+#@section("description")
+$description_body
+	<div class="block">$helper.toJavadocText($model)</div>
+#end
+#end
+
+#macro(usage $context $objects)
+#if (!$objects.isEmpty())
+	<li>Usage ($context):
+#foreach ($object in $objects)
+    <a href="${helper.a($object)}.html">$object.name</a>
+#end
+	</li>
+#end##isEmpty
+#end##macro
+
+#macro(summary $key $title)
+<ul class="blockList">
+	<li id="${key}.summary" class="blockList">
+
+	<h3>${title}</h3>
+	<table class="memberSummary" border="0" cellpadding="3" cellspacing="0">
+##		<caption><span>${title}</span><span class="tabEnd">&nbsp;</span></caption>
+$!bodyContent
+	</table>
+
+	</li>
+</ul>
+#end
+
+#macro(details $key $title)
+<ul class="blockList">
+	<li id="${key}.detail" class="blockList">
+
+	<h3>${title}</h3>
+$!bodyContent
+
+	</li>
+</ul>
+#end
+
+#macro(foot $model)
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav">
+<a name="navbar.bottom"><!-- --></a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../../overview-summary.html">Overview</a></li>
+<li class="navBarCell1Rev">Object</li>
+</ul>
+</div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>
+#end
+
+## Watch out for whitespace errors in this - we use it in a <pre>
+#macro(expression $root)
+##	$root
+##
+#if ($root.type == "null")
+Null##
+#elseif ($root.type == "list")
+[##
+#foreach ($item in $root.items)##
+#expression($item)#if($velocityHasNext), #{end}
+#end##item
+]##
+#elseif ($root.type == "new")
+New <a href="${helper.a($root.astAlternative)}" title="$root.astAlternative.javaTypeName">${root.astAlternative.name}</a>(##
+#foreach ($argument in $root.arguments)
+#expression($argument)#if($velocityHasNext), #{end}
+#end##argument
+)##
+#elseif ($root.type == "reference")
+${root.element}##
+.<a href="${helper.a($root.transform.symbol)}.html" title="$root.transform.symbol.javaTypeName">$root.transform.symbol.name</a>##
+#else
+#stop("ERROR: Unknown type $root.type")
+#end
+##
+#end

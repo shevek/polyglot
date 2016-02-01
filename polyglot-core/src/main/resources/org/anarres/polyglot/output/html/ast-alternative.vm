@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- ${header} -->
+#parse("org/anarres/polyglot/output/html/macros.vm")
+#head("AST Alternative", $model)
+#header("AST Alternative", $model)
+
+<div class="contentContainer">
+
+#@description($model)
+<pre>extends <a href="${helper.a($model.production)}.html">${model.production.name}</a></pre>
+#end
+
+#@section("summary")
+
+#if (!$model.elements.isEmpty())
+#@summary("element", "Element Summary")
+		<tr>
+			<th class="colFirst">Name</th>
+			<th class="colLast">Type</th>
+			<th class="colLast">Description</th>
+		</tr>
+#foreach ($element in $model.elements)
+		<tr class="altColor">
+			<td class="colFirst"><code>$element.name</code></td>
+			<td class="colLast"><code><a href="${helper.a($element.symbol)}.html">${element.symbol.name}</a></code></td>
+			<td class="colLast">$helper.toJavadocSummary($element)</td>
+		</tr>
+#end##element
+#end##summary
+#end##elements.isEmpty
+
+#if (!$model.externals.isEmpty())
+#@summary("element", "External Summary")
+		<tr>
+			<th class="colFirst">Type</th>
+			<th class="colLast">Name</th>
+			<th class="colLast">Description</th>
+		</tr>
+#foreach ($external in $model.externals)
+		<tr class="altColor">
+			<td class="colFirst"><code>${external.javaTypeName}</code></td>
+			<td class="colLast"><code>${external.name}</code></td>
+			<td class="colLast">$helper.toJavadocSummary($external)</td>
+		</tr>
+#end##element
+#end##summary
+#end##externals.isEmpty
+
+#end##section
+
+
+
+#@section("detail")
+
+#if (!$model.elements.isEmpty())
+#@details("element", "Element Details")
+#foreach ($element in $model.elements)
+
+	<a name="$element.name"><!-- detailsitem --></a>
+	<ul class="blockList">
+		<li class="blockList">
+		<h4>${element.name} : <a href="${helper.a($element.symbol)}.html">${element.symbol.name}</a></h4>
+		$helper.toJavadocDetail($element)
+		</li>
+	</ul><!-- detailsitem -->
+
+#end
+#end##detail
+#end##elements.isEmpty
+
+#if (!$model.externals.isEmpty())
+#@details("external", "External Details")
+#foreach ($external in $model.externals)
+
+	<a name="$external.name"><!-- detailsitem --></a>
+	<ul class="blockList">
+		<li class="blockList">
+		<h4>${external.name}</h4>
+		$helper.toJavadocDetail($external)
+		</li>
+	</ul><!-- detailsitem -->
+
+#end
+#end##detail
+#end##externals.isEmpty
+
+#end##section
+
+</div><!-- contentContainer -->
+
+#foot($model)

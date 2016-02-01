@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- ${header} -->
+<html lang="en">
+<head>
+<title>${grammarName} - ${listTitle}</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="Style">
+</head>
+<body>
+<h1 class="bar">${listTitle}</h1>
+<div class="indexContainer">
+
+#if ($helper.isListAstProductions($listGroups))
+<h2>AST Productions</h2>
+#foreach ($object in $grammar.astProductionsAlphabetical)
+<ul>
+<li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
+</ul>
+#end
+#end##isListAstProductions
+
+#if ($helper.isListCstProductions($listGroups))
+<h2>CST Productions</h2>
+#foreach ($object in $grammar.cstProductionsAlphabetical)
+<ul>
+<li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
+</ul>
+#end
+#end##isListCstProductions
+
+#if ($helper.isListAstProductions($listGroups))
+<h2>AST Alternatives</h2>
+#foreach ($object in $grammar.astProductionsAlphabetical)
+<ul>
+#foreach ($subobject in $object.alternatives)
+<li><a href="${helper.a($subobject)}.html" target="objectFrame">${subobject.name}</a></li>
+#end
+</ul>
+#end
+#end##isListAstProductions
+
+#if ($helper.isListCstProductions($listGroups))
+<h2>CST Alternatives</h2>
+#foreach ($object in $grammar.cstProductionsAlphabetical)
+<ul>
+#foreach ($subobject in $object.alternatives)
+<li><a href="${helper.a($subobject)}.html" target="objectFrame">${subobject.name}</a></li>
+#end
+</ul>
+#end
+#end##isListCstProductions
+
+#if ($helper.isListTokens($listGroups))
+<h2>Tokens</h2>
+#foreach ($object in $grammar.tokensAlphabetical)
+<ul>
+<li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
+</ul>
+#end
+#end
+
+#if ($helper.isListHelpers($listGroups))
+<h2>Helpers</h2>
+#foreach ($object in $grammar.helpersAlphabetical)
+<ul>
+<li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
+</ul>
+#end
+#end
+
+#if ($helper.isListExternals($listGroups))
+<h2>Externals</h2>
+#foreach ($object in $grammar.externalsAlphabetical)
+<ul>
+<li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
+</ul>
+#end
+#end
+
+</div>
+</body>
+</html>
+

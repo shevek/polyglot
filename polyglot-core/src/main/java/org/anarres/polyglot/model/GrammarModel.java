@@ -73,6 +73,12 @@ public class GrammarModel implements GraphVizScope {
     }
 
     @Nonnull
+    @TemplateProperty("html")
+    public List<ExternalModel> getExternalsAlphabetical() {
+        return getExternals();
+    }
+
+    @Nonnull
     @TemplateProperty
     public List<ExternalModel> getExternals() {
         List<ExternalModel> out = new ArrayList<>(externals.values());

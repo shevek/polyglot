@@ -1,0 +1,14 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+<!-- ${header} -->
+<html lang="en">
+<head>
+    <title>Polyglot Grammar for ${grammarName}</title>
+</head>
+    <frameset cols="20%,80%" title="Main frame">
+        <frameset rows="30%,70%">
+            <frame src="frame-groups.html" name="groupFrame" title="Object Groups">
+            <frame src="list-all.html" name="objectListFrame" title="All objects">
+        </frameset>
+        <frame src="overview.html" name="objectFrame" title="Object description" scrolling="yes">
+    </frameset>
+</html>

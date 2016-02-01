@@ -16,14 +16,21 @@ import org.anarres.polyglot.model.GrammarModel;
  */
 public class OutputData {
 
+    private final String name;
     private final GrammarModel grammar;
     private final LRAutomaton automaton;
     private final Tables tables;
 
-    public OutputData(@Nonnull GrammarModel grammar, @CheckForNull LRAutomaton automaton, @Nonnull Tables tables) {
+    public OutputData(@Nonnull String name, @Nonnull GrammarModel grammar, @CheckForNull LRAutomaton automaton, @Nonnull Tables tables) {
+        this.name = name;
         this.grammar = grammar;
         this.automaton = automaton;
         this.tables = tables;
+    }
+
+    @Nonnull
+    public String getName() {
+        return name;
     }
 
     @Nonnull

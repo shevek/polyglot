@@ -9,9 +9,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
+import java.util.Set;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.analysis.DepthFirstAdapter;
+import org.anarres.polyglot.model.AbstractElementModel;
 import org.anarres.polyglot.model.AbstractModel;
+import org.anarres.polyglot.model.AbstractNamedJavaModel;
 import org.anarres.polyglot.model.AbstractNamedModel;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
@@ -40,7 +44,6 @@ import org.anarres.polyglot.node.AStringMatcher;
 import org.anarres.polyglot.node.AUnionMatcher;
 import org.anarres.polyglot.node.Node;
 import org.anarres.polyglot.node.PMatcher;
-import org.anarres.polyglot.node.TJavadocComment;
 
 /**
  *
@@ -49,49 +52,35 @@ import org.anarres.polyglot.node.TJavadocComment;
 public class HtmlHelper {
 
     private final GrammarModel grammar;
-    // Uses of given token in CST.
-    private final Multimap<TokenModel, CstAlternativeModel> cstTokenUsage = HashMultimap.create();
-    private final Multimap<CstProductionModel, CstAlternativeModel> cstCstUsage = HashMultimap.create();
-    // Construction of given AST in CST.
-    private final Multimap<AstAlternativeModel, CstAlternativeModel> cstAstUsage = HashMultimap.create();
-    // Uses of given token in AST.
-    private final Multimap<TokenModel, AstAlternativeModel> astTokenUsage = HashMultimap.create();
-    private final Multimap<AstProductionModel, AstAlternativeModel> astAstUsage = HashMultimap.create();
 
     public HtmlHelper(OutputData data) {
         this.grammar = data.getGrammar();
+        buildUsage();
+    }
 
-        for (final CstProductionModel cstProduction : grammar.cstProductions.values()) {
-            for (final CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
-                for (CstElementModel cstElement : cstAlternative.getElements()) {
-                    if (cstElement.isTerminal())
-                        cstTokenUsage.put(cstElement.getToken(), cstAlternative);
-                    else
-                        cstCstUsage.put(cstElement.getCstProduction(), cstAlternative);
-                }
+    public static enum ListGroup {
 
-                for (final CstTransformExpressionModel cstTransformExpression : cstAlternative.getTransformExpressions()) {
-                    cstTransformExpression.apply(new CstTransformExpressionModel.AbstractVisitor<Void, Void, RuntimeException>() {
-                        @Override
-                        public Void visitNew(CstTransformExpressionModel.New expression, Void input) throws RuntimeException {
-                            cstAstUsage.put(expression.getAstAlternative(), cstAlternative);
-                            return null;
-                        }
-                    }, null);
-                }
-            }
-        }
+        Helpers, Tokens, CstProductions, Externals, AstProductions;
+    }
 
-        for (final AstProductionModel astProduction : grammar.astProductions.values()) {
-            for (final AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
-                for (final AstElementModel astElement : astAlternative.getElements()) {
-                    if (astElement.isTerminal())
-                        astTokenUsage.put(astElement.getToken(), astAlternative);
-                    else
-                        astAstUsage.put(astElement.getAstProduction(), astAlternative);
-                }
-            }
-        }
+    public boolean isListHelpers(@Nonnull Set<? extends ListGroup> groups) {
+        return groups.contains(ListGroup.Helpers) && !grammar.getHelpers().isEmpty();
+    }
+
+    public boolean isListTokens(@Nonnull Set<? extends ListGroup> groups) {
+        return groups.contains(ListGroup.Tokens) && !grammar.getTokens().isEmpty();
+    }
+
+    public boolean isListCstProductions(@Nonnull Set<? extends ListGroup> groups) {
+        return groups.contains(ListGroup.CstProductions) && !grammar.getCstProductions().isEmpty();
+    }
+
+    public boolean isListExternals(@Nonnull Set<? extends ListGroup> groups) {
+        return groups.contains(ListGroup.Externals) && !grammar.getExternals().isEmpty();
+    }
+
+    public boolean isListAstProductions(@Nonnull Set<? extends ListGroup> groups) {
+        return groups.contains(ListGroup.AstProductions) && !grammar.getAstProductions().isEmpty();
     }
 
     @Nonnull
@@ -118,7 +107,14 @@ public class HtmlHelper {
 
     private class MatcherVisitor extends DepthFirstAdapter {
 
+        private final String aprefix;
+        private final String asuffix;
         private final StringBuilder buf = new StringBuilder();
+
+        public MatcherVisitor(@CheckForNull String aprefix, @CheckForNull String asuffix) {
+            this.aprefix = aprefix;
+            this.asuffix = asuffix;
+        }
 
         @Override
         public void defaultCase(Node node) {
@@ -142,11 +138,18 @@ public class HtmlHelper {
         public void caseAHelperMatcher(AHelperMatcher node) {
             String name = node.getHelperName().getText();
             HelperModel helper = grammar.getHelper(name);
-            if (helper != null)
-                buf.append("<a href=\"#").append(a(helper)).append("\">");
+            boolean link = (helper != null) && (aprefix != null) && (asuffix != null);
+            if (link) {
+                buf.append("<a href=\"").append(aprefix).append(a(helper)).append(asuffix).append("\"");
+                MatcherVisitor m = new MatcherVisitor(null, null);
+                helper.getMatcher().apply(m);
+                buf.append(" title=\"= ").append(m.buf).append("\"");
+                buf.append(">");
+            }
             buf.append(name);
-            if (helper != null)
+            if (link) {
                 buf.append("</a>");
+            }
         }
 
         private void caseAListMatcher(@Nonnull String infix, @Nonnull Iterable<? extends PMatcher> nodes) {
@@ -235,10 +238,32 @@ public class HtmlHelper {
     }
 
     @Nonnull
-    public String toRegex(@Nonnull PMatcher matcher) {
-        MatcherVisitor visitor = new MatcherVisitor();
+    public String toRegex(@Nonnull PMatcher matcher, @Nonnull String aprefix, @Nonnull String asuffix) {
+        MatcherVisitor visitor = new MatcherVisitor(aprefix, asuffix);
         matcher.apply(visitor);
         return visitor.buf.toString();
+    }
+
+    @Nonnull
+    public String toJavaMethodPrototype(@Nonnull AbstractElementModel<?> model) {
+        StringBuilder buf = new StringBuilder();
+        if (false) {
+            // I don't really like this.
+            if (model.isList())
+                buf.append("@Nonnull ");
+            else if (model.isNullable())
+                buf.append("@CheckForNull ");
+            else
+                buf.append("@Nonnull ");
+        }
+
+        if (model.isList())
+            buf.append("List&lt;");
+        buf.append(model.getJavaTypeName());
+        if (model.isList())
+            buf.append("&gt;");
+        buf.append(" get").append(model.getJavaMethodName()).append("()");
+        return buf.toString();
     }
 
     @Nonnull
@@ -248,6 +273,101 @@ public class HtmlHelper {
             return "";
         // Pattern.compile("\n\\s*\\**").matcher(text).replaceAll("");
         return text;
+    }
+
+    @Nonnull
+    public String toJavadocSummary(@Nonnull AbstractModel model) {
+        String text = model.getJavadocComment();
+        if (text == null)
+            return "No summary.";
+        // Pattern.compile("\n\\s*\\**").matcher(text).replaceAll("");
+        return text;
+    }
+
+    @Nonnull
+    public String toJavadocDetail(@Nonnull AbstractModel model) {
+        String text = model.getJavadocComment();
+        if (text == null)
+            return "No description.";
+        // Pattern.compile("\n\\s*\\**").matcher(text).replaceAll("");
+        return text;
+    }
+
+    private final Multimap<HelperModel, HelperModel> helperHelperUsage = HashMultimap.create();
+    private final Multimap<HelperModel, TokenModel> tokenHelperUsage = HashMultimap.create();
+    // Uses of given token in CST.
+    private final Multimap<TokenModel, CstAlternativeModel> cstTokenUsage = HashMultimap.create();
+    private final Multimap<CstProductionModel, CstAlternativeModel> cstCstUsage = HashMultimap.create();
+    // Construction of given AST in CST.
+    private final Multimap<AstAlternativeModel, CstAlternativeModel> cstAstUsage = HashMultimap.create();
+    // Uses of given token in AST.
+    private final Multimap<TokenModel, AstAlternativeModel> astTokenUsage = HashMultimap.create();
+    private final Multimap<AstProductionModel, AstAlternativeModel> astAstUsage = HashMultimap.create();
+
+    private void buildUsage() {
+        for (final HelperModel token : grammar.getHelpers()) {
+            token.getMatcher().apply(new DepthFirstAdapter() {
+                @Override
+                public void caseAHelperMatcher(AHelperMatcher node) {
+                    String name = node.getHelperName().getText();
+                    HelperModel helper = grammar.getHelper(name);
+                    helperHelperUsage.put(helper, token);
+                }
+            });
+        }
+
+        for (final TokenModel token : grammar.tokens.values()) {
+            token.getMatcher().apply(new DepthFirstAdapter() {
+                @Override
+                public void caseAHelperMatcher(AHelperMatcher node) {
+                    String name = node.getHelperName().getText();
+                    HelperModel helper = grammar.getHelper(name);
+                    tokenHelperUsage.put(helper, token);
+                }
+            });
+        }
+
+        for (final CstProductionModel cstProduction : grammar.cstProductions.values()) {
+            for (final CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+                for (CstElementModel cstElement : cstAlternative.getElements()) {
+                    if (cstElement.isTerminal())
+                        cstTokenUsage.put(cstElement.getToken(), cstAlternative);
+                    else
+                        cstCstUsage.put(cstElement.getCstProduction(), cstAlternative);
+                }
+
+                for (final CstTransformExpressionModel cstTransformExpression : cstAlternative.getTransformExpressions()) {
+                    cstTransformExpression.apply(new CstTransformExpressionModel.AbstractVisitor<Void, Void, RuntimeException>() {
+                        @Override
+                        public Void visitNew(CstTransformExpressionModel.New expression, Void input) throws RuntimeException {
+                            cstAstUsage.put(expression.getAstAlternative(), cstAlternative);
+                            return null;
+                        }
+                    }, null);
+                }
+            }
+        }
+
+        for (final AstProductionModel astProduction : grammar.astProductions.values()) {
+            for (final AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
+                for (final AstElementModel astElement : astAlternative.getElements()) {
+                    if (astElement.isTerminal())
+                        astTokenUsage.put(astElement.getToken(), astAlternative);
+                    else
+                        astAstUsage.put(astElement.getAstProduction(), astAlternative);
+                }
+            }
+        }
+    }
+
+    @Nonnull
+    public Collection<HelperModel> getHelperHelperUsage(@Nonnull HelperModel m) {
+        return helperHelperUsage.get(m);
+    }
+
+    @Nonnull
+    public Collection<TokenModel> getTokenHelperUsage(@Nonnull HelperModel m) {
+        return tokenHelperUsage.get(m);
     }
 
     /** Returns CstAlternativeModels which use the given TokenModel. */

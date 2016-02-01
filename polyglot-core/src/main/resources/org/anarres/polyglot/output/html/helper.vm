@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- ${header} -->
+#parse("org/anarres/polyglot/output/html/macros.vm")
+#head("Helper", $model)
+#header("Helper", $model)
+
+<div class="contentContainer">
+
+#@description($model)
+#end
+
+#@section("summary")
+#@summary("lexer", "Lexical Summary")
+
+		<tr>
+			<th class="colOne">Regular Expression</th>
+		</tr>
+		<tr class="altColor">
+			<td class="colOne"><code>= $helper.toRegex($model.matcher, "", ".html")</code></td>
+		</tr>
+
+#end##summary
+#end##section
+
+#@section("usage")
+
+#@summary("token", "Usage Summary (Tokens)")
+		<tr>
+			<th class="colFirst">Token</th>
+			<th class="colLast">Regular Expression</th>
+			<th class="colLast">Description</th>
+		</tr>
+#foreach ($token in $helper.getTokenHelperUsage($model))
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($token)}.html">${token.name}</a></code></td>
+			<td class="colLast"><code>= $helper.toRegex($token.matcher, "", ".html")</code></td>
+			<td class="colLast">$helper.toJavadocSummary($token)</td>
+		</tr>
+#end##token
+#end##summary
+
+#@summary("token", "Usage Summary (Helpers)")
+		<tr>
+			<th class="colFirst">Helper</th>
+			<th class="colLast">Regular Expression</th>
+			<th class="colLast">Description</th>
+		</tr>
+#foreach ($token in $helper.getHelperHelperUsage($model))
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($token)}.html">${token.name}</a></code></td>
+			<td class="colLast"><code>= $helper.toRegex($token.matcher, "", ".html")</code></td>
+			<td class="colLast">$helper.toJavadocSummary($token)</td>
+		</tr>
+#end##token
+#end##summary
+
+#end##section
+
+</div><!-- contentContainer -->
+
+#foot($model)
