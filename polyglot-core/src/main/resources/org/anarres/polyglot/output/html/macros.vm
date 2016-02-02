@@ -10,7 +10,7 @@
 <div class="topNav">
 	<a name="navbar.top"><!-- --></a>
 <ul class="navList" title="Navigation">
-<li><a href="../../../../../overview-summary.html">Overview</a></li>
+<li><a href="overview.html">Overview</a></li>
 <li class="navBarCell1Rev">Object</li>
 </ul>
 </div>
@@ -81,7 +81,7 @@ $!bodyContent
 <div class="bottomNav">
 <a name="navbar.bottom"><!-- --></a>
 <ul class="navList" title="Navigation">
-<li><a href="../../../../../overview-summary.html">Overview</a></li>
+<li><a href="overview.html">Overview</a></li>
 <li class="navBarCell1Rev">Object</li>
 </ul>
 </div>
@@ -109,8 +109,10 @@ New <a href="${helper.a($root.astAlternative)}" title="$root.astAlternative.java
 #end##argument
 )##
 #elseif ($root.type == "reference")
-${root.element}##
-.<a href="${helper.a($root.transform.symbol)}.html" title="$root.transform.symbol.javaTypeName">$root.transform.symbol.name</a>##
+#if ($root.element.name != $root.transform.symbol.name)
+${root.element.name}.##
+#end
+<a href="${helper.a($root.transform.symbol)}.html" title="$root.transform.symbol.javaTypeName">$root.transform.symbol.name</a>##
 #else
 #stop("ERROR: Unknown type $root.type")
 #end

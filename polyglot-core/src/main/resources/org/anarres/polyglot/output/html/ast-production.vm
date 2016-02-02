@@ -67,7 +67,7 @@
 			<th class="colLast">CST Transform Expression</th>
 		</tr>
 #foreach ($astAlternative in $model.alternatives)
-#foreach ($cstAlternative in $helper.getCstAstUsage($astAlternative))
+#foreach ($cstAlternative in $helper.getAstCstUsage($astAlternative))
 		<tr class="altColor">
 			<td class="colFirst"><code><a href="${helper.a($cstAlternative)}.html">${cstAlternative.name}</a></code></td>
 			<td class="colLast"><code>=
@@ -103,7 +103,7 @@
 		</h4>
 		$helper.toJavadocDetail($alternative)
 		<ul>
-#usage("CST", $helper.getCstAstUsage($alternative))
+#usage("CST", $helper.getAstCstUsage($alternative))
 		</ul>
 		</li>
 	</ul><!-- detailsitem -->

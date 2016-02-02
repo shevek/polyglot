@@ -22,6 +22,7 @@ import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.HelperModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.apache.velocity.VelocityContext;
+import static org.anarres.polyglot.output.HtmlHelper.ListGroup.*;
 
 /**
  *
@@ -44,17 +45,18 @@ public class HtmlOutputWriter extends AbstractOutputWriter {
 
     @Override
     public void run(PolyglotExecutor executor) throws InterruptedException, ExecutionException, IOException {
-        process(executor, "grammar.vm", "grammar.html", ImmutableMap.<String, Object>of());
+        // process(executor, "grammar.vm", "grammar.html", ImmutableMap.<String, Object>of());
 
         process(executor, "stylesheet.vm", "stylesheet.css", ImmutableMap.<String, Object>of());
 
         process(executor, "index.vm", "index.html", ImmutableMap.<String, Object>of());
-        process(executor, "frame-groups.vm", "frame-groups.html", ImmutableMap.<String, Object>of());
+        process(executor, "menu.vm", "menu.html", ImmutableMap.<String, Object>of());
 
-        process(executor, "list.vm", "list-all.html", ImmutableMap.<String, Object>of("listTitle", "All Objects", "listGroups", EnumSet.allOf(HtmlHelper.ListGroup.class)));
-        process(executor, "list.vm", "list-lexer.html", ImmutableMap.<String, Object>of("listTitle", "Lexer Objects", "listGroups", EnumSet.of(HtmlHelper.ListGroup.Helpers, HtmlHelper.ListGroup.Tokens)));
-        process(executor, "list.vm", "list-parser.html", ImmutableMap.<String, Object>of("listTitle", "Parser Objects", "listGroups", EnumSet.of(HtmlHelper.ListGroup.Tokens, HtmlHelper.ListGroup.CstProductions)));
-        process(executor, "list.vm", "list-model.html", ImmutableMap.<String, Object>of("listTitle", "Model Objects", "listGroups", EnumSet.of(HtmlHelper.ListGroup.Tokens, HtmlHelper.ListGroup.Externals, HtmlHelper.ListGroup.AstProductions)));
+        process(executor, "list.vm", "list-all.html", ImmutableMap.<String, Object>of("listTitle", "All Objects", "listGroups", EnumSet.of(Helpers, Tokens, Externals, CstProductions, CstAlternatives, AstProductions, AstAlternatives)));
+        process(executor, "list.vm", "list-lexer.html", ImmutableMap.<String, Object>of("listTitle", "Lexer Objects", "listGroups", EnumSet.of(Helpers, Tokens)));
+        process(executor, "list.vm", "list-parser.html", ImmutableMap.<String, Object>of("listTitle", "Parser Objects", "listGroups", EnumSet.of(Tokens, CstProductions, CstAlternatives)));
+        process(executor, "list.vm", "list-model.html", ImmutableMap.<String, Object>of("listTitle", "Model Objects", "listGroups", EnumSet.of(Tokens, Externals, AstProductions, AstAlternatives)));
+        process(executor, "list.vm", "list-unused.html", ImmutableMap.<String, Object>of("listTitle", "Unused Objects", "listGroups", EnumSet.of(Helpers, Tokens, CstProductions, AstProductions, AstAlternatives, Unused)));
 
         for (HelperModel model : getGrammar().getHelpers()) {
             process(executor, "helper.vm", helper.a(model) + ".html", ImmutableMap.<String, Object>of("model", model));

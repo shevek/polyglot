@@ -11,69 +11,83 @@
 
 #if ($helper.isListAstProductions($listGroups))
 <h2>AST Productions</h2>
-#foreach ($object in $grammar.astProductionsAlphabetical)
 <ul>
+#foreach ($object in $grammar.astProductionsAlphabetical)
+#if ($helper.isListModel($listGroups, $object))
 <li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
-</ul>
 #end
+#end
+</ul>
 #end##isListAstProductions
 
 #if ($helper.isListCstProductions($listGroups))
 <h2>CST Productions</h2>
-#foreach ($object in $grammar.cstProductionsAlphabetical)
 <ul>
+#foreach ($object in $grammar.cstProductionsAlphabetical)
+#if ($helper.isListModel($listGroups, $object))
 <li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
-</ul>
 #end
+#end
+</ul>
 #end##isListCstProductions
 
-#if ($helper.isListAstProductions($listGroups))
+#if ($helper.isListAstAlternatives($listGroups))
 <h2>AST Alternatives</h2>
-#foreach ($object in $grammar.astProductionsAlphabetical)
 <ul>
+#foreach ($object in $grammar.astProductionsAlphabetical)
 #foreach ($subobject in $object.alternatives)
+#if ($helper.isListModel($listGroups, $subobject))
 <li><a href="${helper.a($subobject)}.html" target="objectFrame">${subobject.name}</a></li>
 #end
-</ul>
 #end
+#end
+</ul>
 #end##isListAstProductions
 
-#if ($helper.isListCstProductions($listGroups))
+#if ($helper.isListCstAlternatives($listGroups))
 <h2>CST Alternatives</h2>
-#foreach ($object in $grammar.cstProductionsAlphabetical)
 <ul>
+#foreach ($object in $grammar.cstProductionsAlphabetical)
 #foreach ($subobject in $object.alternatives)
+#if ($helper.isListModel($listGroups, $subobject))
 <li><a href="${helper.a($subobject)}.html" target="objectFrame">${subobject.name}</a></li>
 #end
-</ul>
 #end
+#end
+</ul>
 #end##isListCstProductions
 
 #if ($helper.isListTokens($listGroups))
 <h2>Tokens</h2>
-#foreach ($object in $grammar.tokensAlphabetical)
 <ul>
+#foreach ($object in $grammar.tokensAlphabetical)
+#if ($helper.isListModel($listGroups, $object))
 <li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
-</ul>
 #end
+#end
+</ul>
 #end
 
 #if ($helper.isListHelpers($listGroups))
 <h2>Helpers</h2>
-#foreach ($object in $grammar.helpersAlphabetical)
 <ul>
+#foreach ($object in $grammar.helpersAlphabetical)
+#if ($helper.isListModel($listGroups, $object))
 <li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
-</ul>
 #end
+#end
+</ul>
 #end
 
 #if ($helper.isListExternals($listGroups))
 <h2>Externals</h2>
-#foreach ($object in $grammar.externalsAlphabetical)
 <ul>
+#foreach ($object in $grammar.externalsAlphabetical)
+#if ($helper.isListModel($listGroups, $object))
 <li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a></li>
-</ul>
 #end
+#end
+</ul>
 #end
 
 </div>

@@ -30,7 +30,7 @@
 			<th class="colLast">CST Elements</th>
 			<th class="colLast">Description</th>
 		</tr>
-#foreach ($alternative in $helper.getCstTokenUsage($model))
+#foreach ($alternative in $helper.getTokenCstUsage($model))
 		<tr class="altColor">
 			<td class="colFirst"><code><a href="${helper.a($alternative)}.html">${alternative.name}</a></code></td>
 			<td class="colLast"><code>=
@@ -49,7 +49,7 @@
 			<th class="colLast">AST Elements</th>
 			<th class="colLast">Description</th>
 		</tr>
-#foreach ($alternative in $helper.getAstTokenUsage($model))
+#foreach ($alternative in $helper.getTokenAstUsage($model))
 		<tr class="altColor">
 			<td class="colFirst"><code><a href="${helper.a($alternative)}.html" title="${alternative.javaTypeName}">${alternative.name}</a></code></td>
 			<td class="colLast"><code>=

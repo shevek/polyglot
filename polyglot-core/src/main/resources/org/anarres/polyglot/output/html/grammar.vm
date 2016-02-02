@@ -80,8 +80,8 @@
 		${token} = $helper.toRegex($token.matcher, "#", "")
 	</li>
 	<ul>
-		#usage("CST", $helper.getCstTokenUsage($token))
-		#usage("AST", $helper.getAstTokenUsage($token))
+		#usage("CST", $helper.getTokenCstUsage($token))
+		#usage("AST", $helper.getTokenAstUsage($token))
 	</ul>
 
 #end##token
@@ -170,7 +170,7 @@
         <li><a href="#$helper.a($external.symbol)" title="${external.javaTypeName} get${external.javaMethodName}()">${external}</a>
 			$helper.toJavadocText($external)
 #end##element
-			#usage("CST", $helper.getCstAstUsage($alternative))
+			#usage("CST", $helper.getAstCstUsage($alternative))
 </ul>
 
 #end##alternative

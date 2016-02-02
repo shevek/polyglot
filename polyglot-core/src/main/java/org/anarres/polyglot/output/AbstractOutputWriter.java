@@ -34,6 +34,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.app.event.implement.ReportInvalidReferences;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.runtime.log.LogChute;
 import org.apache.velocity.runtime.log.SystemLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.tools.generic.EscapeTool;
@@ -52,6 +53,8 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     private final Set<? extends Option> options;
     private final Map<? extends String, ? extends File> templates;
     private final OutputData data;
+    private final LogChute logChute = new SystemLogChute();
+    private final EscapeTool escapeTool = new EscapeTool();
 
     public AbstractOutputWriter(
             @Nonnull OutputLanguage language,
@@ -116,6 +119,8 @@ public abstract class AbstractOutputWriter implements OutputWriter {
 
     public static class Loader extends ClasspathResourceLoader {
 
+        // private static final Loader INSTANCE = new Loader();
+
         @Override
         public InputStream getResourceStream(String name) throws ResourceNotFoundException {
             // LOG.info("Loading " + name);
@@ -125,7 +130,8 @@ public abstract class AbstractOutputWriter implements OutputWriter {
 
     protected void process(@Nonnull CharSource source, @Nonnull String dstFilePath, @Nonnull Map<String, Object> contextValues) throws IOException {
         VelocityEngine engine = new VelocityEngine();
-        setProperty(engine, VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS, SystemLogChute.class.getName());
+        // setProperty(engine, VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS, SystemLogChute.class.getName());
+        setProperty(engine, VelocityEngine.RUNTIME_LOG_LOGSYSTEM, logChute);
         setProperty(engine, VelocityEngine.RESOURCE_LOADER, "classpath");
         setProperty(engine, "classpath.resource.loader.class", Loader.class.getName());  // Needs to be in this JAR file.
         // setProperty(engine, VelocityEngine.FILE_RESOURCE_LOADER_CACHE, "true");
@@ -141,7 +147,7 @@ public abstract class AbstractOutputWriter implements OutputWriter {
                 return internalPut(key, value);
             }
         };
-        context.put("esc", new EscapeTool());
+        context.put("esc", escapeTool);
 
         context.put("header", "This file was generated automatically by Polyglot. Edits will be lost.");
         context.put("grammarName", data.getName());

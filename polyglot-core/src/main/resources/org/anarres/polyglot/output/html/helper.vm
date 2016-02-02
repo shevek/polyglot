@@ -30,7 +30,7 @@
 			<th class="colLast">Regular Expression</th>
 			<th class="colLast">Description</th>
 		</tr>
-#foreach ($token in $helper.getTokenHelperUsage($model))
+#foreach ($token in $helper.getHelperTokenUsage($model))
 		<tr class="altColor">
 			<td class="colFirst"><code><a href="${helper.a($token)}.html">${token.name}</a></code></td>
 			<td class="colLast"><code>= $helper.toRegex($token.matcher, "", ".html")</code></td>
