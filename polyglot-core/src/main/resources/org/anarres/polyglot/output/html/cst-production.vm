@@ -32,7 +32,7 @@
 				<pre>&nbsp;{ -&gt; ##
 #foreach ($transformExpression in $alternative.transformExpressions)##
 #expression($transformExpression) ##
-#end##transformPrototype##
+#end##transformExpression##
 }</pre>
 
 			</code></td>

@@ -17,6 +17,7 @@ import org.anarres.polyglot.Option;
 import org.anarres.polyglot.PolyglotExecutor;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstProductionModel;
+import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.HelperModel;
 import org.anarres.polyglot.model.TokenModel;
@@ -65,6 +66,9 @@ public class HtmlOutputWriter extends AbstractOutputWriter {
 
         for (CstProductionModel production : getGrammar().getCstProductions()) {
             process(executor, "cst-production.vm", helper.a(production) + ".html", ImmutableMap.<String, Object>of("model", production));
+            for (CstAlternativeModel alternative : production.getAlternatives().values()) {
+                process(executor, "cst-alternative.vm", helper.a(alternative) + ".html", ImmutableMap.<String, Object>of("model", alternative));
+            }
         }
 
         for (AstProductionModel production : getGrammar().getAstProductions()) {
