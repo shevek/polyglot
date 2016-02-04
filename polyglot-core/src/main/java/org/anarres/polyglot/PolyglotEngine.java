@@ -294,8 +294,10 @@ public class PolyglotEngine {
             return grammar;
         dump(debugHandler.forTarget(GRAMMAR_CST, ".cst.dot"), grammar.getCstGraphVizable());
         dump(debugHandler.forTarget(GRAMMAR_AST, ".ast.dot"), grammar.getAstGraphVizable());
+        stopwatch.stop();
         buildOutputs(executor, grammar, null, new Tables(null, null, null, null),
                 Predicates.equalTo(OutputLanguage.html));
+        stopwatch.start();
 
         new GrammarNormalizer(errors, grammar).run();
         dump(debugHandler.forTarget(GRAMMAR_NORMALIZED, ".normalized.grammar"), grammar);

@@ -409,6 +409,15 @@ public class HtmlHelper {
         return astAstUsage.get(m);
     }
 
+    /**
+     * Returns true if the model is used.
+     *
+     * For an AST production, this may return false if the alternative is constructed
+     * by the CST but subsequently dropped on the floor and not referenced in the AST.
+     *
+     * @param m The model for which to find usages.
+     * @return true if the model is used.
+     */
     public boolean isUsed(@Nonnull AbstractModel m) {
         if (m instanceof HelperModel)
             return helperHelperUsage.containsKey(m) || helperTokenUsage.containsKey(m);

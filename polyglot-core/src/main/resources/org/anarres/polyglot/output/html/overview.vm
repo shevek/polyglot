@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- ${header} -->
+#parse("org/anarres/polyglot/output/html/macros.vm")
+<html lang="en">
+<head>
+<title>${grammarName} - Overview</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="Style">
+</head>
+<body>
+
+<div class="indexContainer">
+
+#@section("summary")
+
+#if (!$grammar.astProductions.isEmpty())
+#@summary("ast", "Model: AST Productions")
+		<tr>
+			<th class="colFirst">Name</th>
+			<th class="colLast">Description</th>
+		</tr>
+#foreach ($model in $grammar.astProductionsAlphabetical)
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($model)}.html">${model.name}</a></code></td>
+			<td class="colLast">$helper.toJavadocSummary($model)</td>
+		</tr>
+#end##model
+#end##summary
+#end##elements.isEmpty
+
+#if (!$grammar.cstProductions.isEmpty())
+#@summary("ast", "Parser: CST Productions")
+		<tr>
+			<th class="colFirst">Name</th>
+			<th class="colLast">Description</th>
+		</tr>
+#foreach ($model in $grammar.cstProductionsAlphabetical)
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($model)}.html">${model.name}</a></code></td>
+			<td class="colLast">$helper.toJavadocSummary($model)</td>
+		</tr>
+#end##model
+#end##summary
+#end##elements.isEmpty
+
+#if (!$grammar.tokens.isEmpty())
+#@summary("ast", "Lexer: Tokens")
+		<tr>
+			<th class="colFirst">Name</th>
+			<th class="colLast">Description</th>
+		</tr>
+#foreach ($model in $grammar.tokensAlphabetical)
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($model)}.html">${model.name}</a></code></td>
+			<td class="colLast">$helper.toJavadocSummary($model)</td>
+		</tr>
+#end##model
+#end##summary
+#end##elements.isEmpty
+
+#end##section
+
+</div>
+
+</body>
+</html>
+

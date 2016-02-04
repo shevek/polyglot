@@ -51,6 +51,7 @@ public class HtmlOutputWriter extends AbstractOutputWriter {
 
         process(executor, "index.vm", "index.html", ImmutableMap.<String, Object>of());
         process(executor, "menu.vm", "menu.html", ImmutableMap.<String, Object>of());
+        process(executor, "overview.vm", "overview.html", ImmutableMap.<String, Object>of());
 
         process(executor, "list.vm", "list-all.html", ImmutableMap.<String, Object>of("listTitle", "All Objects", "listGroups", EnumSet.of(Helpers, Tokens, Externals, CstProductions, CstAlternatives, AstProductions, AstAlternatives)));
         process(executor, "list.vm", "list-lexer.html", ImmutableMap.<String, Object>of("listTitle", "Lexer Objects", "listGroups", EnumSet.of(Helpers, Tokens)));
