@@ -42,6 +42,8 @@ public class Slf4jLogChute implements LogChute {
             case ERROR_ID:
                 LOG.error(message);
                 break;
+            default:
+                throw new IllegalArgumentException("Unknown level " + level);
         }
     }
 
@@ -65,6 +67,8 @@ public class Slf4jLogChute implements LogChute {
             case ERROR_ID:
                 LOG.error(message, throwable);
                 break;
+            default:
+                throw new IllegalArgumentException("Unknown level " + level);
         }
     }
 

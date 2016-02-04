@@ -61,14 +61,12 @@ public abstract class AbstractNamedModel extends AbstractModel {
         if (nodes == null)
             return ImmutableMultimap.of();
         Multimap<String, AnnotationModel> out = HashMultimap.create();
-        if (nodes != null) {
-            for (PAnnotation node : nodes) {
-                AAnnotation a = (AAnnotation) node;
-                TString value = a.getValue();
-                AnnotationModel m = new AnnotationModel(a.getName(), value == null ? null : NFABuilderVisitor.parse(a.getValue()));
-                // LOG.info("Annotation: " + m);
-                out.put(m.getName(), m);
-            }
+        for (PAnnotation node : nodes) {
+            AAnnotation a = (AAnnotation) node;
+            TString value = a.getValue();
+            AnnotationModel m = new AnnotationModel(a.getName(), value == null ? null : NFABuilderVisitor.parse(value));
+            // LOG.info("Annotation: " + m);
+            out.put(m.getName(), m);
         }
         // LOG.info("Annotations: " + out);
         return out;
