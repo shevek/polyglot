@@ -348,6 +348,8 @@ public class HtmlHelper {
                         @Override
                         public Void visitNew(CstTransformExpressionModel.New expression, Void input) throws RuntimeException {
                             astCstUsage.put(expression.getAstAlternative(), cstAlternative);
+                            for (CstTransformExpressionModel argument : expression.getArguments())
+                                argument.apply(this, input);
                             return null;
                         }
                     }, null);

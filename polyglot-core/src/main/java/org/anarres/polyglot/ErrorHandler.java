@@ -66,7 +66,7 @@ public class ErrorHandler {
             } else {
                 buf.append(location.getLine()).append(':').append(location.getColumn()).append(": ").append(message);
                 if (source != null)
-                    buf.append('\n').append(toDescription(location, source));
+                    buf.append("\n  ").append(toDescription(location, source));
             }
         }
 

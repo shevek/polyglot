@@ -103,7 +103,7 @@ Null##
 #end##item
 ]##
 #elseif ($root.type == "new")
-New <a href="${helper.a($root.astAlternative)}" title="$root.astAlternative.javaTypeName">${root.astAlternative.name}</a>(##
+New <a href="${helper.a($root.astAlternative)}.html" title="$root.astAlternative.javaTypeName">${root.astAlternative.name}</a>(##
 #foreach ($argument in $root.arguments)
 #expression($argument)#if($velocityHasNext), #{end}
 #end##argument

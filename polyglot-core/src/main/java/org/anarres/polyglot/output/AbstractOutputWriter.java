@@ -53,7 +53,7 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     private final Set<? extends Option> options;
     private final Map<? extends String, ? extends File> templates;
     private final OutputData data;
-    private final LogChute logChute = new SystemLogChute();
+    private final LogChute logChute = new Slf4jLogChute();
     private final EscapeTool escapeTool = new EscapeTool();
 
     public AbstractOutputWriter(
