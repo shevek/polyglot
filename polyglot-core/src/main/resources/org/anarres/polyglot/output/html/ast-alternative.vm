@@ -49,6 +49,34 @@
 #end##section
 
 
+#@section("usage")
+
+#@summary("construction", "Usage Summary (Construction by CST)")
+		<tr>
+			<th class="colFirst">CST Alternative</th>
+			<th class="colLast">CST Elements</th>
+			<th class="colLast">CST Transform Expression</th>
+		</tr>
+#foreach ($cstAlternative in $helper.getAstCstUsage($model))
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($cstAlternative)}.html">${cstAlternative.name}</a></code></td>
+			<td class="colLast"><code>=
+#foreach ($element in $cstAlternative.elements)
+				<a href="${helper.a($element.symbol)}.html">${element}</a>
+#end
+			</code></td>
+			<td class="colLast">
+#foreach ($expression in $cstAlternative.transformExpressions)
+#expression($expression)
+#end
+			</td>
+		</tr>
+#end##cstAlternative
+#end##summary
+
+#end##section
+
+
 
 #@section("detail")
 
