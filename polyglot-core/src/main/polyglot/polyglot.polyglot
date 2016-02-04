@@ -159,7 +159,7 @@ Productions
 		kw_ignored kw_tokens identifier_list? tok_semi
 			{ -> New section.ignored_tokens([identifier_list.identifier]) };
 
-	// Avoids generating an alternate of length 1.
+	/** This production avoids generating an alternate of length 1. */
 	matcher { -> matcher } =
 		{single} concat_matcher
 			{ -> concat_matcher.matcher } |
@@ -170,7 +170,7 @@ Productions
 		tok_bar concat_matcher
 			{ -> concat_matcher.matcher } ;
 
-	// Avoids generating a concat of length 1.
+	/** This production avoids generating a concat of length 1. */
 	concat_matcher { -> matcher } =
 		{empty}
 			{ -> New matcher.concat([]) } |
@@ -306,8 +306,10 @@ Productions
 			{ -> [ast_alternative_list.ast_alternative, ast_alternative] } ;
 
 	ast_alternative =
-		// If we don't split this, we get a R/R conflict because
-		// the javadoc_comment or annotations might refer to the element.
+		/**
+		 * If we don't split this, we get a R/R conflict because
+		 * the javadoc_comment or annotations might refer to the element.
+		 */
 		{anonymous}
 			[elements]:element*
 				{ -> New ast_alternative(Null, Null, [elements], []) } |
@@ -325,22 +327,22 @@ Productions
 
 
 
-	// Generic
+	/** Generic. */
 	transform_specifier { -> identifier } =
 		tok_dot identifier
 			{ -> identifier } ;
 
-	// Generic
+	/** Generic. */
 	alt_name { -> identifier } =
 		tok_lbrace identifier tok_rbrace
 			{ -> identifier };
 
-	// Generic
+	/** Generic. */
 	element_name { -> identifier } =
 		tok_lsquare identifier tok_rsquare tok_colon
 			{ -> identifier };
 
-	// Generic
+	/** Generic. */
 	specifier =
 		{token} token_specifier tok_dot
 			{ -> New specifier.token(token_specifier) } |
@@ -349,17 +351,19 @@ Productions
 		{external} external_specifier tok_dot
 			{ -> New specifier.external(external_specifier) } ;
 
+	/** Generic. */
 	identifier_list { -> identifier* } =
 		{single} identifier
 			{ -> [identifier] } |
 		{list} identifier_list tok_comma identifier
 			{ -> [identifier_list.identifier, identifier] } ;
 
-	// Generic
+	/** Generic. */
 	annotation =
 		tok_at identifier annotation_value?
 			{ -> New annotation(identifier, annotation_value) } ;
 
+	/** Generic. */
 	annotation_value { -> string? } =
 		tok_lpar string? tok_rpar
 			{ -> string } ;

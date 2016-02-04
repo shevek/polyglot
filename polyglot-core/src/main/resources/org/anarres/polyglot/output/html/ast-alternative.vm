@@ -7,7 +7,8 @@
 <div class="contentContainer">
 
 #@description($model)
-<pre>extends <a href="${helper.a($model.production)}.html">${model.production.name}</a></pre>
+<pre>#annotations($model)
+extends <a href="${helper.a($model.production)}.html">${model.production.name}</a></pre>
 #end
 
 #@section("summary")
@@ -57,7 +58,7 @@
 			<th class="colLast">CST Elements</th>
 			<th class="colLast">CST Transform Expression</th>
 		</tr>
-#foreach ($cstAlternative in $helper.getAstCstUsage($model))
+#foreach ($cstAlternative in $helper.getAstCstAlternativeUsage($model))
 		<tr class="altColor">
 			<td class="colFirst"><code><a href="${helper.a($cstAlternative)}.html">${cstAlternative.name}</a></code></td>
 			<td class="colLast"><code>=

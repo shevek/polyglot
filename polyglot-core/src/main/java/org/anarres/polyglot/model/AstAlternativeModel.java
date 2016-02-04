@@ -23,7 +23,7 @@ import org.anarres.polyglot.output.TemplateProperty;
  *
  * @author shevek
  */
-public class AstAlternativeModel extends AbstractNamedJavaModel implements AstModel {
+public final class AstAlternativeModel extends AbstractNamedJavaModel implements AstModel {
 
     @Nonnull
     public static AstAlternativeModel forNode(@Nonnull AstProductionModel production, @Nonnull AAstAlternative node) {

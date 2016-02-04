@@ -7,12 +7,9 @@
 <div class="contentContainer">
 
 #@description($model)
-<pre>extends <a href="${helper.a($model.production)}.html">${model.production.name}</a></pre>
-<pre>&nbsp;{ -&gt; ##
-#foreach ($transformExpression in $model.transformExpressions)##
-#expression($transformExpression) ##
-#end##transformExpression##
-}</pre>
+<pre>#annotations($model)
+extends <a href="${helper.a($model.production)}.html">${model.production.name}</a>
+&nbsp;#expressions($model)</pre>
 #end
 
 #@section("summary")

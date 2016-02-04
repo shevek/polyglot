@@ -7,11 +7,7 @@
 <div class="contentContainer">
 
 #@description($model)
-##<pre>{ -&gt; ##
-###foreach ($transformPrototype in $model.transformPrototypes)
-##        <a href="${helper.a($transformPrototype.symbol)}.html">${transformPrototype}</a>
-###end##transformPrototype
-##}</pre>
+<pre>#annotations($model)</pre>
 #end
 
 #@section("summary")
@@ -60,6 +56,19 @@
 #end##alternative
 #end##summary
 
+#@summary("construction", "Usage Summary (Prototype in CST)")
+		<tr>
+			<th class="colFirst">CST Production</th>
+			<th class="colLast">CST Transform Prototype</th>
+		</tr>
+#foreach ($cstProduction in $helper.getAstCstProductionUsage($model))
+		<tr class="altColor">
+			<td class="colFirst"><code><a href="${helper.a($cstProduction)}.html">${cstProduction.name}</a></code></td>
+			<td class="colLast"><code>#prototypes($cstProduction)</code></td>
+		</tr>
+#end##cstProduction
+#end##summary
+
 #@summary("construction", "Usage Summary (Construction by CST)")
 		<tr>
 			<th class="colFirst">CST Alternative</th>
@@ -67,7 +76,7 @@
 			<th class="colLast">CST Transform Expression</th>
 		</tr>
 #foreach ($astAlternative in $model.alternatives)
-#foreach ($cstAlternative in $helper.getAstCstUsage($astAlternative))
+#foreach ($cstAlternative in $helper.getAstCstAlternativeUsage($astAlternative))
 		<tr class="altColor">
 			<td class="colFirst"><code><a href="${helper.a($cstAlternative)}.html">${cstAlternative.name}</a></code></td>
 			<td class="colLast"><code>=
@@ -103,7 +112,7 @@
 		</h4>
 		$helper.toJavadocDetail($alternative)
 		<ul>
-#usage("CST", $helper.getAstCstUsage($alternative))
+#usage("CST", $helper.getAstCstAlternativeUsage($alternative))
 		</ul>
 		</li>
 	</ul><!-- detailsitem -->

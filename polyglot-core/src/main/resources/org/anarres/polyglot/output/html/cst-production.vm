@@ -7,11 +7,8 @@
 <div class="contentContainer">
 
 #@description($model)
-<pre>{ -&gt; ##
-#foreach ($transformPrototype in $model.transformPrototypes)##
-<a href="${helper.a($transformPrototype.symbol)}.html">${transformPrototype}</a> ##
-#end##transformPrototype##
-}</pre>
+<pre>#annotations($model)
+#prototypes($model)</pre>
 #end
 
 #@section("summary")
@@ -29,12 +26,7 @@
 #foreach ($element in $alternative.elements)
 				<a href="${helper.a($element.symbol)}.html">${element}</a>
 #end
-				<pre>&nbsp;{ -&gt; ##
-#foreach ($transformExpression in $alternative.transformExpressions)##
-#expression($transformExpression) ##
-#end##transformExpression##
-}</pre>
-
+				<pre>&nbsp;#expressions($alternative)</pre>
 			</code></td>
 			<td class="colLast">$helper.toJavadocSummary($alternative)</td>
 		</tr>

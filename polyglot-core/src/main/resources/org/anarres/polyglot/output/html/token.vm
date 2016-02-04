@@ -7,6 +7,7 @@
 <div class="contentContainer">
 
 #@description($model)
+<pre>#annotations($model)</pre>
 #end
 
 #@section("summary")
@@ -30,7 +31,7 @@
 			<th class="colLast">CST Elements</th>
 			<th class="colLast">Description</th>
 		</tr>
-#foreach ($alternative in $helper.getTokenCstUsage($model))
+#foreach ($alternative in $helper.getTokenCstAlternativeUsage($model))
 		<tr class="altColor">
 			<td class="colFirst"><code><a href="${helper.a($alternative)}.html">${alternative.name}</a></code></td>
 			<td class="colLast"><code>=

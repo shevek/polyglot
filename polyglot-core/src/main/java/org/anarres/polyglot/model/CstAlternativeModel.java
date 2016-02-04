@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author shevek
  */
-public class CstAlternativeModel extends AbstractNamedModel implements Indexed, CstTransformExpressionModel.Container {
+public final class CstAlternativeModel extends AbstractNamedModel implements Indexed, CstTransformExpressionModel.Container {
 
     private static final Logger LOG = LoggerFactory.getLogger(CstAlternativeModel.class);
 

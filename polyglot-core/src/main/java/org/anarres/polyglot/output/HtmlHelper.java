@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -16,6 +17,7 @@ import org.anarres.polyglot.analysis.DepthFirstAdapter;
 import org.anarres.polyglot.model.AbstractElementModel;
 import org.anarres.polyglot.model.AbstractModel;
 import org.anarres.polyglot.model.AbstractNamedModel;
+import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstProductionModel;
@@ -285,10 +287,12 @@ public class HtmlHelper {
     @Nonnull
     public String toJavadocSummary(@Nonnull AbstractModel model) {
         String text = model.getJavadocComment();
-        if (text == null)
-            return "No summary.";
+        if (text != null)
+            return text;
         // Pattern.compile("\n\\s*\\**").matcher(text).replaceAll("");
-        return text;
+        if (model instanceof TokenModel)
+            return "A lexical token matching " + toRegex(((TokenModel) model).getMatcher(), "", ".html");
+        return "No summary.";
     }
 
     @Nonnull
@@ -303,10 +307,12 @@ public class HtmlHelper {
     private final Multimap<HelperModel, HelperModel> helperHelperUsage = HashMultimap.create();
     private final Multimap<HelperModel, TokenModel> helperTokenUsage = HashMultimap.create();
     // Uses of given token in CST.
-    private final Multimap<TokenModel, CstAlternativeModel> tokenCstUsage = HashMultimap.create();
+    private final Multimap<TokenModel, CstProductionModel> tokenCstProductionUsage = HashMultimap.create();
+    private final Multimap<TokenModel, CstAlternativeModel> tokenCstAlternativeUsage = HashMultimap.create();
     private final Multimap<CstProductionModel, CstAlternativeModel> cstCstUsage = HashMultimap.create();
     // Construction of given AST in CST.
-    private final Multimap<AstAlternativeModel, CstAlternativeModel> astCstUsage = HashMultimap.create();
+    private final Multimap<AstProductionModel, CstProductionModel> astCstProductionUsage = HashMultimap.create();
+    private final Multimap<AstAlternativeModel, CstAlternativeModel> astCstAlternativeUsage = HashMultimap.create();
     // Uses of given token in AST.
     private final Multimap<TokenModel, AstAlternativeModel> tokenAstUsage = HashMultimap.create();
     private final Multimap<AstProductionModel, AstAlternativeModel> astAstUsage = HashMultimap.create();
@@ -335,10 +341,17 @@ public class HtmlHelper {
         }
 
         for (final CstProductionModel cstProduction : grammar.cstProductions.values()) {
+            for (final CstTransformPrototypeModel cstTransformPrototype : cstProduction.getTransformPrototypes()) {
+                if (cstTransformPrototype.symbol.isTerminal())
+                    tokenCstProductionUsage.put(cstTransformPrototype.getToken(), cstProduction);
+                else
+                    astCstProductionUsage.put(cstTransformPrototype.getAstProduction(), cstProduction);
+            }
+
             for (final CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
                 for (CstElementModel cstElement : cstAlternative.getElements()) {
                     if (cstElement.isTerminal())
-                        tokenCstUsage.put(cstElement.getToken(), cstAlternative);
+                        tokenCstAlternativeUsage.put(cstElement.getToken(), cstAlternative);
                     else
                         cstCstUsage.put(cstElement.getCstProduction(), cstAlternative);
                 }
@@ -347,11 +360,23 @@ public class HtmlHelper {
                     cstTransformExpression.apply(new CstTransformExpressionModel.AbstractVisitor<Void, Void, RuntimeException>() {
                         @Override
                         public Void visitNew(CstTransformExpressionModel.New expression, Void input) throws RuntimeException {
-                            astCstUsage.put(expression.getAstAlternative(), cstAlternative);
+                            astCstAlternativeUsage.put(expression.getAstAlternative(), cstAlternative);
                             for (CstTransformExpressionModel argument : expression.getArguments())
                                 argument.apply(this, input);
                             return null;
                         }
+
+                        /*
+                         @Override
+                         public Void visitReference(CstTransformExpressionModel.Reference expression, Void input) throws RuntimeException {
+                         AstProductionSymbol symbol = expression.transform.getSymbol();
+                         if (symbol.isTerminal())
+                         tokenCstAlternativeUsage.put((TokenModel) symbol, cstAlternative);
+                         // else
+                         // astCstAlternativeUsage.put((AstProductionModel) symbol, cstAlternative);
+                         return null;
+                         }
+                         */
                     }, null);
                 }
             }
@@ -379,10 +404,15 @@ public class HtmlHelper {
         return helperTokenUsage.get(m);
     }
 
+    @Nonnull
+    public Collection<CstProductionModel> getTokenCstProductionUsage(@Nonnull TokenModel m) {
+        return tokenCstProductionUsage.get(m);
+    }
+
     /** Returns CstAlternativeModels which use the given TokenModel. */
     @Nonnull
-    public Collection<CstAlternativeModel> getTokenCstUsage(@Nonnull TokenModel m) {
-        return tokenCstUsage.get(m);
+    public Collection<CstAlternativeModel> getTokenCstAlternativeUsage(@Nonnull TokenModel m) {
+        return tokenCstAlternativeUsage.get(m);
     }
 
     /** Returns CstAlternativeModels which use the given CstProductionModel. */
@@ -391,10 +421,15 @@ public class HtmlHelper {
         return cstCstUsage.get(m);
     }
 
+    @Nonnull
+    public Collection<CstProductionModel> getAstCstProductionUsage(@Nonnull AstProductionModel m) {
+        return astCstProductionUsage.get(m);
+    }
+
     /** Returns CstAlternativeModels which create the given AstAlternativeModel. */
     @Nonnull
-    public Collection<CstAlternativeModel> getAstCstUsage(@Nonnull AstAlternativeModel m) {
-        return astCstUsage.get(m);
+    public Collection<CstAlternativeModel> getAstCstAlternativeUsage(@Nonnull AstAlternativeModel m) {
+        return astCstAlternativeUsage.get(m);
     }
 
     /** Returns AstAlternativeModels which use the given TokenModel. */
@@ -422,7 +457,7 @@ public class HtmlHelper {
         if (m instanceof HelperModel)
             return helperHelperUsage.containsKey(m) || helperTokenUsage.containsKey(m);
         if (m instanceof TokenModel)
-            return tokenCstUsage.containsKey(m) || tokenAstUsage.containsKey(m) || ((TokenModel) m).isIgnored();
+            return tokenCstAlternativeUsage.containsKey(m) || tokenAstUsage.containsKey(m) || ((TokenModel) m).isIgnored();
         if (m instanceof CstProductionModel)
             return cstCstUsage.containsKey(m) || m == grammar.cstProductionRoot;
         if (m instanceof CstAlternativeModel)
@@ -430,7 +465,7 @@ public class HtmlHelper {
         if (m instanceof AstProductionModel)
             return astAstUsage.containsKey(m) || m == grammar.astProductionRoot;
         if (m instanceof AstAlternativeModel)
-            return astCstUsage.containsKey(m);
+            return astCstAlternativeUsage.containsKey(m);
         throw new IllegalArgumentException("Unknown model " + m.getClass());
     }
 
@@ -438,5 +473,10 @@ public class HtmlHelper {
         if (groups.contains(ListGroup.Unused))
             return !isUsed(m);
         return true;
+    }
+
+    @Nonnull
+    public Collection<? extends AnnotationModel> getAnnotations(@Nonnull AbstractNamedModel m) {
+        return m.getAnnotations().values();
     }
 }

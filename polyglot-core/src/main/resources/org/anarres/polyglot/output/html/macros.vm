@@ -90,6 +90,28 @@ $!bodyContent
 </html>
 #end
 
+#macro(prototypes $model)
+{ -&gt; ##
+#foreach ($transformPrototype in $model.transformPrototypes)##
+#prototype($transformPrototype)
+#end##transformPrototype
+ }
+#end##macro
+
+#macro(prototype $root)
+<a href="${helper.a($root.symbol)}.html">${root}</a>##
+##{if}($root.list)*#{end}##
+##{if}($root.nullable)?#{end}##
+#end##macro
+
+#macro(expressions $model)
+{ -&gt; ##
+#foreach ($transformExpression in $model.transformExpressions)##
+#expression($transformExpression) ##
+#end##transformExpression##
+ }
+#end##macro
+
 ## Watch out for whitespace errors in this - we use it in a <pre>
 #macro(expression $root)
 ##	$root
@@ -117,4 +139,14 @@ ${root.element.name}.##
 #stop("ERROR: Unknown type $root.type")
 #end
 ##
+#end
+
+#macro(annotations $model)
+#foreach ($annotation in $helper.getAnnotations($model))
+@${annotation.name}(##
+#if ($annotation.value)
+'${annotation.value}'##
+#end##value
+)
+#end##annotation
 #end
