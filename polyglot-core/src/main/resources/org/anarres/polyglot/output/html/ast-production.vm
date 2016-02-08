@@ -105,7 +105,7 @@
 	<a name="$alternative.name"><!-- detailsitem --></a>
 	<ul class="blockList">
 		<li class="blockList">
-		<h4><a href="${helper.a($alternative)}.html">${alternative.name}</a> =
+		<h4><pre>#annotations($alternative)</pre><a href="${helper.a($alternative)}.html">${alternative.name}</a> =
 #foreach ($element in $alternative.elements)
 				<a href="${helper.a($element.symbol)}.html" title="$helper.toJavaMethodPrototype($element)">${element}</a>
 #end

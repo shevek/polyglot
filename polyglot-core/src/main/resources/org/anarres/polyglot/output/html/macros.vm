@@ -99,7 +99,7 @@ $!bodyContent
 #end##macro
 
 #macro(prototype $root)
-<a href="${helper.a($root.symbol)}.html">${root}</a>##
+<a href="${helper.a($root.symbol)}.html" title="${root.symbol.javaTypeName}">${root}</a>##
 ##{if}($root.list)*#{end}##
 ##{if}($root.nullable)?#{end}##
 #end##macro
