@@ -5,8 +5,10 @@
  */
 package org.anarres.polyglot.lr;
 
+import com.google.common.base.Preconditions;
 import java.util.AbstractSet;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -16,8 +18,8 @@ public abstract class AbstractIndexedSet<IndexedItem extends Indexed> extends Ab
 
     protected final IndexedUniverse<IndexedItem> universe;
 
-    public AbstractIndexedSet(IndexedUniverse<IndexedItem> universe) {
-        this.universe = universe;
+    public AbstractIndexedSet(@Nonnull IndexedUniverse<IndexedItem> universe) {
+        this.universe = Preconditions.checkNotNull(universe, "IndexedUniverse was null.");
     }
 
     @Override

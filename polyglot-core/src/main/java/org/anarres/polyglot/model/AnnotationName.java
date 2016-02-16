@@ -13,8 +13,16 @@ import javax.annotation.Nonnull;
  */
 public enum AnnotationName {
 
+    /** Used on a TokenModel or CstProductionModel to indicate the user-visible name of the syntactic construct. */
     Named,
-    javaExtends, javaImplements, javaAnnotation;
+    /** Used on a CstProductionModel to request deliberate early inlining. */
+    Inline,
+    /** Used on an AstAlternativeModel to specify the Java superclass of the alternative. */
+    javaExtends,
+    /** Used on an AstProductionModel or AstAlternativeModel to specify a Java interface for the alternative. */
+    javaImplements,
+    /** Used on an AstProductionModel, AstAlternativeModel or ElementModel to indicate an annotation for the class or method. */
+    javaAnnotation;
 
     public static boolean isKnownAnnotation(@Nonnull String text) {
         try {

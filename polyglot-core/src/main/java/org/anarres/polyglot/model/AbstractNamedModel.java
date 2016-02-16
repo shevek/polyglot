@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
@@ -130,6 +131,32 @@ public abstract class AbstractNamedModel extends AbstractModel {
     @Nonnull
     public Collection<? extends AnnotationModel> getAnnotations(@Nonnull AnnotationName name) {
         return getAnnotations(name.name());
+    }
+
+    public boolean hasAnnotation(@Nonnull String name) {
+        return annotations.containsKey(name);
+    }
+
+    public boolean hasAnnotation(@Nonnull AnnotationName name) {
+        return hasAnnotation(name.name());
+    }
+
+    public static class HasAnnotation implements Predicate<AbstractNamedModel> {
+
+        private final String annotationName;
+
+        public HasAnnotation(@Nonnull String annotationName) {
+            this.annotationName = annotationName;
+        }
+
+        public HasAnnotation(@Nonnull AnnotationName annotationName) {
+            this(annotationName.name());
+        }
+
+        @Override
+        public boolean apply(AbstractNamedModel input) {
+            return input.hasAnnotation(annotationName);
+        }
     }
 
     @Nonnull

@@ -40,12 +40,12 @@ public class Inliner {
     private static final Logger LOG = LoggerFactory.getLogger(Inliner.class);
     private static final boolean DEBUG = false;
     private final ExpressionSubstituteVisitor substituteVisitor = new ExpressionSubstituteVisitor();
-    // private final ErrorHandler errors;
+    private final ErrorHandler errors;
     private final GrammarModel grammar;
     private int substitutions = 0;
 
     public Inliner(@Nonnull ErrorHandler errors, @Nonnull GrammarModel grammar) {
-        // this.errors = errors;
+        this.errors = errors;
         this.grammar = grammar;
     }
 
@@ -241,6 +241,7 @@ public class Inliner {
         return true;
     }
 
+    // public boolean inline(@Nonnull Iterable<? extends CstProductionModel> inlineProductions) { }
     /**
      * Returns false on exceptional return (abort).
      *
@@ -248,10 +249,10 @@ public class Inliner {
      * @return false on exceptional return (abort).
      */
     @CheckReturnValue
-    public boolean substitute(@Nonnull LRConflict.Map conflicts) {
+    public boolean substitute(@Nonnull Iterable<? extends CstAlternativeModel> inlineAlternatives) {
         grammar.check();
 
-        for (CstAlternativeModel inlineAlternative : conflicts.getConflictingAlternatives()) {
+        for (CstAlternativeModel inlineAlternative : inlineAlternatives) {
             CstProductionModel inlineProduction = inlineAlternative.getProduction();
             // It is possible that a substitute() inlines into an otherwise conflicting alternative.
             // In that case, a CstAlternativeModel in this Iterable will apparently "vanish".
@@ -271,6 +272,11 @@ public class Inliner {
         }
 
         return substitutions > 0;
+    }
+
+    @CheckReturnValue
+    public boolean substitute(@Nonnull LRConflict.Map conflicts) {
+        return substitute(conflicts.getConflictingAlternatives());
     }
 
     @SuppressWarnings("unused")
