@@ -173,7 +173,7 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
         // * Never generate an alternate unless required.
         // Both of these properties are embedded in the CST grammar itself.
         // LOG.info("Matcher in " + this + " is " + matcher + " of " + matcher.getClass());
-        return matcher instanceof AStringMatcher || matcher instanceof ACharMatcher;
+        return matcher instanceof AStringMatcher || matcher instanceof ACharMatcher || hasAnnotation(AnnotationName.Text);
     }
 
     @Nonnull
@@ -189,7 +189,12 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
             matcher.getChar().apply(parser);
             return Character.toString((Character) parser.getOut(matcher.getChar()));
         }
-        throw new IllegalStateException("Not a known fixed token type: " + matcher.getClass());
+        for (AnnotationModel annotation : getAnnotations(AnnotationName.Text)) {
+            String value = annotation.getValue();
+            if (value != null)
+                return value;
+        }
+        throw new IllegalStateException("Not a known fixed token type (or @Text used without value): " + matcher.getClass());
     }
 
     @Nonnull

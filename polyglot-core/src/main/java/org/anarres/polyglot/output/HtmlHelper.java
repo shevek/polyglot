@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.output;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -303,6 +304,13 @@ public class HtmlHelper {
         // Pattern.compile("\n\\s*\\**").matcher(text).replaceAll("");
         return text;
     }
+
+    private static final Function<AbstractNamedModel, Iterable<String>> FUNCTION_GET_ANNOTATION_NAMES = new Function<AbstractNamedModel, Iterable<String>>() {
+        @Override
+        public Iterable<String> apply(AbstractNamedModel input) {
+            return input.getAnnotations().keySet();
+        }
+    };
 
     private final Multimap<HelperModel, HelperModel> helperHelperUsage = HashMultimap.create();
     private final Multimap<HelperModel, TokenModel> helperTokenUsage = HashMultimap.create();

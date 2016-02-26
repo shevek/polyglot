@@ -21,6 +21,7 @@ import org.anarres.polyglot.lr.LRAction;
 import org.anarres.polyglot.lr.LRConflict;
 import org.anarres.polyglot.lr.LRItem;
 import org.anarres.polyglot.lr.LRState;
+import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
@@ -263,8 +264,11 @@ public class Inliner {
                 continue;
             // If we inline one alternative of a recursive production, we break it
             // when we remove the alternative from the production itself.
-            if (isRecursive(inlineProduction))
+            if (isRecursive(inlineProduction)) {
+                if (!inlineProduction.getAnnotations(AnnotationName.Inline).isEmpty())
+                    errors.addError(inlineProduction.getLocation(), "Production '" + inlineProduction.getName() + "' is recursive, and may not be inlined.");
                 continue;
+            }
             // Do the dirty.
             if (!substitute(inlineAlternative))
                 return false;
