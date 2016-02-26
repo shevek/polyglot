@@ -5,23 +5,25 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Closure;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import org.anarres.gradle.plugin.velocity.VelocityTask;
 import org.anarres.jdiagnostics.ProductMetadata;
+import org.apache.velocity.tools.generic.EscapeTool;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.plugins.JavaPluginConvention;
-import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.SourceSet;
 
 /**
@@ -67,6 +69,9 @@ public class PolyglotPlugin implements Plugin<Project> {
                 });
     }
 
+    public static class SerializableEscapeTool extends EscapeTool implements Serializable {
+    }
+
     private void apply(@Nonnull final Project project, @Nonnull final SourceSet sourceSet, @Nonnull final PolyglotPluginExtension extension) {
         final PolyglotSourceSet polyglotSourceSet = new PolyglotSourceSet(sourceSet.getName(), fileResolver);
         new DslObject(sourceSet).getConvention().getPlugins().put("polyglot", polyglotSourceSet);
@@ -96,6 +101,10 @@ public class PolyglotPlugin implements Plugin<Project> {
                         return out;
                     }
                 });
+
+                Map<String, Object> context = new HashMap<>();
+                context.put("esc", new SerializableEscapeTool());
+                task.setContextValues(context);
             }
         });
         polyglotGrammarTask.setSource(polyglotSourceSet.getPolyglot());
