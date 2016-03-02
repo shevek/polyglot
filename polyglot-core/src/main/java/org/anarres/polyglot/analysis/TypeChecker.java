@@ -58,20 +58,20 @@ public class TypeChecker implements Runnable {
 
     private final ErrorHandler errors;
     private final GrammarModel grammar;
-    private final CstTransformExpressionModel.Visitor<Void, AstProductionSymbol, RuntimeException> expressionVisitor = new CstTransformExpressionModel.Visitor<Void, AstProductionSymbol, RuntimeException>() {
+    private final CstTransformExpressionModel.Visitor<CstAlternativeModel, AstProductionSymbol, RuntimeException> expressionVisitor = new CstTransformExpressionModel.Visitor<CstAlternativeModel, AstProductionSymbol, RuntimeException>() {
 
         @Override
-        public AstProductionSymbol visitNull(CstTransformExpressionModel.Null expression, Void input) throws RuntimeException {
+        public AstProductionSymbol visitNull(CstTransformExpressionModel.Null expression, CstAlternativeModel input) throws RuntimeException {
             return null;
         }
 
         @Override
-        public AstProductionSymbol visitReference(CstTransformExpressionModel.Reference expression, Void input) throws RuntimeException {
+        public AstProductionSymbol visitReference(CstTransformExpressionModel.Reference expression, CstAlternativeModel input) throws RuntimeException {
             return expression.getTransform().getSymbol();
         }
 
         @Override
-        public AstProductionSymbol visitNew(CstTransformExpressionModel.New expression, Void input) throws RuntimeException {
+        public AstProductionSymbol visitNew(CstTransformExpressionModel.New expression, CstAlternativeModel input) throws RuntimeException {
 
             ARGUMENTS:
             {
@@ -90,9 +90,9 @@ public class TypeChecker implements Runnable {
                     AstProductionSymbol result = argument.apply(this, input);
                     // LOG.info(parameter + " <<-- " + result + " list " + isList(argument) + ": " + argument + ":: " + argument.getClass());
                     if (!isAssignableFrom(parameter.symbol, result) || isList(argument) != parameter.isList())
-                        errors.addError(argument.getLocation(), "Cannot pass argument of type " + toTypeName(result, isList(argument)) + " for parameter " + parameter + " of " + expression.astAlternative.getName());
+                        errors.addError(argument.getLocation(), "In transform of CST alternative " + input.getName() + ": Cannot pass argument of type " + toTypeName(result, isList(argument)) + " for parameter " + parameter + " of " + expression.astAlternative.getName());
                     else if (!parameter.isNullable() && argument.isNullableValue())
-                        errors.addError(argument.getLocation(), "Cannot pass nullable argument for parameter " + parameter + " of " + expression.astAlternative.getName());
+                        errors.addError(argument.getLocation(), "In transform of CST alternative " + input.getName() + ": Cannot pass nullable argument for parameter " + parameter + " of " + expression.astAlternative.getName());
 
                     // Allow construction with an empty list.
                     if (isList(argument) && result == null)
@@ -104,13 +104,13 @@ public class TypeChecker implements Runnable {
         }
 
         @Override
-        public AstProductionSymbol visitList(CstTransformExpressionModel.List expression, Void input) throws RuntimeException {
+        public AstProductionSymbol visitList(CstTransformExpressionModel.List expression, CstAlternativeModel input) throws RuntimeException {
             AstProductionSymbol symbol = null;
             for (CstTransformExpressionModel item : expression.getItems()) {
                 AstProductionSymbol result = item.apply(this, input);
 
                 if (isList(item)) {
-                    errors.addError(item.getLocation(), "Nested lists are not permitted.");
+                    errors.addError(item.getLocation(), "In transform of CST alternative " + input.getName() + ": Nested lists are not permitted.");
                     continue;
                 }
 
@@ -118,7 +118,7 @@ public class TypeChecker implements Runnable {
                     symbol = result;
 
                 if (!isAssignableFrom(symbol, result)) {
-                    errors.addError(item.getLocation(), "Cannot make a heterogenous list of " + toTypeName(symbol, false) + " and " + toTypeName(result, isList(item)));
+                    errors.addError(item.getLocation(), "In transform of CST alternative " + input.getName() + ": Cannot make a heterogenous list of " + toTypeName(symbol, false) + " and " + toTypeName(result, isList(item)));
                     continue;
                 }
 
@@ -147,7 +147,7 @@ public class TypeChecker implements Runnable {
                 for (int i = 0; i < cstAlternative.getTransformExpressions().size(); i++) {
                     CstTransformPrototypeModel transformPrototype = cstProduction.getTransformPrototype(i);
                     CstTransformExpressionModel transformExpression = cstAlternative.getTransformExpression(i);
-                    AstProductionSymbol result = transformExpression.apply(expressionVisitor, null);
+                    AstProductionSymbol result = transformExpression.apply(expressionVisitor, cstAlternative);
                     // LOG.info("transformPrototype.getSymbol() = " + transformPrototype.getSymbol() + "@" + System.identityHashCode(transformPrototype.getSymbol()) + "@" + transformPrototype.getSymbol().getLocation().getLine() + ":" + transformPrototype.getSymbol().getLocation().getPos());
                     // LOG.info("result = " + result + "@" + System.identityHashCode(result) + "@" + result.getLocation().getLine() + ":" + result.getLocation().getPos());
                     if (!isAssignableFrom(transformPrototype.getSymbol(), result)
