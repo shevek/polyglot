@@ -156,7 +156,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         String matchName = StateModel.name(node.getState());
         StateModel matchState = grammar.states.get(matchName);
         if (matchState == null) {
-            errors.addError(node.getState(), "No such state " + node.getState().getText());
+            errors.addError(node.getState(), "On token " + token.getSourceName() + ": No such state " + node.getState().getText());
             return;
         }
         StateModel transitionState;
@@ -166,7 +166,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
             String transitionName = StateModel.name(transitionToken);
             transitionState = grammar.states.get(transitionName);
             if (transitionState == null) {
-                errors.addError(node.getTransition(), "No such state " + node.getState().getText());
+                errors.addError(node.getTransition(), "On token " + token.getSourceName() + ": No such state " + node.getState().getText());
                 return;
             }
         } else {
@@ -174,7 +174,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         }
         Object prev = token.transitions.put(matchState, transitionState);
         if (prev != null)
-            errors.addError(node.getState(), "Duplicate transition " + matchName + " on token " + token.getName());
+            errors.addError(node.getState(), "On token " + token.getSourceName() + ": Duplicate transition " + matchName + " on token " + token.getName());
     }
 
     @Override

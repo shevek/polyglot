@@ -113,7 +113,7 @@ public class ReferenceLinker implements Runnable {
             PRODUCTION:
             {
                 if (astProduction == null) {
-                    errors.addError(expression.getLocation(), "No such AST production '" + productionName + "' for New.");
+                    errors.addError(expression.getLocation(), "In CST alternative " + cstAlternative.getName() + ": No such AST production '" + productionName + "' for New.");
                     return null;
                 }
             }
@@ -126,13 +126,13 @@ public class ReferenceLinker implements Runnable {
                     // LOG.info("Looking for alternativeName = " + alternativeName);
                     AstAlternativeModel astAlternative = astProduction.alternatives.get(alternativeName);
                     if (astAlternative == null) {
-                        errors.addError(expression.getLocation(), "No such AST alternative '" + alternativeName + "' for New.");
+                        errors.addError(expression.getLocation(), "In CST alternative " + cstAlternative.getName() + ": No such AST alternative '" + alternativeName + "' for New.");
                         return null;
                     }
                     expression.astAlternative = astAlternative;
                 } else {
                     if (astProduction.alternatives.size() != 1) {
-                        errors.addError(expression.getLocation(), "AST production '" + astProduction.getName() + "' has multiple alternatives. Please specify one, so I don't have to guess.");
+                        errors.addError(expression.getLocation(), "In CST alternative " + cstAlternative.getName() + ": AST production '" + astProduction.getName() + "' has multiple alternatives. Please specify one, so I don't have to guess.");
                         return null;
                     }
                     expression.astAlternative = Iterables.getOnlyElement(astProduction.alternatives.values());
@@ -226,7 +226,7 @@ public class ReferenceLinker implements Runnable {
     }
 
     @SuppressWarnings("unchecked")  // Casts of TokenModel or ExternalModel to S are unchecked, but correct in this instance.
-    private <S extends ProductionSymbol> void linkElement(@Nonnull AbstractElementModel<S> element, Map<? extends String, ? extends S> productions, @Nonnull String productionDesc, @Nonnull String targetDesc, boolean externalsLegal) {
+    private <S extends ProductionSymbol> void linkElement(@Nonnull AbstractElementModel<S> element, Map<? extends String, ? extends S> productions, @Nonnull String productionDesc, @Nonnull String prefix, @Nonnull String targetDesc, boolean externalsLegal) {
         String symbolName = element.getSymbolName();
 
         Linkages<S> linkages = new Linkages<>();
@@ -261,37 +261,41 @@ public class ReferenceLinker implements Runnable {
                 return;
             case 0:
                 if (linkages.isEmpty())
-                    errors.addError(element.getLocation(), "No such token" + (externalsLegal ? ", external" : "") + " or " + productionDesc + " '" + symbolName + "' for " + targetDesc + ".");
+                    errors.addError(element.getLocation(), prefix + ": No such token" + (externalsLegal ? ", external" : "") + " or " + productionDesc + " '" + symbolName + "' for " + targetDesc + " " + element.getName() + "'.");
                 else
-                    errors.addError(element.getLocation(), "Name '" + symbolName + "' in " + targetDesc + " cannot reference " + linkages.toString(true));
+                    errors.addError(element.getLocation(), prefix + ": Name '" + symbolName + "' in " + targetDesc + " cannot reference " + linkages.toString(true));
                 break;
             default:
-                errors.addError(element.getLocation(), "Ambiguous name '" + symbolName + "' in " + targetDesc + " could reference either " + linkages.toString(false));
+                errors.addError(element.getLocation(), prefix + ": Ambiguous name '" + symbolName + "' in " + targetDesc + " could reference either " + linkages.toString(false));
                 break;
         }
     }
 
-    private void linkCstTransformPrototype(@Nonnull CstTransformPrototypeModel element) {
-        linkElement(element, grammar.astProductions, "AST production", "transform prototype", false);
+    private void linkCstTransformPrototype(@Nonnull CstTransformPrototypeModel element, @Nonnull String prefix) {
+        linkElement(element, grammar.astProductions, "AST production", prefix, "transform prototype", false);
     }
 
-    private void linkCstElement(@Nonnull CstElementModel element) {
-        linkElement(element, grammar.cstProductions, "CST production", "CST element", false);
+    private void linkCstElement(@Nonnull CstElementModel element, @Nonnull String prefix) {
+        linkElement(element, grammar.cstProductions, "CST production", prefix, "CST element", false);
     }
 
-    private void linkAstElement(@Nonnull AstElementModel element) {
-        linkElement(element, grammar.astProductions, "AST production", "AST element", true);
+    private void linkAstElement(@Nonnull AstElementModel element, @Nonnull String prefix) {
+        linkElement(element, grammar.astProductions, "AST production", prefix, "AST element", true);
     }
 
     @Override
     public void run() {
         for (CstProductionModel cstProduction : grammar.getCstProductions()) {
-            for (CstTransformPrototypeModel transformPrototype : cstProduction.getTransformPrototypes()) {
-                linkCstTransformPrototype(transformPrototype);
+            {
+                String prefix = "In CST production " + cstProduction.getName();
+                for (CstTransformPrototypeModel transformPrototype : cstProduction.getTransformPrototypes()) {
+                    linkCstTransformPrototype(transformPrototype, prefix);
+                }
             }
             for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+                String prefix = "In CST alternative " + cstAlternative.getName();
                 for (CstElementModel cstElement : cstAlternative.getElements()) {
-                    linkCstElement(cstElement);
+                    linkCstElement(cstElement, prefix);
                 }
                 for (CstTransformExpressionModel transformExpression : cstAlternative.getTransformExpressions()) {
                     transformExpression.apply(expressionVisitor, cstAlternative);
@@ -302,9 +306,10 @@ public class ReferenceLinker implements Runnable {
         for (AstProductionModel astProduction : grammar.getAstProductions()) {
             for (AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
                 // for (AstElementModel astElement : astAlternative.getElements()) { linkAstElement(astElement); }
+                String prefix = "In AST alternative " + astAlternative.getName();
                 for (Iterator<AstElementModel> it = astAlternative.elements.iterator(); it.hasNext(); /* */) {
                     AstElementModel astElement = it.next();
-                    linkAstElement(astElement);
+                    linkAstElement(astElement, prefix);
                     if (astElement.symbol instanceof ExternalModel) {
                         it.remove();
                         astAlternative.externals.add(astElement);
