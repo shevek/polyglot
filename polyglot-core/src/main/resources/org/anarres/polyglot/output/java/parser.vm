@@ -30,6 +30,7 @@ public class Parser {
 
     private static class State extends ArrayList<Object> {
         int state;
+        String name;
     }
 
     private final ILexer lexer;
@@ -71,7 +72,7 @@ public class Parser {
     }
 
     @Nonnull
-    private State push(@Nonnegative int state) {
+    private State push(@Nonnegative int state, @Nonnull String name) {
         stackPointer++;
         State out;
         if (stackPointer == stack.size()) {
@@ -82,6 +83,7 @@ public class Parser {
             out.clear();
         }
         out.state = state;
+        out.name = name;
         return out;
     }
 
@@ -100,7 +102,7 @@ public class Parser {
 
     @Nonnull
     public Start parse() throws ParserException, LexerException, IOException {
-        push(0);
+        push(0, "Start");
         for (;;) {
             Token token = this.lexer.peek();
             int index = token.getTokenIndex();
@@ -116,7 +118,8 @@ public class Parser {
 
             switch (actionEntry[1]) {
                 case SHIFT:
-                    push(actionEntry[2]).add(this.lexer.next());
+## token.getText() hould be TokenModel's descriptiveName annotation if present.
+                    push(actionEntry[2], token.getText()).add(this.lexer.next());
                     break;
                 case REDUCE:
                     int reduction = actionEntry[2];
@@ -127,7 +130,13 @@ public class Parser {
                     ${grammar.astProductionRoot.javaTypeName} root = (${grammar.astProductionRoot.javaTypeName}) pop().get(0);
                     return new Start(root, eof);
                 case ERROR:
-                    throw new ParserException(token, errorTable[actionEntry[2]]);
+                    StringBuilder buf = new StringBuilder("After");
+                    for (int i = 1; i <= stackPointer; i++)
+                        buf.append(' ').append(stack.get(i).name);
+                    buf.append(", expected [").append(errorTable[actionEntry[2]]);
+                    buf.append("] but got ").append(token.getClass().getSimpleName());
+                    buf.append(": ").append(token.getText());
+                    throw new ParserException(token, buf.toString());
             }
         }
     }
@@ -288,7 +297,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 
 #end##element
 ## This push has to happen after we have popped the items, as goTo() looks at the outstanding top state.
-        State out = push(goTo(${alternative.production.index}));
+        State out = push(goTo(${production.index}), "$production.descriptiveName");
 #foreach ($transformExpression in $alternative.transformExpressions)
         // Generating: $transformExpression
         out.add(

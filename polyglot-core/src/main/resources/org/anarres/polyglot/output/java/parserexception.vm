@@ -7,15 +7,10 @@ import ${grammar.package.packageName}.node.Token;
 public class ParserException extends Exception {
 
     @Nonnull
-    private static String toMessage(@Nonnull Token token, @Nonnull String message) {
-        return message + " but got " + token.getClass().getSimpleName() + ": " + token.getText();
-    }
-
-    @Nonnull
     private final Token token;
 
     public ParserException(@Nonnull Token token, @Nonnull String message) {
-        super(toMessage(token, message));
+        super(message);
         this.token = token;
     }
 

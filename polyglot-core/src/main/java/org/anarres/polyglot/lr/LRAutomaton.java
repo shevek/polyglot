@@ -153,12 +153,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
             {
                 List<TokenModel> tokens = new ArrayList<>(state.getActionMap().keySet());
                 Collections.sort(tokens, TokenModel.IndexComparator.INSTANCE);
-                StringBuilder buf = new StringBuilder("After [");
-                Joiner.on(' ').appendTo(buf, Iterables.transform(state.getStack(), ProductionSymbol.FUNCTION_GET_DESCRIPTIVE_NAME));
-                buf.append("], expected [");
-                Joiner.on(", ").appendTo(buf, Iterables.transform(tokens, ProductionSymbol.FUNCTION_GET_DESCRIPTIVE_NAME));
-                buf.append("]");
-                String error = buf.toString();
+                String error = Joiner.on(", ").join(Iterables.transform(tokens, ProductionSymbol.FUNCTION_GET_DESCRIPTIVE_NAME));
                 Integer errorIndex = errorMap.get(error);
                 if (errorIndex == null) {
                     errorIndex = errorMap.size();
