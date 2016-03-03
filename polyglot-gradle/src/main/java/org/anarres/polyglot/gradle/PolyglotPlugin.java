@@ -3,8 +3,11 @@ package org.anarres.polyglot.gradle;
 import com.google.common.base.Throwables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Closure;
+import java.io.Externalizable;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,7 +72,26 @@ public class PolyglotPlugin implements Plugin<Project> {
                 });
     }
 
-    public static class SerializableEscapeTool extends EscapeTool implements Serializable {
+    /** All SerializableEscapeTools are equal. */
+    public static class SerializableEscapeTool extends EscapeTool implements Externalizable {
+
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        }
+
+        @Override
+        public int hashCode() {
+            return 31415927;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof SerializableEscapeTool;
+        }
     }
 
     private void apply(@Nonnull final Project project, @Nonnull final SourceSet sourceSet, @Nonnull final PolyglotPluginExtension extension) {

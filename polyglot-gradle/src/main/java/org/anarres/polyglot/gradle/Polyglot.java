@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,7 +120,7 @@ public class Polyglot extends SourceTask {
 
     public void option(@Nonnull String... names) {
         if (options == null)
-            options = new HashMap<>();
+            options = new EnumMap<>(Option.class);
         for (String name : names) {
             Boolean value = Boolean.TRUE;
             if (name.startsWith("-")) {
