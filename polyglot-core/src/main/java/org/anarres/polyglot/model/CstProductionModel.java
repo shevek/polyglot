@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
 
     @Nonnull
     public static CstProductionModel forNode(@Nonnegative int index, @Nonnull ACstProduction node) {
-        CstProductionModel model = new CstProductionModel(index, node.getName());
+        CstProductionModel model = new CstProductionModel(index, node.getName(), annotations(node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }
@@ -42,8 +43,8 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
     public final Map<String, CstAlternativeModel> alternatives = new LinkedHashMap<>();
     /* pp */ int alternativeIndex = 0;
 
-    public CstProductionModel(@Nonnegative int index, @Nonnull TIdentifier name) {
-        super(name, ImmutableMultimap.<String, AnnotationModel>of());
+    public CstProductionModel(@Nonnegative int index, @Nonnull TIdentifier name, Multimap<String, ? extends AnnotationModel> annotations) {
+        super(name, annotations);
         this.index = index;
     }
 
@@ -101,7 +102,13 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
         List<ACstAlternative> alternatives = new ArrayList<>();
         for (Map.Entry<String, CstAlternativeModel> e : this.alternatives.entrySet())
             alternatives.add(e.getValue().toNode());
-        return new ACstProduction(newJavadocCommentToken(), toNameToken(), new TTokArrow(), transform, alternatives);
+        return new ACstProduction(
+				newJavadocCommentToken(),
+				toNameToken(),
+				new TTokArrow(),
+				transform,
+				alternatives,
+                toAnnotations(getAnnotations()));
     }
 
     @Override

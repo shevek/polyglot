@@ -6,6 +6,7 @@
 package org.anarres.polyglot.lr;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMultimap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.ArrayDeque;
@@ -21,6 +22,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.PolyglotExecutor;
+import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
@@ -45,7 +47,7 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
     // Page 222.
     @Nonnull
     protected static CstAlternativeModel newInitialProduction(@Nonnull CstProductionModel rootProduction) {
-        CstProductionModel production = new CstProductionModel(Integer.MAX_VALUE, new TIdentifier("Start"));
+        CstProductionModel production = new CstProductionModel(Integer.MAX_VALUE, new TIdentifier("Start"), ImmutableMultimap.<String, AnnotationModel>of());
         CstAlternativeModel alternative = CstAlternativeModel.forName(Integer.MAX_VALUE, production, new TIdentifier("<Start>"));
         CstElementModel element = new CstElementModel(
                 new TIdentifier(rootProduction.getName()),

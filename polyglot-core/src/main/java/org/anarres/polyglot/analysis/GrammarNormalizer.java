@@ -6,12 +6,14 @@
 package org.anarres.polyglot.analysis;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.model.AbstractElementModel;
+import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstProductionModel;
@@ -196,7 +198,7 @@ public class GrammarNormalizer implements Runnable {
     @Nonnull
     private CstProductionModel newListProduction(@Nonnull String name, @Nonnull CstElementModel element) {
         Token location = element.getLocation();
-        CstProductionModel out = new CstProductionModel(grammar.cstProductionIndex++, new TIdentifier(name, location));
+        CstProductionModel out = new CstProductionModel(grammar.cstProductionIndex++, new TIdentifier(name, location), ImmutableMultimap.<String, AnnotationModel>of());
 
         if (element.symbol instanceof TokenModel) {
             TokenModel token = (TokenModel) element.symbol;

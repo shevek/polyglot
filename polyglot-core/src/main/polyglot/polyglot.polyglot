@@ -232,12 +232,14 @@ Productions
 
 	cst_production =
 		javadoc_comment?
+		annotation*
 		identifier cst_production_transform? tok_eq cst_alternative_list tok_semi
 			{ -> New cst_production(
 				javadoc_comment, identifier,
 				cst_production_transform.tok_arrow,
 				[cst_production_transform.element],
-				[cst_alternative_list.cst_alternative]) };
+				[cst_alternative_list.cst_alternative],
+				[annotation]) };
 
 	cst_production_transform { -> tok_arrow element* } =
 		tok_lbrace tok_arrow [elements]:element* tok_rbrace
@@ -256,15 +258,18 @@ Productions
 					Null, Null,
 					[elements],
 					cst_transform.tok_arrow,
-					[cst_transform.expression]) } |
+					[cst_transform.expression],
+					[]) } |
 		{named}
 			javadoc_comment?
+			annotation*
 			alt_name [elements]:element* cst_transform?
 				{ -> New cst_alternative(
 					javadoc_comment, alt_name.identifier,
 					[elements],
 					cst_transform.tok_arrow,
-					[cst_transform.expression]) } ;
+					[cst_transform.expression],
+					[annotation]) } ;
 
 	cst_transform { -> tok_arrow expression* } =
 		tok_lbrace tok_arrow [terms]:expression* tok_rbrace
@@ -296,8 +301,12 @@ Productions
 
 	ast_production =
 		javadoc_comment?
-		annotation* identifier tok_eq ast_alternative_list tok_semi
-			{ -> New ast_production(javadoc_comment, identifier, [ast_alternative_list.ast_alternative], [annotation]) };
+		annotation*
+		identifier tok_eq ast_alternative_list tok_semi
+			{ -> New ast_production(
+				javadoc_comment, identifier,
+				[ast_alternative_list.ast_alternative],
+				[annotation]) };
 
 	ast_alternative_list { -> ast_alternative* } =
 		{single} ast_alternative
@@ -442,14 +451,18 @@ Abstract Syntax Tree
 		[name]:identifier
 		[transform_sentinel]:tok_arrow?
 		[transform]:element*
-		[alternatives]:cst_alternative* ;
+		[alternatives]:cst_alternative*
+		[annotations]:annotation*
+		;
 
 	cst_alternative =
 		javadoc_comment?
 		[name]:identifier?
 		[elements]:element*
 		[transform_sentinel]:tok_arrow?
-		[transform]:expression* ;
+		[transform]:expression*
+		[annotations]:annotation*
+		;
 
 	expression =
 		{new} [production_name]:identifier [alternative_name]:identifier? [arguments]:expression* [location]:kw_new |

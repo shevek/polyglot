@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.CheckForNull;
@@ -42,7 +43,7 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
         TIdentifier name = node.getName();
         // if (name == null) name = new TIdentifier("$" + cstProduction.alternativeIndex++, cstProduction.getLocation());
         int alternativeIndex = production.alternativeIndex++;
-        CstAlternativeModel model = new CstAlternativeModel(index, production, location, name, alternativeIndex);
+        CstAlternativeModel model = new CstAlternativeModel(index, production, location, name, alternativeIndex, annotations(node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }
@@ -50,7 +51,7 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
     @Nonnull
     public static CstAlternativeModel forName(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull TIdentifier name) {
         int alternativeIndex = production.alternativeIndex++;
-        return new CstAlternativeModel(index, production, name, name, alternativeIndex);
+        return new CstAlternativeModel(index, production, name, name, alternativeIndex, ImmutableMultimap.<String, AnnotationModel>of());
     }
 
     @Nonnull
@@ -73,9 +74,9 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
     public final List<CstTransformExpressionModel> transformExpressions = new ArrayList<>();
     public final LRAction.Reduce reduceActionCache = new LRAction.Reduce(this);
 
-    private CstAlternativeModel(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull Token location, @CheckForNull TIdentifier name, @Nonnegative int alternativeIndex) {
+    private CstAlternativeModel(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull Token location, @CheckForNull TIdentifier name, @Nonnegative int alternativeIndex, Multimap<String, ? extends AnnotationModel> annotations) {
         // TODO: This is a really bad choice for Location as it points to the production not the elements.
-        super(location, name(production, name, alternativeIndex), ImmutableMultimap.<String, AnnotationModel>of());
+        super(location, name(production, name, alternativeIndex), annotations);
         this.index = index;
         this.production = Preconditions.checkNotNull(production, "CstProductionModel was null.");
         this.alternativeName = name;
@@ -196,7 +197,13 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
         List<PExpression> transform = new ArrayList<>();
         for (CstTransformExpressionModel e : getTransformExpressions())
             transform.add(e.toNode());
-        return new ACstAlternative(newJavadocCommentToken(), alternativeName, elements, new TTokArrow(), transform);
+        return new ACstAlternative(
+				newJavadocCommentToken(),
+				alternativeName,
+				elements,
+				new TTokArrow(),
+				transform,
+				toAnnotations(getAnnotations()));
     }
 
     @Override
