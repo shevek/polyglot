@@ -342,6 +342,8 @@ public class ReferenceLinker implements Runnable {
 
         AST:
         {
+            // TODO: Possibly require all unreferenced AST symbols to be annotated @Weak?
+            // TODO: Possibly discard unreferenced AST symbols? (Probably not.)
             for (AstProductionModel astProduction : grammar.getAstProductions()) {
                 for (AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
                     // for (AstElementModel astElement : astAlternative.getElements()) { linkAstElement(astElement); }

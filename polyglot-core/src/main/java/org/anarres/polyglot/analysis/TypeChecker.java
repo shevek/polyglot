@@ -152,9 +152,13 @@ public class TypeChecker implements Runnable {
                     // LOG.info("result = " + result + "@" + System.identityHashCode(result) + "@" + result.getLocation().getLine() + ":" + result.getLocation().getPos());
                     if (!isAssignableFrom(transformPrototype.getSymbol(), result)
                             || transformPrototype.isList() != isList(transformExpression))
-                        errors.addError(transformExpression.getLocation(), "Transform expression " + i + " of type " + toTypeName(result, isList(transformExpression)) + " does not satisfy transform prototype " + transformPrototype);
+                        errors.addError(transformExpression.getLocation(),
+                                "In transform of CST alternative " + cstAlternative.getName() + ": "
+                                + "Transform expression " + i + " of type " + toTypeName(result, isList(transformExpression)) + " does not satisfy transform prototype " + transformPrototype);
                     else if (!transformPrototype.isNullable() && transformExpression.isNullableValue())
-                        errors.addError(transformExpression.getLocation(), "Transform expression '" + transformExpression + "' is nullable, and does not satisfy non-nullable transform prototype '" + transformPrototype + "'.");
+                        errors.addError(transformExpression.getLocation(),
+                                "In transform of CST alternative " + cstAlternative.getName() + ": "
+                                + "Transform expression '" + transformExpression + "' is nullable, and does not satisfy non-nullable transform prototype '" + transformPrototype + "'.");
                 }
             }
         }
