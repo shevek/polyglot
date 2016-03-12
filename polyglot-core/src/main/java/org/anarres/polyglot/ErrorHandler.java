@@ -24,9 +24,32 @@ import org.anarres.polyglot.node.Token;
  */
 public class ErrorHandler {
 
-    public static class Error {
+    private static final int CONTEXT_LENGTH = 20;
 
-        private static final int CONTEXT_LENGTH = 20;
+    @VisibleForTesting
+    @Nonnull
+    /* pp */ static String toDescription(@Nonnull Token location, @Nonnull String source) {
+        if (source == null)
+            return "<no-text>";
+        if (location == null)
+            return "<no-location>";
+        int offset = location.getOffset();
+        if (offset < 0 || offset > source.length())
+            return "<invalid-offset>";
+
+        String prefix = CharMatcher.WHITESPACE.collapseFrom(source.substring(0, offset), ' ');
+        int start = Math.max(0, prefix.length() - CONTEXT_LENGTH);
+        prefix = prefix.substring(start);
+
+        String suffix = CharMatcher.WHITESPACE.collapseFrom(source.substring(offset), ' ');
+        int end = Math.min(suffix.length(), CONTEXT_LENGTH);
+        suffix = suffix.substring(0, end);
+
+        String text = prefix + "<HERE>" + suffix;
+        return text;
+    }
+
+    public static class Error {
 
         private final Token location;
         private final String message;
@@ -34,29 +57,6 @@ public class ErrorHandler {
         public Error(@CheckForNull Token location, @Nonnull String message) {
             this.location = location;
             this.message = message;
-        }
-
-        @VisibleForTesting
-        @Nonnull
-        /* pp */ String toDescription(@Nonnull Token location, @Nonnull String source) {
-            if (source == null)
-                return "<no-text>";
-            if (location == null)
-                return "<no-location>";
-            int offset = location.getOffset();
-            if (offset < 0 || offset > source.length())
-                return "<invalid-offset>";
-
-            String prefix = CharMatcher.WHITESPACE.collapseFrom(source.substring(0, offset), ' ');
-            int start = Math.max(0, prefix.length() - CONTEXT_LENGTH);
-            prefix = prefix.substring(start);
-
-            String suffix = CharMatcher.WHITESPACE.collapseFrom(source.substring(offset), ' ');
-            int end = Math.min(suffix.length(), CONTEXT_LENGTH);
-            suffix = suffix.substring(0, end);
-
-            String text = prefix + "<HERE>" + suffix;
-            return text;
         }
 
         @Nonnull

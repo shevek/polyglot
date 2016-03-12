@@ -8,12 +8,17 @@ package org.anarres.polyglot.analysis;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.model.AbstractElementModel;
+import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstProductionModel;
@@ -285,34 +290,69 @@ public class ReferenceLinker implements Runnable {
 
     @Override
     public void run() {
-        for (CstProductionModel cstProduction : grammar.getCstProductions()) {
-            {
-                String prefix = "In CST production " + cstProduction.getName();
-                for (CstTransformPrototypeModel transformPrototype : cstProduction.getTransformPrototypes()) {
-                    linkCstTransformPrototype(transformPrototype, prefix);
+
+        CST:
+        {
+        // All known weak productions are in the weak set.
+            // As we discover a reference from a strong production to any weak production,
+            // we enqueue the weak production. This causes subsidiary weak productions to
+            // be linked, and so forth.
+            // At the end, we may, if we choose, remove all remaining weak productions.
+            Set<CstProductionModel> cstProductionsWeak = new HashSet<>();
+            Deque<CstProductionModel> cstProductionsTodo = new ArrayDeque<>();
+            for (CstProductionModel cstProduction : grammar.getCstProductions()) {
+                if (cstProduction == grammar.cstProductionRoot)
+                    cstProductionsTodo.add(cstProduction);
+                else if (cstProduction.hasAnnotation(AnnotationName.Weak))
+                    cstProductionsWeak.add(cstProduction);
+                else
+                    cstProductionsTodo.add(cstProduction);
+            }
+            // Now every production is either weak, or TODO.
+
+            for (;;) {
+                CstProductionModel cstProduction = cstProductionsTodo.poll();
+                if (cstProduction == null)
+                    break;
+                {
+                    String prefix = "In CST production " + cstProduction.getName();
+                    for (CstTransformPrototypeModel transformPrototype : cstProduction.getTransformPrototypes()) {
+                        linkCstTransformPrototype(transformPrototype, prefix);
+                    }
+                }
+                for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+                    String prefix = "In CST alternative " + cstAlternative.getName();
+                    for (CstElementModel cstElement : cstAlternative.getElements()) {
+                        linkCstElement(cstElement, prefix);
+                        CstProductionSymbol symbol = cstElement.symbol;
+                        if (cstProductionsWeak.remove(symbol))  // doubles as an instanceof check.
+                            cstProductionsTodo.add((CstProductionModel) symbol);
+                    }
+                    for (CstTransformExpressionModel transformExpression : cstAlternative.getTransformExpressions()) {
+                        transformExpression.apply(expressionVisitor, cstAlternative);
+                    }
                 }
             }
-            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
-                String prefix = "In CST alternative " + cstAlternative.getName();
-                for (CstElementModel cstElement : cstAlternative.getElements()) {
-                    linkCstElement(cstElement, prefix);
-                }
-                for (CstTransformExpressionModel transformExpression : cstAlternative.getTransformExpressions()) {
-                    transformExpression.apply(expressionVisitor, cstAlternative);
-                }
+
+            for (CstProductionModel cstProduction : cstProductionsWeak) {
+                LOG.info("Discarded unreferenced weak production " + cstProduction.getName());
+                grammar.removeCstProduction(cstProduction);
             }
         }
 
-        for (AstProductionModel astProduction : grammar.getAstProductions()) {
-            for (AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
-                // for (AstElementModel astElement : astAlternative.getElements()) { linkAstElement(astElement); }
-                String prefix = "In AST alternative " + astAlternative.getName();
-                for (Iterator<AstElementModel> it = astAlternative.elements.iterator(); it.hasNext(); /* */) {
-                    AstElementModel astElement = it.next();
-                    linkAstElement(astElement, prefix);
-                    if (astElement.symbol instanceof ExternalModel) {
-                        it.remove();
-                        astAlternative.externals.add(astElement);
+        AST:
+        {
+            for (AstProductionModel astProduction : grammar.getAstProductions()) {
+                for (AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
+                    // for (AstElementModel astElement : astAlternative.getElements()) { linkAstElement(astElement); }
+                    String prefix = "In AST alternative " + astAlternative.getName();
+                    for (Iterator<AstElementModel> it = astAlternative.elements.iterator(); it.hasNext(); /* */) {
+                        AstElementModel astElement = it.next();
+                        linkAstElement(astElement, prefix);
+                        if (astElement.symbol instanceof ExternalModel) {
+                            it.remove();
+                            astAlternative.externals.add(astElement);
+                        }
                     }
                 }
             }

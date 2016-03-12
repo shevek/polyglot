@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Multimap;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.Token;
@@ -38,4 +39,8 @@ public interface ProductionSymbol {
 
     @TemplateProperty
     public boolean isTerminal();
+
+    @Nonnull
+    @TemplateProperty
+    public Multimap<String, ? extends AnnotationModel> getAnnotations();
 }

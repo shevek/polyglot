@@ -194,8 +194,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         cstProduction = CstProductionModel.forNode(grammar.cstProductionIndex++, node);
         if (grammar.cstProductionRoot == null)
             grammar.cstProductionRoot = cstProduction;
-        Object prev = grammar.cstProductions.put(cstProduction.getName(), cstProduction);
-        if (prev != null)
+        if (!grammar.addCstProduction(cstProduction))
             errors.addError(cstProduction.getLocation(), "Duplicate CST production name '" + cstProduction.getName() + "'.");
 
         // If a node is untransformed, attach a simple default transform.
@@ -312,8 +311,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         if (grammar.astProductionRoot == null)
             grammar.astProductionRoot = astProduction;
         // LOG.info("AstProductionModel " + astProduction);
-        Object prev = grammar.astProductions.put(astProduction.getName(), astProduction);
-        if (prev != null)
+        if (!grammar.addAstProduction(astProduction))
             errors.addError(astProduction.getLocation(), "Duplicate AST production name '" + astProduction.getName() + "'");
 
         for (PAstAlternative alternative : node.getAlternatives()) {

@@ -198,12 +198,12 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
         for (CstTransformExpressionModel e : getTransformExpressions())
             transform.add(e.toNode());
         return new ACstAlternative(
-				newJavadocCommentToken(),
-				alternativeName,
-				elements,
-				new TTokArrow(),
-				transform,
-				toAnnotations(getAnnotations()));
+                newJavadocCommentToken(),
+                alternativeName,
+                elements,
+                new TTokArrow(),
+                transform,
+                toAnnotations(getAnnotations()));
     }
 
     @Override

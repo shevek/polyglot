@@ -183,8 +183,9 @@ public class GrammarModel implements GraphVizScope {
         return cstProductions.get(name);
     }
 
-    public void addCstProduction(@Nonnull CstProductionModel cstProduction) {
-        cstProductions.put(cstProduction.getName(), cstProduction);
+    public boolean addCstProduction(@Nonnull CstProductionModel cstProduction) {
+        CstProductionModel prev = cstProductions.put(cstProduction.getName(), cstProduction);
+        return prev == null || prev.hasAnnotation(AnnotationName.Weak);
     }
 
     public boolean removeCstProduction(@Nonnull CstProductionModel cstProduction) {
@@ -215,6 +216,11 @@ public class GrammarModel implements GraphVizScope {
     @TemplateProperty
     public AstProductionModel getAstProduction(@Nonnull String name) {
         return astProductions.get(name);
+    }
+
+    public boolean addAstProduction(@Nonnull AstProductionModel astProduction) {
+        AstProductionModel prev = astProductions.put(astProduction.getName(), astProduction);
+        return prev == null || prev.hasAnnotation(AnnotationName.Weak);
     }
 
     private boolean isSingleAlternativeProduction(@Nonnull CstProductionModel production) {

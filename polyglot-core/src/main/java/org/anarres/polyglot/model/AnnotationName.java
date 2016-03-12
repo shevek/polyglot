@@ -19,6 +19,10 @@ public enum AnnotationName {
     Text,
     /** Used on a CstProductionModel to request deliberate early inlining. */
     Inline,
+    /** Indicates that a production may be overwritten, or discarded if unreferenced. */
+    Weak,
+    /** (Currently informal) Indicates whether a CST production is for general use, or is a private refactoring. */
+    Public, Private,
     /** Used on an AstAlternativeModel to specify the Java superclass of the alternative. */
     javaExtends,
     /** Used on an AstProductionModel or AstAlternativeModel to specify a Java interface for the alternative. */

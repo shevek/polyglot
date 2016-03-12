@@ -1,0 +1,25 @@
+Package org.anarres.polyglot.test.weak;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+
+Productions
+
+	@Weak
+	root { -> } = prod_a { -> } ;
+
+	@Weak
+	prod_a { -> dummy } = dummy { -> dummy } ;
+	prod_a { -> tok_a } = tok_a { -> tok_a } ;
+
+	@Weak
+	prod_b { -> dummy } = dummy { -> dummy } ;
+
+Abstract Syntax Tree
+
+	root = ;
+
+

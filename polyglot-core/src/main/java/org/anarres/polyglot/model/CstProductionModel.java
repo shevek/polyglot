@@ -5,7 +5,6 @@
  */
 package org.anarres.polyglot.model;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -103,11 +102,11 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
         for (Map.Entry<String, CstAlternativeModel> e : this.alternatives.entrySet())
             alternatives.add(e.getValue().toNode());
         return new ACstProduction(
-				newJavadocCommentToken(),
-				toNameToken(),
-				new TTokArrow(),
-				transform,
-				alternatives,
+                newJavadocCommentToken(),
+                toNameToken(),
+                new TTokArrow(),
+                transform,
+                alternatives,
                 toAnnotations(getAnnotations()));
     }
 
