@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.lr;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.HashMap;
 import java.util.Map;

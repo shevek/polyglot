@@ -45,7 +45,7 @@ public class ReferenceLinker implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReferenceLinker.class);
 
-    /* pp */ static boolean linkTransform(@Nonnull ErrorHandler errors, @Nonnull CstTransformExpressionModel.Reference expression) {
+    /* pp */ static boolean linkTransform(@Nonnull ErrorHandler errors, @Nonnull CstAlternativeModel location, @Nonnull CstTransformExpressionModel.Reference expression) {
         String transformName = expression.getTransformName();
         CstProductionSymbol symbol = expression.element.getSymbol();
         // We previously found that the element does not refer to a useful symbol.
@@ -62,12 +62,14 @@ public class ReferenceLinker implements Runnable {
                     return true;
                 }
             }
-            errors.addError(expression.getLocation(), "CST production '" + symbol.getName() + "' was never transformed to '" + transformName + "'.");
+            errors.addError(expression.getLocation(), "In transform of alternative '" + location.getName() + "',"
+                    + " CST production '" + symbol.getName() + "' was never transformed to '" + transformName + "'.");
             return false;
         } else {
             switch (symbol.getTransformPrototypes().size()) {
                 case 0:
-                    errors.addError(expression.getLocation(), "Expression cannot refer to CST production '" + symbol.getName() + "', which was transformed to void.");
+                    errors.addError(expression.getLocation(), "In transform of alternative '" + location.getName() + "',"
+                            + " Expression cannot refer to CST production '" + symbol.getName() + "', which was transformed to void.");
                     return false;
                 case 1:
                     expression.transform = Iterables.getOnlyElement(symbol.getTransformPrototypes());
@@ -75,7 +77,8 @@ public class ReferenceLinker implements Runnable {
                     // expression.transformIndex = 0;
                     return true;
                 default:
-                    errors.addError(expression.getLocation(), "Expression refers to CST production '" + symbol.getName() + "' with multiple transformations, but does not specify one.");
+                    errors.addError(expression.getLocation(), "In transform of alternative '" + location.getName() + "',"
+                            + " Expression refers to CST production '" + symbol.getName() + "' with multiple transformations, but does not specify one.");
                     return false;
             }
         }
@@ -104,7 +107,7 @@ public class ReferenceLinker implements Runnable {
 
             TRANSFORM:
             {
-                if (!linkTransform(errors, expression))
+                if (!linkTransform(errors, cstAlternative, expression))
                     return null;
             }
 
@@ -293,7 +296,7 @@ public class ReferenceLinker implements Runnable {
 
         CST:
         {
-        // All known weak productions are in the weak set.
+            // All known weak productions are in the weak set.
             // As we discover a reference from a strong production to any weak production,
             // we enqueue the weak production. This causes subsidiary weak productions to
             // be linked, and so forth.

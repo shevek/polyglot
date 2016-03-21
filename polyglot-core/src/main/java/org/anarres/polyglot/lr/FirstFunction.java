@@ -79,7 +79,6 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
     }
 
     private final TokenUniverse universe;
-    /** In a value, null means epsilon (empty). */
     private final Map<CstProductionModel, Result> firstMap = new HashMap<>();
 
     public FirstFunction(@Nonnull TokenUniverse universe, @Nonnull GrammarModel grammar) {

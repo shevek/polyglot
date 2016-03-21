@@ -78,22 +78,30 @@ public class GrammarNormalizer implements Runnable {
         }
     }
 
-    private final ErrorHandler errors;
-    private final GrammarModel grammar;
-    private final ExpressionSubstituteVisitor substituteVisitor = new ExpressionSubstituteVisitor();
-    private final CstTransformExpressionModel.Visitor<CstElementModel, Void, RuntimeException> relinkVisitor = new CstTransformExpressionModel.AbstractVisitor<CstElementModel, Void, RuntimeException>() {
+    private class CstRelinker extends CstTransformExpressionModel.AbstractVisitor<CstElementModel, Void, RuntimeException> {
+
+        private final CstAlternativeModel cstAlternative;
+
+        public CstRelinker(@Nonnull CstAlternativeModel cstAlternative) {
+            this.cstAlternative = cstAlternative;
+        }
 
         @Override
         public Void visitReference(CstTransformExpressionModel.Reference expression, CstElementModel input) throws RuntimeException {
             if (expression.element == input) {
                 // TODO: This is a pretty horrible hack.
-                if (!ReferenceLinker.linkTransform(errors, expression))
+                if (!ReferenceLinker.linkTransform(errors, cstAlternative, expression))
                     errors.addError(expression.getLocation(), "Internal error: Failed to relink expression after normalization.");
                 // LOG.info("Relinked " + expression + " which now refers to " + input + "; transform is now " + expression.transform);
             }
             return null;
         }
-    };
+
+    }
+
+    private final ErrorHandler errors;
+    private final GrammarModel grammar;
+    private final ExpressionSubstituteVisitor substituteVisitor = new ExpressionSubstituteVisitor();
 
     public GrammarNormalizer(@Nonnull ErrorHandler errors, @Nonnull GrammarModel grammar) {
         this.errors = errors;
@@ -237,6 +245,8 @@ public class GrammarNormalizer implements Runnable {
 
         List<CstAlternativeSubstitute> substitutes = new ArrayList<>();
         substitutes.add(new CstAlternativeSubstitute(cstAlternative));
+
+        CstRelinker relinkVisitor = new CstRelinker(cstAlternative);
 
         for (CstElementModel cstElement : cstAlternative.getElements()) {
             switch (cstElement.getUnaryOperator()) {
