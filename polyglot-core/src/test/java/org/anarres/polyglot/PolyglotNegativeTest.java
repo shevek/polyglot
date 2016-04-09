@@ -27,6 +27,7 @@ public class PolyglotNegativeTest extends AbstractPolyglotTest {
         // File dst = new File("build/test/velocity/" + file.getName());
         PolyglotEngine engine = new PolyglotEngine(file, destinationDir);
         setUp(engine, file);
+        engine.getOptions().add(Option.DIAGNOSIS);
 
         if (engine.run())
             throw new Exception("Polyglot succeeded unexpectedly");
@@ -50,7 +51,7 @@ public class PolyglotNegativeTest extends AbstractPolyglotTest {
             if (!file.getName().endsWith(".polyglot"))
                 continue;
 
-            // if (!file.getName().equals("test-duplicate.polyglot")) continue;
+            // if (!file.getName().equals("test-diagnostics-root.polyglot")) continue;
             parse(file);
         }
     }
