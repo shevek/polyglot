@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -324,6 +323,7 @@ public class HtmlHelper {
     // Uses of given token in AST.
     private final Multimap<TokenModel, AstAlternativeModel> tokenAstUsage = HashMultimap.create();
     private final Multimap<AstProductionModel, AstAlternativeModel> astAstUsage = HashMultimap.create();
+    private final ModelMap<String> annotationUsage = new ModelMap<>();
 
     private void buildUsage() {
         for (final HelperModel token : grammar.getHelpers()) {
@@ -335,6 +335,7 @@ public class HtmlHelper {
                     helperHelperUsage.put(helper, token);
                 }
             });
+            annotationUsage.put(token, FUNCTION_GET_ANNOTATION_NAMES);
         }
 
         for (final TokenModel token : grammar.tokens.values()) {
@@ -346,6 +347,7 @@ public class HtmlHelper {
                     helperTokenUsage.put(helper, token);
                 }
             });
+            annotationUsage.put(token, FUNCTION_GET_ANNOTATION_NAMES);
         }
 
         for (final CstProductionModel cstProduction : grammar.cstProductions.values()) {
@@ -355,6 +357,7 @@ public class HtmlHelper {
                 else
                     astCstProductionUsage.put(cstTransformPrototype.getAstProduction(), cstProduction);
             }
+            annotationUsage.put(cstProduction, FUNCTION_GET_ANNOTATION_NAMES);
 
             for (final CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
                 for (CstElementModel cstElement : cstAlternative.getElements()) {
@@ -363,6 +366,7 @@ public class HtmlHelper {
                     else
                         cstCstUsage.put(cstElement.getCstProduction(), cstAlternative);
                 }
+                annotationUsage.put(cstAlternative, FUNCTION_GET_ANNOTATION_NAMES);
 
                 for (final CstTransformExpressionModel cstTransformExpression : cstAlternative.getTransformExpressions()) {
                     cstTransformExpression.apply(new CstTransformExpressionModel.AbstractVisitor<Void, Void, RuntimeException>() {
@@ -391,6 +395,7 @@ public class HtmlHelper {
         }
 
         for (final AstProductionModel astProduction : grammar.astProductions.values()) {
+            annotationUsage.put(astProduction, FUNCTION_GET_ANNOTATION_NAMES);
             for (final AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
                 for (final AstElementModel astElement : astAlternative.getElements()) {
                     if (astElement.isTerminal())
@@ -398,6 +403,7 @@ public class HtmlHelper {
                     else
                         astAstUsage.put(astElement.getAstProduction(), astAlternative);
                 }
+                annotationUsage.put(astAlternative, FUNCTION_GET_ANNOTATION_NAMES);
             }
         }
     }
@@ -481,6 +487,16 @@ public class HtmlHelper {
         if (groups.contains(ListGroup.Unused))
             return !isUsed(m);
         return true;
+    }
+
+    @Nonnull
+    public Set<? extends String> getAnnotationNames() {
+        return annotationUsage.getKeys();
+    }
+
+    @Nonnull
+    public ModelMap<String>.ModelSet getAnnotationUsage(@Nonnull String annotationName) {
+        return annotationUsage.getValues(annotationName);
     }
 
     @Nonnull
