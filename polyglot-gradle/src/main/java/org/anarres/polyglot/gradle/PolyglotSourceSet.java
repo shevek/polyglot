@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.internal.file.DefaultSourceDirectorySet;
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.internal.file.SourceDirectorySetFactory;
 import org.gradle.util.ConfigureUtil;
 
 /**
@@ -20,8 +21,9 @@ public class PolyglotSourceSet {
 
     private final SourceDirectorySet polyglot;
 
-    public PolyglotSourceSet(String displayName, FileResolver fileResolver) {
-        polyglot = new DefaultSourceDirectorySet(String.format("Polyglot %s source", displayName), fileResolver);
+    public PolyglotSourceSet(@Nonnull String displayName, @Nonnull SourceDirectorySetFactory sourceDirectorySetFactory) {
+        // polyglot = new DefaultSourceDirectorySet(String.format("Polyglot %s source", displayName), fileResolver);
+        polyglot = sourceDirectorySetFactory.create(String.format("Polyglot %s source", displayName));
         polyglot.getFilter().include("**/*.polyglot", "**/*.sablecc");
     }
 

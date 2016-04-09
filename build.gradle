@@ -128,6 +128,8 @@ project(':polyglot-gradle') {
 		}
 		compile gradleApi()
 		compile 'org.anarres.gradle:gradle-velocity-plugin:1.0.7'
+
+		testCompile gradleTestKit()
 	}
 
 	animalsniffer {
