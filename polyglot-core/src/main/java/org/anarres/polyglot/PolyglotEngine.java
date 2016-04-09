@@ -403,42 +403,73 @@ public class PolyglotEngine {
         return automaton;
     }
 
+    protected boolean inline(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar, @Nonnull Iterable<? extends CstAlternativeModel> inlineAlternatives) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Inliner inliner = new Inliner(errors, grammar);
+        boolean inliner_success = inliner.substitute(inlineAlternatives);
+        LOG.info("{}: Inlining took {} and created {} substitutions.", getName(), stopwatch, inliner.getSubstitutions());
+        return inliner_success;
+    }
+
     @Nonnull
     protected LRAutomaton buildParserLr1(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar) throws IOException, InterruptedException, ExecutionException {
         LRAutomaton automaton = null;
 
-        for (int i = 0; true; i++) {
-            Stopwatch stopwatch = Stopwatch.createStarted();
+        {
+            List<CstAlternativeModel> inlineAlternatives = new ArrayList<>();
+            for (CstProductionModel cstProduction : grammar.getCstProductions()) {
+                if (cstProduction.hasAnnotation(AnnotationName.Inline)) {
+                    for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values())
+                        inlineAlternatives.add(cstAlternative);
+                } else {
+                    for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+                        if (cstAlternative.hasAnnotation(AnnotationName.Inline))
+                            inlineAlternatives.add(cstAlternative);
+                    }
+                }
+            }
+            if (!inlineAlternatives.isEmpty()) {
+                boolean inliner_success = inline(executor, grammar, inlineAlternatives);
+                if (!inliner_success) {
+                    errors.addError(null, "Inliner rejected inlining: Too many substitutions?");
+                    return automaton;
+                }
+            }
+        }
 
+        for (int i = 1; true; i++) {
+
+            Stopwatch stopwatch = Stopwatch.createStarted();
             // LOG.info("\n===\n=== Building LR(1) automaton, round {}\n===", i);
             LOG.info("{}: Building LR(1) parser, round {}.", getName(), i);
             LR1ItemUniverse universe = new LR1ItemUniverse(grammar);
             LOG.debug("{}: LR(1) Universe took {} and created {} items.", getName(), stopwatch, universe.size());
             automaton = universe.build(executor);
             LOG.info("{}: Building LR(1) parser took {} and created {} states at {}/s.", getName(), stopwatch, automaton.getStates().size(), rate(automaton, stopwatch));
-
             dump(debugHandler.forTarget(AUTOMATON_LR1_DESC, ".lr1.v" + i + ".txt"), debugHandler.forTarget(AUTOMATON_LR1, ".lr1.v" + i + ".dot"), grammar, automaton);
 
             LRConflict.Map conflicts = automaton.getConflicts();
             if (conflicts.isEmpty())
                 return automaton;
+
+            if (i >= 5) {
+                errors.addError(null, getName() + ": Too many substitution attempts without success.");
+                return automaton;
+            }
+
+            if (isOption(Option.DIAGNOSIS)) {
+                buildDiagnosis(grammar, conflicts);
+                return automaton;
+            }
+
             // This has to be INFO or gradle -i doesn't show it.
             if (isOption(Option.VERBOSE))
                 LOG.info("{}: LR(1) conflicts are\n{}", getName(), conflicts);
-
-            stopwatch = Stopwatch.createStarted();
-            Inliner inliner = new Inliner(errors, grammar);
-            boolean inliner_success = inliner.substitute(conflicts);
-            LOG.info("{}: Inlining took {} and created {} substitutions.", getName(), stopwatch, inliner.getSubstitutions());
+            boolean inliner_success = inline(executor, grammar, conflicts.getConflictingAlternatives());
             dump(debugHandler.forTarget(GRAMMAR_SUBSTITUTED, ".substituted.v" + i + ".grammar"), grammar);
             // if (isOption(Option.VERBOSE)) LOG.debug("{}: Substitutions created {}", getName(), substitutions);
             if (!inliner_success) {
                 errors.addError(null, "Inliner rejected inlining: Too many substitutions?");
-                return automaton;
-            }
-
-            if (i >= 5) {
-                errors.addError(null, getName() + ": Too many substitution attempts without success.");
                 return automaton;
             }
 
