@@ -52,7 +52,8 @@ import org.anarres.polyglot.lr.LR0ItemUniverse;
 import org.anarres.polyglot.lr.LR1ItemUniverse;
 import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.lr.LRConflict;
-import org.anarres.polyglot.lr.LRDiagnoser;
+import org.anarres.polyglot.diagnoser.AlgorithmicLRDiagnoser;
+import org.anarres.polyglot.diagnoser.LRDiagnoser;
 import org.anarres.polyglot.lr.LRDiagnosis;
 import org.anarres.polyglot.lr.LRState;
 import org.anarres.polyglot.lr.TokenSet;
@@ -232,7 +233,7 @@ public class PolyglotEngine {
 
                 if (false) {
                     // For some as-yet-undetermined reason, this makes the system go to lunch.
-                    LRDiagnoser diagnoser = new LRDiagnoser(grammar);
+                    LRDiagnoser diagnoser = newLRDiagnoser(grammar);
                     for (LRConflict conflict : conflicts.values()) {
                         LOG.info("Diagnosing:\n" + conflict);
                         LRDiagnosis diagnosis = diagnoser.diagnose(conflict);
@@ -450,11 +451,25 @@ public class PolyglotEngine {
         // NOTREACHED. Terminating the loop "normally" would return null here. :-(
     }
 
+    @CheckForNull
+    private LRDiagnoser newLRDiagnoser(@Nonnull GrammarModel grammar) {
+        try {
+            Class<?> factoryType = Class.forName("org.anarres.polyglot.diagnoser.ChocoLRDiagnoser$Factory");
+            LRDiagnoser.Factory factory = factoryType.asSubclass(LRDiagnoser.Factory.class).newInstance();
+            return factory.newDiagnoser(grammar, getOptions());
+        } catch (ClassNotFoundException e) {
+            LOG.info("{}: Failed to construct ChocoLRDiagnoser: {}", getName(), e);
+        } catch (Exception e) {
+            LOG.warn("{}: Failed to construct ChocoLRDiagnoser: {}", getName(), e, e);
+        }
+        return new AlgorithmicLRDiagnoser(grammar);
+    }
+
     @Nonnull
     protected void buildDiagnosis(@Nonnull GrammarModel grammar, @Nonnull LRConflict.Map conflicts) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         if (isOption(Option.DIAGNOSIS)) {
-            LRDiagnoser diagnoser = new LRDiagnoser(grammar);
+            LRDiagnoser diagnoser = newLRDiagnoser(grammar);
             StringBuilder buf = new StringBuilder();
             for (LRConflict conflict : conflicts.values()) {
                 LRDiagnosis diagnosis = diagnoser.diagnose(conflict);
@@ -490,6 +505,7 @@ public class PolyglotEngine {
         try {
             for (Map.Entry<OutputLanguage, File> e : outputDirs.entrySet()) {
                 if (languages.apply(e.getKey())) {
+                    LOG.info("{}: Writing output language {}", getName(), e.getKey());
                     OutputWriter writer = e.getKey().newOutputWriter(e.getValue(), options, templates.row(e.getKey()), data);
                     writer.run(executor);
                 }

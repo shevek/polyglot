@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.anarres.polyglot.lr;
+package org.anarres.polyglot.diagnoser;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -11,15 +11,24 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.Option;
+import org.anarres.polyglot.lr.FirstFunction;
+import org.anarres.polyglot.lr.LRAction;
+import org.anarres.polyglot.lr.LRConflict;
+import org.anarres.polyglot.lr.LRDiagnosis;
+import org.anarres.polyglot.lr.LRItem;
+import org.anarres.polyglot.lr.TokenSet;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
@@ -33,15 +42,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author shevek
  */
-public class LRDiagnoser {
+public class AlgorithmicLRDiagnoser implements LRDiagnoser {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LRDiagnoser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AlgorithmicLRDiagnoser.class);
+
+    public static class Factory implements LRDiagnoser.Factory {
+
+        @Override
+        public LRDiagnoser newDiagnoser(GrammarModel grammar, Set<? extends Option> options) {
+            return new AlgorithmicLRDiagnoser(grammar);
+        }
+    }
     private static final boolean DEBUG = false;
     private final GrammarModel grammar;
     private final FirstFunction firstFunction;
     private final Multimap<CstProductionModel, CstAlternativeModel> productionUsage = HashMultimap.create();
 
-    public LRDiagnoser(@Nonnull GrammarModel grammar) {
+    public AlgorithmicLRDiagnoser(@Nonnull GrammarModel grammar) {
         this.grammar = grammar;
         this.firstFunction = new FirstFunction(grammar);
 
@@ -60,7 +77,8 @@ public class LRDiagnoser {
     private static class Context {
 
         // TODO: ConcurrentNavigableMap<Object, Object> x = new ConcurrentSkipListMap<>();
-        private final Queue<State> queue = new PriorityQueue<>();
+        // private final Queue<State> queue = new PriorityQueue<>();
+        private final Queue<State> queue = new LinkedList<>();
         // private final Int2IntMap seenWithToken = new Int2IntOpenHashMap();
         // private final Int2IntMap seenWithRoot = new Int2IntOpenHashMap();
         private final Object2IntMap<CstElementModel> seenWithToken = new Object2IntOpenHashMap<>();
@@ -179,6 +197,9 @@ public class LRDiagnoser {
 
         STATE:
         while (!context.queue.isEmpty()) {
+            if (context.queue.size() > 1000000)
+                break;
+
             State state = context.queue.remove();
 
             // Discard any state which is just REALLY SLOW to find the token.
@@ -207,6 +228,7 @@ public class LRDiagnoser {
 
             Object2IntMap<CstElementModel> seenAtDepth = (token != null) ? context.seenWithToken : context.seenWithRoot;
 
+            PARENT_ALTERNATIVE:
             for (CstAlternativeModel parentAlternative : productionUsage.get(needleProduction)) {
                 /*
                  if (isSeen(seenAtDepth, state, parentAlternative))
@@ -232,7 +254,10 @@ public class LRDiagnoser {
                             if (tokens.contains(token)) {
                                 if (DEBUG)
                                     LOG.debug(prefix + "Token: Found following " + token.getName() + "; now searching for root");
-                                LRDiagnosis.ItemFrame frame = new LRDiagnosis.ItemFrame(parentAlternative, parentElementIndex, "Token '" + token.getName() + "' in FIRST('" + parentAlternative.getName() + "', " + (parentElementIndex + 1) + ")");
+                                LRDiagnosis.ItemFrame frame = new LRDiagnosis.ItemFrame(parentAlternative, parentElementIndex, "Token '" + token.getName() + "' in FIRST("
+                                        + parentAlternative.elements.subList(parentElementIndex + 1, parentAlternative.elements.size())
+                                        // + "'" + parentAlternative.getName() + "', " + (parentElementIndex + 1)
+                                        + ")");
                                 State child = new State(state, frame, null);
                                 // Not necessarily the fastest path to the root, but the fastest path to the token.
                                 context.queue.clear();
@@ -256,6 +281,7 @@ public class LRDiagnoser {
                             // We have found our token and we are aiming for the root.
                             LRDiagnosis.ItemFrame frame = new LRDiagnosis.ItemFrame(parentAlternative, parentElementIndex);
                             context.queue.add(new State(state, frame, null));
+                            continue PARENT_ALTERNATIVE;
                         }
                     }
                     parentElementIndex++;
@@ -274,7 +300,7 @@ public class LRDiagnoser {
         return null;
     }
 
-    @Nonnull
+    @Override
     public LRDiagnosis diagnose(@Nonnull LRConflict conflict) {
         LRDiagnosis out = new LRDiagnosis(conflict);
 

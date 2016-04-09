@@ -183,12 +183,11 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
      * WXYZ is held in elements.subList(start).
      *
      * @param out the set into which to add tokens.
-     * @param firstFunction The FirstFunction.
      * @param elements The vector of symbols to analyze.
      * @param start the starting point in the vector.
      * @return true iff the symbol sequence was nullable.
      */
-    /* pp */ boolean addFirst(@Nonnull Set<TokenModel> out, @Nonnull List<? extends CstElementModel> elements, @Nonnegative int start) {
+    public boolean addFirst(@Nonnull Set<TokenModel> out, @Nonnull List<? extends CstElementModel> elements, @Nonnegative int start) {
         for (int i = start; i < elements.size(); i++) {
             CstElementModel element = elements.get(i);
             if (element.isTerminal()) {
@@ -208,7 +207,7 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
         return true;
     }
 
-    /* pp */ boolean addFirst(@Nonnull IntSet out, @Nonnull List<? extends CstElementModel> elements, @Nonnegative int start) {
+    public boolean addFirst(@Nonnull IntSet out, @Nonnull List<? extends CstElementModel> elements, @Nonnegative int start) {
         for (int i = start; i < elements.size(); i++) {
             CstElementModel element = elements.get(i);
             if (element.isTerminal()) {

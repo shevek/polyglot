@@ -100,7 +100,6 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // if (!file.getName().equals("private-plsql-compiler.polyglot")) continue;
             // if (!file.getName().equals("private-plsql-compiler-small.polyglot"))
             // if (!file.getName().equals("private-vertica.polyglot"))
-            // if (!file.getName().equals("private-vertica.polyglot")) continue;
             // if (!file.getName().equals("test-abstracts.polyglot"))
             // if (!file.getName().equals("test-annotations.polyglot"))
             // if (!file.getName().equals("test-assignment.polyglot"))
@@ -123,6 +122,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // if (!file.getName().equals("test-star-reduction.polyglot"))
             // if (!file.getName().equals("test-token-constant.polyglot"))
             // if (!file.getName().equals("test-transform.polyglot"))
+            // if (!file.getName().equals("test-weak.polyglot"))
             // if (file.length() > 16384)
             // continue;
             parse(file);

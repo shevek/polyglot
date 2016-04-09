@@ -246,7 +246,7 @@ public class Inliner {
     /**
      * Returns false on exceptional return (abort).
      *
-     * @param conflicts
+     * @param inlineAlternatives The candidates for attempted inlining.
      * @return false on exceptional return (abort).
      */
     @CheckReturnValue
@@ -278,6 +278,12 @@ public class Inliner {
         return substitutions > 0;
     }
 
+    /**
+     * Returns false on exceptional return (abort).
+     *
+     * @param conflicts The set of conflicts from which to draw inlining candidates.
+     * @return false on exceptional return (abort).
+     */
     @CheckReturnValue
     public boolean substitute(@Nonnull LRConflict.Map conflicts) {
         return substitute(conflicts.getConflictingAlternatives());

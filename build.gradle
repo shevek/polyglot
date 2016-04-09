@@ -69,10 +69,24 @@ project(':polyglot-core') {
 
 		// For access to the runtime constants.
 		compile project(':polyglot-runtime')
+
+		testRuntime project(':polyglot-diagnoser')
 	}
 
 	apply plugin: 'org.anarres.polyglot'
 	// apply plugin: 'sablecc'
+}
+
+// This is a separate module as it requires Java 8.
+project(':polyglot-diagnoser') {
+	dependencies {
+		compile project(':polyglot-core')
+		compile 'org.choco-solver:choco-graph:3.3.0'
+	}
+
+	animalsniffer {
+		skip = true
+	}
 }
 
 project(':polyglot-cmd') {

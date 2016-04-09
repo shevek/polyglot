@@ -51,6 +51,12 @@ public class LR0ItemUniverse extends LRItemUniverse<LR0Item> {
         }
     }
 
+    @Nonnull
+    @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
+    public LR0Item findZeroItem(@Nonnull CstAlternativeModel alternative) {
+        return itemMapInitial.get(alternative);
+    }
+
     /** This routine is meant to be allocation-free. */
     // Page 224.
     @Override
