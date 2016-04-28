@@ -236,12 +236,16 @@ public class Lexer implements ILexer {
 #end
     } */ ;
 
+#if ($helper.isOption("CG_COMMENT"))
     private static final int[][] acceptTable /* = {
 #foreach ($state in $grammar.states)
         // Accept table for ${state.name}, indexed by DFA state. Value is token index. 0 is non-accepting.
         { #if($state.dfa)#foreach ($dfaState in $state.dfa.states)${dfaState.acceptTokenIndex}, #end#end},
 #end
     } */ ;
+#else##CG_COMMENT
+    private static final int[][] acceptTable;
+#end##CG_COMMENT
 
     public static enum State {
 #foreach ($state in $grammar.states)

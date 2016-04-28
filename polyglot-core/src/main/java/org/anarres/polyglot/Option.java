@@ -19,10 +19,14 @@ public enum Option {
     INLINE_TABLES,
     /** Enables API documentation generation. */
     CG_APIDOC,
+    /** Enables additional comment generation. */
+    CG_COMMENT,
     /** Enables findbugs annotation generation. */
     CG_FINDBUGS,
     /** Enables usage of common runtime interfaces. */
     CG_RUNTIME,
+    /** Enables parent pointers in the generated code. */
+    CG_PARENT,
     /** Enables threaded execution, which can generate simpler error messages. */
     PARALLEL,
     /** Log additional debugging information. */

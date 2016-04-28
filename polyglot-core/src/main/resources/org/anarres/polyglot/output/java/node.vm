@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 /** The superclass of all {@link Token}, production and alternative types. */
 public abstract class Node implements Switchable, Visitable, Cloneable {
 
+#if ($helper.isOption("CG_PARENT"))
     private Node parent;
 
     /**
@@ -29,6 +30,7 @@ public abstract class Node implements Switchable, Visitable, Cloneable {
     public void parent(@CheckForNull Node parent) {
         this.parent = parent;
     }
+#end##CG_PARENT
 
     /**
      * Removes a child of this node.
@@ -47,6 +49,7 @@ public abstract class Node implements Switchable, Visitable, Cloneable {
      */
     public abstract void replaceChild(@Nonnull Node prev, @Nonnull Node repl);
 
+#if ($helper.isOption("CG_PARENT"))
     /**
      * Replaces this node under its parent with the given node.
      *
@@ -55,6 +58,7 @@ public abstract class Node implements Switchable, Visitable, Cloneable {
     public void replaceBy(@Nonnull Node node) {
         this.parent.replaceChild(this, node);
     }
+#end##CG_PARENT
 
     /**
      * Recursively clones this node and all children.
@@ -83,8 +87,8 @@ public abstract class Node implements Switchable, Visitable, Cloneable {
     @SuppressWarnings("unchecked")
     protected <T extends Node> T cloneNode(@Nonnull CloneListener listener, @CheckForNull T node) {
         if (node == null)
-			return null;
-		return (T) node.clone(listener);
+            return null;
+        return (T) node.clone(listener);
     }
 
     /**
@@ -112,12 +116,19 @@ public abstract class Node implements Switchable, Visitable, Cloneable {
             node.toStringBuilder(buf);
     }
 
+    protected abstract void toStringBuilderDefault(@Nonnull StringBuilder buf);
+
     /**
      * Appends the textual content of this node and all children to the given StringBuilder.
      *
      * There may be trailing spaces.
+     *
+     * By default, this calls toStringBuilderDefault(), which is implemented in each alternative.
+     * This allows you to override toStringBuilder() in a javaExtends superclass.
      */
-    public abstract void toStringBuilder(@Nonnull StringBuilder buf);
+    public void toStringBuilder(@Nonnull StringBuilder buf) {
+        toStringBuilderDefault(buf);
+    }
 
     @Override
     public String toString() {

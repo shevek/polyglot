@@ -21,10 +21,8 @@ import java.io.PushbackReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -57,8 +55,6 @@ import org.anarres.polyglot.diagnoser.LRDiagnoser;
 import org.anarres.polyglot.lr.LRDiagnosis;
 import org.anarres.polyglot.lr.LRState;
 import org.anarres.polyglot.lr.TokenSet;
-import org.anarres.polyglot.model.AnnotationName;
-import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.StateModel;
@@ -117,7 +113,7 @@ public class PolyglotEngine {
     private final Map<OutputLanguage, File> outputDirs = new EnumMap<>(OutputLanguage.class);
     @Nonnull
     private DebugHandler debugHandler = DebugHandler.None.INSTANCE;
-    public final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_TABLES, Option.CG_APIDOC, Option.CG_FINDBUGS, Option.PARALLEL);
+    public final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_TABLES, Option.CG_PARENT, Option.CG_APIDOC, Option.CG_FINDBUGS, Option.PARALLEL);
     private final Table<OutputLanguage, String, File> templates = HashBasedTable.create();
 
     public PolyglotEngine(@Nonnull String name, @Nonnull CharSource input, @Nonnull File outputDir) {

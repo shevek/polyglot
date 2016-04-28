@@ -123,17 +123,22 @@ public class ${alternative.javaTypeName}
 
     $!element.javadocComment
     public void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} Iterable<? extends ${element.javaTypeName}> list) {
+#if ($helper.isOption("CG_PARENT"))
         for (${element.javaTypeName} e : this._${element.javaFieldName}_) {
-            e.parent(null);
+            if (e.parent() == this)
+                e.parent(null);
         }
+#end##CG_PARENT
         this._${element.javaFieldName}_.clear();
 
         if (list != null) {
             for (${element.javaTypeName} e : list) {
+#if ($helper.isOption("CG_PARENT"))
                 Node p = e.parent();
                 if (p != null)
                     p.removeChild(e);
                 e.parent(this);
+#end##CG_PARENT
                 this._${element.javaFieldName}_.add(e);
             }
         }
@@ -153,8 +158,10 @@ public class ${alternative.javaTypeName}
 
     $!element.javadocComment
     public void set${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} ${element.javaTypeName} node) {
+#if ($helper.isOption("CG_PARENT"))
         if (this._${element.javaFieldName}_ != null) {
-            this._${element.javaFieldName}_.parent(null);
+            if (this._${element.javaFieldName}_.parent() == this)
+                this._${element.javaFieldName}_.parent(null);
         }
 
         if (node != null) {
@@ -163,6 +170,7 @@ public class ${alternative.javaTypeName}
                 p.removeChild(node);
             node.parent(this);
         }
+#end##CG_PARENT
 
         this._${element.javaFieldName}_ = node;
     }
@@ -222,11 +230,17 @@ public class ${alternative.javaTypeName}
             if (it.next() == prev) {
                 if (repl != null) {
                     it.set(($element.javaTypeName) repl);
+#if ($helper.isOption("CG_PARENT"))
                     repl.parent(this);
-                    prev.parent(null);
+                    if (prev.parent() == this)
+                        prev.parent(null);
+#end##CG_PARENT
                 } else {
                     it.remove();
-                    prev.parent(null);
+#if ($helper.isOption("CG_PARENT"))
+                    if (prev.parent() == this)
+                        prev.parent(null);
+#end##CG_PARENT
                 }
                 return;
             }
@@ -284,7 +298,7 @@ public class ${alternative.javaTypeName}
     }
 
     @Override
-    public void toStringBuilder(StringBuilder buf) {
+    protected void toStringBuilderDefault(StringBuilder buf) {
 #foreach ($element in $alternative.elements)
         toStringBuilder(buf, get${element.javaMethodName}());
 #end

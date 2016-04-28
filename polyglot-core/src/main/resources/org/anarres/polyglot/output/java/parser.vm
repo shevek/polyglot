@@ -182,7 +182,9 @@ public class Parser {
         switch (reduction) {
 #foreach ($production in $grammar.cstProductions)
 
+#if ($helper.isOption("CG_COMMENT"))
             // Reductions for $production
+#end##CG_COMMENT
 #foreach ($alternative in $production.alternatives)
             case ${alternative.index}: { // Reduce ${alternative}
                 reduce${alternative.javaMethodName}();
@@ -256,8 +258,11 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 
 #foreach ($production in $grammar.cstProductions)
 
+#if ($helper.isOption("CG_COMMENT"))
 // Reductions for $production
+#end##CG_COMMENT
 #foreach ($alternative in $production.alternatives)## CstAlternativeModel
+#if ($helper.isOption("CG_COMMENT"))
 ## Not javadoc - performance sucks too hard.
     /*
      * Rule ${alternative.index}: ${alternative.javaMethodName}.
@@ -266,13 +271,16 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 
      *          { -> #foreach ($transformExpression in $alternative.transformExpressions)$transformExpression#if($velocityHasNext), #end#end }
      */
+#end##CG_COMMENT
     @Nonnull
 #if ($helper.isOption("CG_FINDBUGS"))
     @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
-#end
+#end##CG_FINDBUGS
     private void reduce${alternative.javaMethodName}() {
 #foreach ($element in $alternative.elementsReversed)## CstElementModel
+#if ($helper.isOption("CG_COMMENT"))
         // Pop ${element}
+#end##CG_COMMENT
         @Nonnull
         List<Object> ${element.javaFieldName}_nodes = pop();
 #foreach ($transformPrototype in $element.symbol.transformPrototypes)
@@ -280,7 +288,9 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #if ($transformPrototype.list)
 #set($javaTypeName = "List<${javaTypeName}>")
 #end
+#if ($helper.isOption("CG_COMMENT"))
         // Extract $element { -> $transformPrototype }
+#end##CG_COMMENT
 #if (!$element.nullable)
         @Nonnull
 #elseif (!$element.list)
@@ -299,7 +309,9 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 ## This push has to happen after we have popped the items, as goTo() looks at the outstanding top state.
         State out = push(goTo(${production.index}), "$production.descriptiveName");
 #foreach ($transformExpression in $alternative.transformExpressions)
+#if ($helper.isOption("CG_COMMENT"))
         // Generating: $transformExpression
+#end##CG_COMMENT
         out.add(
 #expression($transformExpression, "            ")
 
@@ -310,6 +322,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #end## alternative
 #end## production
 
+#if ($helper.isOption("CG_COMMENT"))
     private static final int[][][] actionTable /* = {
         // Actions for parser, indexed by LR(k) state. Value is [token, shift, stack-state] or [token, reduce, production-number].
 #if (!$helper.large)
@@ -346,6 +359,11 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #end
 #end## large
     } */ ;
+#else##CG_COMMENT
+    private static final int[][][] actionTable;
+    private static final int[][][] gotoTable;
+    private static final String[] errorTable;
+#end##CG_COMMENT
 
     private static void readArray(@Nonnull int[] out, @Nonnull DataInputStream in) throws IOException {
         for (int i = 0; i < out.length; i++)

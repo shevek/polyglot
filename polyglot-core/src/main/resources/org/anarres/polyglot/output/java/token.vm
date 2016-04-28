@@ -104,7 +104,7 @@ public abstract class Token extends Node implements IToken {
     public abstract Token clone(@Nonnull CloneListener listener);
 
     @Override
-    public void toStringBuilder(@Nonnull StringBuilder buf) {
+    public void toStringBuilderDefault(@Nonnull StringBuilder buf) {
         buf.append(getText()).append(' ');
     }
 

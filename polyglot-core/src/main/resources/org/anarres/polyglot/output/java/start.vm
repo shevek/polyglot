@@ -52,6 +52,7 @@ public final class Start extends Node {
     }
 
     public void set${element.javaMethodName}(@Nonnull ${element.javaTypeName} node) {
+#if ($helper.isOption("CG_PARENT"))
         if (this._${element.javaFieldName}_ != null) {
             this._${element.javaFieldName}_.parent(null);
         }
@@ -62,6 +63,7 @@ public final class Start extends Node {
                 p.removeChild(node);
             node.parent(this);
         }
+#end##CG_PARENT
 
         this._${element.javaFieldName}_ = node;
     }
@@ -72,6 +74,7 @@ public final class Start extends Node {
     }
 
     public void setEOF(@Nonnull EOF node) {
+#if ($helper.isOption("CG_PARENT"))
         if (this._eof_ != null) {
             this._eof_.parent(null);
         }
@@ -82,6 +85,7 @@ public final class Start extends Node {
                 p.removeChild(node);
             node.parent(this);
         }
+#end##CG_PARENT
 
         this._eof_ = node;
     }
@@ -117,7 +121,7 @@ public final class Start extends Node {
     }
 
     @Override
-    public void toStringBuilder(StringBuilder buf) {
+    public void toStringBuilderDefault(StringBuilder buf) {
         toStringBuilder(buf, get${element.javaMethodName}());
         toStringBuilder(buf, getEOF());
     }
