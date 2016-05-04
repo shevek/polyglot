@@ -76,6 +76,16 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
         return Preconditions.checkNotNull((AstProductionModel) getSymbol(), "Symbol was null.");
     }
 
+    public boolean isExternal() {
+        Preconditions.checkNotNull(symbol, "Symbol was null.");
+        return symbol instanceof ExternalModel;
+    }
+
+    @Nonnull
+    public ExternalModel getExternal() {
+        return Preconditions.checkNotNull((ExternalModel) getSymbol(), "Symbol was null.");
+    }
+
     @Override
     @TemplateProperty
     public String getJavaTypeName() {

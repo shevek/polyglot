@@ -16,10 +16,13 @@ import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.model.AnnotationModel;
+import org.anarres.polyglot.model.AstAlternativeModel;
+import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstModel;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  *
@@ -147,6 +150,11 @@ public class JavaHelper {
         return out;
     }
 
+    @Nonnull
+    public boolean hasAnnotation(@Nonnull AstModel model, @Nonnull String name) {
+        return hasAnnotations(model, name);
+    }
+
     /**
      * Returns the value of the unique annotation on the given model with the given name.
      *
@@ -205,5 +213,126 @@ public class JavaHelper {
             default:
                 return "Object";
         }
+    }
+
+    private static enum State {
+
+        CONST, DOLLAR, VAR;
+    }
+
+    public static class FormatToken {
+
+        private final Object value;
+
+        public FormatToken(Object value) {
+            this.value = value;
+        }
+
+        public boolean isText() {
+            return value instanceof String;
+        }
+
+        @Nonnull
+        public String getJavaText() {
+            return StringEscapeUtils.escapeJava(String.valueOf(value));
+        }
+
+        public boolean isElement() {
+            return value instanceof AstElementModel;
+        }
+
+        @Nonnull
+        public AstElementModel getElement() {
+            return (AstElementModel) value;
+        }
+
+        @Override
+        public String toString() {
+            if (isText())
+                return "string:\"" + StringEscapeUtils.escapeJava(String.valueOf(value)) + "\"";
+            return "element:" + value;
+        }
+    }
+
+    @Nonnull
+    private AstElementModel lexGetElement(@Nonnull AstAlternativeModel model, @Nonnull CharSequence name) {
+        for (AstElementModel element : model.getElements()) {
+            if (element.getName().contentEquals(name))
+                return element;
+        }
+        for (AstElementModel element : model.getExternals()) {
+            if (element.getName().contentEquals(name))
+                return element;
+        }
+        throw new IllegalArgumentException("No such element '" + name + "' in AST alternative '" + model.getName() + "'.");
+    }
+
+    @Nonnull
+    public List<FormatToken> lexFormat(@Nonnull AstAlternativeModel model, @Nonnull String format) {
+        List<FormatToken> out = new ArrayList<>();
+        StringBuilder buf = new StringBuilder();
+        State state = State.CONST;
+
+        CHAR:
+        for (int i = 0; i < format.length(); i++) {
+            char c = format.charAt(i);
+            switch (c) {
+                case '$':
+                    switch (state) {
+                        case CONST:
+                            state = State.DOLLAR;
+                            continue CHAR;
+                        case DOLLAR:
+                            state = State.CONST;
+                            buf.append(c);
+                            continue CHAR;
+                    }
+                    break;
+                case '{':
+                    switch (state) {
+                        case CONST:
+                            buf.append(c);
+                            continue CHAR;
+                        case DOLLAR:
+                            if (buf.length() > 0) {
+                                out.add(new FormatToken(buf.toString()));
+                                buf.setLength(0);
+                            }
+                            state = State.VAR;
+                            continue CHAR;
+                    }
+                    break;
+                case '}':
+                    switch (state) {
+                        case CONST:
+                            buf.append(c);
+                            continue CHAR;
+                        case VAR:
+                            out.add(new FormatToken(lexGetElement(model, buf)));
+                            buf.setLength(0);
+                            state = State.CONST;
+                            continue CHAR;
+                    }
+                    break;
+                default:
+                    switch (state) {
+                        case CONST:
+                        case VAR:
+                            buf.append(c);
+                            continue CHAR;
+                    }
+            }
+            throw new IllegalStateException("Unexpected character '" + Character.toString(c) + "' in state " + state);
+        }
+
+        switch (state) {
+            case CONST:
+                if (buf.length() > 0)
+                    out.add(new FormatToken(buf.toString()));
+                break;
+            default:
+                throw new IllegalStateException("Unterminated variable at end of '" + format + "'.");
+        }
+        return out;
     }
 }

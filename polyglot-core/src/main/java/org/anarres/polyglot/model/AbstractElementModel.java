@@ -76,6 +76,7 @@ public abstract class AbstractElementModel<S extends ProductionSymbol> extends A
 
     public boolean isTerminal() {
         Preconditions.checkNotNull(symbol, "Symbol was null.");
+        // Why not symbol.isTerminal()?
         return symbol instanceof TokenModel;
     }
 
