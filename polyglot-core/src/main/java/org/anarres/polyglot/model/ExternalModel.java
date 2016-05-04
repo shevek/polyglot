@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Multimap;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.analysis.MatcherParserVisitor;
@@ -50,6 +51,11 @@ public class ExternalModel extends AbstractNamedJavaModel implements AstProducti
     @Override
     public String getJavaTypeName() {
         return javaTypeName;
+    }
+
+    @Override
+    public String getJavaMethodName() {
+        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, getName());
     }
 
     @Override
