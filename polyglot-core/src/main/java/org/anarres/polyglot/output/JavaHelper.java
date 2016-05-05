@@ -5,7 +5,10 @@
  */
 package org.anarres.polyglot.output;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,6 +68,15 @@ public class JavaHelper {
         }
     }
 
+    /*new Escaper() { @Override public String escape(String string) { return StringEscapeUtils.escapeJava(string); } };*/
+    public static final Escaper ESCAPER = Escapers.builder()
+            .addEscape('\t', "\\t")
+            .addEscape('\r', "\\r")
+            .addEscape('\n', "\\n")
+            .addEscape('"', "\\\"")
+            .addEscape('\\', "\\\\")
+            .build();
+
     @Nonnull
     private final Set<? extends Option> options;
     @Nonnull
@@ -76,6 +88,11 @@ public class JavaHelper {
         this.options = options;
         this.grammar = grammar;
         this.automaton = automaton;
+    }
+
+    @Nonnull
+    public String escape(String in) {
+        return ESCAPER.escape(Preconditions.checkNotNull(in, "Cannot escape null string."));
     }
 
     /**
@@ -172,6 +189,19 @@ public class JavaHelper {
         return annotation.getValue();
     }
 
+    /**
+     * Returns the value of the unique annotation on the given model with the given name,
+     * escaped as a Java literal without encapsulating quotation marks.
+     *
+     * @param model The model from which to retrieve annotations.
+     * @param name The name of the annotations to retrieve.
+     * @return The escaped value of the unique annotation on the given model with the given name.
+     */
+    @Nonnull
+    public String getAnnotationEscaped(@Nonnull AstModel model, @Nonnull String name) {
+        return escape(getAnnotation(model, name));
+    }
+
     @Nonnull
     public String getSuperClass(@Nonnull AstModel model, @Nonnull String defaultValue) {
         List<String> values = getAnnotations(model, "javaExtends");
@@ -234,7 +264,7 @@ public class JavaHelper {
 
         @Nonnull
         public String getJavaText() {
-            return StringEscapeUtils.escapeJava(String.valueOf(value));
+            return ESCAPER.escape(String.valueOf(value));
         }
 
         public boolean isElement() {
@@ -249,7 +279,7 @@ public class JavaHelper {
         @Override
         public String toString() {
             if (isText())
-                return "string:\"" + StringEscapeUtils.escapeJava(String.valueOf(value)) + "\"";
+                return "string:\"" + ESCAPER.escape(String.valueOf(value)) + "\"";
             return "element:" + value;
         }
     }

@@ -6,8 +6,6 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.escape.Escaper;
-import com.google.common.escape.Escapers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +27,7 @@ import org.anarres.polyglot.node.PAnnotation;
 import org.anarres.polyglot.node.PMatcher;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TJavadocComment;
+import org.anarres.polyglot.output.JavaHelper;
 import org.anarres.polyglot.output.TemplateProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,14 +198,7 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
 
     @Nonnull
     public String getJavaText() {
-        Escaper escaper = Escapers.builder()
-                .addEscape('\t', "\\t")
-                .addEscape('\r', "\\r")
-                .addEscape('\n', "\\n")
-                .addEscape('"', "\\\"")
-                .addEscape('\\', "\\\\")
-                .build();
-        return escaper.escape(getText());
+        return JavaHelper.ESCAPER.escape(getText());
     }
 
     @Override
