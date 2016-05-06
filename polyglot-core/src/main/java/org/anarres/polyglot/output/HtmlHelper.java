@@ -31,17 +31,16 @@ import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.HelperModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.node.AAlternateMatcher;
-import org.anarres.polyglot.node.ACharChar;
 import org.anarres.polyglot.node.AConcatMatcher;
-import org.anarres.polyglot.node.ADecChar;
+import org.anarres.polyglot.node.ADecCharLiteral;
 import org.anarres.polyglot.node.ADifferenceMatcher;
 import org.anarres.polyglot.node.AHelperMatcher;
-import org.anarres.polyglot.node.AHexChar;
+import org.anarres.polyglot.node.AHexCharLiteral;
 import org.anarres.polyglot.node.AIntervalMatcher;
 import org.anarres.polyglot.node.APlusMatcher;
 import org.anarres.polyglot.node.AQuestionMatcher;
 import org.anarres.polyglot.node.AStarMatcher;
-import org.anarres.polyglot.node.AStringMatcher;
+import org.anarres.polyglot.node.AStringLiteral;
 import org.anarres.polyglot.node.AUnionMatcher;
 import org.anarres.polyglot.node.Node;
 import org.anarres.polyglot.node.PMatcher;
@@ -226,22 +225,17 @@ public class HtmlHelper {
         }
 
         @Override
-        public void caseAStringMatcher(AStringMatcher node) {
-            buf.append(node.getString().getText());
-        }
-
-        @Override
-        public void caseACharChar(ACharChar node) {
+        public void caseAStringLiteral(AStringLiteral node) {
             buf.append(node.getToken().getText());
         }
 
         @Override
-        public void caseADecChar(ADecChar node) {
+        public void caseADecCharLiteral(ADecCharLiteral node) {
             buf.append(node.getToken().getText());
         }
 
         @Override
-        public void caseAHexChar(AHexChar node) {
+        public void caseAHexCharLiteral(AHexCharLiteral node) {
             buf.append(node.getToken().getText());
         }
     }

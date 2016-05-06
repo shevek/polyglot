@@ -93,7 +93,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseAExternal(AExternal node) {
-        ExternalModel external = ExternalModel.forNode(node);
+        ExternalModel external = ExternalModel.forNode(errors, node);
         if (!grammar.addExternal(external))
             errors.addError(node.getName(), "Duplicate external name '" + external.getName() + "'.");
     }
@@ -138,7 +138,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseAToken(AToken node) {
-        token = new TokenModel(grammar.tokenIndex++, node.getName(), node.getMatcher(), node.getAnnotations());
+        token = TokenModel.forNode(errors, grammar.tokenIndex++, node);
         token.setJavadocComment(node.getJavadocComment());
         Object prev = grammar.tokens.put(token.getName(), token);
         if (prev != null)
@@ -191,7 +191,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseACstProduction(ACstProduction node) {
-        cstProduction = CstProductionModel.forNode(grammar.cstProductionIndex++, node);
+        cstProduction = CstProductionModel.forNode(errors, grammar.cstProductionIndex++, node);
         if (grammar.cstProductionRoot == null)
             grammar.cstProductionRoot = cstProduction;
         if (!grammar.addCstProduction(cstProduction))
@@ -219,7 +219,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseACstAlternative(ACstAlternative node) {
-        cstAlternative = CstAlternativeModel.forNode(grammar.cstAlternativeIndex++, cstProduction, node);
+        cstAlternative = CstAlternativeModel.forNode(errors, grammar.cstAlternativeIndex++, cstProduction, node);
         Object prev = cstProduction.alternatives.put(cstAlternative.getName(), cstAlternative);
         if (prev != null) {
             if (node.getName() == null) // NOTREACHED due to $0 naming.
@@ -307,7 +307,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseAAstProduction(AAstProduction node) {
-        astProduction = AstProductionModel.forNode(node);
+        astProduction = AstProductionModel.forNode(errors, node);
         if (grammar.astProductionRoot == null)
             grammar.astProductionRoot = astProduction;
         // LOG.info("AstProductionModel " + astProduction);
@@ -323,7 +323,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseAAstAlternative(AAstAlternative node) {
-        astAlternative = AstAlternativeModel.forNode(astProduction, node);
+        astAlternative = AstAlternativeModel.forNode(errors, astProduction, node);
         Object prev = astProduction.alternatives.put(astAlternative.getName(), astAlternative);
         if (prev != null) {
             if (node.getName() == null)
@@ -345,7 +345,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         // TODO: Add this to the generic alternative, not just the CST one.
         // We might be a CstProductionTransform. :-( We should probably do separation by type in the grammar.
         if (astAlternative != null) {
-            AstElementModel element = AstElementModel.forNode(node);
+            AstElementModel element = AstElementModel.forNode(errors, node);
             for (AstElementModel e : astAlternative.elements)
                 if (name.equals(e.getName()))
                     errors.addError(node.getSymbolName(), "Duplicate element name '" + name + "' in AST alternative '" + astAlternative.getName() + "'.");

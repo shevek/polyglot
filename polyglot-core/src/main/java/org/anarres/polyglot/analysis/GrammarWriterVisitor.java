@@ -10,23 +10,21 @@ import java.util.Collection;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.AAlternateMatcher;
 import org.anarres.polyglot.node.AAstAlternative;
 import org.anarres.polyglot.node.AAstProduction;
 import org.anarres.polyglot.node.AAstSection;
-import org.anarres.polyglot.node.ACharChar;
 import org.anarres.polyglot.node.AConcatMatcher;
 import org.anarres.polyglot.node.ACstAlternative;
 import org.anarres.polyglot.node.ACstProduction;
-import org.anarres.polyglot.node.ADecChar;
+import org.anarres.polyglot.node.ADecCharLiteral;
 import org.anarres.polyglot.node.ADifferenceMatcher;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.AHelper;
 import org.anarres.polyglot.node.AHelperMatcher;
 import org.anarres.polyglot.node.AHelpersSection;
-import org.anarres.polyglot.node.AHexChar;
+import org.anarres.polyglot.node.AHexCharLiteral;
 import org.anarres.polyglot.node.AIgnoredTokensSection;
 import org.anarres.polyglot.node.AIntervalMatcher;
 import org.anarres.polyglot.node.AListExpression;
@@ -43,7 +41,7 @@ import org.anarres.polyglot.node.AReferenceExpression;
 import org.anarres.polyglot.node.AStarMatcher;
 import org.anarres.polyglot.node.AStarUnOp;
 import org.anarres.polyglot.node.AStatesSection;
-import org.anarres.polyglot.node.AStringMatcher;
+import org.anarres.polyglot.node.AStringLiteral;
 import org.anarres.polyglot.node.AToken;
 import org.anarres.polyglot.node.ATokenSpecifier;
 import org.anarres.polyglot.node.ATokenState;
@@ -136,11 +134,6 @@ public class GrammarWriterVisitor extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseAStringMatcher(AStringMatcher node) {
-        out.append(node.getString().getText());
-    }
-
-    @Override
     public void caseAHelperMatcher(AHelperMatcher node) {
         out.append(node.getHelperName().getText());
     }
@@ -169,17 +162,17 @@ public class GrammarWriterVisitor extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseACharChar(ACharChar node) {
+    public void caseAStringLiteral(AStringLiteral node) {
         out.append(node.getToken().getText());
     }
 
     @Override
-    public void caseADecChar(ADecChar node) {
+    public void caseADecCharLiteral(ADecCharLiteral node) {
         out.append(node.getToken().getText());
     }
 
     @Override
-    public void caseAHexChar(AHexChar node) {
+    public void caseAHexCharLiteral(AHexCharLiteral node) {
         out.append(node.getToken().getText());
     }
 

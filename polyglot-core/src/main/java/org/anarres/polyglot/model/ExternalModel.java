@@ -8,11 +8,11 @@ package org.anarres.polyglot.model;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Multimap;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.analysis.MatcherParserVisitor;
 import org.anarres.polyglot.node.AExternal;
 import org.anarres.polyglot.node.Node;
 import org.anarres.polyglot.node.TIdentifier;
-import org.anarres.polyglot.node.TString;
 import org.anarres.polyglot.output.TemplateProperty;
 
 /**
@@ -22,20 +22,19 @@ import org.anarres.polyglot.output.TemplateProperty;
 public class ExternalModel extends AbstractNamedJavaModel implements AstProductionSymbol {
 
     @Nonnull
-    public static ExternalModel forNode(@Nonnull AExternal node) {
-        ExternalModel model = new ExternalModel(node.getName(), node.getExternalType(), annotations(node.getAnnotations()));
+    public static ExternalModel forNode(@Nonnull ErrorHandler errors, @Nonnull AExternal node) {
+        String javaTypeName = MatcherParserVisitor.parse(errors, node.getExternalType());
+        ExternalModel model = new ExternalModel(node.getName(), javaTypeName, annotations(errors, node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }
 
-    private final TString externalType;
     // Cached
     private final String javaTypeName;
 
-    public ExternalModel(@Nonnull TIdentifier name, @Nonnull TString externalType, Multimap<String, ? extends AnnotationModel> annotations) {
+    public ExternalModel(@Nonnull TIdentifier name, @Nonnull String javaTypeName, Multimap<String, ? extends AnnotationModel> annotations) {
         super(name, annotations);
-        this.externalType = externalType;
-        this.javaTypeName = MatcherParserVisitor.parse(externalType);
+        this.javaTypeName = javaTypeName;
     }
 
     @Override
@@ -63,7 +62,7 @@ public class ExternalModel extends AbstractNamedJavaModel implements AstProducti
         return new AExternal(
                 newJavadocCommentToken(),
                 toNameToken(),
-                externalType.clone(),
+                MatcherParserVisitor.escape(getJavaTypeName()),
                 toAnnotations(getAnnotations()));
     }
 }

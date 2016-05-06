@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.node.ACstAlternative;
 import org.anarres.polyglot.node.ACstProduction;
@@ -30,8 +31,8 @@ import org.anarres.polyglot.output.TemplateProperty;
 public final class CstProductionModel extends AbstractNamedModel implements CstProductionSymbol, Indexed {
 
     @Nonnull
-    public static CstProductionModel forNode(@Nonnegative int index, @Nonnull ACstProduction node) {
-        CstProductionModel model = new CstProductionModel(index, node.getName(), annotations(node.getAnnotations()));
+    public static CstProductionModel forNode(@Nonnull ErrorHandler errors, @Nonnegative int index, @Nonnull ACstProduction node) {
+        CstProductionModel model = new CstProductionModel(index, node.getName(), annotations(errors, node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }
@@ -42,7 +43,7 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
     public final Map<String, CstAlternativeModel> alternatives = new LinkedHashMap<>();
     /* pp */ int alternativeIndex = 0;
 
-    public CstProductionModel(@Nonnegative int index, @Nonnull TIdentifier name, Multimap<String, ? extends AnnotationModel> annotations) {
+    public CstProductionModel(@Nonnegative int index, @Nonnull TIdentifier name, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
         super(name, annotations);
         this.index = index;
     }

@@ -5,15 +5,15 @@
  */
 package org.anarres.polyglot.lr;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import org.anarres.polyglot.model.AnnotationModel;
 import org.junit.Test;
 import org.anarres.polyglot.model.TokenModel;
-import org.anarres.polyglot.node.AStringMatcher;
-import org.anarres.polyglot.node.PAnnotation;
+import org.anarres.polyglot.node.ALiteralMatcher;
 import org.anarres.polyglot.node.TIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,8 @@ public class TokenSetTest {
         for (int i = 0; i < 4; i++) {
             tokens.add(new TokenModel(i + 1,
                     new TIdentifier("tok" + i),
-                    new AStringMatcher(),
-                    Collections.<PAnnotation>emptyList()
+                    new ALiteralMatcher(), null,
+                    ImmutableMultimap.<String, AnnotationModel>of()
             ));
         }
         TokenUniverse universe = new TokenUniverse(tokens);

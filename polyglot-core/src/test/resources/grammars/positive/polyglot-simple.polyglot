@@ -65,11 +65,11 @@ Tokens
 
 	identifier = id_part ('_' id_part)*;
 
-	char = ''' not_eol ''';
+	char = '\'' not_eol '\'';
 	dec_char = digit+;
 	hex_char = '0' ('x' | 'X') hex_digit+;
 
-	string = ''' [not_eol - ''']+ ''';
+	string = '\'' [not_eol - '\'']+ '\'';
 
 	blank = (eol | tab | ' ')+ ;
 	c_comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';

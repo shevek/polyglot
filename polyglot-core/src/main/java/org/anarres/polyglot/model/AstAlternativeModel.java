@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.node.AAstAlternative;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.TIdentifier;
@@ -26,9 +27,9 @@ import org.anarres.polyglot.output.TemplateProperty;
 public final class AstAlternativeModel extends AbstractNamedJavaModel implements AstModel {
 
     @Nonnull
-    public static AstAlternativeModel forNode(@Nonnull AstProductionModel production, @Nonnull AAstAlternative node) {
+    public static AstAlternativeModel forNode(@Nonnull ErrorHandler errors, @Nonnull AstProductionModel production, @Nonnull AAstAlternative node) {
         Token location = location(production, node.getName(), node.getJavadocComment(), Iterables.getFirst(node.getElements(), null));
-        AstAlternativeModel model = new AstAlternativeModel(production, location, node.getName(), annotations(node.getAnnotations()));
+        AstAlternativeModel model = new AstAlternativeModel(production, location, node.getName(), annotations(errors, node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }

@@ -283,7 +283,7 @@ Tokens
   {code} short_comment = '//' not_cr_lf* eol | '#' not_cr_lf* eol;
   {code} long_comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';  /* '4vim */
 
-  {code} static_string = ''' ([all - ['\' + ''']] | '\' all)*  '''; /* '4vim */
+  {code} static_string = '\'' ([all - ['\\' + '\'']] | '\\' all)*  '\''; /* '4vim */
 
   {code->string} string_start = '"';
   {string->code} string_end = '"';
@@ -300,13 +300,13 @@ Tokens
   {string, heredoc, backtick} string_array_static = '$' identifier '[' [all - ']']+ ']';
   {string, heredoc, backtick} string_object = '$' identifier '->' identifier;
 
-  {string} string_chunk = ([all - ['$' + ['"' + ['{' + '\']]]] | '\' all | '{' '\' all | '{' [all - ['$' + ['\' + '"']]])+;
+  {string} string_chunk = ([all - ['$' + ['"' + ['{' + '\\']]]] | '\\' all | '{' '\\' all | '{' [all - ['$' + ['\\' + '"']]])+;
   {string} string_chunk_helper = '$' | '{';
 
-  {heredoc} heredoc_chunk = ([all - ['\' + ['$' + '{']]] | '\' all | '{' '\' all | '{' [all - ['$' + ['\' + '"']]])+;
+  {heredoc} heredoc_chunk = ([all - ['\\' + ['$' + '{']]] | '\\' all | '{' '\\' all | '{' [all - ['$' + ['\\' + '"']]])+;
   {heredoc} heredoc_chunk_helper = '$' | '{';
 
-  {backtick} backtick_chunk = ([all - ['$' + ['`' + ['{' + '\']]]] | '\' all | '{' '\' all | '{' [all - ['$' + ['\' + '`']]])+;
+  {backtick} backtick_chunk = ([all - ['$' + ['`' + ['{' + '\\']]]] | '\\' all | '{' '\\' all | '{' [all - ['$' + ['\\' + '`']]])+;
   {backtick} backtick_chunk_helper = '$' | '{';
 
   {string} string_cvar_start =;

@@ -36,6 +36,11 @@ public class CharSet implements HelperModel.Value {
         this(o.intervals);
     }
 
+    public CharSet(@Nonnull String s) {
+        for (int i = 0; i < s.length(); i++)
+            add(new CharInterval(s.charAt(i)));
+    }
+
     @Nonnull
     public List<? extends CharInterval> getIntervals() {
         return intervals;

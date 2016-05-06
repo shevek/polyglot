@@ -9,6 +9,12 @@ Abstract Syntax Tree
 
 	@javaImplements('java.io.Serializable')
 	@javaAnnotation('@net.jcip.annotations.ThreadSafe')
+	@testBare
+	@testNone()
+	@testEmpty('')
+	@testSingle('x')
+	@testDouble('xx')
+	@testEscaped('\\\n')
 	program =
 		@javaImplements('java.io.Serializable')
 		@javaAnnotation('@net.jcip.annotations.ThreadSafe')

@@ -6,6 +6,7 @@
 package org.anarres.polyglot.analysis;
 
 import java.util.List;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.dfa.CharSet;
@@ -15,21 +16,21 @@ import org.anarres.polyglot.model.HelperModel;
 import org.anarres.polyglot.model.StateModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.node.AAlternateMatcher;
-import org.anarres.polyglot.node.ACharMatcher;
 import org.anarres.polyglot.node.AConcatMatcher;
 import org.anarres.polyglot.node.ADifferenceMatcher;
 import org.anarres.polyglot.node.AGrammar;
 import org.anarres.polyglot.node.AHelper;
 import org.anarres.polyglot.node.AHelperMatcher;
 import org.anarres.polyglot.node.AIntervalMatcher;
+import org.anarres.polyglot.node.ALiteralMatcher;
 import org.anarres.polyglot.node.APlusMatcher;
 import org.anarres.polyglot.node.AQuestionMatcher;
 import org.anarres.polyglot.node.AStarMatcher;
-import org.anarres.polyglot.node.AStringMatcher;
 import org.anarres.polyglot.node.AToken;
 import org.anarres.polyglot.node.AUnionMatcher;
 import org.anarres.polyglot.node.Node;
 import org.anarres.polyglot.node.PMatcher;
+import org.anarres.polyglot.node.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
     private final GrammarModel grammar;
 
     public NFABuilderVisitor(@Nonnull ErrorHandler errors, @Nonnull GrammarModel grammar) {
+        super(errors);
         this.errors = errors;
         this.grammar = grammar;
     }
@@ -53,12 +55,33 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
         throw new IllegalStateException();
     }
 
+    private char getChar(@Nonnull Node node, @CheckForNull Token location, @Nonnull String description) {
+        Object o = getOut(node);
+        if (o instanceof Character)
+            return (Character) o;
+        if (o instanceof String) {
+            String s = (String) o;
+            if (s.length() > 1)
+                errors.addError(location, "Expected character, not string of length " + s.length() + " in " + description + ": " + s);
+            return s.charAt(0);
+        }
+        throw new IllegalStateException("What is " + o.getClass() + " for " + node.getClass());
+    }
+
     @Nonnull
-    private CharSet getCharSet(@Nonnull Node node) {
+    private CharSet getCharSet(@Nonnull Node node, @CheckForNull Token location, @Nonnull String description) {
         // TODO: Warn if not a CharSet - could be a helper which referred to an NFA.
         Object o = getOut(node);
         if (o instanceof CharSet)
             return (CharSet) o;
+        if (o instanceof Character)
+            return new CharSet((Character) o);
+        if (o instanceof String) {
+            String s = (String) o;
+            if (s.length() > 1)
+                errors.addError(location, "Expected character or charset, not string of length " + s.length() + " in " + description + ": " + s);
+            return new CharSet(s.charAt(0));
+        }
         if (node instanceof AHelperMatcher)
             throw new IllegalStateException("What is " + o.getClass() + " for helper " + ((AHelperMatcher) node).getHelperName().getText());
         throw new IllegalStateException("What is " + o.getClass() + " for " + node.getClass());
@@ -74,36 +97,39 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
             return ((NFA) o);
         if (o instanceof CharSet)
             return new NFA((CharSet) o);
+        if (o instanceof Character)
+            return new NFA(Character.toString((Character) o));
+        if (o instanceof String)
+            return new NFA((String) o);
         throw new IllegalStateException("What is " + o.getClass() + " for " + node.getClass());
     }
 
     @Override
-    public void outACharMatcher(ACharMatcher node) {
-        Character c = (Character) getOut(node.getChar());
-        // LOG.info("ACharMatcher " + Integer.toString(c.charValue()) + " -> CharSet.");
-        setOut(node, new CharSet(c.charValue()));
+    public void outALiteralMatcher(ALiteralMatcher node) {
+        // LOG.info("ALiteralMatcher " + Integer.toString(c.charValue()) + " -> CharSet.");
+        setOut(node, getOut(node.getLiteral()));   // Character or String.
     }
 
     @Override
     public void outAIntervalMatcher(AIntervalMatcher node) {
-        Character left = (Character) getOut(node.getLeft());
-        Character right = (Character) getOut(node.getRight());
-        setOut(node, new CharSet(left.charValue(), right.charValue()));
+        char left = getChar(node.getLeft(), node.getOp(), "left endpoint of interval");
+        char right = getChar(node.getRight(), node.getOp(), "right endpoint of interval");
+        setOut(node, new CharSet(left, right));
     }
 
     @Override
     public void outAUnionMatcher(AUnionMatcher node) {
         // LOG.info("Union at " + node.getOp().getLine());
-        CharSet left = getCharSet(node.getLeft());
-        CharSet right = getCharSet(node.getRight());
+        CharSet left = getCharSet(node.getLeft(), node.getOp(), "left hand side of union");
+        CharSet right = getCharSet(node.getRight(), node.getOp(), "right hand side of union");
         setOut(node, left.union(right));
     }
 
     @Override
     public void outADifferenceMatcher(ADifferenceMatcher node) {
         // LOG.info("Difference at " + node.getOp().getLine());
-        CharSet left = getCharSet(node.getLeft());
-        CharSet right = getCharSet(node.getRight());
+        CharSet left = getCharSet(node.getLeft(), node.getOp(), "left hand side of difference");
+        CharSet right = getCharSet(node.getRight(), node.getOp(), "right hand side of difference");
         setOut(node, left.diff(right));
     }
 
@@ -117,12 +143,6 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
             return;
         }
         setOut(node, helper.value);
-    }
-
-    @Override
-    public void outAStringMatcher(AStringMatcher node) {
-        String text = parse(node.getString());
-        setOut(node, new NFA(text));
     }
 
     @Override
@@ -189,7 +209,19 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
         HelperModel helper = grammar.getHelper(name);
         if (helper == null)
             throw new IllegalStateException("No such helper " + name);
-        HelperModel.Value value = (HelperModel.Value) getOut(node.getMatcher());
+        Object o = getOut(node.getMatcher());
+        HelperModel.Value value;
+        if (o instanceof Character)
+            value = new CharSet((Character) o);
+        else if (o instanceof String) {
+            String s = (String) o;
+            if (s.length() == 1)
+                value = new CharSet(s.charAt(0));
+            else
+                value = new NFA(s);
+        } else {
+            value = (HelperModel.Value) o;
+        }
         // LOG.info(name + " -> " + value);
         helper.value = value;
     }

@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.output.TemplateProperty;
@@ -49,13 +50,13 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
     }
 
     @Nonnull
-    public static AstElementModel forNode(@Nonnull AElement node) {
+    public static AstElementModel forNode(@Nonnull ErrorHandler errors, @Nonnull AElement node) {
         AstElementModel model = new AstElementModel(
                 name(node),
                 Specifier.toSpecifier(node.getSpecifier()),
                 node.getSymbolName(),
                 UnaryOperator.toUnaryOperator(node.getUnOp()),
-                annotations(node.getAnnotations()));
+                annotations(errors, node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }

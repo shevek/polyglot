@@ -17,7 +17,7 @@ Helpers
 	nondigit = ['_' + [['a' .. 'z'] + ['A' ..  'Z']]];
 	hex_digit = [digit + [['a' .. 'f'] + ['A' .. 'F']]];
 	hex_quad = hex_digit hex_digit hex_digit hex_digit;
-	universal_char_name = '\u' hex_quad;
+	universal_char_name = '\\u' hex_quad;
 	identifier_nondigit = nondigit | universal_char_name;
 
 // include("helpers.sh")

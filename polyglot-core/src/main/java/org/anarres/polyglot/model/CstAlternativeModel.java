@@ -16,6 +16,7 @@ import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.lr.LRAction;
 import org.anarres.polyglot.node.ACstAlternative;
@@ -38,12 +39,12 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
     private static final Logger LOG = LoggerFactory.getLogger(CstAlternativeModel.class);
 
     @Nonnull
-    public static CstAlternativeModel forNode(int index, CstProductionModel production, ACstAlternative node) {
+    public static CstAlternativeModel forNode(@Nonnull ErrorHandler errors, int index, @Nonnull CstProductionModel production, @Nonnull ACstAlternative node) {
         Token location = location(production, node.getName(), node.getJavadocComment(), Iterables.getFirst(node.getElements(), null));
         TIdentifier name = node.getName();
         // if (name == null) name = new TIdentifier("$" + cstProduction.alternativeIndex++, cstProduction.getLocation());
         int alternativeIndex = production.alternativeIndex++;
-        CstAlternativeModel model = new CstAlternativeModel(index, production, location, name, alternativeIndex, annotations(node.getAnnotations()));
+        CstAlternativeModel model = new CstAlternativeModel(index, production, location, name, alternativeIndex, annotations(errors, node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }

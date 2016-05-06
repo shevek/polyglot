@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.node.AAstAlternative;
 import org.anarres.polyglot.node.AAstProduction;
 import org.anarres.polyglot.node.TIdentifier;
@@ -27,8 +28,8 @@ import org.anarres.polyglot.output.TemplateProperty;
 public final class AstProductionModel extends AbstractNamedJavaModel implements AstProductionSymbol {
 
     @Nonnull
-    public static AstProductionModel forNode(AAstProduction node) {
-        AstProductionModel model = new AstProductionModel(node.getName(), annotations(node.getAnnotations()));
+    public static AstProductionModel forNode(@Nonnull ErrorHandler errors, @Nonnull AAstProduction node) {
+        AstProductionModel model = new AstProductionModel(node.getName(), annotations(errors, node.getAnnotations()));
         model.setJavadocComment(node.getJavadocComment());
         return model;
     }

@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.analysis.NFABuilderVisitor;
 import org.anarres.polyglot.node.AAnnotation;
 import org.anarres.polyglot.node.PAnnotation;
@@ -58,14 +59,14 @@ public abstract class AbstractNamedModel extends AbstractModel {
     }
 
     @Nonnull
-    protected static Multimap<String, ? extends AnnotationModel> annotations(@CheckForNull Iterable<? extends PAnnotation> nodes) {
+    protected static Multimap<String, ? extends AnnotationModel> annotations(@Nonnull ErrorHandler errors, @CheckForNull Iterable<? extends PAnnotation> nodes) {
         if (nodes == null)
             return ImmutableMultimap.of();
         Multimap<String, AnnotationModel> out = HashMultimap.create();
         for (PAnnotation node : nodes) {
             AAnnotation a = (AAnnotation) node;
             TString value = a.getValue();
-            AnnotationModel m = new AnnotationModel(a.getName(), value == null ? null : NFABuilderVisitor.parse(value));
+            AnnotationModel m = new AnnotationModel(a.getName(), value == null ? null : NFABuilderVisitor.parse(errors, value));
             // LOG.info("Annotation: " + m);
             out.put(m.getName(), m);
         }

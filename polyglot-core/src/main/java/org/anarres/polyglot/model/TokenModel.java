@@ -6,6 +6,8 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,17 +15,16 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.analysis.MatcherParserVisitor;
-import org.anarres.polyglot.analysis.NFABuilderVisitor;
 import org.anarres.polyglot.dfa.NFA;
 import org.anarres.polyglot.lr.Indexed;
-import org.anarres.polyglot.node.AAnnotation;
-import org.anarres.polyglot.node.ACharMatcher;
-import org.anarres.polyglot.node.AStringMatcher;
+import org.anarres.polyglot.node.ALiteralMatcher;
 import org.anarres.polyglot.node.AToken;
 import org.anarres.polyglot.node.ATokenState;
-import org.anarres.polyglot.node.PAnnotation;
 import org.anarres.polyglot.node.PMatcher;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TJavadocComment;
@@ -60,7 +61,7 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
         public static final int INDEX = 0;
 
         public EOF() {
-            super(INDEX, new TIdentifier("<eof>"), new AStringMatcher(), Collections.<AAnnotation>emptyList());
+            super(INDEX, new TIdentifier("<eof>"), new ALiteralMatcher(), null, ImmutableMultimap.<String, AnnotationModel>of());
             setJavadocComment(new TJavadocComment("/** A magic end-of-input token returned from the Lexer. */"));
         }
 
@@ -95,7 +96,7 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
         public static final Invalid INSTANCE = new Invalid();
 
         public Invalid() {
-            super(Integer.MAX_VALUE, new TIdentifier("<invalid>"), new AStringMatcher(), Collections.<AAnnotation>emptyList());
+            super(Integer.MAX_VALUE, new TIdentifier("<invalid>"), new ALiteralMatcher(), null, ImmutableMultimap.<String, AnnotationModel>of());
             setJavadocComment(new TJavadocComment("/** A magic 'invalid' token returned from the Lexer. */"));
         }
 
@@ -115,6 +116,33 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
         }
     }
 
+    @CheckForNull
+    private static String toText(@Nonnull ErrorHandler errors, @Nonnull PMatcher matcher, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
+        if (matcher instanceof ALiteralMatcher) {
+            // :-(
+            ALiteralMatcher literalMatcher = (ALiteralMatcher) matcher;
+            // A special case in our code, e.g. EOF, etc.
+            if (literalMatcher.getLiteral() == null)
+                return null;
+            MatcherParserVisitor parser = new MatcherParserVisitor(errors);
+            literalMatcher.getLiteral().apply(parser);
+            return parser.getString(literalMatcher.getLiteral());
+        }
+        for (AnnotationModel annotation : annotations.get(AnnotationName.Text.name())) {
+            String value = annotation.getValue();
+            if (value != null)
+                return value;
+        }
+        return null;
+    }
+
+    @Nonnull
+    public static TokenModel forNode(@Nonnull ErrorHandler errors, @Nonnegative int index, @Nonnull AToken node) {
+        Multimap<String, ? extends AnnotationModel> annotations = annotations(errors, node.getAnnotations());
+        String text = toText(errors, node.getMatcher(), annotations);
+        return new TokenModel(index, node.getName(), node.getMatcher(), text, annotations);
+    }
+
     private final int index;
     // If empty, then NORMAL only.
     private final PMatcher matcher;
@@ -124,14 +152,16 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
     public NFA nfa;
     // Cached
     private final String javaTypeName;
+    private final String text;
 
-    public TokenModel(int index, @Nonnull TIdentifier name, @Nonnull PMatcher matcher, @Nonnull Iterable<? extends PAnnotation> annotations) {
-        super(name, annotations(annotations));
+    public TokenModel(int index, @Nonnull TIdentifier name, @Nonnull PMatcher matcher, @CheckForNull String text, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
+        super(name, annotations);
         this.index = index;
         this.matcher = matcher;
         this.transformPrototype = new CstTransformPrototypeModel(name, Specifier.TOKEN, name, UnaryOperator.NONE);
         this.transformPrototype.symbol = this;
         this.javaTypeName = "T" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, getName());
+        this.text = text;
     }
 
     @Override
@@ -172,28 +202,15 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
         // * Never generate an alternate unless required.
         // Both of these properties are embedded in the CST grammar itself.
         // LOG.info("Matcher in " + this + " is " + matcher + " of " + matcher.getClass());
-        return matcher instanceof AStringMatcher || matcher instanceof ACharMatcher || hasAnnotation(AnnotationName.Text);
+        // return matcher instanceof ALiteralMatcher || hasAnnotation(AnnotationName.Text);
+        return (text != null);
     }
 
     @Nonnull
     public String getText() {
-        if (matcher instanceof AStringMatcher) {
-            AStringMatcher matcher = (AStringMatcher) this.matcher;
-            return NFABuilderVisitor.parse(matcher.getString());
-        }
-        if (matcher instanceof ACharMatcher) {
-            // :-(
-            ACharMatcher matcher = (ACharMatcher) this.matcher;
-            MatcherParserVisitor parser = new MatcherParserVisitor();
-            matcher.getChar().apply(parser);
-            return Character.toString((Character) parser.getOut(matcher.getChar()));
-        }
-        for (AnnotationModel annotation : getAnnotations(AnnotationName.Text)) {
-            String value = annotation.getValue();
-            if (value != null)
-                return value;
-        }
-        throw new IllegalStateException("Not a known fixed token type (or @Text used without value): " + matcher.getClass());
+        if (text == null)
+            throw new IllegalStateException("Not a known fixed token type (or @Text used without value): " + matcher.getClass());
+        return text;
     }
 
     @Nonnull
