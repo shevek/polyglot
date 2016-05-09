@@ -37,8 +37,10 @@ public class CharSet implements HelperModel.Value {
     }
 
     public CharSet(@Nonnull String s) {
-        for (int i = 0; i < s.length(); i++)
-            add(new CharInterval(s.charAt(i)));
+        for (int i = 0; i < s.length(); i++) {
+            CharInterval interval = new CharInterval(s.charAt(i));
+            union_add(this, interval);
+        }
     }
 
     @Nonnull
@@ -63,28 +65,32 @@ public class CharSet implements HelperModel.Value {
         intervals.add(interval);
     }
 
+    private static void union_add(@Nonnull CharSet result, @Nonnull CharInterval interval) {
+        for (;;) {
+            CharInterval overlap = CharInterval.findFirstOverlappingInterval(
+                    result.getIntervals(),
+                    // Extend the search by one in each direction so we find a contiguous range.
+                    Chars.checkedCast(Math.max(0, interval.getStart() - 1)),
+                    Chars.checkedCast(Math.min(0xffff, interval.getEnd() + 1))
+            );
+            if (overlap == null)
+                break;
+            result.remove(overlap);
+            interval = new CharInterval(
+                    Chars.checkedCast(Math.min(interval.getStart(), overlap.getStart())),
+                    Chars.checkedCast(Math.max(interval.getEnd(), overlap.getEnd()))
+            );
+        }
+
+        result.add(interval);
+    }
+
     @Nonnull
     public CharSet union(@Nonnull CharSet chars) {
         CharSet result = new CharSet(this);
 
         for (CharInterval interval : chars.intervals) {
-            for (;;) {
-                CharInterval overlap = CharInterval.findFirstOverlappingInterval(
-                        result.getIntervals(),
-                        // Extend the search by one in each direction so we find a contiguous range.
-                        Chars.checkedCast(Math.max(0, interval.getStart() - 1)),
-                        Chars.checkedCast(Math.min(0xffff, interval.getEnd() + 1))
-                );
-                if (overlap == null)
-                    break;
-                result.remove(overlap);
-                interval = new CharInterval(
-                        Chars.checkedCast(Math.min(interval.getStart(), overlap.getStart())),
-                        Chars.checkedCast(Math.max(interval.getEnd(), overlap.getEnd()))
-                );
-            }
-
-            result.add(interval);
+            union_add(result, interval);
         }
 
         return result;

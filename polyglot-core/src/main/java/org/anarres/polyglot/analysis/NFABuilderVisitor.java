@@ -78,6 +78,7 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
             return new CharSet((Character) o);
         if (o instanceof String) {
             String s = (String) o;
+            // This failure is optional; CharSet can be constructed from a String.
             if (s.length() > 1)
                 errors.addError(location, "Expected character or charset, not string of length " + s.length() + " in " + description + ": " + s);
             return new CharSet(s.charAt(0));
