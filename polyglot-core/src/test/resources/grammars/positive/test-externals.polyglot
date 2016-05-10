@@ -69,4 +69,6 @@ Abstract Syntax Tree
 		/** An integer constant expression. */
 		{constant} integer_constant [value]:j_int [description]:j_string ;
 
+	array =
+		j_string* ;
 

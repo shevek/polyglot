@@ -39,7 +39,11 @@ public class ${alternative.javaTypeName}
 
 #foreach ($external in $alternative.externals)
     /** External ${external.name}. */
+#if ($external.list)
+    private List<${external.javaTypeName}> _${external.javaFieldName}_;
+#else##if external.list
     private ${external.javaTypeName} _${external.javaFieldName}_;
+#end##if external.list
 #end##foreach alternative.externals
 
     /**
@@ -87,7 +91,7 @@ public class ${alternative.javaTypeName}
 #foreach ($external in $alternative.externals)
         #if($external.nullable)@CheckForNull#{else}@Nonnull#{end}##
 #if ($external.list)
-        Iterable<? extends ${external.javaTypeName}> _${external.javaFieldName}_#if($velocityHasNext),#end
+        List<${external.javaTypeName}> _${external.javaFieldName}_#if($velocityHasNext),#end
 
 #else##if external.list
         ${external.javaTypeName} _${external.javaFieldName}_#if($velocityHasNext),#end
@@ -187,17 +191,17 @@ public class ${alternative.javaTypeName}
     @Nonnull
 #end
 #annotate($external)
-    public ${external.javaTypeName} get${external.javaMethodName}() {
+    public #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} get${external.javaMethodName}() {
         return this._${external.javaFieldName}_;
     }
 
     $!external.javadocComment
-    public void set${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} ${external.javaTypeName} value) {
+    public void set${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} value) {
         this._${external.javaFieldName}_ = value;
     }
 
     @Nonnull
-    public ${alternative.javaTypeName} with${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} ${external.javaTypeName} value) {
+    public ${alternative.javaTypeName} with${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} value) {
         set${external.javaMethodName}(value);
         return this;
     }
