@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.analysis.DepthFirstAdapter;
 import org.anarres.polyglot.model.AbstractElementModel;
 import org.anarres.polyglot.model.AbstractModel;
@@ -51,9 +52,11 @@ import org.anarres.polyglot.node.PMatcher;
  */
 public class HtmlHelper {
 
+    private final ErrorHandler errors;
     private final GrammarModel grammar;
 
-    public HtmlHelper(OutputData data) {
+    public HtmlHelper(ErrorHandler errors, OutputData data) {
+        this.errors = errors;
         this.grammar = data.getGrammar();
         buildUsage();
     }

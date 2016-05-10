@@ -9,10 +9,9 @@ import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.Option;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.PolyglotExecutor;
 import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.model.AstAlternativeModel;
@@ -32,12 +31,13 @@ public class JavaOutputWriter extends AbstractOutputWriter {
     private static final Logger LOG = LoggerFactory.getLogger(JavaOutputWriter.class);
     private final JavaHelper helper;
 
-    public JavaOutputWriter(@Nonnull File destinationDir,
-            @Nonnull Set<? extends Option> options,
+    public JavaOutputWriter(
+            @Nonnull ErrorHandler errors,
+            @Nonnull File destinationDir,
             @Nonnull Map<? extends String, ? extends File> templates,
             @Nonnull OutputData data) {
-        super(OutputLanguage.java, destinationDir, options, templates, data);
-        this.helper = new JavaHelper(options, data.getGrammar(), data.getAutomaton());
+        super(errors, OutputLanguage.java, destinationDir, templates, data);
+        this.helper = new JavaHelper(data.getOptions(), data.getGrammar(), data.getAutomaton());
     }
 
     @Override

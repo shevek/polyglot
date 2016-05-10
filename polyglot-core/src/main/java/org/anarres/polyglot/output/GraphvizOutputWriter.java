@@ -11,13 +11,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
 import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizUtils;
 import org.anarres.graphviz.builder.GraphVizable;
-import org.anarres.polyglot.Option;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.PolyglotExecutor;
 
 /**
@@ -26,8 +25,8 @@ import org.anarres.polyglot.PolyglotExecutor;
  */
 public class GraphvizOutputWriter extends AbstractOutputWriter {
 
-    public GraphvizOutputWriter(File destinationDir, Set<? extends Option> options, Map<? extends String, ? extends File> templates, OutputData data) {
-        super(OutputLanguage.graphviz, destinationDir, options, templates, data);
+    public GraphvizOutputWriter(ErrorHandler errors, File destinationDir, Map<? extends String, ? extends File> templates, OutputData data) {
+        super(errors, OutputLanguage.graphviz, destinationDir, templates, data);
     }
 
     private void write(@Nonnull File file, @Nonnull GraphVizable object) throws IOException {

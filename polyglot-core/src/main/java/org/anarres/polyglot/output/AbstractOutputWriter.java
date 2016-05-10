@@ -19,13 +19,12 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import org.anarres.polyglot.Option;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.PolyglotEngine;
 import org.anarres.polyglot.PolyglotExecutor;
 import org.anarres.polyglot.lr.LRAutomaton;
@@ -35,7 +34,6 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.app.event.implement.ReportInvalidReferences;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.log.LogChute;
-import org.apache.velocity.runtime.log.SystemLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.tools.generic.EscapeTool;
 import org.slf4j.Logger;
@@ -49,24 +47,29 @@ public abstract class AbstractOutputWriter implements OutputWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOutputWriter.class);
     private final OutputLanguage language;
+    private final ErrorHandler errors;
     private final File destinationDir;
-    private final Set<? extends Option> options;
     private final Map<? extends String, ? extends File> templates;
     private final OutputData data;
     private final LogChute logChute = new Slf4jLogChute();
     private final EscapeTool escapeTool = new EscapeTool();
 
     public AbstractOutputWriter(
+            @Nonnull ErrorHandler errors,
             @Nonnull OutputLanguage language,
             @Nonnull File destinationDir,
-            @Nonnull Set<? extends Option> options,
             @Nonnull Map<? extends String, ? extends File> templates,
             @Nonnull OutputData data) {
+        this.errors = errors;
         this.language = language;
         this.destinationDir = destinationDir;
-        this.options = options;
         this.templates = templates;
         this.data = data;
+    }
+
+    @Nonnull
+    public ErrorHandler getErrors() {
+        return errors;
     }
 
     @Nonnull
@@ -120,7 +123,6 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     public static class Loader extends ClasspathResourceLoader {
 
         // private static final Loader INSTANCE = new Loader();
-
         @Override
         public InputStream getResourceStream(String name) throws ResourceNotFoundException {
             // LOG.info("Loading " + name);

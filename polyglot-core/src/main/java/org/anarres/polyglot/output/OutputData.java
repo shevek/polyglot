@@ -5,8 +5,10 @@
  */
 package org.anarres.polyglot.output;
 
+import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.Option;
 import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.model.GrammarModel;
 
@@ -20,12 +22,14 @@ public class OutputData {
     private final GrammarModel grammar;
     private final LRAutomaton automaton;
     private final Tables tables;
+    private final Set<? extends Option> options;
 
-    public OutputData(@Nonnull String name, @Nonnull GrammarModel grammar, @CheckForNull LRAutomaton automaton, @Nonnull Tables tables) {
+    public OutputData(@Nonnull String name, @Nonnull GrammarModel grammar, @CheckForNull LRAutomaton automaton, @Nonnull Tables tables, @Nonnull Set<? extends Option> options) {
         this.name = name;
         this.grammar = grammar;
         this.automaton = automaton;
         this.tables = tables;
+        this.options = options;
     }
 
     @Nonnull
@@ -46,6 +50,11 @@ public class OutputData {
     @Nonnull
     public Tables getTables() {
         return tables;
+    }
+
+    @Nonnull
+    public Set<? extends Option> getOptions() {
+        return options;
     }
 
 }

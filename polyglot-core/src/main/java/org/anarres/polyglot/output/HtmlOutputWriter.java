@@ -10,10 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.Option;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.PolyglotExecutor;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstProductionModel;
@@ -32,9 +31,9 @@ public class HtmlOutputWriter extends AbstractOutputWriter {
 
     private final HtmlHelper helper;
 
-    public HtmlOutputWriter(File destinationDir, Set<? extends Option> options, Map<? extends String, ? extends File> templates, OutputData data) {
-        super(OutputLanguage.html, destinationDir, options, templates, data);
-        this.helper = new HtmlHelper(data);
+    public HtmlOutputWriter(ErrorHandler errors, File destinationDir, Map<? extends String, ? extends File> templates, OutputData data) {
+        super(errors, OutputLanguage.html, destinationDir, templates, data);
+        this.helper = new HtmlHelper(errors, data);
     }
 
     @Override

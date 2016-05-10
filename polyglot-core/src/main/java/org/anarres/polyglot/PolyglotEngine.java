@@ -497,12 +497,12 @@ public class PolyglotEngine {
             Predicate<? super OutputLanguage> languages) throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
         LOG.info("{}: Writing output.", getName());
-        OutputData data = new OutputData(getName(), grammar, automaton, tables);
+        OutputData data = new OutputData(getName(), grammar, automaton, tables, options);
         try {
             for (Map.Entry<OutputLanguage, File> e : outputDirs.entrySet()) {
                 if (languages.apply(e.getKey())) {
                     LOG.info("{}: Writing output language {}", getName(), e.getKey());
-                    OutputWriter writer = e.getKey().newOutputWriter(e.getValue(), options, templates.row(e.getKey()), data);
+                    OutputWriter writer = e.getKey().newOutputWriter(errors, e.getValue(), templates.row(e.getKey()), data);
                     writer.run(executor);
                 }
             }
