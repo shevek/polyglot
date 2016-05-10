@@ -34,7 +34,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
         if (file.getName().equals("php4.sablecc"))
             engine.setOption(Option.ALLOWMASKEDTOKENS, true);
         if (!engine.run())
-            fail("Polyglot failed:\n" + engine.getErrors().toString(engine.getInput()));
+            fail("Polyglot failed on " + file + ":\n" + engine.getErrors().toString(engine.getInput()));
     }
 
     @Test
