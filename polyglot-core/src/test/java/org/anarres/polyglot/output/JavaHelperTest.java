@@ -54,5 +54,6 @@ public class JavaHelperTest {
         testLexFormat("${el}", 1);
         testLexFormat("${el}foo${el}bar$$${el}$$$$", 6);
         testLexFormat("foo bar baz $$ qux", 1);
+        testLexFormat("%{el} ${el} $<%<$>%> baz $$ qux", 9);
     }
 }

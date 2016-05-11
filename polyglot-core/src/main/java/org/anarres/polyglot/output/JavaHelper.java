@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.CheckForNull;
+import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
@@ -25,7 +26,6 @@ import org.anarres.polyglot.model.AstModel;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
-import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  *
@@ -247,7 +247,8 @@ public class JavaHelper {
 
     private static enum State {
 
-        CONST, DOLLAR, VAR;
+        CONST, @Deprecated
+        DOLLAR, PERCENT, VAR;
     }
 
     public static class FormatToken {
@@ -267,6 +268,15 @@ public class JavaHelper {
             return ESCAPER.escape(String.valueOf(value));
         }
 
+        public boolean isIndent() {
+            return value instanceof Integer;
+        }
+
+        @CheckForSigned
+        public int getIndent() {
+            return ((Integer) value).intValue();
+        }
+
         public boolean isElement() {
             return value instanceof AstElementModel;
         }
@@ -280,6 +290,8 @@ public class JavaHelper {
         public String toString() {
             if (isText())
                 return "string:\"" + ESCAPER.escape(String.valueOf(value)) + "\"";
+            if (isIndent())
+                return "indent:" + value;
             return "element:" + value;
         }
     }
@@ -318,12 +330,24 @@ public class JavaHelper {
                             continue CHAR;
                     }
                     break;
+                case '%':
+                    switch (state) {
+                        case CONST:
+                            state = State.PERCENT;
+                            continue CHAR;
+                        case PERCENT:
+                            state = State.CONST;
+                            buf.append(c);
+                            continue CHAR;
+                    }
+                    break;
                 case '{':
                     switch (state) {
                         case CONST:
                             buf.append(c);
                             continue CHAR;
                         case DOLLAR:
+                        case PERCENT:
                             if (buf.length() > 0) {
                                 out.add(new FormatToken(buf.toString()));
                                 buf.setLength(0);
@@ -344,6 +368,23 @@ public class JavaHelper {
                             continue CHAR;
                     }
                     break;
+                case '<':
+                case '>':
+                    switch (state) {
+                        case CONST:
+                            buf.append(c);
+                            continue CHAR;
+                        case DOLLAR:
+                        case PERCENT:
+                            if (buf.length() > 0) {
+                                out.add(new FormatToken(buf.toString()));
+                                buf.setLength(0);
+                            }
+                            out.add(new FormatToken(c == '<' ? -1 : +1));
+                            state = State.CONST;
+                            continue CHAR;
+                    }
+                    break;
                 default:
                     switch (state) {
                         case CONST:
@@ -351,6 +392,7 @@ public class JavaHelper {
                             buf.append(c);
                             continue CHAR;
                     }
+                    break;
             }
             throw new IllegalStateException("Unexpected character '" + Character.toString(c) + "' in state " + state);
         }
