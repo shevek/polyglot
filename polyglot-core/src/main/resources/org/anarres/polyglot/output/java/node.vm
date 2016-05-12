@@ -7,7 +7,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /** The superclass of all {@link Token}, production and alternative types. */
-public abstract class Node implements Switchable, Visitable, Cloneable {
+public abstract class Node implements INode, Cloneable {
 
 #if ($helper.isOption("CG_PARENT"))
     private Node parent;
