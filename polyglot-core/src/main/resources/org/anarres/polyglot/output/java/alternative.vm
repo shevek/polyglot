@@ -179,6 +179,12 @@ public class ${alternative.javaTypeName}
         this._${element.javaFieldName}_ = node;
     }
 #end##if element.list
+
+    @Nonnull
+    public ${alternative.javaTypeName} with${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} #if($element.list)Iterable<? extends ${element.javaTypeName}>#{else}${element.javaTypeName}#{end} value) {
+        set${element.javaMethodName}(value);
+        return this;
+    }
 #end##foreach alternative.elements
 
     // Externals
