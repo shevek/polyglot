@@ -198,7 +198,7 @@ public class JavaHelper {
      * @return The escaped value of the unique annotation on the given model with the given name.
      */
     @Nonnull
-    public String getAnnotationEscaped(@Nonnull AstModel model, @Nonnull String name) {
+    public String getAnnotationJavaText(@Nonnull AstModel model, @Nonnull String name) {
         return escape(getAnnotation(model, name));
     }
 
@@ -289,10 +289,10 @@ public class JavaHelper {
         @Override
         public String toString() {
             if (isText())
-                return "string:\"" + ESCAPER.escape(String.valueOf(value)) + "\"";
+                return "string:\"" + getJavaText() + "\"";
             if (isIndent())
-                return "indent:" + value;
-            return "element:" + value;
+                return "indent:" + getIndent();
+            return "element:" + getElement();
         }
     }
 
@@ -318,81 +318,49 @@ public class JavaHelper {
         CHAR:
         for (int i = 0; i < format.length(); i++) {
             char c = format.charAt(i);
-            switch (c) {
-                case '$':
-                    switch (state) {
-                        case CONST:
-                            state = State.DOLLAR;
-                            continue CHAR;
-                        case DOLLAR:
-                            state = State.CONST;
-                            buf.append(c);
-                            continue CHAR;
-                    }
-                    break;
-                case '%':
-                    switch (state) {
-                        case CONST:
+            switch (state) {
+                case CONST:
+                    switch (c) {
+                        case '%':
                             state = State.PERCENT;
                             continue CHAR;
-                        case PERCENT:
-                            state = State.CONST;
+                        default:
                             buf.append(c);
                             continue CHAR;
                     }
-                    break;
-                case '{':
-                    switch (state) {
-                        case CONST:
-                            buf.append(c);
-                            continue CHAR;
-                        case DOLLAR:
-                        case PERCENT:
-                            if (buf.length() > 0) {
-                                out.add(new FormatToken(buf.toString()));
-                                buf.setLength(0);
-                            }
+                case PERCENT:
+                    if (c == '%') {
+                        buf.append('%');
+                        state = State.CONST;
+                        continue CHAR;
+                    }
+                    if (buf.length() > 0) {
+                        out.add(new FormatToken(buf.toString()));
+                        buf.setLength(0);
+                    }
+                    switch (c) {
+                        case '{':
                             state = State.VAR;
                             continue CHAR;
-                    }
-                    break;
-                case '}':
-                    switch (state) {
-                        case CONST:
-                            buf.append(c);
+                        case '>':
+                        case '<':
+                            out.add(new FormatToken(c == '<' ? -1 : +1));
+                            state = State.CONST;
                             continue CHAR;
-                        case VAR:
+                        default:
+                            break;
+                    }
+                case VAR:
+                    switch (c) {
+                        case '}':
                             out.add(new FormatToken(lexGetElement(model, buf)));
                             buf.setLength(0);
                             state = State.CONST;
                             continue CHAR;
-                    }
-                    break;
-                case '<':
-                case '>':
-                    switch (state) {
-                        case CONST:
-                            buf.append(c);
-                            continue CHAR;
-                        case DOLLAR:
-                        case PERCENT:
-                            if (buf.length() > 0) {
-                                out.add(new FormatToken(buf.toString()));
-                                buf.setLength(0);
-                            }
-                            out.add(new FormatToken(c == '<' ? -1 : +1));
-                            state = State.CONST;
-                            continue CHAR;
-                    }
-                    break;
-                default:
-                    switch (state) {
-                        case CONST:
-                        case VAR:
+                        default:
                             buf.append(c);
                             continue CHAR;
                     }
-                    break;
             }
             throw new IllegalStateException("Unexpected character '" + Character.toString(c) + "' in state " + state);
         }

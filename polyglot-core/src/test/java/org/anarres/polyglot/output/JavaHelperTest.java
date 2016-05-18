@@ -50,10 +50,11 @@ public class JavaHelperTest {
     @Test
     public void testLexFormat() {
         testLexFormat("", 0);
-        testLexFormat("$$", 1);
-        testLexFormat("${el}", 1);
-        testLexFormat("${el}foo${el}bar$$${el}$$$$", 6);
-        testLexFormat("foo bar baz $$ qux", 1);
-        testLexFormat("%{el} ${el} $<%<$>%> baz $$ qux", 9);
+        testLexFormat("%%", 1);
+        testLexFormat("%{el}", 1);
+        testLexFormat("%{el}foo%{el}bar%%%{el}%%%%", 6);
+        testLexFormat("foo bar baz %% qux", 1);
+        testLexFormat("%{el} %{el} %<%<%>%> baz %% qux", 9);
+        testLexFormat("ELSE%{el}\n", 3);
     }
 }
