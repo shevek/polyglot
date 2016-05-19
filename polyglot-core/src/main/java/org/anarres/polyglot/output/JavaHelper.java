@@ -296,83 +296,110 @@ public class JavaHelper {
         }
     }
 
-    @Nonnull
-    private AstElementModel lexGetElement(@Nonnull AstAlternativeModel model, @Nonnull CharSequence name) {
-        for (AstElementModel element : model.getElements()) {
-            if (element.getName().contentEquals(name))
-                return element;
-        }
-        for (AstElementModel element : model.getExternals()) {
-            if (element.getName().contentEquals(name))
-                return element;
-        }
-        throw new IllegalArgumentException("No such element '" + name + "' in AST alternative '" + model.getName() + "'.");
-    }
+    public static abstract class FormatLexer {
 
-    @Nonnull
-    public List<FormatToken> lexFormat(@Nonnull AstAlternativeModel model, @Nonnull String format) {
-        List<FormatToken> out = new ArrayList<>();
-        StringBuilder buf = new StringBuilder();
-        State state = State.CONST;
+        @Nonnull
+        protected abstract AstElementModel getElement(@Nonnull CharSequence name);
 
-        CHAR:
-        for (int i = 0; i < format.length(); i++) {
-            char c = format.charAt(i);
+        @Nonnull
+        public List<FormatToken> lex(@Nonnull String format) {
+            List<FormatToken> out = new ArrayList<>();
+            StringBuilder buf = new StringBuilder();
+            State state = State.CONST;
+
+            CHAR:
+            for (int i = 0; i < format.length(); i++) {
+                char c = format.charAt(i);
+                switch (state) {
+                    case CONST:
+                        switch (c) {
+                            case '%':
+                                state = State.PERCENT;
+                                continue CHAR;
+                            default:
+                                buf.append(c);
+                                continue CHAR;
+                        }
+                    case PERCENT:
+                        if (c == '%') {
+                            buf.append('%');
+                            state = State.CONST;
+                            continue CHAR;
+                        }
+                        if (buf.length() > 0) {
+                            out.add(new FormatToken(buf.toString()));
+                            buf.setLength(0);
+                        }
+                        switch (c) {
+                            case '{':
+                                state = State.VAR;
+                                continue CHAR;
+                            case '>':
+                            case '<':
+                                out.add(new FormatToken(c == '<' ? -1 : +1));
+                                state = State.CONST;
+                                continue CHAR;
+                        }
+                        break;
+                    case VAR:
+                        switch (c) {
+                            case '}':
+                                out.add(new FormatToken(getElement(buf)));
+                                buf.setLength(0);
+                                state = State.CONST;
+                                continue CHAR;
+                            default:
+                                buf.append(c);
+                                continue CHAR;
+                        }
+                }
+                throw new IllegalStateException("Unexpected character '" + Character.toString(c) + "' in state " + state);
+            }
+
             switch (state) {
                 case CONST:
-                    switch (c) {
-                        case '%':
-                            state = State.PERCENT;
-                            continue CHAR;
-                        default:
-                            buf.append(c);
-                            continue CHAR;
-                    }
-                case PERCENT:
-                    if (c == '%') {
-                        buf.append('%');
-                        state = State.CONST;
-                        continue CHAR;
-                    }
-                    if (buf.length() > 0) {
+                    if (buf.length() > 0)
                         out.add(new FormatToken(buf.toString()));
-                        buf.setLength(0);
-                    }
-                    switch (c) {
-                        case '{':
-                            state = State.VAR;
-                            continue CHAR;
-                        case '>':
-                        case '<':
-                            out.add(new FormatToken(c == '<' ? -1 : +1));
-                            state = State.CONST;
-                            continue CHAR;
-                        default:
-                            break;
-                    }
-                case VAR:
-                    switch (c) {
-                        case '}':
-                            out.add(new FormatToken(lexGetElement(model, buf)));
-                            buf.setLength(0);
-                            state = State.CONST;
-                            continue CHAR;
-                        default:
-                            buf.append(c);
-                            continue CHAR;
-                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unterminated format code at end of '" + format + "'.");
             }
-            throw new IllegalStateException("Unexpected character '" + Character.toString(c) + "' in state " + state);
+            return out;
         }
-
-        switch (state) {
-            case CONST:
-                if (buf.length() > 0)
-                    out.add(new FormatToken(buf.toString()));
-                break;
-            default:
-                throw new IllegalStateException("Unterminated variable at end of '" + format + "'.");
-        }
-        return out;
     }
+
+    @Nonnull
+    public List<FormatToken> lexFormat(@Nonnull final AstAlternativeModel model, @Nonnull String format) {
+        FormatLexer lexer = new FormatLexer() {
+            @Override
+            protected AstElementModel getElement(CharSequence name) {
+                for (AstElementModel element : model.getElements()) {
+                    if (element.getName().contentEquals(name))
+                        return element;
+                }
+                for (AstElementModel element : model.getExternals()) {
+                    if (element.getName().contentEquals(name))
+                        return element;
+                }
+                throw new IllegalArgumentException("No such element '" + name + "' in AST alternative '" + model.getName() + "'.");
+            }
+        };
+        return lexer.lex(format);
+    }
+
+    @Nonnull
+    public List<FormatToken> lexFormat(@Nonnull final AstElementModel model, @Nonnull String format) {
+        FormatLexer lexer = new FormatLexer() {
+            @Override
+            protected AstElementModel getElement(CharSequence name) {
+                if ("self".contentEquals(name))
+                    return model;
+                if (model.getName().contentEquals(name))
+                    return model;
+                throw new IllegalArgumentException("Cannot refer to element element '" + name + "' from format string on element '" + model.getName() + "'.");
+            }
+        };
+        return lexer.lex(format);
+    }
+
 }
