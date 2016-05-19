@@ -394,6 +394,8 @@ public class JavaHelper {
             protected AstElementModel getElement(CharSequence name) {
                 if ("self".contentEquals(name))
                     return model;
+                if ("this".contentEquals(name))
+                    return model;
                 if (model.getName().contentEquals(name))
                     return model;
                 throw new IllegalArgumentException("Cannot refer to element element '" + name + "' from format string on element '" + model.getName() + "'.");
