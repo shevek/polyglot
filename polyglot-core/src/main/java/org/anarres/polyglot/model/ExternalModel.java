@@ -47,6 +47,11 @@ public class ExternalModel extends AbstractNamedJavaModel implements AstProducti
         return getJavaTypeName().toLowerCase().equals(getJavaTypeName());
     }
 
+    @TemplateProperty("alternative.vm")
+    public boolean isPrimitiveBoolean() {
+        return "boolean".equals(getJavaTypeName());
+    }
+
     @Override
     public String getJavaTypeName() {
         return javaTypeName;

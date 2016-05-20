@@ -73,10 +73,10 @@ public class ${alternative.javaTypeName}
     /**
      * Constructs a new ${alternative.javaTypeName} and sets all elements and externals.
 #foreach ($element in $alternative.elements)
-     * @param _${element.javaFieldName}_ See {@link #get${element.javaMethodName}()}.
+     * @param _${element.javaFieldName}_ See {@link ${esc.h}get${element.javaMethodName}()}.
 #end
 #foreach ($external in $alternative.externals)
-     * @param _${external.javaFieldName}_ See {@link #get${external.javaMethodName}()}.
+     * @param _${external.javaFieldName}_ See {@link ${esc.h}#if($external.symbol.primitiveBoolean)is#{else}get#{end}${external.javaMethodName}()}.
 #end
      */
     public ${alternative.javaTypeName}(
@@ -197,7 +197,7 @@ public class ${alternative.javaTypeName}
     @Nonnull
 #end
 #annotate($external)
-    public #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} get${external.javaMethodName}() {
+    public #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} #if($external.symbol.primitiveBoolean)is#{else}get#{end}${external.javaMethodName}() {
         return this._${external.javaFieldName}_;
     }
 
@@ -291,7 +291,7 @@ public class ${alternative.javaTypeName}
 #end##foreach alternative.elements
         );
 #foreach ($external in $alternative.externals)
-        out.set${external.javaMethodName}(get${external.javaMethodName}());
+        out.set${external.javaMethodName}(#if($external.symbol.primitiveBoolean)is#{else}get#{end}${external.javaMethodName}());
 #end##foreach alternative.externals
         listener.fireNodeCloned(this, out);
         return out;

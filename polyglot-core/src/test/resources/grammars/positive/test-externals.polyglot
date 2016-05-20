@@ -48,9 +48,10 @@ Productions
 			{ -> New expression.constant(integer_constant) } ;
 
 Externals
-	j_int    = 'int' ;
-	j_string = 'String' ;
-	j_map    = 'java.util.Map<String, Object>' ;
+	j_boolean = 'boolean' ;
+	j_int     = 'int' ;
+	j_string  = 'String' ;
+	j_map     = 'java.util.Map<String, Object>' ;
 
 Abstract Syntax Tree
 
@@ -70,5 +71,6 @@ Abstract Syntax Tree
 		{constant} integer_constant [value]:j_int [description]:j_string ;
 
 	array =
+		j_boolean
 		j_string* ;
 
