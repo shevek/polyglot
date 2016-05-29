@@ -36,6 +36,15 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
     public O visit${alternative.javaMethodName}(${alternative.javaTypeName} node, I input) throws X {
         in${alternative.javaMethodName}(node, input);
 
+#if (!$alternative.externals.empty)
+        // Externals are emitted in order of definition
+        inExternals(node, input, $alternative.externals.size());
+#foreach ($external in $alternative.externals)
+        visitExternal${alternative.javaMethodName}${external.javaMethodName}(node, input, node.get${external.javaMethodName}());
+#end##foreach alternative.externals
+        outExternals(node, input, $alternative.externals.size());
+#end
+
 #foreach ($element in $alternative.elements)
 #if ($element.list)
         {
@@ -47,15 +56,6 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
         applyTo(node.get${element.javaMethodName}(), input);
 #end##list
 #end##foreach element
-
-#if (!$alternative.externals.empty)
-        // Externals are emitted in order of definition, but universally after elements.
-        inExternals(node, input, $alternative.externals.size());
-#foreach ($external in $alternative.externals)
-        visitExternal${alternative.javaMethodName}${external.javaMethodName}(node, input, node.get${external.javaMethodName}());
-#end##foreach alternative.externals
-        outExternals(node, input, $alternative.externals.size());
-#end
 
         return out${alternative.javaMethodName}(node, input);
     }
