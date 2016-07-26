@@ -114,8 +114,8 @@ public class GrammarModel implements GraphVizScope {
     }
 
     public boolean addHelper(@Nonnull HelperModel model) {
-        Object prev = helpers.put(model.getName(), model);
-        return prev == null;
+        HelperModel prev = helpers.put(model.getName(), model);
+        return prev == null || prev.hasAnnotation(AnnotationName.Weak);
     }
 
     @Nonnull

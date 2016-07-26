@@ -134,8 +134,10 @@ Productions
 			{ -> New section.helpers([helpers]) };
 
 	helper =
+		javadoc_comment?
+		annotation*
 		identifier tok_eq matcher tok_semi
-			{ -> New helper(identifier, matcher) };
+			{ -> New helper(javadoc_comment, identifier, matcher, [annotation]) };
 
 	states { -> section } =
 		kw_states identifier_list tok_semi
@@ -416,7 +418,9 @@ Abstract Syntax Tree
 		;
 
 	helper =
-		[name]:identifier matcher ;
+		javadoc_comment?
+		[name]:identifier matcher
+		[annotations]:annotation* ;
 
 	token =
 		javadoc_comment?

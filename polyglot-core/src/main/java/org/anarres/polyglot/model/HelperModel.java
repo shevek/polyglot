@@ -5,8 +5,9 @@
  */
 package org.anarres.polyglot.model;
 
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.node.AHelper;
 import org.anarres.polyglot.node.PMatcher;
 import org.anarres.polyglot.node.TIdentifier;
@@ -19,8 +20,10 @@ import org.anarres.polyglot.output.TemplateProperty;
 public class HelperModel extends AbstractNamedModel {
 
     @Nonnull
-    public static HelperModel forNode(@Nonnull AHelper node) {
-        return new HelperModel(node.getName(), node.getMatcher());
+    public static HelperModel forNode(@Nonnull ErrorHandler errors, @Nonnull AHelper node) {
+        HelperModel model = new HelperModel(node.getName(), node.getMatcher(), annotations(errors, node.getAnnotations()));
+        model.setJavadocComment(node.getJavadocComment());
+        return model;
     }
 
     public interface Value {
@@ -31,8 +34,8 @@ public class HelperModel extends AbstractNamedModel {
     // NFA?
     public Value value;   // CharSet or NFA.
 
-    public HelperModel(TIdentifier name, PMatcher matcher) {
-        super(name, ImmutableMultimap.<String, AnnotationModel>of());
+    public HelperModel(TIdentifier name, PMatcher matcher, Multimap<String, ? extends AnnotationModel> annotations) {
+        super(name, annotations);
         this.matcher = matcher;
     }
 
@@ -51,7 +54,11 @@ public class HelperModel extends AbstractNamedModel {
 
     @Override
     public AHelper toNode() {
-        return new AHelper(toNameToken(), matcher.clone());
+        return new AHelper(
+                newJavadocCommentToken(),
+                toNameToken(),
+                matcher.clone(),
+                toAnnotations(getAnnotations()));
     }
 
 }

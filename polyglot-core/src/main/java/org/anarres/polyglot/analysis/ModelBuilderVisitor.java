@@ -100,7 +100,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
 
     @Override
     public void caseAHelper(AHelper node) {
-        HelperModel helper = HelperModel.forNode(node);
+        HelperModel helper = HelperModel.forNode(errors, node);
         if (!grammar.addHelper(helper))
             errors.addError(node.getName(), "Duplicate helper name '" + helper.getName() + "'.");
     }
