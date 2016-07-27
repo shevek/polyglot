@@ -11,6 +11,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.CheckReturnValue;
@@ -252,6 +253,7 @@ public class Inliner {
     @CheckReturnValue
     public boolean substitute(@Nonnull Iterable<? extends CstAlternativeModel> inlineAlternatives) {
         grammar.check();
+        Set<CstProductionModel> cstProductionRoots = new HashSet<>(grammar.getCstProductionRoots());
 
         for (CstAlternativeModel inlineAlternative : inlineAlternatives) {
             CstProductionModel inlineProduction = inlineAlternative.getProduction();
@@ -260,7 +262,7 @@ public class Inliner {
             if (inlineProduction.alternatives.get(inlineAlternative.getName()) != inlineAlternative)
                 continue;
             // Let's not inline this.
-            if (inlineProduction == grammar.cstProductionRoot)
+            if (cstProductionRoots.contains(inlineProduction))
                 continue;
             // If we inline one alternative of a recursive production, we break it
             // when we remove the alternative from the production itself.

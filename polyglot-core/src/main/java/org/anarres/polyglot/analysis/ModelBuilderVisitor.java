@@ -192,8 +192,6 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
     @Override
     public void caseACstProduction(ACstProduction node) {
         cstProduction = CstProductionModel.forNode(errors, grammar.cstProductionIndex++, node);
-        if (grammar.cstProductionRoot == null)
-            grammar.cstProductionRoot = cstProduction;
         if (!grammar.addCstProduction(cstProduction))
             errors.addError(cstProduction.getLocation(), "Duplicate CST production name '" + cstProduction.getName() + "'.");
 
@@ -308,8 +306,6 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
     @Override
     public void caseAAstProduction(AAstProduction node) {
         astProduction = AstProductionModel.forNode(errors, node);
-        if (grammar.astProductionRoot == null)
-            grammar.astProductionRoot = astProduction;
         // LOG.info("AstProductionModel " + astProduction);
         if (!grammar.addAstProduction(astProduction))
             errors.addError(astProduction.getLocation(), "Duplicate AST production name '" + astProduction.getName() + "'");

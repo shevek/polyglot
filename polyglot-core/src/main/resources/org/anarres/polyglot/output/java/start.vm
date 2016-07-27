@@ -7,29 +7,29 @@ import javax.annotation.Nonnull;
 import ${package}.analysis.Visitor;
 
 ## It's not actually an element, it's an AstProductionModel
-#set($element = $grammar.astProductionRoot)
+#set($element = $parserMachine.astProductionRoot)
 /** This class is the root of the parse tree returned from the Parser. */
-public final class Start extends Node {
+public final class ${parserMachine.startClassName} extends Node {
 
     private ${element.javaTypeName} _${element.javaFieldName}_;
     private EOF _eof_;
 
-    public Start(@Nonnull ${element.javaTypeName} _${element.javaFieldName}_, @Nonnull EOF _eof_) {
+    public ${parserMachine.startClassName}(@Nonnull ${element.javaTypeName} _${element.javaFieldName}_, @CheckForNull EOF _eof_) {
         set${element.javaMethodName}(_${element.javaFieldName}_);
         setEOF(_eof_);
     }
 
-    public Start() {
+    public ${parserMachine.startClassName}() {
     }
 
     @Override
-    public Start clone() {
+    public ${parserMachine.startClassName} clone() {
         return clone(CloneListener.NONE);
     }
 
     @Override
-    public Start clone(CloneListener listener) {
-        Start clone = new Start(
+    public ${parserMachine.startClassName} clone(CloneListener listener) {
+        ${parserMachine.startClassName} clone = new ${parserMachine.startClassName}(
             cloneNode(listener, this._${element.javaFieldName}_),
             cloneNode(listener, this._eof_));
 		listener.fireNodeCloned(this, clone);
@@ -38,12 +38,12 @@ public final class Start extends Node {
 
     @Override
     public void apply(Switch s) {
-        s.caseStart(this);
+        s.case${parserMachine.startClassName}(this);
     }
 
     @Override
     public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
-        return v.visitStart(this, input);
+        return v.visit${parserMachine.startClassName}(this, input);
     }
 
     @Nonnull
@@ -68,12 +68,12 @@ public final class Start extends Node {
         this._${element.javaFieldName}_ = node;
     }
 
-    @Nonnull
+    @CheckForNull
     public EOF getEOF() {
         return this._eof_;
     }
 
-    public void setEOF(@Nonnull EOF node) {
+    public void setEOF(@CheckForNull EOF node) {
 #if ($helper.isOption("CG_PARENT"))
         if (this._eof_ != null) {
             this._eof_.parent(null);

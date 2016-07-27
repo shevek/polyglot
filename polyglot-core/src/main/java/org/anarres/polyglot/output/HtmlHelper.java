@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -313,6 +314,7 @@ public class HtmlHelper {
     // Uses of given token in CST.
     private final Multimap<TokenModel, CstProductionModel> tokenCstProductionUsage = HashMultimap.create();
     private final Multimap<TokenModel, CstAlternativeModel> tokenCstAlternativeUsage = HashMultimap.create();
+    private final Set<CstProductionModel> cstRootUsage = new HashSet<>();
     private final Multimap<CstProductionModel, CstAlternativeModel> cstCstUsage = HashMultimap.create();
     // Construction of given AST in CST.
     private final Multimap<AstProductionModel, CstProductionModel> astCstProductionUsage = HashMultimap.create();
@@ -347,6 +349,7 @@ public class HtmlHelper {
             annotationUsage.put(token, FUNCTION_GET_ANNOTATION_NAMES);
         }
 
+        cstRootUsage.addAll(grammar.getCstProductionRoots());
         for (final CstProductionModel cstProduction : grammar.cstProductions.values()) {
             for (final CstTransformPrototypeModel cstTransformPrototype : cstProduction.getTransformPrototypes()) {
                 if (cstTransformPrototype.symbol.isTerminal())
@@ -470,11 +473,11 @@ public class HtmlHelper {
         if (m instanceof TokenModel)
             return tokenCstAlternativeUsage.containsKey(m) || tokenAstUsage.containsKey(m) || ((TokenModel) m).isIgnored();
         if (m instanceof CstProductionModel)
-            return cstCstUsage.containsKey(m) || m == grammar.cstProductionRoot;
+            return cstRootUsage.contains(m) || cstCstUsage.containsKey(m);
         if (m instanceof CstAlternativeModel)
             return true;
         if (m instanceof AstProductionModel)
-            return astAstUsage.containsKey(m) || m == grammar.astProductionRoot;
+            return astAstUsage.containsKey(m) || astCstProductionUsage.containsKey(m); // || m == grammar.getAstProductionRoot();
         if (m instanceof AstAlternativeModel)
             return astCstAlternativeUsage.containsKey(m);
         throw new IllegalArgumentException("Unknown model " + m.getClass());

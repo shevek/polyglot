@@ -21,7 +21,7 @@ import ${package}.analysis.AnalysisAdapter;
 import ${package}.lexer.ILexer;
 import ${package}.lexer.LexerException;
 
-public class Parser {
+public class ${parserMachine.parserClassName} {
 
     public static final int SHIFT = 0;
     public static final int REDUCE = 1;
@@ -37,7 +37,7 @@ public class Parser {
     private final List<State> stack = new ArrayList<State>();
     private int stackPointer = -1;   // Points to last valid state on stack.
 
-    public Parser(@Nonnull ILexer lexer) {
+    public ${parserMachine.parserClassName}(@Nonnull ILexer lexer) {
         this.lexer = lexer;
     }
 
@@ -101,8 +101,8 @@ public class Parser {
     }
 
     @Nonnull
-    public Start parse() throws ParserException, LexerException, IOException {
-        push(0, "Start");
+    public ${parserMachine.startClassName} parse() throws ParserException, LexerException, IOException {
+        push(0, "${parserMachine.startClassName}");
         for (;;) {
             Token token = this.lexer.peek();
             int index = token.getTokenIndex();
@@ -127,8 +127,8 @@ public class Parser {
                     break;
                 case ACCEPT:
                     EOF eof = (EOF) this.lexer.next();
-                    ${grammar.astProductionRoot.javaTypeName} root = (${grammar.astProductionRoot.javaTypeName}) pop().get(0);
-                    return new Start(root, eof);
+                    ${parserMachine.astProductionRoot.javaTypeName} root = (${parserMachine.astProductionRoot.javaTypeName}) pop().get(0);
+                    return new ${parserMachine.startClassName}(root, eof);
                 case ERROR:
                     StringBuilder buf = new StringBuilder("After");
                     for (int i = 1; i <= stackPointer; i++)
@@ -141,7 +141,7 @@ public class Parser {
         }
     }
 
-#if ($helper.large) ## reduce-large
+#if ($helper.isLarge($automaton)) ## reduce-large
 
 #foreach ($alternativeGroup in $helper.alternativeGroups)
     /* Performs a reduction of an alternative in group ${alternativeGroup.index}. */
@@ -325,7 +325,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #if ($helper.isOption("CG_COMMENT"))
     private static final int[][][] actionTable /* = {
         // Actions for parser, indexed by LR(k) state. Value is [token, shift, stack-state] or [token, reduce, production-number].
-#if (!$helper.large)
+#if (!$helper.isLarge($automaton))
 #foreach ($state in $automaton.states)
         // Actions for S${state.index}
         {
@@ -340,7 +340,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 
     private static final int[][][] gotoTable /* = {
         // Goto for parser, indexed by LR(k) state. Value is [production, stack-state]
-#if (!$helper.large)
+#if (!$helper.isLarge($automaton))
 #foreach ($state in $automaton.states)
         // Goto for S${state.index}
         {
@@ -353,7 +353,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
     } */ ;
 
     private static final String[] errorTable /* = {
-#if (!$helper.large)
+#if (!$helper.isLarge($automaton))
 #foreach ($error in $automaton.errors)
         "$error",
 #end
@@ -381,15 +381,15 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
     static {
         try {
             DataInputStream in = new DataInputStream(
-#if ($tables.parserDataInline)
+#if ($parserMachine.inline)
                 new java.util.zip.GZIPInputStream(
                     new java.io.ByteArrayInputStream(
-                        javax.xml.bind.DatatypeConverter.parseBase64Binary("$tables.parserDataText")
+                        javax.xml.bind.DatatypeConverter.parseBase64Binary("$parserMachine.encodedText")
                     )
                 )
 #else
                 new BufferedInputStream(
-                    Parser.class.getResourceAsStream("parser.dat")
+                    ${parserMachine.parserClassName}.class.getResourceAsStream("${parserMachine.parserClassName}.dat")
                 )
 #end
             );

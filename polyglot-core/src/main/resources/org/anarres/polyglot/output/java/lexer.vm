@@ -282,15 +282,15 @@ public class Lexer implements ILexer {
     static {
         try {
             DataInputStream in = new DataInputStream(
-#if ($tables.lexerDataInline)
+#if ($lexerMachine.inline)
                 new java.util.zip.GZIPInputStream(
                     new java.io.ByteArrayInputStream(
-                        javax.xml.bind.DatatypeConverter.parseBase64Binary("$tables.lexerDataText")
+                        javax.xml.bind.DatatypeConverter.parseBase64Binary("$lexerMachine.encodedText")
                     )
                 )
 #else
                 new java.io.BufferedInputStream(
-                    Lexer.class.getResourceAsStream("lexer.dat")
+                    Lexer.class.getResourceAsStream("Lexer.dat")
                 )
 #end
             );

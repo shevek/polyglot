@@ -7,6 +7,7 @@ package org.anarres.polyglot.lr;
 
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.model.CstAlternativeModel;
+import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.TokenModel;
 
@@ -20,9 +21,9 @@ public class LR0Automaton extends LRAutomaton {
     private final FirstFunction firstFunction;
     private final FollowFunction followFunction;
 
-    public LR0Automaton(@Nonnull GrammarModel grammar) {
+    public LR0Automaton(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         this.firstFunction = new FirstFunction(grammar);
-        this.followFunction = new FollowFunction(grammar, firstFunction);
+        this.followFunction = new FollowFunction(grammar, cstProductionRoot, firstFunction);
     }
 
     /**

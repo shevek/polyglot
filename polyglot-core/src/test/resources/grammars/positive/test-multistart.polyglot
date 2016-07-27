@@ -1,0 +1,34 @@
+Package org.anarres.polyglot.test.multistart;
+
+Tokens
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+
+Productions
+
+	@Weak
+	ignored =
+		tok_a ;
+
+	@Start
+	root_a { -> prog_a } =
+		tok_a { -> New prog_a.a() } ;
+
+	@Start('B')
+	root_b { -> prog_b } =
+		tok_b { -> New prog_b.b() } ;
+
+	@Start('C')
+	root_c { -> prog_c } =
+		tok_c { -> New prog_c.c() } ;
+
+Abstract Syntax Tree
+
+	@Weak
+	ignored = tok_a ;
+
+	prog_a = {a} | {b} ;
+	prog_b = {a} | {b} ;
+	prog_c = {c} ;
+

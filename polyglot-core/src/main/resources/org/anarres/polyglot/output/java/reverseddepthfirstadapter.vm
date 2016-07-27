@@ -19,22 +19,24 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter {
     public void defaultOut(@Nonnull Node node) {
     }
 
-    public void inStart(@Nonnull Start node) {
+#foreach ($parserMachine in $parserMachines)
+    public void in${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node) {
         defaultIn(node);
     }
 
-    public void outStart(@Nonnull Start node) {
+    public void out${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node) {
         defaultOut(node);
     }
 
     @Override
-    public void caseStart(Start node) {
-        inStart(node);
+    public void case${parserMachine.startClassName}(${parserMachine.startClassName} node) {
+        in${parserMachine.startClassName}(node);
         applyTo(node.getEOF());
-        applyTo(node.get${grammar.astProductionRoot.javaMethodName}());
-        outStart(node);
+        applyTo(node.get${parserMachine.astProductionRoot.javaMethodName}());
+        out${parserMachine.startClassName}(node);
     }
 
+#end
 #foreach ($production in $grammar.astProductions)
     // Production: $production
 #foreach ($alternative in $production.alternatives)

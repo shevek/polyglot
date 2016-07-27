@@ -49,18 +49,20 @@ public class ChocoLRDiagnoser implements LRDiagnoser {
     public static class Factory implements LRDiagnoser.Factory {
 
         @Override
-        public LRDiagnoser newDiagnoser(GrammarModel grammar, Set<? extends Option> options) {
-            return new ChocoLRDiagnoser(grammar);
+        public LRDiagnoser newDiagnoser(GrammarModel grammar, CstProductionModel cstProductionRoot, Set<? extends Option> options) {
+            return new ChocoLRDiagnoser(grammar, cstProductionRoot);
         }
     }
 
     private final GrammarModel grammar;
+    private final CstProductionModel cstProductionRoot;
     private final LR0ItemUniverse universe;
     // private final FirstFunction firstFunction;
 
-    public ChocoLRDiagnoser(GrammarModel grammar) {
+    public ChocoLRDiagnoser(GrammarModel grammar, CstProductionModel cstProductionRoot) {
         this.grammar = grammar;
-        this.universe = new LR0ItemUniverse(grammar);
+        this.cstProductionRoot = cstProductionRoot;
+        this.universe = new LR0ItemUniverse(grammar, cstProductionRoot);
         // this.firstFunction = new FirstFunction(grammar);
     }
 

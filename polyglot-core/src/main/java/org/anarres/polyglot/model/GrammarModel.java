@@ -54,10 +54,10 @@ public class GrammarModel implements GraphVizScope {
     // public final TokenModel.EOF tokenEof = new TokenModel.EOF();
     public final Map<String, TokenModel> tokens = new DefaultMap<>();
     public int cstProductionIndex = 0;
-    public CstProductionModel cstProductionRoot;
+    private CstProductionModel cstProductionRoot;
     public final Map<String, CstProductionModel> cstProductions = new DefaultMap<>();
     public int cstAlternativeIndex = 0;
-    public AstProductionModel astProductionRoot;
+    // private AstProductionModel astProductionRoot;
     public final Map<String, AstProductionModel> astProductions = new DefaultMap<>();
     // public final Map<String, AlternativeModel> productionAlternatives = new HashMap<>();
     public int inlineIndex = 0;
@@ -148,6 +148,7 @@ public class GrammarModel implements GraphVizScope {
         return out;
     }
 
+    @Nonnull
     public Map<String, TokenModel> getTokenMap() {
         return tokens;
     }
@@ -178,12 +179,28 @@ public class GrammarModel implements GraphVizScope {
         return out;
     }
 
+    @Nonnull
+    public List<? extends CstProductionModel> getCstProductionRoots() {
+        List<CstProductionModel> out = new ArrayList<CstProductionModel>();
+        for (CstProductionModel cstProduction : cstProductions.values())
+            if (cstProduction.hasAnnotation(AnnotationName.Start))
+                out.add(cstProduction);
+        if (!out.isEmpty())
+            return out;
+        CstProductionModel cstProduction = cstProductionRoot;
+        if (cstProduction != null)
+            return Collections.singletonList(cstProduction);
+        return Collections.emptyList();
+    }
+
     @CheckForNull
     public CstProductionModel getCstProduction(@Nonnull String name) {
         return cstProductions.get(name);
     }
 
     public boolean addCstProduction(@Nonnull CstProductionModel cstProduction) {
+        if (cstProductionRoot == null)
+            cstProductionRoot = cstProduction;
         CstProductionModel prev = cstProductions.put(cstProduction.getName(), cstProduction);
         return prev == null || prev.hasAnnotation(AnnotationName.Weak);
     }
@@ -206,12 +223,7 @@ public class GrammarModel implements GraphVizScope {
         return out;
     }
 
-    @Nonnull
-    @TemplateProperty
-    public AstProductionModel getAstProductionRoot() {
-        return astProductionRoot;
-    }
-
+    // @Nonnull @TemplateProperty public AstProductionModel getAstProductionRoot() { return astProductionRoot; }
     @CheckForNull
     @TemplateProperty
     public AstProductionModel getAstProduction(@Nonnull String name) {
@@ -219,6 +231,7 @@ public class GrammarModel implements GraphVizScope {
     }
 
     public boolean addAstProduction(@Nonnull AstProductionModel astProduction) {
+        // if (astProductionRoot == null) astProductionRoot = astProduction;
         AstProductionModel prev = astProductions.put(astProduction.getName(), astProduction);
         return prev == null || prev.hasAnnotation(AnnotationName.Weak);
     }
@@ -389,8 +402,7 @@ public class GrammarModel implements GraphVizScope {
         {
             List<AAstProduction> productions = new ArrayList<>();
             // This one has to be first.
-            if (astProductionRoot != null)
-                productions.add(astProductionRoot.toNode());
+            // if (astProductionRoot != null) productions.add(astProductionRoot.toNode());
             List<Map.Entry<String, AstProductionModel>> astProductions = new ArrayList<>(this.astProductions.entrySet());
             // If order wasn't preserved, let's put some sensible order on it.
             if (!(this.astProductions instanceof LinkedHashMap)) {
@@ -402,8 +414,8 @@ public class GrammarModel implements GraphVizScope {
                 });
             }
             for (Map.Entry<String, AstProductionModel> e : astProductions)
-                if (e.getValue() != astProductionRoot)
-                    productions.add(e.getValue().toNode());
+                // if (e.getValue() != astProductionRoot)
+                productions.add(e.getValue().toNode());
             sections.add(new AAstSection(productions));
         }
 

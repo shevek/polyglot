@@ -50,14 +50,16 @@ public class TreeVisitorAdapter<I, O, X extends Exception> extends VisitorAdapte
         return null;
     }
 
-    public O inStart(@Nonnull Start node, I input) throws X {
+#foreach ($parserMachine in $parserMachines)
+    public O in${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X {
         return inDefault(node, input);
     }
 
-    public O outStart(@Nonnull Start node, I input) throws X {
+    public O out${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X {
         return outDefault(node, input);
     }
 
+#end
 #foreach ($production in $grammar.astProductions)
 
     // Production: $production

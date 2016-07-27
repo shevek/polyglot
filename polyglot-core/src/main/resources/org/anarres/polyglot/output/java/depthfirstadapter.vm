@@ -21,22 +21,24 @@ public class DepthFirstAdapter extends AnalysisAdapter {
     public void defaultOut(@Nonnull Node node) {
     }
 
-    public void inStart(@Nonnull Start node) {
+#foreach ($parserMachine in $parserMachines)
+    public void in${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node) {
         defaultIn(node);
     }
 
-    public void outStart(@Nonnull Start node) {
+    public void out${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node) {
         defaultOut(node);
     }
 
     @Override
-    public void caseStart(Start node) {
-        inStart(node);
-        applyTo(node.get${grammar.astProductionRoot.javaMethodName}());
+    public void case${parserMachine.startClassName}(${parserMachine.startClassName} node) {
+        in${parserMachine.startClassName}(node);
+        applyTo(node.get${parserMachine.astProductionRoot.javaMethodName}());
         applyTo(node.getEOF());
-        outStart(node);
+        out${parserMachine.startClassName}(node);
     }
 
+#end
 #foreach ($production in $grammar.astProductions)
     // Production: $production
 #foreach ($alternative in $production.alternatives)

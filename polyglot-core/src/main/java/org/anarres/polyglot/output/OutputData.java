@@ -5,11 +5,11 @@
  */
 package org.anarres.polyglot.output;
 
+import java.util.List;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
-import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.model.GrammarModel;
 
 /**
@@ -20,15 +20,20 @@ public class OutputData {
 
     private final String name;
     private final GrammarModel grammar;
-    private final LRAutomaton automaton;
-    private final Tables tables;
+    private final EncodedStateMachine.Lexer lexerMachine;
+    private final List<? extends EncodedStateMachine.Parser> parserMachines;
     private final Set<? extends Option> options;
 
-    public OutputData(@Nonnull String name, @Nonnull GrammarModel grammar, @CheckForNull LRAutomaton automaton, @Nonnull Tables tables, @Nonnull Set<? extends Option> options) {
+    public OutputData(
+            @Nonnull String name,
+            @Nonnull GrammarModel grammar,
+            @Nonnull EncodedStateMachine.Lexer lexerMachine,
+            @Nonnull List<? extends EncodedStateMachine.Parser> parserMachines,
+            @Nonnull Set<? extends Option> options) {
         this.name = name;
         this.grammar = grammar;
-        this.automaton = automaton;
-        this.tables = tables;
+        this.lexerMachine = lexerMachine;
+        this.parserMachines = parserMachines;
         this.options = options;
     }
 
@@ -43,13 +48,13 @@ public class OutputData {
     }
 
     @CheckForNull
-    public LRAutomaton getAutomaton() {
-        return automaton;
+    public EncodedStateMachine.Lexer getLexerMachine() {
+        return lexerMachine;
     }
 
     @Nonnull
-    public Tables getTables() {
-        return tables;
+    public List<? extends EncodedStateMachine.Parser> getParserMachines() {
+        return parserMachines;
     }
 
     @Nonnull

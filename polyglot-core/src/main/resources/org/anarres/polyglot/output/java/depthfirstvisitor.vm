@@ -20,14 +20,16 @@ import ${grammar.package.packageName}.node.*;
  */
 public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAdapter<I, O, X> {
 
+#foreach ($parserMachine in $parserMachines)
     @Override
-    public O visitStart(Start node, I input) throws X {
-        inStart(node, input);
-        applyTo(node.get${grammar.astProductionRoot.javaMethodName}(), input);
+    public O visit${parserMachine.startClassName}(${parserMachine.startClassName} node, I input) throws X {
+        in${parserMachine.startClassName}(node, input);
+        applyTo(node.get${parserMachine.astProductionRoot.javaMethodName}(), input);
         applyTo(node.getEOF(), input);
-        return outStart(node, input);
+        return out${parserMachine.startClassName}(node, input);
     }
 
+#end
 #foreach ($production in $grammar.astProductions)
     // Production: $production
 #foreach ($alternative in $production.alternatives)

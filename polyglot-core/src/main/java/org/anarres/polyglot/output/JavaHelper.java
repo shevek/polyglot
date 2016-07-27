@@ -26,6 +26,8 @@ import org.anarres.polyglot.model.AstModel;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -81,13 +83,10 @@ public class JavaHelper {
     private final Set<? extends Option> options;
     @Nonnull
     private final GrammarModel grammar;
-    @CheckForNull
-    private final LRAutomaton automaton;
 
-    public JavaHelper(@Nonnull Set<? extends Option> options, @Nonnull GrammarModel grammar, @CheckForNull LRAutomaton automaton) {
+    public JavaHelper(@Nonnull Set<? extends Option> options, @Nonnull GrammarModel grammar) {
         this.options = options;
         this.grammar = grammar;
-        this.automaton = automaton;
     }
 
     @Nonnull
@@ -101,13 +100,18 @@ public class JavaHelper {
      * @return false if the grammar or the automaton is "large".
      */
     @TemplateProperty
-    public boolean isLarge() {
+    public boolean isLarge(LRAutomaton automaton) {
         if (grammar.cstProductions.size() > ALTERNATIVE_GROUP_SIZE)
             return true;
         if (automaton != null)
             if (automaton.getStates().size() > ALTERNATIVE_GROUP_SIZE)
                 return true;
         return false;
+    }
+
+    @TemplateProperty
+    public boolean isLarge(EncodedStateMachine.Parser parserMachine) {
+        return isLarge(parserMachine.getAutomaton());
     }
 
     @Nonnegative
@@ -297,6 +301,8 @@ public class JavaHelper {
     }
 
     public static abstract class FormatLexer {
+
+        private static final Logger LOG = LoggerFactory.getLogger(FormatLexer.class);
 
         @Nonnull
         protected abstract AstElementModel getElement(@Nonnull CharSequence name);

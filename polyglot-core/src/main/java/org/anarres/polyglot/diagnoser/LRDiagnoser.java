@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.lr.LRConflict;
 import org.anarres.polyglot.lr.LRDiagnosis;
+import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
 
 /**
@@ -22,7 +23,7 @@ public interface LRDiagnoser {
     public static interface Factory {
 
         @CheckForNull
-        public LRDiagnoser newDiagnoser(@Nonnull GrammarModel grammar, @Nonnull Set<? extends Option> options);
+        public LRDiagnoser newDiagnoser(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot, @Nonnull Set<? extends Option> options);
     }
 
     @Nonnull

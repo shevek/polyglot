@@ -7,9 +7,10 @@ Tokens
 
 Productions
 
-	program { -> } =
-		tok_a |
-		tok_b ;
+	// Tests automated generation of CST alt names for anonymous alts.
+	program =
+		tok_a { -> New program() } |
+		tok_b { -> New program() } ;
 
 Abstract Syntax Tree
 

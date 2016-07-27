@@ -11,7 +11,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,17 +48,19 @@ public class AlgorithmicLRDiagnoser implements LRDiagnoser {
     public static class Factory implements LRDiagnoser.Factory {
 
         @Override
-        public LRDiagnoser newDiagnoser(GrammarModel grammar, Set<? extends Option> options) {
-            return new AlgorithmicLRDiagnoser(grammar);
+        public LRDiagnoser newDiagnoser(GrammarModel grammar, CstProductionModel cstProductionRoot, Set<? extends Option> options) {
+            return new AlgorithmicLRDiagnoser(grammar, cstProductionRoot);
         }
     }
     private static final boolean DEBUG = false;
     private final GrammarModel grammar;
+    private final CstProductionModel cstProductionRoot;
     private final FirstFunction firstFunction;
     private final Multimap<CstProductionModel, CstAlternativeModel> productionUsage = HashMultimap.create();
 
-    public AlgorithmicLRDiagnoser(@Nonnull GrammarModel grammar) {
+    public AlgorithmicLRDiagnoser(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         this.grammar = grammar;
+        this.cstProductionRoot = cstProductionRoot;
         this.firstFunction = new FirstFunction(grammar);
 
         for (CstProductionModel production : grammar.getCstProductions()) {
@@ -219,7 +220,7 @@ public class AlgorithmicLRDiagnoser implements LRDiagnoser {
             }
 
             if (token == null) {
-                if (needleProduction == grammar.cstProductionRoot) {
+                if (needleProduction == cstProductionRoot) {
                     if (DEBUG)
                         LOG.debug(prefix + "Found root; returning.");
                     return state.toPath();

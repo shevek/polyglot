@@ -55,14 +55,14 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
         return visitDefault(node, input);
     }
 
-#if ($grammar.astProductionRoot)
+#foreach ($parserMachine in $parserMachines)
 #javadocVisitDefault()
     @Override
-    public O visitStart(Start node, I input) throws X {
+    public O visit${parserMachine.startClassName}(${parserMachine.startClassName} node, I input) throws X {
         return visitDefault(node, input);
     }
-#end
 
+#end
 #foreach ($token in $grammar.tokens)
 #javadocVisitToken()
     @Override

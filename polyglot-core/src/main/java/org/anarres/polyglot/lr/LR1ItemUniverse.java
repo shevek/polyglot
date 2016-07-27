@@ -63,8 +63,8 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
     // private final FollowFunction followFunction = new FollowFunction(grammar, firstFunction);
     private final Map<CstAlternativeModel, TokenMap<LR1Item>> itemMapInitial = new HashMap<>();
 
-    public LR1ItemUniverse(@Nonnull GrammarModel grammar) {
-        super(LR1Item.class, grammar);
+    public LR1ItemUniverse(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
+        super(LR1Item.class, grammar, cstProductionRoot);
         addAlternative(startProduction);
         for (CstProductionModel production : grammar.cstProductions.values()) {
             for (CstAlternativeModel alternative : production.alternatives.values()) {

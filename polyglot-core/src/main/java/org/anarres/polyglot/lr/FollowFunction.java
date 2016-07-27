@@ -29,12 +29,12 @@ public class FollowFunction implements Function<CstProductionModel, Set<TokenMod
     /** In a value, TokenModel.EOF means $ (end of input). */
     private final Map<CstProductionModel, Set<TokenModel>> followMap = new HashMap<>();
 
-    public FollowFunction(@Nonnull GrammarModel grammar, @Nonnull FirstFunction firstFunction) {
-        build(grammar, firstFunction);
+    public FollowFunction(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot, @Nonnull FirstFunction firstFunction) {
+        build(grammar, cstProductionRoot, firstFunction);
     }
 
     // Dragon book Page 189.
-    private void build(@Nonnull GrammarModel grammar, @Nonnull FirstFunction firstFunction) {
+    private void build(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot, @Nonnull FirstFunction firstFunction) {
         for (CstProductionModel production : grammar.cstProductions.values()) {
             Set<TokenModel> followSet = new TokenSet(firstFunction.getUniverse());
             followMap.put(production, followSet);
@@ -42,7 +42,7 @@ public class FollowFunction implements Function<CstProductionModel, Set<TokenMod
 
         // Rule 1. The root production may be followed by EOF.
         // This means $.
-        followMap.get(grammar.cstProductionRoot).add(TokenModel.EOF.INSTANCE);
+        followMap.get(cstProductionRoot).add(TokenModel.EOF.INSTANCE);
 
         // Rule 2. Within a rule, excluding epsilon and EOF.
         for (CstProductionModel production : grammar.cstProductions.values()) {

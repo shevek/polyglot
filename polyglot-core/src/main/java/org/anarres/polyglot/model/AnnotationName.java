@@ -23,6 +23,8 @@ public enum AnnotationName {
     Weak,
     /** (Currently informal) Indicates whether a CST production is for general use, or is a private refactoring. */
     Public, Private,
+    /** Indicates that this is the start production for a Parser. */
+    Start,
     /** Used on an AstAlternativeModel to specify the Java superclass of the alternative. */
     javaExtends,
     /** Used on an AstProductionModel or AstAlternativeModel to specify a Java interface for the alternative. */

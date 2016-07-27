@@ -40,7 +40,7 @@ public class JavaHelperTest {
         GrammarModel grammar = new GrammarModel();
         grammar.addAstProduction(production);
 
-        JavaHelper helper = new JavaHelper(Collections.<Option>emptySet(), grammar, null);
+        JavaHelper helper = new JavaHelper(Collections.<Option>emptySet(), grammar);
         LOG.info("In: " + text);
         List<? extends Object> out = helper.lexFormat(alternative, text);
         LOG.info("Out: " + out);

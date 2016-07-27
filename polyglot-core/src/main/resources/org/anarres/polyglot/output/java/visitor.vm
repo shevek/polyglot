@@ -20,9 +20,8 @@ public interface Visitor<I, O, X extends Exception> {
 #foreach ($token in $grammar.tokens)
     public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X;
 #end
-## Make sure we have an AST before we emit anything for Start.
-#if ($grammar.astProductionRoot)
-    public O visitStart(@Nonnull Start node, I input) throws X;
+#foreach ($parserMachine in $parserMachines)
+    public O visit${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X;
 #end
 #foreach ($production in $grammar.astProductions)
 #foreach ($alternative in $production.alternatives)

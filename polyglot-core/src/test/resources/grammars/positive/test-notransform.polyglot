@@ -6,7 +6,7 @@ Tokens
 
 Productions
 
-	program { -> } =
+	program =
 		;
 
 	p_a { -> p_a } =

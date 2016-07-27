@@ -64,13 +64,13 @@ public class AnalysisAdapter implements Analysis {
             this.out.remove(node);
     }
 
-#if ($grammar.astProductionRoot)
+#foreach ($parserMachine in $parserMachines)
     @Override
-    public void caseStart(Start node) {
+    public void case${parserMachine.startClassName}(${parserMachine.startClassName} node) {
         defaultCase(node);
     }
-#end
 
+#end
 #foreach ($token in $grammar.tokens)
     @Override
     public void case${token.javaMethodName}(@Nonnull ${token.javaTypeName} node) {

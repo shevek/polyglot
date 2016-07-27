@@ -32,8 +32,8 @@ public class LR0ItemUniverse extends LRItemUniverse<LR0Item> {
     /** A map from CstAlternativeModel to LR0Item(CstAlternativeModel, 0), to avoid allocation. */
     private final Map<CstAlternativeModel, LR0Item> itemMapInitial = new HashMap<>();
 
-    public LR0ItemUniverse(@Nonnull GrammarModel grammar) {
-        super(LR0Item.class, grammar);
+    public LR0ItemUniverse(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
+        super(LR0Item.class, grammar, cstProductionRoot);
         addAlternative(startProduction);
         for (CstProductionModel production : grammar.cstProductions.values()) {
             for (CstAlternativeModel alternative : production.alternatives.values()) {
@@ -87,6 +87,6 @@ public class LR0ItemUniverse extends LRItemUniverse<LR0Item> {
 
     @Override
     public LRAutomaton build(PolyglotExecutor executor) throws InterruptedException, ExecutionException {
-        return build(executor, new LR0Automaton(grammar));
+        return build(executor, new LR0Automaton(grammar, cstProductionRoot));
     }
 }

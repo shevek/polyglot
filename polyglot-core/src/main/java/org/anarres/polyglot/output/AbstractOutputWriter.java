@@ -27,7 +27,6 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.PolyglotEngine;
 import org.anarres.polyglot.PolyglotExecutor;
-import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.model.GrammarModel;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -50,7 +49,7 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     private final ErrorHandler errors;
     private final File destinationDir;
     private final Map<? extends String, ? extends File> templates;
-    private final OutputData data;
+    private final OutputData outputData;
     private final LogChute logChute = new Slf4jLogChute();
     private final EscapeTool escapeTool = new EscapeTool();
 
@@ -59,12 +58,12 @@ public abstract class AbstractOutputWriter implements OutputWriter {
             @Nonnull OutputLanguage language,
             @Nonnull File destinationDir,
             @Nonnull Map<? extends String, ? extends File> templates,
-            @Nonnull OutputData data) {
+            @Nonnull OutputData outputData) {
         this.errors = errors;
         this.language = language;
         this.destinationDir = destinationDir;
         this.templates = templates;
-        this.data = data;
+        this.outputData = outputData;
     }
 
     @Nonnull
@@ -83,18 +82,13 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     }
 
     @Nonnull
-    protected GrammarModel getGrammar() {
-        return data.getGrammar();
-    }
-
-    @CheckForNull
-    protected LRAutomaton getAutomaton() {
-        return data.getAutomaton();
+    public OutputData getOutputData() {
+        return outputData;
     }
 
     @Nonnull
-    protected Tables getTables() {
-        return data.getTables();
+    protected GrammarModel getGrammar() {
+        return getOutputData().getGrammar();
     }
 
     protected void setProperty(@Nonnull VelocityEngine engine, @Nonnull String name, @Nonnull Object value) {
@@ -152,10 +146,10 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         context.put("esc", escapeTool);
 
         context.put("header", "This file was generated automatically by Polyglot. Edits will be lost.");
-        context.put("grammarName", data.getName());
+        context.put("grammarName", getOutputData().getName());
         context.put("grammar", getGrammar());
-        context.put("automaton", getAutomaton());
-        context.put("tables", getTables());
+        context.put("lexerMachine", getOutputData().getLexerMachine());
+        context.put("parserMachines", getOutputData().getParserMachines());
         context.put("package", getGrammar().getPackage().getPackageName());
         initContext(context);
         for (Map.Entry<String, Object> e : contextValues.entrySet())

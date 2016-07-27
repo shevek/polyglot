@@ -9,7 +9,7 @@ Tokens
 Productions
 
 	@Weak
-	root { -> } = prod_a { -> } ;
+	root = prod_a { -> New root() } ;
 
 	@Weak
 	prod_a { -> dummy } = dummy { -> dummy } ;

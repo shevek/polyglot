@@ -12,7 +12,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -60,12 +59,14 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         return alternative;
     }
     protected final GrammarModel grammar;
+    protected final CstProductionModel cstProductionRoot;
     protected final CstAlternativeModel startProduction;
 
-    public LRItemUniverse(@Nonnull Class<I> itemType, @Nonnull GrammarModel grammar) {
+    public LRItemUniverse(@Nonnull Class<I> itemType, @Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         super(itemType);
         this.grammar = grammar;
-        this.startProduction = newInitialProduction(grammar.cstProductionRoot);
+        this.cstProductionRoot = cstProductionRoot;
+        this.startProduction = newInitialProduction(cstProductionRoot);
     }
 
     protected abstract void closure(@Nonnull Set<? super I> out, @Nonnull Queue<I> queue, @Nonnull I root, @Nonnull IntSet tmp);

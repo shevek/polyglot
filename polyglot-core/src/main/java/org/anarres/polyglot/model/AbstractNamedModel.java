@@ -134,6 +134,16 @@ public abstract class AbstractNamedModel extends AbstractModel {
         return getAnnotations(name.name());
     }
 
+    @CheckForNull
+    public AnnotationModel getAnnotation(@Nonnull String name) {
+        return Iterables.getFirst(getAnnotations(name), null);
+    }
+
+    @CheckForNull
+    public AnnotationModel getAnnotation(@Nonnull AnnotationName name) {
+        return Iterables.getFirst(getAnnotations(name), null);
+    }
+
     public boolean hasAnnotation(@Nonnull String name) {
         return annotations.containsKey(name);
     }
