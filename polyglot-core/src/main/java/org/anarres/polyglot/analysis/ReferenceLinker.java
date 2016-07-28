@@ -269,7 +269,7 @@ public class ReferenceLinker implements Runnable {
                 return;
             case 0:
                 if (linkages.isEmpty())
-                    errors.addError(element.getLocation(), prefix + ": No such token" + (externalsLegal ? ", external" : "") + " or " + productionDesc + " '" + symbolName + "' for " + targetDesc + " " + element.getName() + "'.");
+                    errors.addError(element.getLocation(), prefix + ": No such token" + (externalsLegal ? ", external" : "") + " or " + productionDesc + " '" + symbolName + "' for " + targetDesc + " '" + element.getName() + "'.");
                 else
                     errors.addError(element.getLocation(), prefix + ": Name '" + symbolName + "' in " + targetDesc + " cannot reference " + linkages.toString(true));
                 break;
