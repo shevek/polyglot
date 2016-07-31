@@ -183,7 +183,7 @@ public class GrammarModel implements GraphVizScope {
     public List<? extends CstProductionModel> getCstProductionRoots() {
         List<CstProductionModel> out = new ArrayList<CstProductionModel>();
         for (CstProductionModel cstProduction : cstProductions.values())
-            if (cstProduction.hasAnnotation(AnnotationName.Start))
+            if (cstProduction.hasAnnotation(AnnotationName.ParserStart))
                 out.add(cstProduction);
         if (!out.isEmpty())
             return out;
@@ -251,7 +251,7 @@ public class GrammarModel implements GraphVizScope {
         if (false)
             for (Map.Entry<String, TokenModel> e : tokens.entrySet()) {
                 TokenModel token = e.getValue();
-                if (!token.ignored)
+                if (!token.isIgnored())
                     graph.node(this, token).label(e.getKey());
             }
         for (Map.Entry<String, CstProductionModel> e : cstProductions.entrySet()) {
@@ -307,7 +307,7 @@ public class GrammarModel implements GraphVizScope {
         if (false)
             for (Map.Entry<String, TokenModel> e : tokens.entrySet()) {
                 TokenModel token = e.getValue();
-                if (!token.ignored)
+                if (!token.isIgnored())
                     graph.node(this, token).label(e.getKey());
             }
         for (Map.Entry<String, AstProductionModel> e : astProductions.entrySet()) {

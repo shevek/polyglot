@@ -18,6 +18,16 @@ import org.anarres.polyglot.node.TString;
  */
 public class AnnotationModel extends AbstractModel {
 
+    @Nonnull
+    public static AnnotationModel forName(@Nonnull AnnotationName name, @CheckForNull String value) {
+        return new AnnotationModel(new TIdentifier(name.name()), value);
+    }
+
+    @Nonnull
+    public static AnnotationModel forName(@Nonnull AnnotationName name) {
+        return forName(name, null);
+    }
+
     private final TIdentifier name;
     private final String value;
 

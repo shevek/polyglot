@@ -69,6 +69,7 @@ public abstract class AbstractPolyglotTest {
         {
             LOG.info("Compiling.");
             Stopwatch stopwatch = Stopwatch.createStarted();
+            // Compilation.Result result = Compilation.compile(Collections.<Processor>emptySet(), javaSources().getSubject(Truth.THROW_ASSERTION_ERROR, javaFileObjects));
             assert_().about(javaSources())
                     .that(javaFileObjects)
                     .compilesWithoutError();

@@ -185,7 +185,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
             if (token == null)
                 errors.addError(identifier, "Cannot ignore nonexistent token '" + name + "'.");
             else
-                token.ignored = true;
+                token.setIgnored(true);
         }
     }
 

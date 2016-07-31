@@ -23,8 +23,14 @@ public enum AnnotationName {
     Weak,
     /** (Currently informal) Indicates whether a CST production is for general use, or is a private refactoring. */
     Public, Private,
+    /** Used on a TokenModel to indicate that the token is ignored by the lexer. */
+    LexerIgnored,
+    /** Used on a TokenModel to indicate that it may be masked, i.e. never match. */
+    LexerAllowMasking,
+    /** Used on a TokenModel to indicate that the token is ignored by the parser. */
+    ParserIgnored,
     /** Indicates that this is the start production for a Parser. */
-    Start,
+    ParserStart,
     /** Used on an AstAlternativeModel to specify the Java superclass of the alternative. */
     javaExtends,
     /** Used on an AstProductionModel or AstAlternativeModel to specify a Java interface for the alternative. */

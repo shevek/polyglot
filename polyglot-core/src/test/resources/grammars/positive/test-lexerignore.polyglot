@@ -1,0 +1,8 @@
+Package org.anarres.polyglot.test.lexerignore;
+
+Tokens
+
+	tok_a = 'a' ;
+	@LexerIgnore
+	tok_b = 'b' ;
+

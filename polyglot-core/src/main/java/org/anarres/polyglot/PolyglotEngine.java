@@ -552,7 +552,7 @@ public class PolyglotEngine {
 
             List<EncodedStateMachine.Parser> parserMachines = new ArrayList<>();
             for (CstProductionModel cstProductionRoot : grammar.getCstProductionRoots()) {
-                AnnotationModel startAnnotation = cstProductionRoot.getAnnotation(AnnotationName.Start);
+                AnnotationModel startAnnotation = cstProductionRoot.getAnnotation(AnnotationName.ParserStart);
                 String machineName = startAnnotation == null ? "" : StartChecker.getMachineName(startAnnotation);
 
                 LRAutomaton automaton;

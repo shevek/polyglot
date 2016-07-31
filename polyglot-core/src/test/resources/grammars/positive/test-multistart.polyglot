@@ -11,15 +11,15 @@ Productions
 	ignored =
 		tok_a ;
 
-	@Start
+	@ParserStart
 	root_a { -> prog_a } =
 		tok_a { -> New prog_a.a() } ;
 
-	@Start('B')
+	@ParserStart('B')
 	root_b { -> prog_b } =
 		tok_b { -> New prog_b.b() } ;
 
-	@Start('C')
+	@ParserStart('C')
 	root_c { -> prog_c } =
 		tok_c { -> New prog_c.c() } ;
 

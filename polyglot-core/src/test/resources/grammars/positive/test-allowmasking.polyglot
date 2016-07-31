@@ -1,0 +1,8 @@
+Package org.anarres.polyglot.test.allowmasking;
+
+Tokens
+
+	tok_a = 'a' ;
+	@LexerAllowMasking
+	tok_b = 'a' ;
+

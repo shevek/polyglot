@@ -12,8 +12,6 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
@@ -27,6 +25,7 @@ import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.lr.TokenMap;
 import org.anarres.polyglot.lr.TokenSet;
 import org.anarres.polyglot.lr.TokenUniverse;
+import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.output.TemplateProperty;
@@ -389,9 +388,15 @@ public class DFA implements GraphVizable, GraphVizScope {
          */
         public TokenMask(@Nonnull TokenUniverse universe) {
             super(universe);
-            for (TokenModel token : universe.getItems())
-                if (!(token instanceof TokenModel.EOF))
-                    put(token, new TokenSet(universe));
+            for (TokenModel token : universe.getItems()) {
+                if (token.hasAnnotation(AnnotationName.LexerIgnored))
+                    continue;
+                if (token.hasAnnotation(AnnotationName.LexerAllowMasking))
+                    continue;
+                if (token instanceof TokenModel.EOF)
+                    continue;
+                put(token, new TokenSet(universe));
+            }
         }
 
         public TokenMask(@Nonnull GrammarModel grammar) {

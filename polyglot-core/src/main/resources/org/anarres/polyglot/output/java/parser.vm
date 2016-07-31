@@ -21,6 +21,9 @@ import ${package}.analysis.AnalysisAdapter;
 import ${package}.lexer.ILexer;
 import ${package}.lexer.LexerException;
 
+#if ($helper.isOption("CG_FINDBUGS"))
+@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SKIPPED_CLASS_TOO_BIG")
+#end##CG_FINDBUGS
 public class ${parserMachine.parserClassName} {
 
     public static final int SHIFT = 0;

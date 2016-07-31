@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.dfa.CharSet;
 import org.anarres.polyglot.dfa.NFA;
+import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.HelperModel;
 import org.anarres.polyglot.model.StateModel;
@@ -229,13 +230,14 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
 
     @Override
     public void outAToken(AToken node) {
-        NFA nfa = getNFA(node.getMatcher());
-
         String name = node.getName().getText();
         TokenModel token = grammar.getToken(name);
         if (token == null)
             throw new IllegalStateException("No such token " + name);
+        if (token.hasAnnotation(AnnotationName.LexerIgnored))
+            return;
 
+        NFA nfa = getNFA(node.getMatcher());
         // nfa.states[nfa.states.length - 1].accept = token;
         nfa = nfa.accept(token);
         setOut(node, nfa);
@@ -252,6 +254,8 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
             // LOG.info("Building for state " + state.getName());
             NFA stateNfa = null;
             for (TokenModel token : grammar.tokens.values()) {
+                if (token.hasAnnotation(AnnotationName.LexerIgnored))
+                    continue;
                 // Out of all the tokens which "start" in that state.
                 if (token.transitions.containsKey(state)
                         || (token.transitions.isEmpty() && state.isInitialState())) {

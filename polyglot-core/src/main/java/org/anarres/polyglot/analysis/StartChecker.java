@@ -48,15 +48,15 @@ public class StartChecker implements Runnable {
         for (CstProductionModel cstProduction : grammar.getCstProductionRoots()) {
             // TODO: We could relax this if we allowed Start to have N fields by iterating this transform.
             if (cstProduction.transformPrototypes.size() != 1) {
-                errors.addError(cstProduction.getLocation(), "Start production '" + cstProduction.getName() + "' must transform into exactly one AST production.");
+                errors.addError(cstProduction.getLocation(), "Production '" + cstProduction.getName() + "' annotated @" + AnnotationName.ParserStart.name() + " must transform into exactly one AST production.");
             }
 
             String machineName = "";
-            Collection<? extends AnnotationModel> annotations = cstProduction.getAnnotations(AnnotationName.Start);
+            Collection<? extends AnnotationModel> annotations = cstProduction.getAnnotations(AnnotationName.ParserStart);
             if (!annotations.isEmpty()) {
                 AnnotationModel annotation = annotations.iterator().next();
                 if (annotations.size() > 1)
-                    errors.addError(annotation.getLocation(), "At most one @Start annotation is permitted on CST production '" + cstProduction.getName() + "'.");
+                    errors.addError(annotation.getLocation(), "At most one @" + AnnotationName.ParserStart.name() + " annotation is permitted on CST production '" + cstProduction.getName() + "'.");
                 machineName = getMachineName(annotation);
             }
 
