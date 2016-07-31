@@ -1,0 +1,10 @@
+Package org.anarres.polyglot.test.javadefaulttext;
+
+Tokens
+
+	tok_a = 'a' * ;
+	@Text('B')
+	tok_b = 'b' * ;
+	@DefaultText('C')
+	tok_c = 'c' * ;
+

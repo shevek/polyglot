@@ -16,9 +16,26 @@ public final class ${token.javaTypeName} extends Token
         {
 
     public static final ${token.javaTypeName}[] EMPTY_ARRAY = new ${token.javaTypeName}[0];
+#if ($helper.hasAnnotation($token, 'DefaultText'))
+    public static final String DEFAULT_TEXT = "${helper.getAnnotationJavaText($token, 'DefaultText')}";
+#end##hasAnnotation(DefaultText)
 
     private String text;
 
+#if ($helper.hasAnnotation($token, 'DefaultText'))
+    public ${token.javaTypeName}() {
+        this(DEFAULT_TEXT);
+    }
+
+    public ${token.javaTypeName}(int offset, int line, int column) {
+        this(DEFAULT_TEXT, offset, line, column);
+    }
+
+    public ${token.javaTypeName}(@Nonnull Token location) {
+        this(DEFAULT_TEXT, location);
+    }
+
+#end##hasAnnotation(DefaultText)
     public ${token.javaTypeName}(@Nonnull String text) {
         setText(text);
     }

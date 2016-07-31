@@ -15,6 +15,8 @@ public enum AnnotationName {
 
     /** Used on a TokenModel or CstProductionModel to indicate the user-visible name of the syntactic construct. */
     Named,
+    /** Used on a TokenModel to set a default text, even if the regex is variable. */
+    DefaultText,
     /** Used on a TokenModel to force a fixed text, even if the regex is variable. */
     Text,
     /** Used on a CstProductionModel to request deliberate early inlining. */

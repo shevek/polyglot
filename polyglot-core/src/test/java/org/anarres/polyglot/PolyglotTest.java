@@ -44,6 +44,8 @@ public class PolyglotTest extends AbstractPolyglotTest {
 
         assertTrue(root.isDirectory());
 
+        boolean fast = System.getProperty("test.fast") != null;
+
         Stopwatch stopwatch = Stopwatch.createStarted();
         for (File file : Files.fileTreeTraverser().preOrderTraversal(root)) {
             LOG.info("File is " + file);
@@ -53,6 +55,10 @@ public class PolyglotTest extends AbstractPolyglotTest {
                 continue;
             if (!file.getName().endsWith(".polyglot"))
                 if (!file.getName().endsWith(".sablecc"))
+                    continue;
+            if (fast)
+                if (file.length() > 16384)
+                    // if (file.getName().startsWith("private-"))
                     continue;
 
             // if (!file.getName().equals("java-type.polyglot"))
