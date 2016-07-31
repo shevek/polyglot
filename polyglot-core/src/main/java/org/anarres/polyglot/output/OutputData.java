@@ -27,7 +27,7 @@ public class OutputData {
     public OutputData(
             @Nonnull String name,
             @Nonnull GrammarModel grammar,
-            @Nonnull EncodedStateMachine.Lexer lexerMachine,
+            @CheckForNull EncodedStateMachine.Lexer lexerMachine,
             @Nonnull List<? extends EncodedStateMachine.Parser> parserMachines,
             @Nonnull Set<? extends Option> options) {
         this.name = name;
