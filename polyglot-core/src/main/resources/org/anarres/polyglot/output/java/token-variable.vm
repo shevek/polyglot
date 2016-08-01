@@ -69,6 +69,8 @@ public final class ${token.javaTypeName} extends Token
     }
 
     public void setText(@Nonnull String text) {
+        if (text == null)
+            throw new NullPointerException("Text was null.");
         this.text = text;
     }
 
