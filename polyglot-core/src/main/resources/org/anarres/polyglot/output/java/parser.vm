@@ -144,7 +144,7 @@ public class ${parserMachine.parserClassName} {
         }
     }
 
-#if ($helper.isLarge($automaton)) ## reduce-large
+#if ($helper.isLarge($parserMachine)) ## reduce-large
 
 #foreach ($alternativeGroup in $helper.alternativeGroups)
     /* Performs a reduction of an alternative in group ${alternativeGroup.index}. */
@@ -325,10 +325,12 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #end## alternative
 #end## production
 
-#if ($helper.isOption("CG_COMMENT"))
+##if ($helper.isOption("CG_COMMENT"))
+## automaton is no longer available because multiparsers blows up the heap if we keep them all around.
+#if (false)
     private static final int[][][] actionTable /* = {
         // Actions for parser, indexed by LR(k) state. Value is [token, shift, stack-state] or [token, reduce, production-number].
-#if (!$helper.isLarge($automaton))
+#if (!$helper.isLarge($parserMachine))
 #foreach ($state in $automaton.states)
         // Actions for S${state.index}
         {
@@ -343,7 +345,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 
     private static final int[][][] gotoTable /* = {
         // Goto for parser, indexed by LR(k) state. Value is [production, stack-state]
-#if (!$helper.isLarge($automaton))
+#if (!$helper.isLarge($parserMachine))
 #foreach ($state in $automaton.states)
         // Goto for S${state.index}
         {
@@ -356,7 +358,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
     } */ ;
 
     private static final String[] errorTable /* = {
-#if (!$helper.isLarge($automaton))
+#if (!$helper.isLarge($parserMachine))
 #foreach ($error in $automaton.errors)
         "$error",
 #end

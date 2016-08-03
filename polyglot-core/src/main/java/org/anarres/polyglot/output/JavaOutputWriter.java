@@ -65,10 +65,10 @@ public class JavaOutputWriter extends AbstractOutputWriter {
         process(executor, "parserexception.vm", "parser/ParserException.java");
         List<? extends EncodedStateMachine.Parser> parserMachines = getOutputData().getParserMachines();
         for (EncodedStateMachine.Parser parserMachine : parserMachines) {
-            LRAutomaton automaton = parserMachine.getAutomaton();
-            process(executor, "parser.vm", "parser/" + parserMachine.getParserClassName() + ".java", ImmutableMap.<String, Object>of("parserMachine", parserMachine, "automaton", automaton));
-            write(executor, parserMachine.getEncodedData(), "parser/" + parserMachine.getParserClassName() + ".dat");
+            // LRAutomaton automaton = parserMachine.getAutomaton();
+            process(executor, "parser.vm", "parser/" + parserMachine.getParserClassName() + ".java", ImmutableMap.<String, Object>of("parserMachine", parserMachine));
             process(executor, "start.vm", "node/" + parserMachine.getStartClassName() + ".java", ImmutableMap.<String, Object>of("parserMachine", parserMachine));
+            write(executor, parserMachine.getEncodedData(), "parser/" + parserMachine.getParserClassName() + ".dat");
         }
 
         processTemplates(executor);

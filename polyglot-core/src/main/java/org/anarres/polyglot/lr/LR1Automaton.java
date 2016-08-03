@@ -16,6 +16,6 @@ public class LR1Automaton extends LRAutomaton {
 
     @Override
     protected Iterable<? extends TokenModel> getLookaheads(LRItem item) {
-        return Collections.singletonList(((LR1Item)item).getLookahead());
+        return Collections.singletonList(((LR1Item) item).getLookahead());
     }
 }

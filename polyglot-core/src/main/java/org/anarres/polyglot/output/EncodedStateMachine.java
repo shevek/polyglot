@@ -80,7 +80,7 @@ public class EncodedStateMachine {
     public static EncodedStateMachine.Parser forParser(@Nonnull String name, @Nonnull LRAutomaton automaton, @Nonnull CstProductionModel cstProductionRoot, boolean inline) throws IOException {
         byte[] encodedData = newParserTable(automaton);
         String encodedText = newStringTable(encodedData, inline ? MAX_INLINE_TABLE_LENGTH : 0);
-        return new Parser(name, automaton, cstProductionRoot, encodedData, encodedText);
+        return new Parser(name, /* automaton, */ cstProductionRoot, encodedData, encodedText);
     }
 
     // This takes an argument with a different nullability annotation than the field.
@@ -154,13 +154,13 @@ public class EncodedStateMachine {
     public static class Parser extends EncodedStateMachine {
 
         private final String name;
-        private final LRAutomaton automaton;
+        // private final LRAutomaton automaton;
         private final CstProductionModel cstProductionRoot;
 
-        public Parser(@Nonnull String name, @Nonnull LRAutomaton automaton, @Nonnull CstProductionModel cstProductionRoot, @Nonnull byte[] encodedData, @CheckForNull String encodedText) {
+        public Parser(@Nonnull String name, /* @Nonnull LRAutomaton automaton, */ @Nonnull CstProductionModel cstProductionRoot, @Nonnull byte[] encodedData, @CheckForNull String encodedText) {
             super(encodedData, encodedText);
             this.name = name;
-            this.automaton = automaton;
+            // this.automaton = automaton;
             this.cstProductionRoot = cstProductionRoot;
         }
 
@@ -181,11 +181,8 @@ public class EncodedStateMachine {
             return "S" + getName();
         }
 
-        @Nonnull
-        public LRAutomaton getAutomaton() {
-            return automaton;
-        }
-
+        // See also JavaHelper.
+        // @Nonnull public LRAutomaton getAutomaton() { return automaton; }
         @Nonnull
         public CstProductionModel getCstProductionRoot() {
             return cstProductionRoot;

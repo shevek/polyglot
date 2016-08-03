@@ -5,7 +5,6 @@
  */
 package org.anarres.polyglot;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -36,6 +35,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizable;
+import org.anarres.polyglot.analysis.AnnotationChecker;
 import org.anarres.polyglot.analysis.ConflictChecker;
 import org.anarres.polyglot.analysis.EpsilonChecker;
 import org.anarres.polyglot.analysis.GrammarNormalizer;
@@ -289,6 +289,9 @@ public class PolyglotEngine {
             return grammar;
         dump(debugHandler.forTarget(GRAMMAR_PARSED, ".parsed.grammar"), grammar);
         // dump("Raw model", grammar);
+        new AnnotationChecker(errors, grammar).run();
+        if (errors.isFatal())
+            return grammar;
         new ReferenceLinker(errors, grammar).run();
         if (errors.isFatal())
             return grammar;

@@ -100,7 +100,7 @@ public class JavaHelper {
      * @return false if the grammar or the automaton is "large".
      */
     @TemplateProperty
-    public boolean isLarge(LRAutomaton automaton) {
+    public boolean isLarge(@CheckForNull LRAutomaton automaton) {
         if (grammar.cstProductions.size() > ALTERNATIVE_GROUP_SIZE)
             return true;
         if (automaton != null)
@@ -111,7 +111,10 @@ public class JavaHelper {
 
     @TemplateProperty
     public boolean isLarge(EncodedStateMachine.Parser parserMachine) {
-        return isLarge(parserMachine.getAutomaton());
+        // return isLarge(parserMachine.getAutomaton());
+        if (grammar.cstProductions.size() > ALTERNATIVE_GROUP_SIZE)
+            return true;
+        return false;
     }
 
     @Nonnegative
