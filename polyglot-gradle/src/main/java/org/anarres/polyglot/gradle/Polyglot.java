@@ -157,7 +157,7 @@ public class Polyglot extends SourceTask {
                     PolyglotEngine engine = new PolyglotEngine(file.getAbsoluteFile(), outputDir.getAbsoluteFile());
                     final File reportsDir = new File(getProject().getBuildDir(), "reports/polyglot");
                     engine.setOutputDir(OutputLanguage.html, new File(reportsDir, engine.getName()));
-                    engine.setOutputDir(OutputLanguage.graphviz, new File(reportsDir, engine.getName()));
+                    // engine.setOutputDir(OutputLanguage.graphviz, new File(reportsDir, engine.getName()));
                     File debugDir = getDebugDir();
                     if (debugDir != null) {
                         PolyglotEngine.mkdirs(debugDir, "debug directory");
