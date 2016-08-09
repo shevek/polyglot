@@ -292,7 +292,6 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #if ($helper.isOption("CG_COMMENT"))
         // Pop ${element}
 #end##CG_COMMENT
-        @Nonnull
         List<Object> ${element.javaFieldName}_nodes = pop();
 #foreach ($transformPrototype in $element.symbol.transformPrototypes)
 #set($javaTypeName = ${transformPrototype.javaTypeName})
