@@ -151,16 +151,21 @@ public class ${parserMachine.parserClassName} {
     private void reduce${alternativeGroup.javaMethodName}(@Nonnegative int reduction) throws ParserException {
         switch (reduction) {
 #foreach ($alternative in $alternativeGroup.alternatives)
-            case ${alternative.index}: { // Reduce ${alternative}
+#if ($parserMachine.isCstAlternativeReachable($alternative))
+#if ($helper.isOption("CG_COMMENT"))
+            // Reduce ${alternative}
+#end##CG_COMMENT
+            case ${alternative.index}: {
                 reduce${alternative.javaMethodName}();
                 return;
             }
-#end
+#end##isCstAlternativeReachable
+#end##foreach alternative in alternativeGroup
             default:
                 throw new IllegalStateException("Illegal reduction in group ${alternativeGroup.javaMethodName}: " + reduction);
         }
     }
-#end
+#end##foreach alternativeGroup
 
     // Grammar is large, using grouped strategy.
     /* Performs a reduction. */
@@ -189,10 +194,12 @@ public class ${parserMachine.parserClassName} {
             // Reductions for $production
 #end##CG_COMMENT
 #foreach ($alternative in $production.alternatives)
+#if ($parserMachine.isCstAlternativeReachable($alternative))
             case ${alternative.index}: { // Reduce ${alternative}
                 reduce${alternative.javaMethodName}();
                 return;
             }
+#end##isCstAlternativeReachable
 #end
 #end
             default:
@@ -265,6 +272,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 // Reductions for $production
 #end##CG_COMMENT
 #foreach ($alternative in $production.alternatives)## CstAlternativeModel
+#if ($parserMachine.isCstAlternativeReachable($alternative))
 #if ($helper.isOption("CG_COMMENT"))
 ## Not javadoc - performance sucks too hard.
     /*
@@ -322,6 +330,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #end##transformExpression
     }
 
+#end## isCstAlternativeReachable
 #end## alternative
 #end## production
 

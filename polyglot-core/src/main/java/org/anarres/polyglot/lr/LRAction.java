@@ -25,17 +25,20 @@ public abstract class LRAction {
                     public int getOpcode() {
                         return AbstractParser.SHIFT;
                     }
-                }, REDUCE {
+                },
+        REDUCE {
                     @Override
                     public int getOpcode() {
                         return AbstractParser.REDUCE;
                     }
-                }, ACCEPT {
+                },
+        ACCEPT {
                     @Override
                     public int getOpcode() {
                         return AbstractParser.ACCEPT;
                     }
-                }, ERROR {
+                },
+        ERROR {
                     @Override
                     public int getOpcode() {
                         return AbstractParser.ERROR;
@@ -65,7 +68,7 @@ public abstract class LRAction {
 
         @Nonnull
         @Override
-        public Indexed getValue() {
+        public Indexed getTarget() {
             return newState;
         }
 
@@ -95,7 +98,7 @@ public abstract class LRAction {
 
         @Nonnull
         @Override
-        public Indexed getValue() {
+        public Indexed getTarget() {
             return reduction;
         }
 
@@ -113,7 +116,7 @@ public abstract class LRAction {
         }
 
         @Override
-        public Indexed getValue() {
+        public Indexed getTarget() {
             return null;
         }
     }
@@ -122,11 +125,11 @@ public abstract class LRAction {
     public abstract Action getAction();
 
     @TemplateProperty
-    public abstract Indexed getValue();
+    public abstract Indexed getTarget();
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getAction()) ^ Objects.hashCode(getValue());
+        return Objects.hashCode(getAction()) ^ Objects.hashCode(getTarget());
     }
 
     @Override
@@ -138,7 +141,7 @@ public abstract class LRAction {
         if (!getClass().equals(obj.getClass()))
             return false;
         LRAction o = (LRAction) obj;
-        return Objects.equals(getValue(), o.getValue());
+        return Objects.equals(getTarget(), o.getTarget());
     }
 
     @Override

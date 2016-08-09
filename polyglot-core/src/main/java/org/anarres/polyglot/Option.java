@@ -27,6 +27,8 @@ public enum Option {
     CG_RUNTIME,
     /** Enables parent pointers in the generated code. */
     CG_PARENT,
+    /** Enables "large-mode", typically automatic, but can be forced. */
+    CG_LARGE,
     /** Enables threaded execution, which can generate simpler error messages. */
     PARALLEL,
     /** Log additional debugging information. */

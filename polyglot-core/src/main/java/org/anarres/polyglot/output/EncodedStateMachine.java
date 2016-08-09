@@ -7,6 +7,8 @@ package org.anarres.polyglot.output;
 
 import com.google.common.collect.Iterables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -21,6 +23,7 @@ import org.anarres.polyglot.lr.LRAction;
 import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.lr.LRState;
 import org.anarres.polyglot.model.AstProductionModel;
+import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstTransformPrototypeModel;
 import org.anarres.polyglot.model.GrammarModel;
@@ -78,14 +81,15 @@ public class EncodedStateMachine {
 
     @CheckForNull
     public static EncodedStateMachine.Parser forParser(@Nonnull String name, @Nonnull LRAutomaton automaton, @Nonnull CstProductionModel cstProductionRoot, boolean inline) throws IOException {
-        byte[] encodedData = newParserTable(automaton);
+        IntOpenHashSet cstAlternativeSet = new IntOpenHashSet();
+        byte[] encodedData = newParserTable(automaton, cstAlternativeSet);
         String encodedText = newStringTable(encodedData, inline ? MAX_INLINE_TABLE_LENGTH : 0);
-        return new Parser(name, /* automaton, */ cstProductionRoot, encodedData, encodedText);
+        return new Parser(name, /* automaton, */ cstProductionRoot, cstAlternativeSet, encodedData, encodedText);
     }
 
     // This takes an argument with a different nullability annotation than the field.
     @Nonnull
-    private static byte[] newParserTable(@Nonnull LRAutomaton automaton) throws IOException {
+    private static byte[] newParserTable(@Nonnull LRAutomaton automaton, @Nonnull IntSet cstAlternativeSet) throws IOException {
         ByteArrayOutputStream buf = new ByteArrayOutputStream(8192);
         try (DataOutputStream out = new DataOutputStream(buf)) {
             out.writeInt(automaton.getStates().size()); // parserStateCount
@@ -100,11 +104,17 @@ public class EncodedStateMachine {
 
                 for (Map.Entry<TokenModel, LRAction> e : state.getActionMap().entrySet()) {
                     // TokenModel key = e.getKey();
-                    // LRAction value = e.getValue();
+                    LRAction action = e.getValue();
                     out.writeInt(e.getKey().getIndex());
-                    out.writeInt(e.getValue().getAction().getOpcode());
-                    Indexed target = e.getValue().getValue();
+                    out.writeInt(action.getAction().getOpcode());
+                    Indexed target = action.getTarget();
                     out.writeInt(target == null ? -1 : target.getIndex());
+
+                    // Keep track of all the CstProductionModels which are reachable from this Parser.
+                    if (action instanceof LRAction.Reduce) {
+                        LRAction.Reduce reduceAction = (LRAction.Reduce) action;
+                        cstAlternativeSet.add(reduceAction.getRule().getIndex());
+                    }
                 }
 
                 out.writeInt(state.getGotoMap().size());
@@ -156,12 +166,16 @@ public class EncodedStateMachine {
         private final String name;
         // private final LRAutomaton automaton;
         private final CstProductionModel cstProductionRoot;
+        private final IntSet cstAlternativeSet;
 
-        public Parser(@Nonnull String name, /* @Nonnull LRAutomaton automaton, */ @Nonnull CstProductionModel cstProductionRoot, @Nonnull byte[] encodedData, @CheckForNull String encodedText) {
+        public Parser(@Nonnull String name, /* @Nonnull LRAutomaton automaton, */
+                @Nonnull CstProductionModel cstProductionRoot, @Nonnull IntSet cstAlternativeSet,
+                @Nonnull byte[] encodedData, @CheckForNull String encodedText) {
             super(encodedData, encodedText);
             this.name = name;
             // this.automaton = automaton;
             this.cstProductionRoot = cstProductionRoot;
+            this.cstAlternativeSet = cstAlternativeSet;
         }
 
         @Nonnull
@@ -186,6 +200,10 @@ public class EncodedStateMachine {
         @Nonnull
         public CstProductionModel getCstProductionRoot() {
             return cstProductionRoot;
+        }
+
+        public boolean isCstAlternativeReachable(@Nonnull CstAlternativeModel cstAlternative) {
+            return cstAlternativeSet.contains(cstAlternative.getIndex());
         }
 
         @Nonnull
