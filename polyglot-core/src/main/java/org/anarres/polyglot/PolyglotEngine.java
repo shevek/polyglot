@@ -272,7 +272,7 @@ public class PolyglotEngine {
             errors.addError(e.getToken(), "Failed to lex source file: " + e);
             return null;
         } catch (ParserException e) {
-            errors.addError(e.getToken(), "Failed to lex source file: " + e);
+            errors.addError(e.getToken(), "Failed to parse source file: " + e);
             return null;
         } finally {
             LOG.info("{}: Parsing took {}", getName(), stopwatch);
