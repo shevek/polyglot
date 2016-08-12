@@ -28,11 +28,11 @@ public enum AnnotationName {
     Public(CstProductionModel.class, AstProductionModel.class),
     Private(CstProductionModel.class, AstProductionModel.class),
     /** Used on a TokenModel to indicate that the token is ignored by the lexer. */
-    LexerIgnored(TokenModel.class),
+    LexerIgnore(TokenModel.class),
     /** Used on a TokenModel to indicate that it may be masked, i.e. never match. */
     LexerAllowMasking(TokenModel.class),
     /** Used on a TokenModel to indicate that the token is ignored by the parser. */
-    ParserIgnored(TokenModel.class),
+    ParserIgnore(TokenModel.class),
     /** Indicates that this is the start production for a Parser. */
     ParserStart(CstProductionModel.class),
     /** Used on an AstAlternativeModel to specify the Java superclass of the alternative. */

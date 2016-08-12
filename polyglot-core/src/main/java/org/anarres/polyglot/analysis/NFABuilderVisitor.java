@@ -234,7 +234,7 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
         TokenModel token = grammar.getToken(name);
         if (token == null)
             throw new IllegalStateException("No such token " + name);
-        if (token.hasAnnotation(AnnotationName.LexerIgnored))
+        if (token.hasAnnotation(AnnotationName.LexerIgnore))
             return;
 
         NFA nfa = getNFA(node.getMatcher());
@@ -254,7 +254,7 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
             // LOG.info("Building for state " + state.getName());
             NFA stateNfa = null;
             for (TokenModel token : grammar.tokens.values()) {
-                if (token.hasAnnotation(AnnotationName.LexerIgnored))
+                if (token.hasAnnotation(AnnotationName.LexerIgnore))
                     continue;
                 // Out of all the tokens which "start" in that state.
                 if (token.transitions.containsKey(state)

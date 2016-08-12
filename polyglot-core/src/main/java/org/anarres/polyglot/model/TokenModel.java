@@ -61,7 +61,7 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
         public static final int INDEX = 0;
 
         public EOF() {
-            super(INDEX, new TIdentifier("<eof>"), new ALiteralMatcher(), null, ImmutableMultimap.<String, AnnotationModel>of(AnnotationName.LexerIgnored.name(), AnnotationModel.forName(AnnotationName.LexerIgnored)));
+            super(INDEX, new TIdentifier("<eof>"), new ALiteralMatcher(), null, ImmutableMultimap.<String, AnnotationModel>of(AnnotationName.LexerIgnore.name(), AnnotationModel.forName(AnnotationName.LexerIgnore)));
             setJavadocComment(new TJavadocComment("/** A magic end-of-input token returned from the Lexer. */"));
         }
 
@@ -194,7 +194,7 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
     /** Returns true if this token is ignored by the parser. */
     @TemplateProperty
     public boolean isIgnored() {
-        return hasAnnotation(AnnotationName.ParserIgnored) || ignored;
+        return hasAnnotation(AnnotationName.ParserIgnore) || ignored;
     }
 
     @Deprecated

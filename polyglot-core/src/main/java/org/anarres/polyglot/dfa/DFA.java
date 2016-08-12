@@ -389,7 +389,7 @@ public class DFA implements GraphVizable, GraphVizScope {
         public TokenMask(@Nonnull TokenUniverse universe) {
             super(universe);
             for (TokenModel token : universe.getItems()) {
-                if (token.hasAnnotation(AnnotationName.LexerIgnored))
+                if (token.hasAnnotation(AnnotationName.LexerIgnore))
                     continue;
                 if (token.hasAnnotation(AnnotationName.LexerAllowMasking))
                     continue;
