@@ -208,15 +208,15 @@ public class Lexer implements ILexer {
         this.column = column;
     }
 
-    protected void unread(@Nonnull Token token) throws IOException {
-        String text = token.getText();
-        int length = text.length();
-        for (int i = length - 1; i >= 0; i--)
-            this.in.unread(text.charAt(i));
-        this.offset = token.getOffset();
-        this.line = token.getLine() - 1;
-        this.column = token.getColumn() - 1;
-    }
+##    protected void unread(@Nonnull Token token) throws IOException {
+##        String text = token.getText();
+##        int length = text.length();
+##        for (int i = length - 1; i >= 0; i--)
+##            this.in.unread(text.charAt(i));
+##        this.offset = token.getOffset();
+##        this.line = token.getLine() - 1;
+##        this.column = token.getColumn() - 1;
+##    }
 
     @Nonnull
     private String getText(/* @Nonnegative */ int acceptLength) {

@@ -107,7 +107,7 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
             return Collections.<O>emptyList();
         if (nodes.isEmpty())
             return Collections.<O>emptyList();
-        List<O> out = new ArrayList<O>();
+        List<O> out = new ArrayList<O>(nodes.size());
         for (Node node : nodes)
             out.add(applyTo(node, input));
         return out;

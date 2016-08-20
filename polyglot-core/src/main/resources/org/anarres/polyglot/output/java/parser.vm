@@ -32,6 +32,9 @@ public class ${parserMachine.parserClassName} {
     public static final int ERROR = 3;
 
     private static class State extends ArrayList<Object> {
+        public State() {
+            super(1);
+        }
         int state;
         String name;
     }
@@ -59,7 +62,6 @@ public class ${parserMachine.parserClassName} {
                 low = middle + 1;
             else
                 return entry;
-
         }
 
         // If the zero index is the default.
