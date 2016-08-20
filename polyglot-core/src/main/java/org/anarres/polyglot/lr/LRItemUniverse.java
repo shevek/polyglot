@@ -21,6 +21,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.PolyglotExecutor;
+import org.anarres.polyglot.analysis.StartChecker;
 import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
@@ -61,12 +62,26 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
     protected final GrammarModel grammar;
     protected final CstProductionModel cstProductionRoot;
     protected final CstAlternativeModel startProduction;
+    private final String machineName;
+    private final IgnoredProductionsSet ignoredProductions;
 
     public LRItemUniverse(@Nonnull Class<I> itemType, @Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         super(itemType);
         this.grammar = grammar;
         this.cstProductionRoot = cstProductionRoot;
         this.startProduction = newInitialProduction(cstProductionRoot);
+        this.machineName = StartChecker.getMachineName(cstProductionRoot);
+        this.ignoredProductions = new IgnoredProductionsSet(grammar, cstProductionRoot);
+    }
+
+    @Nonnull
+    public String getMachineName() {
+        return machineName;
+    }
+
+    @Nonnull
+    public IgnoredProductionsSet getIgnoredProductions() {
+        return ignoredProductions;
     }
 
     protected abstract void closure(@Nonnull Set<? super I> out, @Nonnull Queue<I> queue, @Nonnull I root, @Nonnull IntSet tmp);

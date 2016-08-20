@@ -1,0 +1,29 @@
+Package org.anarres.polyglot.test.parserignore;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+
+Productions
+
+	@ParserStart
+	root = pa { -> New root() } | pb { -> New root() } ;
+
+	@ParserStart('A')
+	pa =
+		{allowed} tok_a { -> New pa() } |
+		@ParserIgnore('A')
+		{forbidden} pc { -> New pa() } ;
+
+	pb { -> } = tok_b ;
+	
+	pc { -> } = tok_c ;
+
+Abstract Syntax Tree
+
+	root = ;
+
+	pa = ;
+

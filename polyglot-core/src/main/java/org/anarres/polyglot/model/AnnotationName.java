@@ -31,8 +31,8 @@ public enum AnnotationName {
     LexerIgnore(TokenModel.class),
     /** Used on a TokenModel to indicate that it may be masked, i.e. never match. */
     LexerAllowMasking(TokenModel.class),
-    /** Used on a TokenModel to indicate that the token is ignored by the parser. */
-    ParserIgnore(TokenModel.class),
+    /** Used on a TokenModel to indicate that the token or production is ignored by the parser with the given name(s). */
+    ParserIgnore(TokenModel.class, CstProductionModel.class, CstAlternativeModel.class),
     /** Indicates that this is the start production for a Parser. */
     ParserStart(CstProductionModel.class),
     /** Used on an AstAlternativeModel to specify the Java superclass of the alternative. */

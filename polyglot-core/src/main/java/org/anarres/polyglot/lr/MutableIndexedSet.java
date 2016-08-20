@@ -24,12 +24,10 @@ import org.slf4j.LoggerFactory;
 public class MutableIndexedSet<IndexedItem extends Indexed> extends AbstractIndexedSet<IndexedItem> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MutableIndexedSet.class);
-    private final IntOpenHashSet indices;
+    private final IntOpenHashSet indices = new IntOpenHashSet();
 
     public MutableIndexedSet(@Nonnull IndexedUniverse<IndexedItem> universe) {
         super(universe);
-        // this.indices = new BitSet(universe.size());
-        this.indices = new IntOpenHashSet();
     }
 
     /** Exposed to allow for allocation-free iteration. */

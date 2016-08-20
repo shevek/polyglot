@@ -23,6 +23,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.lr.FirstFunction;
+import org.anarres.polyglot.lr.IgnoredProductionsSet;
 import org.anarres.polyglot.lr.LRAction;
 import org.anarres.polyglot.lr.LRConflict;
 import org.anarres.polyglot.lr.LRDiagnosis;
@@ -61,7 +62,7 @@ public class AlgorithmicLRDiagnoser implements LRDiagnoser {
     public AlgorithmicLRDiagnoser(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         this.grammar = grammar;
         this.cstProductionRoot = cstProductionRoot;
-        this.firstFunction = new FirstFunction(grammar);
+        this.firstFunction = new FirstFunction(grammar, IgnoredProductionsSet.EMPTY);
 
         for (CstProductionModel production : grammar.getCstProductions()) {
             for (CstAlternativeModel alternative : production.getAlternatives().values()) {

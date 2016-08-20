@@ -81,13 +81,13 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
     private final TokenUniverse universe;
     private final Map<CstProductionModel, Result> firstMap = new HashMap<>();
 
-    public FirstFunction(@Nonnull TokenUniverse universe, @Nonnull GrammarModel grammar) {
+    public FirstFunction(@Nonnull TokenUniverse universe, @Nonnull GrammarModel grammar, @Nonnull IgnoredProductionsSet ignoredProductions) {
         this.universe = universe;
-        build(grammar);
+        build(grammar, ignoredProductions);
     }
 
-    public FirstFunction(@Nonnull GrammarModel grammar) {
-        this(new TokenUniverse(grammar), grammar);
+    public FirstFunction(@Nonnull GrammarModel grammar, @Nonnull IgnoredProductionsSet ignoredProductions) {
+        this(new TokenUniverse(grammar), grammar, ignoredProductions);
     }
 
     @Nonnull
@@ -97,8 +97,10 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
 
     // Dragon book page 189.
     // Mogensen page 55.
-    private void build(@Nonnull GrammarModel grammar) {
+    private void build(@Nonnull GrammarModel grammar, @Nonnull IgnoredProductionsSet ignoredProductions) {
         for (CstProductionModel production : grammar.cstProductions.values()) {
+            if (ignoredProductions.isIgnored(production))
+                continue;
             Result firstSet = new Result(universe);
             if (isPossiblyEmptyProduction(production))
                 firstSet.setNullable();
@@ -110,10 +112,14 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
         do {
             modified = false;
             for (CstProductionModel production : grammar.cstProductions.values()) {
+                if (ignoredProductions.isIgnored(production))
+                    continue;
                 // if (production == null) throw new IllegalStateException("No Production");
                 Result firstSet = firstMap.get(production);
                 // if (firstSet == null) throw new IllegalStateException("No FirstSet (Result) for " + production);
                 for (CstAlternativeModel alternative : production.alternatives.values()) {
+                    if (ignoredProductions.isIgnored(alternative))
+                        continue;
                     ELEMENT:
                     {
                         for (CstElementModel element : alternative.elements) {
@@ -150,6 +156,8 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
 
         if (DEBUG) {
             for (CstProductionModel production : grammar.cstProductions.values()) {
+                if (ignoredProductions.isIgnored(production))
+                    continue;
                 LOG.info("First-O: " + production.getName() + " = " + firstMap.get(production));
             }
         }

@@ -8,6 +8,7 @@ package org.anarres.polyglot.analysis;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.lr.FirstFunction;
+import org.anarres.polyglot.lr.IgnoredProductionsSet;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
@@ -29,7 +30,7 @@ public class EpsilonChecker implements Runnable {
 
     @Override
     public void run() {
-        FirstFunction firstFunction = new FirstFunction(grammar);
+        FirstFunction firstFunction = new FirstFunction(grammar, IgnoredProductionsSet.EMPTY);
         for (CstProductionModel cstProduction : grammar.cstProductions.values()) {
             for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
                 for (CstElementModel cstElement : cstAlternative.getElements()) {

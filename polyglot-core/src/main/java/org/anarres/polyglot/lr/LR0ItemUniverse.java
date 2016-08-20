@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.lr;
 
+import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.HashMap;
@@ -34,9 +35,16 @@ public class LR0ItemUniverse extends LRItemUniverse<LR0Item> {
 
     public LR0ItemUniverse(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         super(LR0Item.class, grammar, cstProductionRoot);
+
+        IgnoredProductionsSet ignoredProductions = getIgnoredProductions();
+
         addAlternative(startProduction);
         for (CstProductionModel production : grammar.cstProductions.values()) {
+            if (ignoredProductions.isIgnored(production))
+                continue;
             for (CstAlternativeModel alternative : production.alternatives.values()) {
+                if (ignoredProductions.isIgnored(alternative))
+                    continue;
                 addAlternative(alternative);
             }
         }
@@ -63,6 +71,7 @@ public class LR0ItemUniverse extends LRItemUniverse<LR0Item> {
     protected void closure(Set<? super LR0Item> out, Queue<LR0Item> queue, LR0Item root, IntSet tmp) {
         // Invariant: Queue contains all unwalked items (and possibly some duplicates).
         // When an item is removed from the queue, it is added to the result.
+        IgnoredProductionsSet ignoredProductions = getIgnoredProductions();
         queue.add(root);
         for (;;) {
             LR0Item item = queue.poll();
@@ -76,8 +85,10 @@ public class LR0ItemUniverse extends LRItemUniverse<LR0Item> {
             // LOG.info("Closing over item " + item);
             CstProductionModel subproduction = (CstProductionModel) symbol;
             for (CstAlternativeModel subalternative : subproduction.alternatives.values()) {
+                if (ignoredProductions.isIgnored(subalternative))
+                    continue;
                 // Allocation-free version of new LR0Item(subalternative, 0);
-                LR0Item subitem = itemMapInitial.get(subalternative);
+                LR0Item subitem = findZeroItem(subalternative);
                 if (!out.contains(subitem))
                     queue.add(subitem);
             }
@@ -87,6 +98,6 @@ public class LR0ItemUniverse extends LRItemUniverse<LR0Item> {
 
     @Override
     public LRAutomaton build(PolyglotExecutor executor) throws InterruptedException, ExecutionException {
-        return build(executor, new LR0Automaton(grammar, cstProductionRoot));
+        return build(executor, new LR0Automaton(grammar, cstProductionRoot, getIgnoredProductions()));
     }
 }

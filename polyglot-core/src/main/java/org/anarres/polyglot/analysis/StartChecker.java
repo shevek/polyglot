@@ -26,6 +26,12 @@ import org.anarres.polyglot.model.GrammarModel;
 public class StartChecker implements Runnable {
 
     @Nonnull
+    public static String getMachineName(@Nonnull CstProductionModel cstProductionRoot) {
+        AnnotationModel startAnnotation = cstProductionRoot.getAnnotation(AnnotationName.ParserStart);
+        return startAnnotation == null ? "" : getMachineName(startAnnotation);
+    }
+
+    @Nonnull
     public static String getMachineName(@Nonnull AnnotationModel annotation) {
         String value = annotation.getValue();
         if (value == null)

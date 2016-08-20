@@ -58,16 +58,23 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
 
     private static final Logger LOG = LoggerFactory.getLogger(LR1ItemUniverse.class);
     // private static final boolean DEBUG = false;
-    // Doesn't need to be global.
-    private final FirstFunction firstFunction = new FirstFunction(grammar);
+    private final FirstFunction firstFunction;
     // private final FollowFunction followFunction = new FollowFunction(grammar, firstFunction);
     private final Map<CstAlternativeModel, TokenMap<LR1Item>> itemMapInitial = new HashMap<>();
 
     public LR1ItemUniverse(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         super(LR1Item.class, grammar, cstProductionRoot);
+
+        IgnoredProductionsSet ignoredProductions = getIgnoredProductions();
+        this.firstFunction = new FirstFunction(grammar, ignoredProductions);
+
         addAlternative(startProduction);
         for (CstProductionModel production : grammar.cstProductions.values()) {
+            if (ignoredProductions.isIgnored(production))
+                continue;
             for (CstAlternativeModel alternative : production.alternatives.values()) {
+                if (ignoredProductions.isIgnored(alternative))
+                    continue;
                 addAlternative(alternative);
             }
         }
@@ -144,6 +151,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
         // Invariant: Queue contains all unwalked items (and possibly some duplicates).
         // When an item is removed from the queue, it is added to the result.
         // TokenUniverse tokenUniverse = firstFunction.getUniverse();
+        IgnoredProductionsSet ignoredProductions = getIgnoredProductions();
         queue.add(root);
         for (;;) {
             LR1Item item = queue.poll();
@@ -154,10 +162,12 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
             CstProductionSymbol symbol = item.getSymbol();
             if (!(symbol instanceof CstProductionModel))
                 continue;
+            CstAlternativeModel alternative = item.getProductionAlternative();
             CstProductionModel subproduction = (CstProductionModel) symbol;
             // if (DEBUG) LOG.info("Closing over " + item);
             for (CstAlternativeModel subalternative : subproduction.alternatives.values()) {
-                CstAlternativeModel alternative = item.getProductionAlternative();
+                if (ignoredProductions.isIgnored(subalternative))
+                    continue;
                 lookaheads.clear();
                 if (firstFunction.addFirst(lookaheads, alternative.getElements(), item.getPosition() + 1))  // Walk the remainder of the parent, hence the +1
                     lookaheads.add(item.getLookahead().getIndex());    // If everything was nullable, add the terminal.
@@ -184,6 +194,6 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
 
     @Override
     public LRAutomaton build(PolyglotExecutor executor) throws InterruptedException, ExecutionException {
-        return build(executor, new LR1Automaton());
+        return build(executor, new LR1Automaton(cstProductionRoot));
     }
 }

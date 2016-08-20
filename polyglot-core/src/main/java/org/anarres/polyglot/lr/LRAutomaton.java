@@ -38,10 +38,15 @@ import org.slf4j.LoggerFactory;
 public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
 
     private static final Logger LOG = LoggerFactory.getLogger(LRAutomaton.class);
+    private final String machineName;
     private final Map<ImmutableIndexedSet<? extends LRItem>, LRState> states = new LinkedHashMap<>();
     private List<String> errors;
     private final LRConflict.Map conflicts = new LRConflict.Map();
     private final Object lock = new Object();
+
+    public LRAutomaton(@Nonnull String machineName) {
+        this.machineName = machineName;
+    }
 
     @Nonnull
     @TemplateProperty

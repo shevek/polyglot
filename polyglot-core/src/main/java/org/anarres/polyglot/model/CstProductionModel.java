@@ -94,6 +94,16 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
         return false;
     }
 
+    public boolean isIgnored(@Nonnull String machineName) {
+        AnnotationModel annotation = getAnnotation(AnnotationName.ParserIgnore);
+        if (annotation == null)
+            return false;
+        String annotationValue = annotation.getValue();
+        if (annotationValue == null)
+            return true;
+        return machineName.equals(annotationValue);
+    }
+
     @Override
     public ACstProduction toNode() {
         List<AElement> transform = new ArrayList<>();

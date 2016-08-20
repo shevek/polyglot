@@ -57,6 +57,7 @@ import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.lr.LRConflict;
 import org.anarres.polyglot.diagnoser.AlgorithmicLRDiagnoser;
 import org.anarres.polyglot.diagnoser.LRDiagnoser;
+import org.anarres.polyglot.lr.IgnoredProductionsSet;
 import org.anarres.polyglot.lr.LRDiagnosis;
 import org.anarres.polyglot.lr.LRState;
 import org.anarres.polyglot.lr.TokenSet;
@@ -376,7 +377,7 @@ public class PolyglotEngine {
         CharSink sink = debugHandler.forTarget(FUNCTIONS, ".functions.txt");
         if (sink != null) {
             try (Writer writer = sink.openBufferedStream()) {
-                FirstFunction firstFunction = new FirstFunction(grammar);
+                FirstFunction firstFunction = new FirstFunction(grammar, IgnoredProductionsSet.EMPTY);
                 for (CstProductionModel production : grammar.cstProductions.values())
                     writer.write("FIRST " + production.getName() + " -> " + firstFunction.apply(production) + "\n");
                 for (CstProductionModel cstProductionRoot : grammar.getCstProductionRoots()) {

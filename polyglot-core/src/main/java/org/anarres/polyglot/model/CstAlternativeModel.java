@@ -190,6 +190,16 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
         return buf.toString();
     }
 
+    public boolean isIgnored(@Nonnull String machineName) {
+        AnnotationModel annotation = getAnnotation(AnnotationName.ParserIgnore);
+        if (annotation == null)
+            return getProduction().isIgnored(machineName);
+        String annotationValue = annotation.getValue();
+        if (annotationValue == null)
+            return true;
+        return machineName.equals(annotationValue);
+    }
+
     @Override
     public ACstAlternative toNode() {
         List<AElement> elements = new ArrayList<>();
