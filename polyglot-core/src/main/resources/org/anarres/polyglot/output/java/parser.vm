@@ -99,7 +99,8 @@ public class ${parserMachine.parserClassName} {
 
     @Nonnull
     private State pop() {
-        return stack.remove(stackPointer--);
+##        return stack.remove(stackPointer--);
+        return stack.get(stackPointer--);
     }
 
     protected void ignore(@Nonnull Token token) {
