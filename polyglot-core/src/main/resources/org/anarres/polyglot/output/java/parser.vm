@@ -20,9 +20,12 @@ import ${package}.analysis.Analysis;
 import ${package}.analysis.AnalysisAdapter;
 import ${package}.lexer.ILexer;
 import ${package}.lexer.LexerException;
+#if ($helper.isOption("CG_FINDBUGS"))
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+#end##CG_FINDBUGS
 
 #if ($helper.isOption("CG_FINDBUGS"))
-@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SKIPPED_CLASS_TOO_BIG")
+@SuppressFBWarnings("SKIPPED_CLASS_TOO_BIG")
 #end##CG_FINDBUGS
 public class ${parserMachine.parserClassName} {
 
@@ -37,6 +40,11 @@ public class ${parserMachine.parserClassName} {
         }
         int state;
         String name;
+
+        @SuppressWarnings({"unchecked"})
+        public <T> T t(@Nonnegative int index) {
+            return (T) get(index);
+        }
     }
 
     private final ILexer lexer;
@@ -287,14 +295,14 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #end##CG_COMMENT
     @Nonnull
 #if ($helper.isOption("CG_FINDBUGS"))
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
+    @SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
 #end##CG_FINDBUGS
     private void reduce${alternative.javaMethodName}() {
 #foreach ($element in $alternative.elementsReversed)## CstElementModel
 #if ($helper.isOption("CG_COMMENT"))
         // Pop ${element}
 #end##CG_COMMENT
-        List<Object> ${element.javaFieldName}_nodes = pop();
+        State ${element.javaFieldName}_nodes = pop();
 #foreach ($transformPrototype in $element.symbol.transformPrototypes)
 #set($javaTypeName = ${transformPrototype.javaTypeName})
 #if ($transformPrototype.list)
@@ -310,11 +318,10 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #else
         // @CheckForEmpty
 #end
-        @SuppressWarnings({"unchecked"})
 #if ($helper.isOption("CG_FINDBUGS"))
-        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
+        @SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
 #end
-        $javaTypeName ${element.javaFieldName}__${transformPrototype.name} = ($javaTypeName) ${element.javaFieldName}_nodes.get($foreach.count - 1);
+        $javaTypeName ${element.javaFieldName}__${transformPrototype.name} = ${element.javaFieldName}_nodes.t($foreach.count - 1);
 #end##transformPrototype
 
 #end##element
