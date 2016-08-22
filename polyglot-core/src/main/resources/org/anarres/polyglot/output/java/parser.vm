@@ -158,10 +158,9 @@ public class ${parserMachine.parserClassName} {
 #if ($helper.isOption("CG_COMMENT"))
             // Reduce ${alternative}
 #end##CG_COMMENT
-            case ${alternative.index}: {
+            case ${alternative.index}:
                 reduce${alternative.javaMethodName}();
                 return;
-            }
 #end##isCstAlternativeReachable
 #end##foreach alternative in alternativeGroup
             default:
@@ -175,10 +174,9 @@ public class ${parserMachine.parserClassName} {
     private void reduce(@Nonnegative int reduction) throws IOException, LexerException, ParserException {
         switch (reduction >> $helper.alternativeGroupShift) {
 #foreach ($alternativeGroup in $helper.alternativeGroups)
-            case ${alternativeGroup.index}: {
+            case ${alternativeGroup.index}:
                 reduce${alternativeGroup.javaMethodName}(reduction);
                 return;
-            }
 #end## alternativeGroup
             default:
                 throw new IllegalStateException("Illegal reduction: " + reduction);
@@ -192,16 +190,17 @@ public class ${parserMachine.parserClassName} {
     private void reduce(@Nonnegative int reduction) throws IOException, LexerException, ParserException {
         switch (reduction) {
 #foreach ($production in $grammar.cstProductions)
-
 #if ($helper.isOption("CG_COMMENT"))
             // Reductions for $production
 #end##CG_COMMENT
 #foreach ($alternative in $production.alternatives)
 #if ($parserMachine.isCstAlternativeReachable($alternative))
-            case ${alternative.index}: { // Reduce ${alternative}
+#if ($helper.isOption("CG_COMMENT"))
+            // Reduce ${alternative}
+#end##CG_COMMENT
+            case ${alternative.index}:
                 reduce${alternative.javaMethodName}();
                 return;
-            }
 #end##isCstAlternativeReachable
 #end
 #end
@@ -311,7 +310,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #else
         // @CheckForEmpty
 #end
-        @SuppressWarnings({"unchecked", "unused"})
+        @SuppressWarnings({"unchecked"})
 #if ($helper.isOption("CG_FINDBUGS"))
         @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
 #end
