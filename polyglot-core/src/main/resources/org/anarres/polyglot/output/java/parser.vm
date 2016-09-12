@@ -293,7 +293,6 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
      *          { -> #foreach ($transformExpression in $alternative.transformExpressions)$transformExpression#if($velocityHasNext), #end#end }
      */
 #end##CG_COMMENT
-    @Nonnull
     private void reduce${alternative.javaMethodName}() {
 #foreach ($element in $alternative.elementsReversed)## CstElementModel
 #if ($helper.isOption("CG_COMMENT"))
