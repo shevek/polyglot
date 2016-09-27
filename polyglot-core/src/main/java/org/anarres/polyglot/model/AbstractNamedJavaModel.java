@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.base.CharMatcher;
 import com.google.common.collect.Multimap;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.TIdentifier;
@@ -33,6 +34,11 @@ public abstract class AbstractNamedJavaModel extends AbstractNamedModel {
     @TemplateProperty
     public abstract String getJavaTypeName();
     // return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, getName()); }
+
+    @TemplateProperty("alternative.vm")
+    public boolean isJavaTypePrimitive() {
+        return CharMatcher.JAVA_LOWER_CASE.matchesAllOf(getJavaTypeName());
+    }
 
     /** Typically {@link CaseFormat#LOWER_CAMEL}. */
     @Nonnull
