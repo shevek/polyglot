@@ -69,6 +69,8 @@ public class StartChecker implements Runnable {
             if (!machineNames.add(machineName))
                 errors.addError(cstProduction.getLocation(), "Duplicate parser name '" + machineName + "' on CST production '" + cstProduction.getName() + "'.");
         }
+
+        // TODO: Check ParserIgnore on tokens and alts all refer to valid machine names.
     }
 
 }
