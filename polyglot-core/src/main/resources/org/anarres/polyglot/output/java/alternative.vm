@@ -11,6 +11,7 @@ import ${package}.analysis.Visitor;
 
 #parse("org/anarres/polyglot/output/java/macros.vm")
 
+#if ($helper.isOption("CG_APIDOC"))
 #if ($alternative.javadocComment)
 $alternative.javadocComment
 #elseif ($alternative.production.javadocComment)
@@ -19,6 +20,7 @@ $production.javadocComment
 ## No default javadoc - (a) information leakage, (b) javadoc performance sucks.
 ## /** ${alternative} */
 #end
+#end##CG_APIDOC
 #annotate($alternative)
 public class ${alternative.javaTypeName}
         extends $helper.getSuperClass($alternative, ${production.javaTypeName})
