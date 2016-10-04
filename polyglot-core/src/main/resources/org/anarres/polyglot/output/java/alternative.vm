@@ -58,10 +58,10 @@ public class ${alternative.javaTypeName}
 #foreach ($element in $alternative.elements)
         #if($element.nullable)@CheckForNull#{else}@Nonnull#{end}##
 #if ($element.list)
-        Iterable<? extends ${element.javaTypeName}> _${element.javaFieldName}_#if($velocityHasNext),#end
+ Iterable<? extends ${element.javaTypeName}> _${element.javaFieldName}_#if($velocityHasNext),#end
 
 #else##if element.list
-        ${element.javaTypeName} _${element.javaFieldName}_#if($velocityHasNext),#end
+ ${element.javaTypeName} _${element.javaFieldName}_#if($velocityHasNext),#end
 
 #end##if element.list
 #end##foreach alternative.elements
@@ -85,18 +85,18 @@ public class ${alternative.javaTypeName}
 #foreach ($element in $alternative.elements)
         #if($element.nullable)@CheckForNull#{else}@Nonnull#{end}##
 #if ($element.list)
-        Iterable<? extends ${element.javaTypeName}> _${element.javaFieldName}_,
+ Iterable<? extends ${element.javaTypeName}> _${element.javaFieldName}_,
 #else##if element.list
-        ${element.javaTypeName} _${element.javaFieldName}_,
+ ${element.javaTypeName} _${element.javaFieldName}_,
 #end##if element.list
 #end##foreach alternative.elements
 #foreach ($external in $alternative.externals)
         #if($external.nullable)@CheckForNull#{else}@Nonnull#{end}##
 #if ($external.list)
-        List<${external.javaTypeName}> _${external.javaFieldName}_#if($velocityHasNext),#end
+ List<${external.javaTypeName}> _${external.javaFieldName}_#if($velocityHasNext),#end
 
 #else##if external.list
-        ${external.javaTypeName} _${external.javaFieldName}_#if($velocityHasNext),#end
+ ${external.javaTypeName} _${external.javaFieldName}_#if($velocityHasNext),#end
 
 #end##if external.list
 #end##foreach alternative.externals
@@ -106,7 +106,7 @@ public class ${alternative.javaTypeName}
 #end##foreach alternative.elements
 #foreach ($external in $alternative.externals)
         set${external.javaMethodName}(_${external.javaFieldName}_);
-#end##foreach alternative.elements
+#end##foreach alternative.externals
     }
 #end##!externals.empty
 
