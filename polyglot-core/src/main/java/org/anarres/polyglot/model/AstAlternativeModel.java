@@ -91,6 +91,15 @@ public final class AstAlternativeModel extends AbstractNamedJavaModel implements
         return elements;
     }
 
+    @CheckForNull
+    public AstElementModel getElement(@Nonnull String name) {
+        for (AstElementModel element : getElements()) {
+            if (name.equals(element.getName()))
+                return element;
+        }
+        return null;
+    }
+
     @Nonnull
     @TemplateProperty
     public List<? extends AstElementModel> getExternals() {
@@ -103,6 +112,15 @@ public final class AstAlternativeModel extends AbstractNamedJavaModel implements
         List<AstElementModel> externals = new ArrayList<>(getExternals());
         Collections.reverse(externals);
         return externals;
+    }
+
+    @CheckForNull
+    public AstElementModel getExternal(@Nonnull String name) {
+        for (AstElementModel external : getExternals()) {
+            if (name.equals(external.getName()))
+                return external;
+        }
+        return null;
     }
 
     @Override

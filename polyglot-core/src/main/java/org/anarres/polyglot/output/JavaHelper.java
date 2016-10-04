@@ -158,7 +158,7 @@ public class JavaHelper {
 
     @Nonnull
     public boolean hasAnnotations(@Nonnull AstModel model, @Nonnull String name) {
-        return !model.getAnnotations().get(name).isEmpty();
+        return model.getAnnotations().containsKey(name);
     }
 
     /**

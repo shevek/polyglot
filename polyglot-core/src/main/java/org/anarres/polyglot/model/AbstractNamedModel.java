@@ -126,7 +126,7 @@ public abstract class AbstractNamedModel extends AbstractModel {
 
     @Nonnull
     public Collection<? extends AnnotationModel> getAnnotations(@Nonnull String name) {
-        return annotations.get(name);
+        return getAnnotations().get(name);
     }
 
     @Nonnull
@@ -145,7 +145,7 @@ public abstract class AbstractNamedModel extends AbstractModel {
     }
 
     public boolean hasAnnotation(@Nonnull String name) {
-        return annotations.containsKey(name);
+        return getAnnotations().containsKey(name);
     }
 
     public boolean hasAnnotation(@Nonnull AnnotationName name) {
