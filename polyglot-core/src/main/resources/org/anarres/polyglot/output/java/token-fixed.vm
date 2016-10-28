@@ -16,6 +16,7 @@ public final class ${token.javaTypeName} extends Token
         {
 
     public static final ${token.javaTypeName}[] EMPTY_ARRAY = new ${token.javaTypeName}[0];
+    public static final String DEFAULT_TEXT = "${token.javaText}";
 
     public ${token.javaTypeName}() {
     }
@@ -45,7 +46,7 @@ public final class ${token.javaTypeName} extends Token
 
     @Override
     public String getText() {
-        return "${token.javaText}";
+        return DEFAULT_TEXT;
     }
 
     @Override
