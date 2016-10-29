@@ -8,4 +8,7 @@
 #foreach ($annotation in $helper.getAnnotations($object, "javaAnnotation"))
     $annotation
 #end
+#if ($object.javaTypeName.endsWith("Exception") && $helper.isOption("CG_FINDBUGS"))
+@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("NM_CLASS_NOT_EXCEPTION")
+#end
 #end
