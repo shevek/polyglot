@@ -11,6 +11,11 @@ Principle and Language
 
 (TODO)
 
+Installation
+------------
+
+Run `bootstrap.sh` then `upgrade.sh`.
+
 Execution
 ---------
 
@@ -73,7 +78,7 @@ Implementation Details
 ----------------------
 
 Polyglot aims for the maximum possible performance for the practical
-developer. It will attempt fast strategies (SLR), and if they fails,
+developer. It will attempt fast strategies (SLR), and if they fail,
 it will attempt slower strategies (LR(1), LR(k)). It will use all
 CPU cores on the system, so your computer will go out to lunch during
 a build. However, the performance for LR(1) universes in excess of
@@ -88,6 +93,6 @@ Credits
 
 Polyglot is based on the specification (but not the code) of
 [SableCC](http://www.sablecc.org/) by Etienne Gagnon, and aims for
-backwards compatibility with all SableCC grammars and applications
-built on the generated code.
+limited backwards compatibility with all SableCC grammars and
+applications built on the generated code.
 
