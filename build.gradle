@@ -7,7 +7,7 @@ buildscript {
 	}
 
 	dependencies {
-		classpath 'org.anarres.gradle:gradle-stdproject-plugin:1.0.7'
+		classpath 'org.anarres.gradle:gradle-stdproject-plugin:1.0.8'
 		// classpath "org.anarres.gradle:gradle-sablecc-plugin:1.0.4"
 		// classpath 'org.anarres.sablecc:sablecc-gradle:3.7.1-SNAPSHOT'
 		classpath 'org.anarres.polyglot:polyglot-gradle:1.0.0'
@@ -167,8 +167,4 @@ project(':polyglot-maven') {
 
 		testCompile 'org.apache.maven.shared:maven-plugin-testing-harness:1.1'
 	}
-}
-
-wrapper {
-	gradleVersion = '3.2.1'
 }
