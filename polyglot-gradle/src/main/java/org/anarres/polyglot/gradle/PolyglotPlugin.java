@@ -160,7 +160,7 @@ public class PolyglotPlugin implements Plugin<Project> {
 
         CopySpec processResourcesTask = (CopySpec) project.getTasks().getByName(sourceSet.getProcessResourcesTaskName());
         processResourcesTask.with(
-                project.copySpec(Closure.IDENTITY)
+                project.copySpec()
                 .from(polyglotParserTask.getOutputDir())
                 .include("**/*.dat")
         );
