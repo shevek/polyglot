@@ -156,7 +156,7 @@ public abstract class AbstractOutputWriter implements OutputWriter {
             context.put(e.getKey(), e.getValue());
         File dstFile = newDestinationFile(dstFilePath);
         StringWriter writer = new StringWriter();
-        try (final Reader reader = source.openBufferedStream()) {
+        try (Reader reader = source.openBufferedStream()) {
             // try (Writer writer = sink.openBufferedStream()) {
             engine.evaluate(context, writer, dstFilePath, reader);
             // }
