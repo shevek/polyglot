@@ -3,7 +3,7 @@
 <head>
 <title>${grammarName}: $type ${model.name}</title>
 <link rel="stylesheet" type="text/css" href="stylesheet.css" title="Style">
-<script type="text/javascript" src="script.js"></script>
+##<script type="text/javascript" src="script.js"></script>
 </head>
 <body>
 
