@@ -11,7 +11,9 @@ import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
@@ -24,7 +26,9 @@ import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstModel;
 import org.anarres.polyglot.model.CstAlternativeModel;
+import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
+import org.anarres.polyglot.model.CstTransformPrototypeModel;
 import org.anarres.polyglot.model.GrammarModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +59,7 @@ public class JavaHelper {
         @Nonnull
         @TemplateProperty("parser.vm")
         public String getJavaMethodName() {
-            return "Group" + index;
+            return "G" + index;
         }
 
         /**
@@ -83,6 +87,12 @@ public class JavaHelper {
     private final Set<? extends Option> options;
     @Nonnull
     private final GrammarModel grammar;
+    private final ThreadLocal<Map<String, String>> locals = new ThreadLocal<Map<String, String>>() {
+        @Override
+        protected Map<String, String> initialValue() {
+            return new HashMap<>();
+        }
+    };
 
     public JavaHelper(@Nonnull Set<? extends Option> options, @Nonnull GrammarModel grammar) {
         this.options = options;
@@ -139,6 +149,52 @@ public class JavaHelper {
                 out.get(groupIndex).add(alternative);
             }
         }
+        return out;
+    }
+
+    public String beginLocalVariables() {
+        locals.remove();
+        return "";
+    }
+
+    public String endLocalVariables() {
+        locals.remove();
+        return "";
+    }
+
+    @Nonnull
+    public String getReduceMethodName(@Nonnull CstAlternativeModel model) {
+        if (options.contains(Option.CG_COMPACT))
+            return "r" + model.getIndex();
+        else
+            return "reduce" + model.getJavaMethodName();
+    }
+
+    @Nonnull
+    private String newCompactLocalName(@Nonnull String in) {
+        Map<String, String> locals = this.locals.get();
+        String out = locals.get(in);
+        if (out == null) {
+            out = "v" + locals.size();
+            locals.put(in, out);
+        }
+        // out = "/*" + in + "*/" + out;
+        return out;
+    }
+
+    @Nonnull
+    public String getLocalVariableName(@Nonnull CstElementModel element) {
+        String out = element.getJavaFieldName() + "_nodes";
+        if (options.contains(Option.CG_COMPACT))
+            out = newCompactLocalName(out);
+        return out;
+    }
+
+    @Nonnull
+    public String getLocalVariableName(@Nonnull CstElementModel element, @Nonnull CstTransformPrototypeModel transformPrototype) {
+        String out = element.getJavaFieldName() + "__" + transformPrototype.getName();
+        if (options.contains(Option.CG_COMPACT))
+            out = newCompactLocalName(out);
         return out;
     }
 

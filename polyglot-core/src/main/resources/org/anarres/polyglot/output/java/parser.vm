@@ -34,8 +34,9 @@ public class ${parserMachine.parserClassName} {
     public static final int ACCEPT = 2;
     public static final int ERROR = 3;
 
-    private static class State extends ArrayList<Object> {
-        public State() {
+    /** State. */
+    private static class S extends ArrayList<Object> {
+        public S() {
             super(1);
         }
         int state;
@@ -48,7 +49,7 @@ public class ${parserMachine.parserClassName} {
     }
 
     private final ILexer lexer;
-    private final List<State> stack = new ArrayList<State>();
+    private final List<S> stack = new ArrayList<S>();
     private int stackPointer = -1;   // Points to last valid state on stack.
 
     public ${parserMachine.parserClassName}(@Nonnull ILexer lexer) {
@@ -85,11 +86,11 @@ public class ${parserMachine.parserClassName} {
     }
 
     @Nonnull
-    private State push(@Nonnegative int state, @Nonnull String name) {
+    private S push(@Nonnegative int state, @Nonnull String name) {
         stackPointer++;
-        State out;
+        S out;
         if (stackPointer == stack.size()) {
-            out = new State();
+            out = new S();
             stack.add(out);
         } else {
             out = stack.get(stackPointer);
@@ -100,18 +101,25 @@ public class ${parserMachine.parserClassName} {
         return out;
     }
 
+    /* Goto, then push. */
+    @Nonnull
+    private S gp(@Nonnegative int productionIndex, @Nonnull String name) {
+        return push(goTo(productionIndex), name);
+    }
+
     @Nonnegative
     private int state() {
         return stack.get(stackPointer).state;
     }
 
     @Nonnull
-    private State pop() {
+    private S pop() {
 ##        return stack.remove(stackPointer--);
         return stack.get(stackPointer--);
     }
 
-    private <T> T pop1() {
+    /* Pop, and return the first transform result. */
+    private <T> T p() {
         return pop().t(0);
     }
 
@@ -171,7 +179,7 @@ public class ${parserMachine.parserClassName} {
             // Reduce ${alternative}
 #end##CG_COMMENT
             case ${alternative.index}:
-                reduce${alternative.javaMethodName}();
+                ${helper.getReduceMethodName($alternative)}();
                 return;
 #end##isCstAlternativeReachable
 #end##foreach alternative in alternativeGroup
@@ -211,7 +219,7 @@ public class ${parserMachine.parserClassName} {
             // Reduce ${alternative}
 #end##CG_COMMENT
             case ${alternative.index}:
-                reduce${alternative.javaMethodName}();
+                ${helper.getReduceMethodName($alternative)}();
                 return;
 #end##isCstAlternativeReachable
 #end
@@ -223,16 +231,23 @@ public class ${parserMachine.parserClassName} {
 
 #end
 
-    /* Implements a kind of left-associative addition for lists and items. */
-    private static class ListBuilder<T> extends ArrayList<T> {
+    /* ListBuilder. Implements a kind of left-associative addition for lists and items. */
+    private static class L<T> extends ArrayList<T> {
         @Nonnull
-        public ListBuilder<T> with(@Nonnull T value) {
+        public static <T> List<T> e() {
+            return Collections.<T>emptyList();
+        }
+
+        /* with(). */
+        @Nonnull
+        public L<T> n(@Nonnull T value) {
             add(value);
             return this;
         }
 
+        /* withAll(). */
         @Nonnull
-        public ListBuilder<T> withAll(@Nonnull Collection<? extends T> value) {
+        public L<T> l(@Nonnull Collection<? extends T> value) {
             addAll(value);
             return this;
         }
@@ -240,12 +255,12 @@ public class ${parserMachine.parserClassName} {
 
 #macro(list $root $indent)
 #if ($root.items.empty)
-${indent}Collections.<${root.javaTypeName}>emptyList()
+${indent}L.<${root.javaTypeName}>e()
 #else##not empty
-${indent}new ListBuilder<${root.javaTypeName}>()
+${indent}new L<${root.javaTypeName}>()
 #foreach ($item in $root.items)##
 ##if ($item.type == "reference" )##
-${indent}.with#if($item.listValue)All#end(
+${indent}.#if($item.listValue)l#{else}n#{end}(
 #set ($subindent = $indent + "    ")
 #expression($item, $subindent)
 
@@ -274,7 +289,7 @@ ${indent}new ${root.astAlternative.javaTypeName}(
 ${indent})##
 #elseif ($root.type == "reference")##
 ##${indent}// Element is ${root.element} , transform is ${root.transform}
-${indent}${root.element.javaFieldName}__${root.transform.name}##
+${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 #else
 #stop("ERROR: Unknown type $root.type")
 #end
@@ -297,13 +312,13 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
      *          { -> #foreach ($transformExpression in $alternative.transformExpressions)$transformExpression#if($velocityHasNext), #end#end }
      */
 #end##CG_COMMENT
-    private void reduce${alternative.javaMethodName}() {
+    private void ${helper.getReduceMethodName($alternative)}() {$helper.beginLocalVariables()
 #foreach ($element in $alternative.elementsReversed)## CstElementModel  {{
 #if ($helper.isOption("CG_COMMENT"))
         // Pop ${element}
 #end##CG_COMMENT
 #if ($element.symbol.transformPrototypes.size() != 1)
-        State ${element.javaFieldName}_nodes = pop();
+        S ${helper.getLocalVariableName($element)} = pop();
 #end## multiple transformPrototypes
 #foreach ($transformPrototype in $element.symbol.transformPrototypes)## {
 #set($javaTypeName = ${transformPrototype.javaTypeName})
@@ -323,15 +338,15 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #end
 #end##CG_JSR305_INTERNAL
 #if ($element.symbol.transformPrototypes.size() != 1)
-        $javaTypeName ${element.javaFieldName}__${transformPrototype.name} = ${element.javaFieldName}_nodes.t($foreach.count - 1);
+        $javaTypeName ${helper.getLocalVariableName($element, $transformPrototype)} = ${helper.getLocalVariableName($element)}.t($foreach.count - 1);
 #else## transformPrototypes.size()
-        $javaTypeName ${element.javaFieldName}__${transformPrototype.name} = pop1();
+        $javaTypeName ${helper.getLocalVariableName($element, $transformPrototype)} = p();
 #end## transformPrototypes.size()
 #end##transformPrototype                                                }
 ##
 #end##element                                                           }}
 ## This push has to happen after we have popped the items, as goTo() looks at the outstanding top state.
-        State out = push(goTo(${production.index}), "$production.descriptiveName");
+        S out = gp(${production.index}, "$production.descriptiveName");
 #foreach ($transformExpression in $alternative.transformExpressions)
 #if ($helper.isOption("CG_COMMENT"))
         // Generating: $transformExpression
@@ -341,7 +356,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 
         );
 #end##transformExpression
-    }
+    }$helper.endLocalVariables()
 
 #end## isCstAlternativeReachable
 #end## alternative

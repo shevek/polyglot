@@ -27,6 +27,8 @@ public enum Option {
     CG_JSR305_INTERNAL,
     /** Enables findbugs annotation generation. */
     CG_FINDBUGS,
+    /** Enables compact code generation. */
+    CG_COMPACT,
     /** Enables usage of common runtime interfaces. */
     CG_RUNTIME,
     /** Enables parent pointers in the generated code. */
