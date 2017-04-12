@@ -111,6 +111,10 @@ public class ${parserMachine.parserClassName} {
         return stack.get(stackPointer--);
     }
 
+    private <T> T pop1() {
+        return pop().t(0);
+    }
+
     protected void ignore(@Nonnull Token token) {
     }
 
@@ -294,12 +298,14 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
      */
 #end##CG_COMMENT
     private void reduce${alternative.javaMethodName}() {
-#foreach ($element in $alternative.elementsReversed)## CstElementModel
+#foreach ($element in $alternative.elementsReversed)## CstElementModel  {{
 #if ($helper.isOption("CG_COMMENT"))
         // Pop ${element}
 #end##CG_COMMENT
+#if ($element.symbol.transformPrototypes.size() != 1)
         State ${element.javaFieldName}_nodes = pop();
-#foreach ($transformPrototype in $element.symbol.transformPrototypes)
+#end## multiple transformPrototypes
+#foreach ($transformPrototype in $element.symbol.transformPrototypes)## {
 #set($javaTypeName = ${transformPrototype.javaTypeName})
 #if ($transformPrototype.list)
 #set($javaTypeName = "List<${javaTypeName}>")
@@ -307,6 +313,7 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #if ($helper.isOption("CG_COMMENT"))
         // Extract $element { -> $transformPrototype }
 #end##CG_COMMENT
+#if ($helper.isOption("CG_JSR305_INTERNAL"))
 #if (!$element.nullable)
         @Nonnull
 #elseif (!$element.list)
@@ -314,10 +321,15 @@ ${indent}${root.element.javaFieldName}__${root.transform.name}##
 #else
         // @CheckForEmpty
 #end
+#end##CG_JSR305_INTERNAL
+#if ($element.symbol.transformPrototypes.size() != 1)
         $javaTypeName ${element.javaFieldName}__${transformPrototype.name} = ${element.javaFieldName}_nodes.t($foreach.count - 1);
-#end##transformPrototype
-
-#end##element
+#else## transformPrototypes.size()
+        $javaTypeName ${element.javaFieldName}__${transformPrototype.name} = pop1();
+#end## transformPrototypes.size()
+#end##transformPrototype                                                }
+##
+#end##element                                                           }}
 ## This push has to happen after we have popped the items, as goTo() looks at the outstanding top state.
         State out = push(goTo(${production.index}), "$production.descriptiveName");
 #foreach ($transformExpression in $alternative.transformExpressions)

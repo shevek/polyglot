@@ -48,6 +48,8 @@ public class PolyglotOptionsTest extends AbstractPolyglotTest {
         parse(file, EnumSet.of(Option.LR1, Option.CG_APIDOC, Option.PARALLEL));
         parse(file, EnumSet.of(Option.LR1, Option.CG_FINDBUGS, Option.PARALLEL));
         parse(file, EnumSet.of(Option.LR1, Option.CG_COMMENT, Option.PARALLEL));
+        parse(file, EnumSet.of(Option.LR1, Option.CG_JSR305, Option.PARALLEL));
+        parse(file, EnumSet.of(Option.LR1, Option.CG_JSR305_INTERNAL, Option.PARALLEL));
         parse(file, EnumSet.of(Option.LR1, Option.PARALLEL));
         parse(file, EnumSet.of(Option.LR1, Option.CG_LARGE));
     }

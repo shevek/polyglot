@@ -121,7 +121,7 @@ public class PolyglotEngine {
     private final Map<OutputLanguage, File> outputDirs = new EnumMap<>(OutputLanguage.class);
     @Nonnull
     private DebugHandler debugHandler = DebugHandler.None.INSTANCE;
-    public final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_TABLES, Option.CG_PARENT, Option.CG_APIDOC, Option.CG_FINDBUGS, Option.PARALLEL);
+    public final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_TABLES, Option.CG_PARENT, Option.CG_APIDOC, Option.CG_JSR305, Option.CG_FINDBUGS, Option.PARALLEL);
     private final Table<OutputLanguage, String, File> templates = HashBasedTable.create();
 
     public PolyglotEngine(@Nonnull String name, @Nonnull CharSource input, @Nonnull File outputDir) {
