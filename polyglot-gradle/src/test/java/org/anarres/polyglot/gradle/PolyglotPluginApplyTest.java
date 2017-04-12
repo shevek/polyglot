@@ -1,9 +1,9 @@
 package org.anarres.polyglot.gradle;
 
-import com.google.common.io.Files;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.gradle.testkit.runner.BuildResult;
@@ -59,7 +59,7 @@ public class PolyglotPluginApplyTest {
     @Test
     public void testApply() throws Exception {
         String text = "plugins { id 'java';\nid 'org.anarres.polyglot' }\n";
-        Files.write(text, testProjectBuildFile, StandardCharsets.UTF_8);
+        Files.write(testProjectBuildFile.toPath(), Collections.singletonList(text));
 
         GradleRunner runner = GradleRunner.create()
                 .withGradleVersion(gradleVersion)
