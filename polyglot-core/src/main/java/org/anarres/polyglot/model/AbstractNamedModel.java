@@ -30,7 +30,7 @@ import org.anarres.polyglot.node.Token;
  *
  * @author shevek
  */
-public abstract class AbstractNamedModel extends AbstractModel {
+public abstract class AbstractNamedModel extends AbstractModel implements AnnotatedModel {
 
     public static class NameComparator implements Comparator<AbstractNamedModel> {
 

@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author shevek
  */
-public class JavaHelper {
+public class JavaHelper extends AbstractHelper {
 
     private static final int ALTERNATIVE_GROUP_SHIFT = 9;
     private static final int ALTERNATIVE_GROUP_SIZE = 1 << ALTERNATIVE_GROUP_SHIFT;
@@ -210,50 +210,6 @@ public class JavaHelper {
 
     public boolean isOption(@Nonnull String name) {
         return options.contains(Option.valueOf(name));
-    }
-
-    @Nonnull
-    public boolean hasAnnotations(@Nonnull AstModel model, @Nonnull String name) {
-        return model.getAnnotations().containsKey(name);
-    }
-
-    /**
-     * Returns the list of values of annotations on the given model with the given name.
-     *
-     * The returned list may contain nulls for annotations which did not specify a value.
-     *
-     * @param model The model from which to retrieve annotations.
-     * @param name The name of the annotations to retrieve.
-     * @return The list of values of annotations on the given model with the given name.
-     */
-    @Nonnull
-    public List<String> getAnnotations(@Nonnull AstModel model, @Nonnull String name) {
-        List<String> out = new ArrayList<>();
-        for (AnnotationModel annotation : model.getAnnotations().get(name))
-            out.add(annotation.getValue());
-        return out;
-    }
-
-    @Nonnull
-    public boolean hasAnnotation(@Nonnull AstModel model, @Nonnull String name) {
-        return hasAnnotations(model, name);
-    }
-
-    /**
-     * Returns the value of the unique annotation on the given model with the given name.
-     *
-     * If the annotation is missing or not unique, an exception is thrown.
-     * If the annotation has a null or no value, a null is returned.
-     * Note: A null return value does NOT mean that the annotation was missing.
-     *
-     * @param model The model from which to retrieve annotations.
-     * @param name The name of the annotations to retrieve.
-     * @return The value of the unique annotation on the given model with the given name.
-     */
-    @CheckForNull
-    public String getAnnotation(@Nonnull AstModel model, @Nonnull String name) {
-        AnnotationModel annotation = Iterables.getOnlyElement(model.getAnnotations().get(name));
-        return annotation.getValue();
     }
 
     /**

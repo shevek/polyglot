@@ -9,6 +9,32 @@
 <h1 class="bar">${listTitle}</h1>
 <div class="indexContainer">
 
+#if ($helper.isListAstProductions($listGroups) && !$helper.isListUnused($listGroups))
+<h2>AST Roots</h2>
+<ul>
+#foreach ($object in $helper.astProductionRootsAlphabetical)
+<li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a> (##
+#foreach ($annotation in $helper.getAstProductionParserStartAnnotations($object))##
+$!esc.html($annotation)Parser#{if}($velocityHasNext), #{end}##
+#end##getAnnotations
+)</li>
+#end
+</ul>
+#end##isListAstProductions
+
+#if ($helper.isListCstProductions($listGroups) && !$helper.isListUnused($listGroups))
+<h2>CST Roots</h2>
+<ul>
+#foreach ($object in $grammar.cstProductionRootsAlphabetical)
+<li><a href="${helper.a($object)}.html" target="objectFrame">${object.name}</a> (##
+#foreach ($annotation in $helper.getAnnotations($object, 'ParserStart'))##
+$!esc.html($annotation)Parser#{if}($velocityHasNext), #{end}##
+#end##getAnnotations
+)</li>
+#end
+</ul>
+#end##isListCstProductions
+
 #if ($helper.isListAstProductions($listGroups))
 <h2>AST Productions</h2>
 <ul>

@@ -193,6 +193,13 @@ public class GrammarModel implements GraphVizScope {
         return Collections.emptyList();
     }
 
+    @Nonnull
+    public List<? extends CstProductionModel> getCstProductionRootsAlphabetical() {
+        List<CstProductionModel> out = new ArrayList<CstProductionModel>(getCstProductionRoots());
+        Collections.sort(out, CstProductionModel.NameComparator.INSTANCE);
+        return out;
+    }
+
     @CheckForNull
     public CstProductionModel getCstProduction(@Nonnull String name) {
         return cstProductions.get(name);

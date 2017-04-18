@@ -5,15 +5,15 @@
  */
 package org.anarres.polyglot.model;
 
-import com.google.common.collect.Multimap;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.output.TemplateProperty;
 
 /**
+ * The set of models of things which might appear in the AST.
  *
  * @author shevek
  */
-public interface AstModel {
+public interface AstModel extends AnnotatedModel {
 
     @Nonnull
     @TemplateProperty
@@ -30,8 +30,4 @@ public interface AstModel {
     @Nonnull
     @TemplateProperty
     public String getJavaMethodName();
-
-    @Nonnull
-    @TemplateProperty
-    public Multimap<String, ? extends AnnotationModel> getAnnotations();
 }

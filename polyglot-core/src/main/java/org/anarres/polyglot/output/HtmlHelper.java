@@ -9,8 +9,11 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -20,6 +23,7 @@ import org.anarres.polyglot.model.AbstractElementModel;
 import org.anarres.polyglot.model.AbstractModel;
 import org.anarres.polyglot.model.AbstractNamedModel;
 import org.anarres.polyglot.model.AnnotationModel;
+import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstProductionModel;
@@ -51,7 +55,7 @@ import org.anarres.polyglot.node.PMatcher;
  *
  * @author shevek
  */
-public class HtmlHelper {
+public class HtmlHelper extends AbstractHelper {
 
     private final ErrorHandler errors;
     private final GrammarModel grammar;
@@ -65,6 +69,10 @@ public class HtmlHelper {
     public static enum ListGroup {
 
         Helpers, Tokens, CstProductions, CstAlternatives, Externals, AstProductions, AstAlternatives, Unused;
+    }
+
+    public boolean isListUnused(@Nonnull Set<? extends ListGroup> groups) {
+        return groups.contains(ListGroup.Unused);
     }
 
     public boolean isListHelpers(@Nonnull Set<? extends ListGroup> groups) {
@@ -93,6 +101,29 @@ public class HtmlHelper {
 
     public boolean isListAstAlternatives(@Nonnull Set<? extends ListGroup> groups) {
         return groups.contains(ListGroup.AstAlternatives) && !grammar.getAstProductions().isEmpty();
+    }
+
+    @Nonnull
+    public List<AstProductionModel> getAstProductionRootsAlphabetical() {
+        List<AstProductionModel> out = new ArrayList<>();
+        for (CstProductionModel cstProduction : grammar.getCstProductionRoots()) {
+            for (CstTransformPrototypeModel cstTransform : cstProduction.getTransformPrototypes()) {
+                out.add(cstTransform.getAstProduction());
+            }
+        }
+        Collections.sort(out, AstProductionModel.NameComparator.INSTANCE);
+        return out;
+    }
+
+    @Nonnull
+    public List<String> getAstProductionParserStartAnnotations(@Nonnull AstProductionModel model) {
+        List<String> out = new ArrayList<>();
+        for (CstProductionModel cstProduction : astCstProductionUsage.get(model)) {
+            for (AnnotationModel annotation : cstProduction.getAnnotations(AnnotationName.ParserStart)) {
+                out.add(annotation.getValue());
+            }
+        }
+        return out;
     }
 
     @Nonnull
