@@ -76,13 +76,4 @@ public class CstElementModel extends AbstractElementModel<CstProductionSymbol> {
                 getUnaryOperator().newUnOp(),
                 Collections.<AAnnotation>emptyList());
     }
-
-    @Override
-    public String toString() {
-        String name = getName();
-        String symbolName = getSymbolName();
-        if (name.equals(symbolName))
-            return name;
-        return "[" + name + "]:" + symbolName;
-    }
 }
