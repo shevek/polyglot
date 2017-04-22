@@ -90,7 +90,7 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
      * @return The return value of node.apply(this, input), or null if node is null.
      */
     @CheckForNull
-    public O applyTo(@CheckForNull Node node, I input) throws X {
+    public O applyTo(@CheckForNull Visitable node, I input) throws X {
         if (node == null)
             return null;
         return node.apply(this, input);
@@ -102,13 +102,13 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
      * @return The list of return values from the node.apply() calls, with null for null nodes.
      */
     @Nonnull
-    public List<O> applyTo(@CheckForNull Collection<? extends Node> nodes, I input) throws X {
+    public List<O> applyTo(@CheckForNull Collection<? extends Visitable> nodes, I input) throws X {
         if (nodes == null)
             return Collections.<O>emptyList();
         if (nodes.isEmpty())
             return Collections.<O>emptyList();
         List<O> out = new ArrayList<O>(nodes.size());
-        for (Node node : nodes)
+        for (Visitable node : nodes)
             out.add(applyTo(node, input));
         return out;
     }
@@ -119,11 +119,11 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
      * @return The list of return values from the node.apply() calls, with null for null nodes.
      */
     @Nonnull
-    public List<O> applyTo(@CheckForNull Iterable<? extends Node> nodes, I input) throws X {
+    public List<O> applyTo(@CheckForNull Iterable<? extends Visitable> nodes, I input) throws X {
         if (nodes == null)
             return Collections.<O>emptyList();
         List<O> out = new ArrayList<O>();
-        for (Node node : nodes)
+        for (Visitable node : nodes)
             out.add(applyTo(node, input));
         if (out.isEmpty())
             return Collections.<O>emptyList();

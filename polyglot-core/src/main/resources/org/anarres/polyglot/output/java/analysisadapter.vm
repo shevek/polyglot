@@ -102,17 +102,17 @@ public class AnalysisAdapter implements Analysis {
     }
 
     /** Equivalent to node.apply(this) with safety against nulls. */
-    public void applyTo(@CheckForNull Node node) {
+    public void applyTo(@CheckForNull Switchable node) {
         if (node == null)
             return;
         node.apply(this);
     }
 
     /** Equivalent to for (node in nodes) node.apply(this) with safety against nulls. */
-    public void applyTo(@CheckForNull Iterable<? extends Node> nodes) {
+    public void applyTo(@CheckForNull Iterable<? extends Switchable> nodes) {
         if (nodes == null)
             return;
-        for (Node node : nodes)
+        for (Switchable node : nodes)
             applyTo(node);
     }
 }
