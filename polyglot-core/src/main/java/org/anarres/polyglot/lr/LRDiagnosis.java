@@ -55,6 +55,11 @@ public class LRDiagnosis extends HashMap<LRAction, Path> {
             return alternative;
         }
 
+        @Nonnegative
+        public int getPosition() {
+            return position;
+        }
+
         @Override
         public void toStringBuilder(StringBuilder buf) {
             List<CstElementModel> elements = alternative.elements;
@@ -91,6 +96,9 @@ public class LRDiagnosis extends HashMap<LRAction, Path> {
 
         public Path(@Nonnull Collection<? extends Frame> c) {
             super(c);
+        }
+
+        public Path() {
         }
 
         public void toStringBuilder(@Nonnull StringBuilder buf) {

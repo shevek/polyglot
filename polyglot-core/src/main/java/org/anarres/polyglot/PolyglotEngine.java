@@ -57,6 +57,7 @@ import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.lr.LRConflict;
 import org.anarres.polyglot.diagnoser.AlgorithmicLRDiagnoser;
 import org.anarres.polyglot.diagnoser.LRDiagnoser;
+import org.anarres.polyglot.diagnoser.SimpleLRDiagnoser;
 import org.anarres.polyglot.lr.IgnoredProductionsSet;
 import org.anarres.polyglot.lr.LRDiagnosis;
 import org.anarres.polyglot.lr.LRState;
@@ -470,6 +471,8 @@ public class PolyglotEngine {
 
     @Nonnull
     private LRDiagnoser newLRDiagnoser(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
+        if (true)
+            return new SimpleLRDiagnoser(grammar, cstProductionRoot);
         try {
             Class<?> factoryType = Class.forName("org.anarres.polyglot.diagnoser.ChocoLRDiagnoser$Factory");
             LRDiagnoser.Factory factory = factoryType.asSubclass(LRDiagnoser.Factory.class).newInstance();
