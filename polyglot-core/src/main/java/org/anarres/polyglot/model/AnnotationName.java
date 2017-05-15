@@ -35,6 +35,8 @@ public enum AnnotationName {
     ParserIgnore(TokenModel.class, CstProductionModel.class, CstAlternativeModel.class),
     /** Indicates that this is the start production for a Parser. */
     ParserStart(CstProductionModel.class),
+    /** Indicates the relative precedence of a reduction. */
+    ParserPrecedence(CstAlternativeModel.class),
     /** Used on an AstAlternativeModel to specify the Java superclass of the alternative. */
     javaExtends(TokenModel.class, AstProductionModel.class),
     /** Used on an AstProductionModel or AstAlternativeModel to specify a Java interface for the alternative. */

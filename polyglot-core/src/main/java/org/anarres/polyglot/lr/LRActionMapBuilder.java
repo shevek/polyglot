@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.model.AnnotationModel;
+import org.anarres.polyglot.model.AnnotationName;
+import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +32,7 @@ public class LRActionMapBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(LRActionMapBuilder.class);
     // I think this is too sparse to be worth extending TokenMap.
     private final Map<TokenModel, LRAction> actions = new HashMap<>();
+    private final Map<TokenModel, String> actionPrecedence = new HashMap<>();
     // While we might imagine that this is lossy over <TokenModel, LRItem, LRAction>,
     // the extra information is useless, and we have to elide it manually.
     private final Table<TokenModel, LRAction, LRItem> actionItems = HashBasedTable.create();
@@ -37,12 +41,25 @@ public class LRActionMapBuilder {
     public void addAction(@Nonnull LRItem item, @Nonnull TokenModel key, @Nonnull LRAction value) {
         Preconditions.checkNotNull(key, "TokenModel was null.");
         Preconditions.checkNotNull(value, "LRAction was null.");
+
+        CstAlternativeModel cstAlternative = item.getProductionAlternative();
+        AnnotationModel annotation = cstAlternative.getAnnotation(AnnotationName.ParserPrecedence);
+        if (annotation != null) {
+            actionPrecedence.put(key, annotation.getValue());
+            actions.remove(key);
+            actionItems.row(key).clear();
+        }
+        else if (actionPrecedence.containsKey(key)) {
+            return;
+        }
+
         actions.put(key, value);
         actionItems.put(key, value, item);
     }
 
     public void clear() {
         actions.clear();
+        actionPrecedence.clear();
         actionItems.clear();
     }
 
