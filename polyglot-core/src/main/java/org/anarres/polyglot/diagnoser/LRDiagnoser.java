@@ -6,7 +6,6 @@
 package org.anarres.polyglot.diagnoser;
 
 import java.util.Set;
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.lr.LRConflict;
@@ -22,7 +21,7 @@ public interface LRDiagnoser {
 
     public static interface Factory {
 
-        @CheckForNull
+        @Nonnull
         public LRDiagnoser newDiagnoser(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot, @Nonnull Set<? extends Option> options);
     }
 

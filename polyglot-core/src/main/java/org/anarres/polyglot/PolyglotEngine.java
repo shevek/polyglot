@@ -468,7 +468,7 @@ public class PolyglotEngine {
         // NOTREACHED. Terminating the loop "normally" would return null here. :-(
     }
 
-    @CheckForNull
+    @Nonnull
     private LRDiagnoser newLRDiagnoser(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         try {
             Class<?> factoryType = Class.forName("org.anarres.polyglot.diagnoser.ChocoLRDiagnoser$Factory");
@@ -484,8 +484,11 @@ public class PolyglotEngine {
 
     @Nonnull
     protected void buildDiagnosis(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot, @Nonnull LRConflict.Map conflicts) {
+        if (conflicts.isEmpty())
+            return;
         Stopwatch stopwatch = Stopwatch.createStarted();
         if (isOption(Option.DIAGNOSIS)) {
+            LOG.info("{}: Diagnosing conflicts.", getName());
             LRDiagnoser diagnoser = newLRDiagnoser(grammar, cstProductionRoot);
             StringBuilder buf = new StringBuilder();
             for (LRConflict conflict : conflicts.values()) {
@@ -581,15 +584,13 @@ public class PolyglotEngine {
                         conflicts = automaton.getConflicts();
                         if (conflicts.isEmpty())
                             break AUTOMATON;
+                        buildDiagnosis(grammar, cstProductionRoot, conflicts);
                         if (errors.isFatal())
                             return false;
                         LOG.info("{}: LR(1) failed with {} conflicts; trying next strategy.", getName(), conflicts.size());
                     }
 
-                    if (conflicts != null)
-                        buildDiagnosis(grammar, cstProductionRoot, conflicts);
-                    else
-                        errors.addError(null, "Failed to build an LR automaton: No strategies enabled?");
+                    errors.addError(null, "Failed to build an automaton: No more strategies.");
                     return false;
                 }
                 parserMachines.add(EncodedStateMachine.forParser(machineName, automaton, cstProductionRoot, isOption(Option.CG_INLINE_TABLES)));
