@@ -25,12 +25,16 @@ import org.anarres.polyglot.node.PAnnotation;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TString;
 import org.anarres.polyglot.node.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author shevek
  */
 public abstract class AbstractNamedModel extends AbstractModel implements AnnotatedModel {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractNamedModel.class);
 
     public static class NameComparator implements Comparator<AbstractNamedModel> {
 
@@ -62,6 +66,7 @@ public abstract class AbstractNamedModel extends AbstractModel implements Annota
     protected static Multimap<String, ? extends AnnotationModel> annotations(@Nonnull ErrorHandler errors, @CheckForNull Iterable<? extends PAnnotation> nodes) {
         if (nodes == null)
             return ImmutableMultimap.of();
+        // LOG.info("Annotations in: " + Iterables.size(nodes));
         Multimap<String, AnnotationModel> out = HashMultimap.create();
         for (PAnnotation node : nodes) {
             AAnnotation a = (AAnnotation) node;
@@ -70,7 +75,7 @@ public abstract class AbstractNamedModel extends AbstractModel implements Annota
             // LOG.info("Annotation: " + m);
             out.put(m.getName(), m);
         }
-        // LOG.info("Annotations: " + out);
+        // LOG.info("Annotations out: " + out);
         return out;
     }
 
@@ -119,7 +124,7 @@ public abstract class AbstractNamedModel extends AbstractModel implements Annota
         return getName();
     }
 
-    @Nonnull
+    @Override
     public final Multimap<String, ? extends AnnotationModel> getAnnotations() {
         return annotations;
     }

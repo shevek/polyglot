@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
@@ -20,6 +21,8 @@ import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TTokArrow;
 import org.anarres.polyglot.output.TemplateProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A nonterminal symbol.
@@ -29,6 +32,8 @@ import org.anarres.polyglot.output.TemplateProperty;
  * @author shevek
  */
 public final class CstProductionModel extends AbstractNamedModel implements CstProductionSymbol, Indexed {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CstProductionModel.class);
 
     @Nonnull
     public static CstProductionModel forNode(@Nonnull ErrorHandler errors, @Nonnegative int index, @Nonnull ACstProduction node) {
@@ -94,14 +99,18 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
         return false;
     }
 
-    public boolean isIgnored(@Nonnull String machineName) {
-        AnnotationModel annotation = getAnnotation(AnnotationName.ParserIgnore);
-        if (annotation == null)
-            return false;
-        String annotationValue = annotation.getValue();
-        if (annotationValue == null)
-            return true;
-        return machineName.equals(annotationValue);
+    /** Passing null asks if ignored for all machines. */
+    public boolean isIgnored(@CheckForNull String machineName) {
+        // LOG.debug("isIgnored: " + machineName + "." + getName());
+        for (AnnotationModel annotation : getAnnotations(AnnotationName.ParserIgnore)) {
+            String annotationValue = annotation.getValue();
+            // LOG.info("Actual: " + annotationValue);
+            if (annotationValue == null)
+                return true;
+            if (annotationValue.equals(machineName))
+                return true;
+        }
+        return false;
     }
 
     @Override

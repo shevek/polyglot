@@ -263,10 +263,14 @@ public class GrammarModel implements GraphVizScope {
             }
         for (Map.Entry<String, CstProductionModel> e : cstProductions.entrySet()) {
             CstProductionModel production = e.getValue();
+            if (production.isIgnored(null))
+                continue;
             if (!isSingleAlternativeProduction(production))
                 graph.node(this, production).label(e.getKey());
             for (Map.Entry<String, CstAlternativeModel> f : production.alternatives.entrySet()) {
                 CstAlternativeModel alternative = f.getValue();
+                if (alternative.isIgnored(null))
+                    continue;
                 graph.node(this, alternative).label(f.getKey());
                 if (!isSingleAlternativeProduction(production))
                     graph.edge(this, production, alternative);
