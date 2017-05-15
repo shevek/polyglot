@@ -298,6 +298,14 @@ public class PolyglotEngine {
         if (errors.isFatal())
             return grammar;
         dump(debugHandler.forTarget(GRAMMAR_LINKED, ".linked.grammar"), grammar);
+        dump(debugHandler.forTarget(GRAMMAR_CST, ".cst.dot"), grammar.getCstGraphVizable());
+        dump(debugHandler.forTarget(GRAMMAR_AST, ".ast.dot"), grammar.getAstGraphVizable());
+        stopwatch.stop();
+        buildOutputs(executor, grammar,
+                null, Collections.<EncodedStateMachine.Parser>emptyList(),
+                Predicates.equalTo(OutputLanguage.html));
+        stopwatch.start();
+
         // dump("Linked model", grammar);
         new EpsilonChecker(errors, grammar).run();
         if (errors.isFatal())
@@ -308,13 +316,6 @@ public class PolyglotEngine {
         new ConflictChecker(errors, grammar).run();
         if (errors.isFatal())
             return grammar;
-        dump(debugHandler.forTarget(GRAMMAR_CST, ".cst.dot"), grammar.getCstGraphVizable());
-        dump(debugHandler.forTarget(GRAMMAR_AST, ".ast.dot"), grammar.getAstGraphVizable());
-        stopwatch.stop();
-        buildOutputs(executor, grammar,
-                null, Collections.<EncodedStateMachine.Parser>emptyList(),
-                Predicates.equalTo(OutputLanguage.html));
-        stopwatch.start();
 
         new GrammarNormalizer(errors, grammar).run();
         dump(debugHandler.forTarget(GRAMMAR_NORMALIZED, ".normalized.grammar"), grammar);
