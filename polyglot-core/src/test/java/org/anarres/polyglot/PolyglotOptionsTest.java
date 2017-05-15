@@ -43,7 +43,7 @@ public class PolyglotOptionsTest extends AbstractPolyglotTest {
         LOG.info("File is " + file);
 
         assertTrue(file.isFile());
-        parse(file, EnumSet.of(Option.LR1, Option.INLINE_TABLES, Option.PARALLEL));
+        parse(file, EnumSet.of(Option.LR1, Option.CG_INLINE_TABLES, Option.PARALLEL));
         parse(file, EnumSet.of(Option.LR1, Option.CG_PARENT, Option.PARALLEL));
         parse(file, EnumSet.of(Option.LR1, Option.CG_APIDOC, Option.PARALLEL));
         parse(file, EnumSet.of(Option.LR1, Option.CG_FINDBUGS, Option.PARALLEL));

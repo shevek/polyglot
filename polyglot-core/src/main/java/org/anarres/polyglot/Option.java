@@ -11,12 +11,14 @@ package org.anarres.polyglot;
  */
 public enum Option {
 
-    /** Enables SLR parser generation. *//** Enables SLR parser generation. */
+    /** Enables SLR parser generation. *//** Enables SLR parser generation. *//** Enables SLR parser generation. *//** Enables SLR parser generation. */
     SLR,
     /** Enables LR(1) parser generation. */
     LR1,
+    /** Enables the inliner to solve simple conflicts. */
+    INLINE_ON_CONFLICT,
     /** Enables inline table (base64/gzip) table generation. */
-    INLINE_TABLES,
+    CG_INLINE_TABLES,
     /** Enables API documentation generation. */
     CG_APIDOC,
     /** Enables additional comment generation. */

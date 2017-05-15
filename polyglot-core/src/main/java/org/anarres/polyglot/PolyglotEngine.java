@@ -121,7 +121,7 @@ public class PolyglotEngine {
     private final Map<OutputLanguage, File> outputDirs = new EnumMap<>(OutputLanguage.class);
     @Nonnull
     private DebugHandler debugHandler = DebugHandler.None.INSTANCE;
-    public final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_TABLES, Option.CG_PARENT, Option.CG_APIDOC, Option.CG_JSR305, Option.CG_FINDBUGS, Option.PARALLEL);
+    public final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_ON_CONFLICT, Option.CG_INLINE_TABLES, Option.CG_PARENT, Option.CG_APIDOC, Option.CG_JSR305, Option.CG_FINDBUGS, Option.PARALLEL);
     private final Table<OutputLanguage, String, File> templates = HashBasedTable.create();
 
     public PolyglotEngine(@Nonnull String name, @Nonnull CharSource input, @Nonnull File outputDir) {
@@ -367,7 +367,7 @@ public class PolyglotEngine {
                     LOG.warn("{}: {}: {}", getName(), ErrorHandler.toLocationString(token.getLocation()), buf);
             }
 
-            return EncodedStateMachine.forLexer(grammar, isOption(Option.INLINE_TABLES));
+            return EncodedStateMachine.forLexer(grammar, isOption(Option.CG_INLINE_TABLES));
         } finally {
             LOG.info("{}: Building lexer took {}", getName(), stopwatch);
         }
@@ -440,6 +440,8 @@ public class PolyglotEngine {
             // This has to be INFO or gradle -i doesn't show it.
             if (isOption(Option.VERBOSE))
                 LOG.info("{}: LR(1) conflicts are\n{}", getName(), conflicts);
+            if (!isOption(Option.INLINE_ON_CONFLICT))
+                return automaton;
 
             stopwatch = Stopwatch.createStarted();
             Inliner inliner = new Inliner(errors, grammar);
@@ -590,7 +592,7 @@ public class PolyglotEngine {
                         errors.addError(null, "Failed to build an LR automaton: No strategies enabled?");
                     return false;
                 }
-                parserMachines.add(EncodedStateMachine.forParser(machineName, automaton, cstProductionRoot, isOption(Option.INLINE_TABLES)));
+                parserMachines.add(EncodedStateMachine.forParser(machineName, automaton, cstProductionRoot, isOption(Option.CG_INLINE_TABLES)));
             }
 
             buildOutputs(executor, grammar, lexerMachine, parserMachines,
