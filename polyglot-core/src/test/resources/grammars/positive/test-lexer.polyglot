@@ -1,0 +1,26 @@
+Package org.anarres.polyglot.test.lexer;
+
+Helpers
+
+	all = [0 .. 0xFFFF];
+	sqchar = [all - '\''];
+
+Tokens
+
+	// This is wrong, don't use it in real code.
+	// I just wrote it to debug the NFA.
+	sqstr =
+		'\'' (sqchar | '\'\'')* '\'' |
+		'E' '\'' (sqchar | '\\\'')* '\'' ;
+
+Productions
+
+	// Page 229
+	// This should be LR(1) but not LR(0) or SLR(1).
+	program { -> root } =
+		sqstr { -> New root(sqstr) } ;
+
+Abstract Syntax Tree
+
+	root = sqstr ;
+

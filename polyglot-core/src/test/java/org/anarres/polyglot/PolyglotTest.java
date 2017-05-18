@@ -65,7 +65,6 @@ public class PolyglotTest extends AbstractPolyglotTest {
                 if (file.length() > 16384)
                     // if (file.getName().startsWith("private-"))
                     return false;
-            LOG.info("Accepting " + file);
             // if (!file.getName().equals("java-type.polyglot"))
             // if (!file.getName().equals("php4.sablecc"))
             // if (!file.getName().equals("polyglot.polyglot"))
@@ -102,8 +101,9 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // if (!file.getName().equals("test-token-constant.polyglot"))
             // if (!file.getName().equals("test-transform.polyglot"))
             // if (!file.getName().equals("test-weak.polyglot"))
-            // if (file.length() > 16384)
+            // if (!file.getName().equals("test-lexer.polyglot"))
             // return false;
+            LOG.info("Accepting " + file);
             return true;
         }
     }
