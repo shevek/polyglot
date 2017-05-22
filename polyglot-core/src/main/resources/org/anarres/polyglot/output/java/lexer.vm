@@ -84,10 +84,10 @@ public class Lexer implements ILexer {
             CHAR: {
                 switch (c) {
                     case 10:
+                        this.offset++;
                         if (this.cr) {
                             this.cr = false;
                         } else {
-                            this.offset++;
                             this.line++;
                             this.column = 0;
                         }
