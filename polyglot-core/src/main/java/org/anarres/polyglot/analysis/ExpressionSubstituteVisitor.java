@@ -100,7 +100,7 @@ public class ExpressionSubstituteVisitor implements CstTransformExpressionModel.
 
     @CheckForNull
     private List<? extends CstTransformExpressionModel> visitChildren(@Nonnull List<? extends CstTransformExpressionModel> inList, @Nonnull SubstitutionMap input, boolean excludeNulls) {
-        List<CstTransformExpressionModel> outList = new ArrayList<>();
+        List<CstTransformExpressionModel> outList = new ArrayList<>(inList.size());
         boolean mutated = false;
         for (CstTransformExpressionModel in : inList) {
             CstTransformExpressionModel out = in.apply(this, input);

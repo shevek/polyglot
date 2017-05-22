@@ -63,8 +63,8 @@ public abstract class AbstractNamedModel extends AbstractModel implements Annota
     }
 
     @Nonnull
-    protected static Multimap<String, ? extends AnnotationModel> annotations(@Nonnull ErrorHandler errors, @CheckForNull Iterable<? extends PAnnotation> nodes) {
-        if (nodes == null)
+    protected static Multimap<String, ? extends AnnotationModel> annotations(@Nonnull ErrorHandler errors, @CheckForNull Collection<? extends PAnnotation> nodes) {
+        if (nodes == null || nodes.isEmpty())
             return ImmutableMultimap.of();
         // LOG.info("Annotations in: " + Iterables.size(nodes));
         Multimap<String, AnnotationModel> out = HashMultimap.create();

@@ -48,8 +48,10 @@ public class GrammarNormalizer implements Runnable {
     private static class CstAlternativeSubstitute {
 
         private final StringBuilder name = new StringBuilder();
-        private final List<CstElementModel> elements = new ArrayList<>();
-        private final List<CstTransformExpressionModel> transformExpressions = new ArrayList<>();
+        private final int elementsSize;
+        private final List<CstElementModel> elements;
+        // After construction, this list remains a fixed size.
+        private final List<CstTransformExpressionModel> transformExpressions;
 
         public CstAlternativeSubstitute(@Nonnull CstAlternativeModel alternative) {
             // We can't use alternative.getSourceName() here because
@@ -60,13 +62,17 @@ public class GrammarNormalizer implements Runnable {
                 this.name.append(name.getText());
             else
                 this.name.append('$').append(alternative.getAlternativeIndex());
-            this.transformExpressions.addAll(alternative.getTransformExpressions());
+            this.elementsSize = alternative.elements.size();
+            this.elements = new ArrayList<>(elementsSize);
+            this.transformExpressions = new ArrayList<>(alternative.getTransformExpressions());
         }
 
         public CstAlternativeSubstitute(@Nonnull CstAlternativeSubstitute source) {
             this.name.append(source.name);
+            this.elementsSize = source.elementsSize;
+            this.elements = new ArrayList<>(elementsSize);
             this.elements.addAll(source.elements);
-            this.transformExpressions.addAll(source.transformExpressions);
+            this.transformExpressions = new ArrayList<>(source.transformExpressions);
         }
 
         @Nonnull
@@ -272,6 +278,8 @@ public class GrammarNormalizer implements Runnable {
                     int size = substitutes.size();
                     for (int i = 0; i < size; i++)
                         substitutes.add(new CstAlternativeSubstitute(substitutes.get(i)));
+                    if (substitutes.size() > 10000)
+                        LOG.warn("Lots of optional elements in " + cstAlternative.getName() + " have caused a substitute list of size " + substitutes.size() + ".");
                     // Now, without
                     ExpressionSubstituteVisitor.SubstitutionMap map = new ExpressionSubstituteVisitor.SubstitutionMap();
                     for (CstTransformPrototypeModel transformPrototype : cstElement.symbol.getTransformPrototypes()) {

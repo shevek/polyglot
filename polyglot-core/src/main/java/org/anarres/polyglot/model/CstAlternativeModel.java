@@ -72,7 +72,7 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
     private final int alternativeIndex;
     public final List<CstElementModel> elements = new ArrayList<>();
     /** @see CstProductionModel#transformPrototypes */
-    public final List<CstTransformExpressionModel> transformExpressions = new ArrayList<>();
+    public final List<CstTransformExpressionModel> transformExpressions = new ArrayList<>(1);   // We very rarely get more than one.
     public final LRAction.Reduce reduceActionCache = new LRAction.Reduce(this);
 
     private CstAlternativeModel(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull Token location, @CheckForNull TIdentifier name, @Nonnegative int alternativeIndex, Multimap<String, ? extends AnnotationModel> annotations) {
