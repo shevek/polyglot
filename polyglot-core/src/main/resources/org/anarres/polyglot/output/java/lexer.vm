@@ -223,6 +223,7 @@ public class Lexer implements ILexer {
         return this.text.substring(0, acceptLength);
     }
 
+#if ($helper.isOption("CG_COMMENT"))
     private static final int[][][][] gotoTable /* = {
 #foreach ($state in $grammar.states)
         // Transitions for ${state.name}, indexed by DFA state. Value is [start, end, dfa-state].
@@ -235,6 +236,9 @@ public class Lexer implements ILexer {
         },
 #end
     } */ ;
+#else##CG_COMMENT
+    private static final int[][][][] gotoTable;
+#end##CG_COMMENT
 
 #if ($helper.isOption("CG_COMMENT"))
     private static final int[][] acceptTable /* = {
