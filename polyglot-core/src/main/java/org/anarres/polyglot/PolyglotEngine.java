@@ -317,10 +317,12 @@ public class PolyglotEngine {
         if (errors.isFatal())
             return grammar;
 
+        LOG.debug("{}: Input grammar has {} terminals and {} alternatives.", getName(), grammar.getTokenMap().size(), grammar.getCstAlternativeCount());
         new GrammarNormalizer(errors, grammar).run();
         dump(debugHandler.forTarget(GRAMMAR_NORMALIZED, ".normalized.grammar"), grammar);
         if (errors.isFatal())
             return grammar;
+        LOG.debug("{}: Normalized grammar has {} alternatives.", getName(), grammar.getCstAlternativeCount());
 
         new TypeChecker(errors, grammar).run();
         if (errors.isFatal())

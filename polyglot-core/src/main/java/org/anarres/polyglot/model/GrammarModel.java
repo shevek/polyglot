@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizNode;
@@ -214,6 +215,14 @@ public class GrammarModel implements GraphVizScope {
 
     public boolean removeCstProduction(@Nonnull CstProductionModel cstProduction) {
         return cstProductions.remove(cstProduction.getName()) != null;
+    }
+
+    @Nonnegative
+    public int getCstAlternativeCount() {
+        int out = 0;
+        for (CstProductionModel cstProduction : cstProductions.values())
+            out += cstProduction.getAlternatives().size();
+        return out;
     }
 
     @Nonnull
