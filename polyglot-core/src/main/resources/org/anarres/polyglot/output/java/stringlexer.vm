@@ -11,86 +11,41 @@ import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
 
 /**
- * The default concrete lexer implementation.
+ * A fast string-reading concrete lexer implementation.
  */
-public class Lexer extends AbstractLexer {
+public class StringLexer extends AbstractLexer {
 
-    protected final PushbackReader in;
-
+    protected final String in;
     private int offset;
     private int line;
     private int column;
     private boolean cr;
-    private final StringBuilder text = new StringBuilder();
 
-    public Lexer(@Nonnull PushbackReader in) {
+    public StringLexer(@Nonnull String in) {
         this.in = in;
     }
 
-    @Nonnull
-    private static PushbackReader toPushbackReader(@Nonnull Reader in, @Nonnegative int lookahead_length) {
-        if (in instanceof PushbackReader)
-            return (PushbackReader) in;
-        return new PushbackReader(in, lookahead_length);
-    }
-
-    public Lexer(@Nonnull Reader in, @Nonnegative int lookahead_length) {
-        this(toPushbackReader(in, lookahead_length));
-    }
-
-    protected void filter() throws LexerException, IOException {
-    }
-
     @Override
-    protected Token getToken() throws IOException, LexerException {
+    protected Token getToken() throws LexerException {
         int dfa_state = 0;
 
-        int start_offset = this.offset;
-        int start_line = this.line;
-        int start_column = this.column;
+        final int start_offset = this.offset;
+        final int start_line = this.line;
+        final int start_column = this.column;
+        final String in = this.in;
+
+        int current_offset = this.offset;
 
         int accept_token = 0;
         int accept_offset = -1;
-        int accept_line = -1;
-        int accept_column = -1;
-        int accept_length = -1;
 
         int[][][] gotoTableEntry = AbstractLexer.gotoTable[this.state.id()];
         int[] acceptTableEntry = AbstractLexer.acceptTable[this.state.id()];
-        this.text.setLength(0);
 
         while (true) {
-            int c = in.read();
-
-            CHAR: {
-                switch (c) {
-                    case 10:
-                        this.offset++;
-                        if (this.cr) {
-                            this.cr = false;
-                        } else {
-                            this.line++;
-                            this.column = 0;
-                        }
-                        break;
-                    case 13:
-                        this.offset++;
-                        this.line++;
-                        this.column = 0;
-                        this.cr = true;
-                        break;
-                    case -1:
-                        dfa_state = -1;
-                        break CHAR;
-                    default:
-                        this.offset++;
-                        this.column++;
-                        this.cr = false;
-                        break;
-                }
-
-                this.text.append((char) c);
-
+            CHAR:
+            if (current_offset < in.length()) {
+                int c = in.charAt(current_offset++);
                 int[][] gotoTableItem = gotoTableEntry[dfa_state];
                 dfa_state = -1;
                 int low = 0;
@@ -109,17 +64,16 @@ public class Lexer extends AbstractLexer {
                         break;
                     }
                 }
-            }
+            } else {
+				dfa_state = -1;
+			}
 
             if (dfa_state >= 0) {
                 // If there was a valid transition found on this character.
                 int acceptTableItem = acceptTableEntry[dfa_state];
                 if (acceptTableItem != 0) {
                     accept_token = acceptTableItem;
-                    accept_length = this.text.length();
-                    accept_offset = this.offset;
-                    accept_line = this.line;
-                    accept_column = this.column;
+                    accept_offset = current_offset;
                 }
             }
             else {
@@ -135,13 +89,12 @@ public class Lexer extends AbstractLexer {
                             start_column + 1);
 #else## token not fixed
                         Token token = new ${token.javaTypeName}(
-                            getText(accept_length),
+							in.substring(start_offset, accept_offset),
                             start_offset,
                             start_line + 1,
                             start_column + 1);
 #end## token.fixed
-                        unread_except(accept_length);
-                        accept_at(accept_offset, accept_line, accept_column);
+                        accept_at(accept_offset);
 #if ($token.transitional)
 
                         switch (state) {
@@ -156,11 +109,15 @@ public class Lexer extends AbstractLexer {
                     }
 #end##foreach token
                     case 0: {
-                        if (this.text.length() > 0) {
+                        if (current_offset > start_offset) {
                             throw new LexerException(
-                                new InvalidToken(this.text.substring(0, 1), start_offset, start_line + 1, start_column + 1),
+                                new InvalidToken(
+									in.substring(start_offset, start_offset + 1),
+									start_offset,
+									start_line + 1,
+									start_column + 1),
                                 // "[" + (start_line + 1) + "," + (start_column + 1) + "] " +
-                                "Unknown token: " + this.text);
+                                "Unknown token: " + in.substring(start_offset, current_offset));
                         }
 
                         return new EOF(
@@ -176,31 +133,37 @@ public class Lexer extends AbstractLexer {
         }
     }
 
-    private void unread_except(/* @Nonnegative */ int acceptLength) throws IOException {
-        int length = this.text.length();
-        for (int i = length - 1; i >= acceptLength; i--) {
-            this.in.unread(this.text.charAt(i));
+    private void accept_at(int offset) {
+        int current_line = this.line;
+        int current_column = this.column;
+        boolean current_cr = this.cr;
+
+        for (int i = this.offset; i < offset; i++) {
+            int c = in.charAt(i);
+            switch (c) {
+                case 10:
+                    if (current_cr) {
+                        current_cr = false;
+                    } else {
+                        current_line++;
+                        current_column = 0;
+                    }
+                    break;
+                case 13:
+                    current_line++;
+                    current_column = 0;
+                    current_cr = true;
+                    break;
+                default:
+                    current_column++;
+                    current_cr = false;
+                    break;
+            }
         }
-    }
 
-    private void accept_at(int offset, int line, int column) {
         this.offset = offset;
-        this.line = line;
-        this.column = column;
-    }
-
-##    protected void unread(@Nonnull Token token) throws IOException {
-##        String text = token.getText();
-##        int length = text.length();
-##        for (int i = length - 1; i >= 0; i--)
-##            this.in.unread(text.charAt(i));
-##        this.offset = token.getOffset();
-##        this.line = token.getLine() - 1;
-##        this.column = token.getColumn() - 1;
-##    }
-
-    @Nonnull
-    private String getText(/* @Nonnegative */ int acceptLength) {
-        return this.text.substring(0, acceptLength);
+        this.line = current_line;
+        this.column = current_column;
+        this.cr = current_cr;
     }
 }

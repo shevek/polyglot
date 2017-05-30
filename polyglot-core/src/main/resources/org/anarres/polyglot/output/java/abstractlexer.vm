@@ -1,0 +1,141 @@
+/* ${header} */
+package ${grammar.package.packageName}.lexer;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.PushbackReader;
+import java.io.Reader;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import ${grammar.package.packageName}.node.*;
+
+/**
+ * An abstract base lexer class.
+ */
+public abstract class AbstractLexer implements ILexer {
+
+    protected State state = State.${grammar.states.get(0).name};
+    protected Token token;
+
+    protected void filter() throws LexerException, IOException {
+    }
+
+    @Override
+    public Token peek() throws LexerException, IOException {
+        while (token == null) {
+            token = getToken();
+            filter();
+        }
+
+        return token;
+    }
+
+    @Override
+    public Token next() throws LexerException, IOException {
+        Token out = peek();
+        token = null;
+        return out;
+    }
+
+    @Nonnull
+    protected abstract Token getToken() throws LexerException, IOException;
+
+#if ($helper.isOption("CG_COMMENT"))
+    protected static final int[][][][] gotoTable /* = {
+#foreach ($state in $grammar.states)
+        // Transitions for ${state.name}, indexed by DFA state. Value is [start, end, dfa-state].
+        {
+#if ($state.dfa)
+#foreach ($dfaState in $state.dfa.states)
+            { #foreach ($dfaTransition in $dfaState.transitions){$dfaTransition.startCode, $dfaTransition.endCode, $dfaTransition.destination.index}, #end}, // DFA State ${dfaState.index}
+#end##dfaState
+#end##state.dfa
+        },
+#end
+    } */ ;
+#else##CG_COMMENT
+    protected static final int[][][][] gotoTable;
+#end##CG_COMMENT
+
+#if ($helper.isOption("CG_COMMENT"))
+    protected static final int[][] acceptTable /* = {
+#foreach ($state in $grammar.states)
+        // Accept table for ${state.name}, indexed by DFA state. Value is token index. 0 is non-accepting.
+        { #if($state.dfa)#foreach ($dfaState in $state.dfa.states)${dfaState.acceptTokenIndex}, #end#end},
+#end
+    } */ ;
+#else##CG_COMMENT
+    protected static final int[][] acceptTable;
+#end##CG_COMMENT
+
+    public static enum State {
+#foreach ($state in $grammar.states)
+        ${state.name}(${state.index}),
+#end
+## Trailing comma is valid in Java.
+        ;
+
+        private final int id;
+
+        /* pp */ State(@Nonnegative int id) {
+            this.id = id;
+        }
+
+        @Nonnegative
+        public int id() {
+            return this.id;
+        }
+    }
+
+    private static void readArray(@Nonnull int[] out, @Nonnull DataInputStream in) throws IOException {
+        for (int i = 0; i < out.length; i++)
+            out[i] = in.readInt();
+    }
+
+    @Nonnull
+    private static int[][] readTable(@Nonnull DataInputStream in, @Nonnegative int sublength) throws IOException {
+        int[][] out = new int[in.readInt()][sublength];
+        for (int i = 0; i < out.length; i++)
+            readArray(out[i], in);
+        return out;
+    }
+
+    static {
+        try {
+            DataInputStream in = new DataInputStream(
+#if ($lexerMachine.inline)
+                new java.util.zip.GZIPInputStream(
+                    new java.io.ByteArrayInputStream(
+                        javax.xml.bind.DatatypeConverter.parseBase64Binary("$lexerMachine.encodedText")
+                    )
+                )
+#else
+                new java.io.BufferedInputStream(
+                    AbstractLexer.class.getResourceAsStream("Lexer.dat")
+                )
+#end
+            );
+
+            int lexerStateCount = in.readInt();
+            gotoTable = new int[lexerStateCount][][][];
+            acceptTable = new int[lexerStateCount][];
+
+            for (int lexerStateIndex = 0; lexerStateIndex < lexerStateCount; lexerStateIndex++) {
+                // DFA state count in this lexer state
+                int dfaStateCount = in.readInt();
+
+                gotoTable[lexerStateIndex] = new int[dfaStateCount][][];
+                acceptTable[lexerStateIndex] = new int[dfaStateCount];
+                for (int dfaStateIndex = 0; dfaStateIndex < dfaStateCount; dfaStateIndex++) {
+                    gotoTable[lexerStateIndex][dfaStateIndex] = readTable(in, 3);
+                    acceptTable[lexerStateIndex][dfaStateIndex] = in.readInt();
+                }
+            }
+
+            in.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load lexer table.", e);
+        }
+    }
+}

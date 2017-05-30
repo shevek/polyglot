@@ -78,7 +78,9 @@ public class JavaOutputWriter extends AbstractOutputWriter {
         process(executor, "lexerexception.vm", "lexer/LexerException.java");
         EncodedStateMachine.Lexer lexerMachine = getOutputData().getLexerMachine();
         if (lexerMachine != null) {
+            process(executor, "abstractlexer.vm", "lexer/AbstractLexer.java");
             process(executor, "lexer.vm", "lexer/Lexer.java");
+            process(executor, "stringlexer.vm", "lexer/StringLexer.java");
             write(executor, lexerMachine.getEncodedData(), "lexer/Lexer.dat");
         }
 
