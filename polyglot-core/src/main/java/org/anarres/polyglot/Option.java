@@ -37,6 +37,10 @@ public enum Option {
     CG_PARENT,
     /** Enables "large-mode", typically automatic, but can be forced. */
     CG_LARGE,
+    /** Forces linear-search in the lexer. */
+    CG_LEXER_LINEARSEARCH,
+    /** Forces binary-search in the lexer. */
+    CG_LEXER_BINARYSEARCH,
     /** Enables threaded execution, which can generate simpler error messages. */
     PARALLEL,
     /** Log additional debugging information. */

@@ -21,7 +21,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.lr.LRAutomaton;
-import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstModel;

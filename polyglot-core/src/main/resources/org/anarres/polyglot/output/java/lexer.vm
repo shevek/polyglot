@@ -55,7 +55,7 @@ public class Lexer extends AbstractLexer {
         int accept_column = -1;
         int accept_length = -1;
 
-        int[][][] gotoTableEntry = AbstractLexer.gotoTable[this.state.id()];
+        int[][] gotoTableEntry = AbstractLexer.gotoTable[this.state.id()];
         int[] acceptTableEntry = AbstractLexer.acceptTable[this.state.id()];
         this.text.setLength(0);
 
@@ -91,24 +91,8 @@ public class Lexer extends AbstractLexer {
 
                 this.text.append((char) c);
 
-                int[][] gotoTableItem = gotoTableEntry[dfa_state];
-                dfa_state = -1;
-                int low = 0;
-                int high = gotoTableItem.length - 1;
-
-                while (low <= high) {
-                    int middle = (low + high) >>> 1;
-                    int[] tableEntry = gotoTableItem[middle];
-
-                    if (c < tableEntry[0]) {
-                        high = middle - 1;
-                    } else if (c > tableEntry[1]) {
-                        low = middle + 1;
-                    } else {
-                        dfa_state = tableEntry[2];
-                        break;
-                    }
-                }
+                int[] gotoTableItem = gotoTableEntry[dfa_state];
+                dfa_state = search(gotoTableItem, c);
             }
 
             if (dfa_state >= 0) {
