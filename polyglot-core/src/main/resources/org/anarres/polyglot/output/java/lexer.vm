@@ -59,7 +59,7 @@ public class Lexer extends AbstractLexer {
         int[] acceptTableEntry = AbstractLexer.acceptTable[this.state.id()];
         this.text.setLength(0);
 
-        while (true) {
+        for (;;) {
             int c = in.read();
 
             CHAR: {

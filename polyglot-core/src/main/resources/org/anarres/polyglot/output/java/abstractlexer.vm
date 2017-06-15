@@ -84,7 +84,7 @@ public abstract class AbstractLexer implements ILexer {
     protected abstract Token getToken() throws LexerException, IOException;
 
 #if ($helper.isOption("CG_COMMENT"))
-    protected static final int[][][] gotoTable /* = {
+    /* pp */ static final int[][][] gotoTable /* = {
 #foreach ($state in $grammar.states)
         // Transitions for ${state.name}, indexed by DFA state. Value is [start, end, dfa-state].
         {
@@ -97,18 +97,18 @@ public abstract class AbstractLexer implements ILexer {
 #end
     } */ ;
 #else##CG_COMMENT
-    protected static final int[][][] gotoTable;
+    /* pp */ static final int[][][] gotoTable;
 #end##CG_COMMENT
 
 #if ($helper.isOption("CG_COMMENT"))
-    protected static final int[][] acceptTable /* = {
+    /* pp */ static final int[][] acceptTable /* = {
 #foreach ($state in $grammar.states)
         // Accept table for ${state.name}, indexed by DFA state. Value is token index. 0 is non-accepting.
         { #if($state.dfa)#foreach ($dfaState in $state.dfa.states)${dfaState.acceptTokenIndex}, #end#end},
 #end
     } */ ;
 #else##CG_COMMENT
-    protected static final int[][] acceptTable;
+    /* pp */ static final int[][] acceptTable;
 #end##CG_COMMENT
 
     public static enum State {

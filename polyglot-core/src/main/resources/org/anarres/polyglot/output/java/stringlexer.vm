@@ -33,17 +33,19 @@ public class StringLexer extends AbstractLexer {
         final int start_line = this.line;
         final int start_column = this.column;
         final String in = this.in;
+        final int in_length = in.length();
 
         int current_offset = this.offset;
 
         int accept_token = 0;
         int accept_offset = -1;
 
-        int[][] gotoTableEntry = AbstractLexer.gotoTable[this.state.id()];
-        int[] acceptTableEntry = AbstractLexer.acceptTable[this.state.id()];
+        int state_id = this.state.id();
+        final int[][] gotoTableEntry = AbstractLexer.gotoTable[state_id];
+        final int[] acceptTableEntry = AbstractLexer.acceptTable[state_id];
 
-        while (true) {
-            if (current_offset < in.length()) {
+        for (;;) {
+            if (current_offset < in_length) {
                 int c = in.charAt(current_offset++);
                 int[] gotoTableItem = gotoTableEntry[dfa_state];
                 dfa_state = search(gotoTableItem, c);
