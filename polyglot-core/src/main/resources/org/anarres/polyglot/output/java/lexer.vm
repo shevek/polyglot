@@ -38,9 +38,6 @@ public class Lexer extends AbstractLexer {
         this(toPushbackReader(in, lookahead_length));
     }
 
-    protected void filter() throws LexerException, IOException {
-    }
-
     @Override
     protected Token getToken() throws IOException, LexerException {
         int dfa_state = 0;
