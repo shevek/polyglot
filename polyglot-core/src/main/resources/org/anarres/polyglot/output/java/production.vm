@@ -33,6 +33,6 @@ public abstract class ${production.javaTypeName}
     @Override
     public abstract ${production.javaTypeName} clone();
 
-    @Nonnull
+    @Override
     public abstract ${production.javaTypeName} clone(@Nonnull CloneListener listener);
 }

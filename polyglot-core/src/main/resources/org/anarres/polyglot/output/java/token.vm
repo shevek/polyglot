@@ -100,7 +100,7 @@ public abstract class Token extends Node implements IToken {
     @Override
     public abstract Token clone();
 
-    @Nonnull
+    @Override
     public abstract Token clone(@Nonnull CloneListener listener);
 
     @Override
