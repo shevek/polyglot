@@ -42,7 +42,7 @@ public class ${parserMachine.parserClassName} {
         int state;
         String name;
 
-        @SuppressWarnings({"unchecked"})
+        @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
         public <T> T t(@Nonnegative int index) {
             return (T) get(index);
         }
@@ -119,6 +119,7 @@ public class ${parserMachine.parserClassName} {
     }
 
     /* Pop, and return the first transform result. */
+    @SuppressWarnings("TypeParameterUnusedInFormals")
     private <T> T p() {
         return pop().t(0);
     }
