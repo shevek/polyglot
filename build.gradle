@@ -69,7 +69,7 @@ project(':polyglot-core') {
 	dependencies {
 		compile 'org.slf4j:slf4j-api:1.7.12'
 		compile 'com.google.code.findbugs:annotations:2.0.3'
-		compile 'com.google.guava:guava:18.0'
+		compile 'com.google.guava:guava-jdk5:17.0'
 		compile 'org.anarres:jcpp:1.4.11'
 		compile 'org.anarres.graphviz:graphviz-builder:1.0.3'
 		compile 'org.anarres.jdiagnostics:jdiagnostics:1.0.2'
