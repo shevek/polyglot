@@ -72,7 +72,7 @@ public abstract class AbstractLexer implements ILexer {
 #if ($helper.isOption("CG_LEXER_LINEARSEARCH"))
         return search_linear(gotoTable, c);
 #elseif ($helper.isOption("CG_LEXER_BINARYSEARCH"))
-		return search_binary(gotoTable, c);
+        return search_binary(gotoTable, c);
 #else
         if (gotoTable.length > 15)
             return search_binary(gotoTable, c);
