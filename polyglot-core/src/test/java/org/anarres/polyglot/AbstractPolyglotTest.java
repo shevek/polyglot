@@ -33,7 +33,8 @@ public abstract class AbstractPolyglotTest {
     protected final File destinationDir = new File("../polyglot-tests/build/generated-sources/polyglot-java");
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
+        PolyglotEngine.deleteChildren(destinationDir, "Test cleanup");
         destinationDir.mkdirs();
     }
 

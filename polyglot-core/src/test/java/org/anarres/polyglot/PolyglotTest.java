@@ -7,7 +7,6 @@ package org.anarres.polyglot;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.FluentIterable;
 import com.google.common.io.Files;
 import java.io.File;
 import javax.annotation.Nonnull;
