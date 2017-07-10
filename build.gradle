@@ -140,7 +140,6 @@ project(':polyglot-gradle') {
 		}
 		compile gradleApi()
 		compile 'org.anarres.gradle:gradle-velocity-plugin:1.0.7'
-		compile 'com.google.guava:guava:18.0'
 
 		testCompile gradleTestKit()
 	}
