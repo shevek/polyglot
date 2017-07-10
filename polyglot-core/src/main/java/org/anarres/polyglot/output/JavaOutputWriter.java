@@ -113,14 +113,17 @@ public class JavaOutputWriter extends AbstractOutputWriter {
         process(executor, "analysis.vm", "analysis/Analysis.java");
         process(executor, "analysisadapter.vm", "analysis/AnalysisAdapter.java");
 
+        // It makes little sense to visit a lexer-only grammar depth-first, but
+        // there's no reason why we wouldn't emit the degenerate case. It makes
+        // things like Locator, ASTPrinter, and so forth work for lexer-only machines.
+        process(executor, "depthfirstadapter.vm", "analysis/DepthFirstAdapter.java");
+        process(executor, "treevisitoradapter.vm", "analysis/TreeVisitorAdapter.java");
+        process(executor, "depthfirstvisitor.vm", "analysis/DepthFirstVisitor.java");
+
         if (!grammar.astProductions.isEmpty()) {
-            process(executor, "treevisitoradapter.vm", "analysis/TreeVisitorAdapter.java");
-            process(executor, "depthfirstadapter.vm", "analysis/DepthFirstAdapter.java");
             process(executor, "reverseddepthfirstadapter.vm", "analysis/ReversedDepthFirstAdapter.java");
 
-            process(executor, "depthfirstvisitor.vm", "analysis/DepthFirstVisitor.java");
             // process(executor, "reverseddepthfirstadapter.vm", "analysis/ReversedDepthFirstAdapter.java");
-
             process(executor, "iproduction.vm", "node/IProduction.java");
             process(executor, "ialternative.vm", "node/IAlternative.java");
             for (AstProductionModel production : grammar.astProductions.values()) {
