@@ -2,7 +2,6 @@
 package ${grammar.package.packageName}.node;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import ${package}.analysis.Visitor;
 

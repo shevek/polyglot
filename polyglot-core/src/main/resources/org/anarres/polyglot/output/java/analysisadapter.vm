@@ -4,7 +4,6 @@ package ${grammar.package.packageName}.analysis;
 import java.util.Map;
 import java.util.WeakHashMap;
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
 
