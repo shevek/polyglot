@@ -35,6 +35,14 @@ public final class ${token.javaTypeName} extends Token
         this(DEFAULT_TEXT, location);
     }
 
+#else##hasAnnotation(DefaultText)
+## Let's help Kryo and other serializers a little bit.
+#if ($helper.isOption('CG_APIDOC'))
+    /** This helps some serialization libraries. */
+#end##CG_APIDOC
+    private ${token.javaTypeName}() {
+    }
+
 #end##hasAnnotation(DefaultText)
     public ${token.javaTypeName}(@Nonnull String text) {
         setText(text);
