@@ -207,8 +207,12 @@ public class JavaHelper extends AbstractHelper {
         return false;
     }
 
+    public boolean isOption(@Nonnull Option option) {
+        return options.contains(option);
+    }
+
     public boolean isOption(@Nonnull String name) {
-        return options.contains(Option.valueOf(name));
+        return isOption(Option.valueOf(name));
     }
 
     /**
@@ -427,5 +431,4 @@ public class JavaHelper extends AbstractHelper {
         };
         return lexer.lex(format);
     }
-
 }

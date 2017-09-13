@@ -6,25 +6,25 @@ import ${grammar.package.packageName}.node.InvalidToken;
 
 public class LexerException extends Exception {
 
-    private final InvalidToken token;
-    private final String rawMessage;
-    
-    public LexerException(@Nonnull InvalidToken token, @Nonnull String rawMessage) {
-        super("[" + token.getLine() + "," + token.getColumn() + "] " + rawMessage);
-        this.token = token;
-        this.rawMessage = rawMessage;
-    }
+	private final InvalidToken token;
+	private final String rawMessage;
+	
+	public LexerException(@Nonnull InvalidToken token, @Nonnull String rawMessage) {
+		super("[" + token.getLine() + "," + token.getColumn() + "] " + rawMessage);
+		this.token = token;
+		this.rawMessage = rawMessage;
+	}
 
 	@Nonnull 
-    public InvalidToken getToken() {
-        return token;
-    }
+	public InvalidToken getToken() {
+		return token;
+	}
 
 #if ($helper.isOption("CG_APIDOC"))
 	/** Returns the raw lexer error message. */
 #end
-    @Nonnull
-    public String getRawMessage() {
-        return rawMessage;
-    }
+	@Nonnull
+	public String getRawMessage() {
+		return rawMessage;
+	}
 }

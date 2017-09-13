@@ -42,7 +42,11 @@ public enum AnnotationName {
     /** Used on an AstProductionModel or AstAlternativeModel to specify a Java interface for the alternative. */
     javaImplements(TokenModel.class, AstProductionModel.class),
     /** Used on an AstProductionModel, AstAlternativeModel or ElementModel to indicate an annotation for the class or method. */
-    javaAnnotation(TokenModel.class, AstProductionModel.class);
+    javaClassAnnotation(TokenModel.class, AstProductionModel.class, AstAlternativeModel.class),
+    javaGetAnnotation(AstElementModel.class),
+    javaSetAnnotation(AstElementModel.class),
+    javaFieldAnnotation(AstElementModel.class),
+    ;
 
     private final Class<? extends Model>[] targets;
 

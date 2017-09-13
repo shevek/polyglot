@@ -15,14 +15,14 @@ public interface ILexer {
 	 *
 	 * @return the next available token.
 	 */
-    @Nonnull
-    public Token peek() throws IOException, LexerException;
+	@Nonnull
+	public Token peek() throws IOException, LexerException;
 
 	/**
 	 * Returns and consumes the next available token.
 	 *
 	 * @return the next available token.
 	 */
-    @Nonnull
-    public Token next() throws IOException, LexerException;
+	@Nonnull
+	public Token next() throws IOException, LexerException;
 }

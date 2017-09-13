@@ -13,64 +13,64 @@ import ${grammar.package.packageName}.node.*;
  */
 public class ReversedDepthFirstAdapter extends AnalysisAdapter {
 
-    public void defaultIn(@Nonnull Node node) {
-    }
+	public void defaultIn(@Nonnull Node node) {
+	}
 
-    public void defaultOut(@Nonnull Node node) {
-    }
+	public void defaultOut(@Nonnull Node node) {
+	}
 
 #foreach ($parserMachine in $parserMachines)
-    public void in${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node) {
-        defaultIn(node);
-    }
+	public void in${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node) {
+		defaultIn(node);
+	}
 
-    public void out${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node) {
-        defaultOut(node);
-    }
+	public void out${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node) {
+		defaultOut(node);
+	}
 
-    @Override
-    public void case${parserMachine.startClassName}(${parserMachine.startClassName} node) {
-        in${parserMachine.startClassName}(node);
-        applyTo(node.getEOF());
-        applyTo(node.get${parserMachine.astProductionRoot.javaMethodName}());
-        out${parserMachine.startClassName}(node);
-    }
+	@Override
+	public void case${parserMachine.startClassName}(${parserMachine.startClassName} node) {
+		in${parserMachine.startClassName}(node);
+		applyTo(node.getEOF());
+		applyTo(node.get${parserMachine.astProductionRoot.javaMethodName}());
+		out${parserMachine.startClassName}(node);
+	}
 
 #end
 #foreach ($production in $grammar.astProductions)
-    // Production: $production
+	// Production: $production
 #foreach ($alternative in $production.alternatives)
-    // Alternative: $alternative
-    public void in${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node) {
-        defaultIn(node);
-    }
+	// Alternative: $alternative
+	public void in${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node) {
+		defaultIn(node);
+	}
 
-    public void out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node) {
-        defaultOut(node);
-    }
+	public void out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node) {
+		defaultOut(node);
+	}
 
-    @Override
-    public void case${alternative.javaMethodName}(${alternative.javaTypeName} node) {
-        in${alternative.javaMethodName}(node);
+	@Override
+	public void case${alternative.javaMethodName}(${alternative.javaTypeName} node) {
+		in${alternative.javaMethodName}(node);
 
 #foreach ($external in $alternative.externalsReversed)
-        // External $external.name
+		// External $external.name
 #end##foreach alternative.externals
 
 #foreach ($element in $alternative.elementsReversed)
 #if ($element.list)
-        {
-            ${element.javaTypeName}[] copy = node.get${element.javaMethodName}().toArray(${element.javaTypeName}.EMPTY_ARRAY);
-            for (int i = copy.length - 1; i >= 0; i--)
-                applyTo(copy[i]);
-        }
+		{
+			${element.javaTypeName}[] copy = node.get${element.javaMethodName}().toArray(${element.javaTypeName}.EMPTY_ARRAY);
+			for (int i = copy.length - 1; i >= 0; i--)
+				applyTo(copy[i]);
+		}
 #else##list
-        applyTo(node.get${element.javaMethodName}());
+		applyTo(node.get${element.javaMethodName}());
 #end##list
 #end##foreach element
 
-        out${alternative.javaMethodName}(node);
-    }
+		out${alternative.javaMethodName}(node);
+	}
 
 #end
 #end

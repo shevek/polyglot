@@ -21,46 +21,50 @@ import ${grammar.package.packageName}.node.*;
 public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAdapter<I, O, X> {
 
 #foreach ($parserMachine in $parserMachines)
-    @Override
-    public O visit${parserMachine.startClassName}(${parserMachine.startClassName} node, I input) throws X {
-        in${parserMachine.startClassName}(node, input);
-        applyTo(node.get${parserMachine.astProductionRoot.javaMethodName}(), input);
-        applyTo(node.getEOF(), input);
-        return out${parserMachine.startClassName}(node, input);
-    }
+	@Override
+	public O visit${parserMachine.startClassName}(${parserMachine.startClassName} node, I input) throws X {
+		in${parserMachine.startClassName}(node, input);
+		applyTo(node.get${parserMachine.astProductionRoot.javaMethodName}(), input);
+		applyTo(node.getEOF(), input);
+		return out${parserMachine.startClassName}(node, input);
+	}
 
 #end
 #foreach ($production in $grammar.astProductions)
-    // Production: $production
+	// Production: $production
 #foreach ($alternative in $production.alternatives)
-    // Alternative: $alternative
-    @Override
-    public O visit${alternative.javaMethodName}(${alternative.javaTypeName} node, I input) throws X {
-        in${alternative.javaMethodName}(node, input);
+	// Alternative: $alternative
+	@Override
+	public O visit${alternative.javaMethodName}(${alternative.javaTypeName} node, I input) throws X {
+		in${alternative.javaMethodName}(node, input);
 
 #if (!$alternative.externals.empty)
-        // Externals are emitted in order of definition
-        inExternals(node, input, $alternative.externals.size());
+		// Externals are emitted in order of definition
+		inExternals(node, input, $alternative.externals.size());
 #foreach ($external in $alternative.externals)
-        visitExternal${alternative.javaMethodName}${external.javaMethodName}(node, input, node.get${external.javaMethodName}());
+		visitExternal${alternative.javaMethodName}${external.javaMethodName}(node, input, node.get${external.javaMethodName}());
 #end##foreach alternative.externals
-        outExternals(node, input, $alternative.externals.size());
+		outExternals(node, input, $alternative.externals.size());
 #end
 
 #foreach ($element in $alternative.elements)
 #if ($element.list)
-        {
-            ${element.javaTypeName}[] copy = node.get${element.javaMethodName}().toArray(${element.javaTypeName}.EMPTY_ARRAY);
-            for (${element.javaTypeName} e : copy)
-                applyTo(e, input);
-        }
+		{
+			List<${element.javaTypeName}> orig = node.get${element.javaMethodName}();
+## For CG_LISTREF_MUTABLE:
+			if (orig != null) {
+				${element.javaTypeName}[] copy = orig.toArray(${element.javaTypeName}.EMPTY_ARRAY);
+				for (${element.javaTypeName} e : copy)
+					applyTo(e, input);
+			}
+		}
 #else##list
-        applyTo(node.get${element.javaMethodName}(), input);
+		applyTo(node.get${element.javaMethodName}(), input);
 #end##list
 #end##foreach element
 
-        return out${alternative.javaMethodName}(node, input);
-    }
+		return out${alternative.javaMethodName}(node, input);
+	}
 
 #end
 #end

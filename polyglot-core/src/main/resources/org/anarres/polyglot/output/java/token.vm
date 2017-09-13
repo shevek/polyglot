@@ -9,107 +9,107 @@ import javax.annotation.Nonnull;
 /** The abstract Token class is the superclass of all fixed and variable tokens. */
 public abstract class Token extends Node implements IToken {
 
-    private int offset;
-    private int line;
-    private int column;
+	private int offset;
+	private int line;
+	private int column;
 
-    /** Carries the token index from the lexer to the parser. */
-    @CheckForSigned
-    public abstract int getTokenIndex();
+	/** Carries the token index from the lexer to the parser. */
+	@CheckForSigned
+	public abstract int getTokenIndex();
 
-    /**
-     * Returns the textual content of this token.
-     *
-     * If the token represents a nontrivial lexical form, such as a C string,
-     * further parsing is required to extract a semantic value.
-     *
-     * @return the textual content of this token.
-     */
-    @Nonnull
-    public abstract String getText();
+	/**
+	 * Returns the textual content of this token.
+	 *
+	 * If the token represents a nontrivial lexical form, such as a C string,
+	 * further parsing is required to extract a semantic value.
+	 *
+	 * @return the textual content of this token.
+	 */
+	@Nonnull
+	public abstract String getText();
 
-    /**
-     * Returns the 0-based offset of this Token in the source text.
-     *
-     * @return the 0-based offset of this Token in the source text.
-     */
-    public int getOffset() {
-        return this.offset;
-    }
+	/**
+	 * Returns the 0-based offset of this Token in the source text.
+	 *
+	 * @return the 0-based offset of this Token in the source text.
+	 */
+	public int getOffset() {
+		return this.offset;
+	}
 
-    public void setOffset(@Nonnegative int offset) {
-        this.offset = offset;
-    }
+	public void setOffset(@Nonnegative int offset) {
+		this.offset = offset;
+	}
 
-    /**
-     * Returns The 1-based line of this Token.
-     *
-     * @return The 1-based line of this Token.
-     */
-    public int getLine() {
-        return this.line;
-    }
+	/**
+	 * Returns The 1-based line of this Token.
+	 *
+	 * @return The 1-based line of this Token.
+	 */
+	public int getLine() {
+		return this.line;
+	}
 
-    public void setLine(@Nonnegative int line) {
-        this.line = line;
-    }
+	public void setLine(@Nonnegative int line) {
+		this.line = line;
+	}
 
-    /**
-     * Use getColumn().
-     *
-     * @return column The 1-based column of this Token.
-     */
-    @Deprecated
-    public int getPos() {
-        return getColumn();
-    }
+	/**
+	 * Use getColumn().
+	 *
+	 * @return column The 1-based column of this Token.
+	 */
+	@Deprecated
+	public int getPos() {
+		return getColumn();
+	}
 
-    /**
-     * Use setColumn(int).
-     *
-     * @param column The 1-based column of this Token.
-     */
-    @Deprecated
-    public void setPos(int column) {
-        setColumn(column);
-    }
+	/**
+	 * Use setColumn(int).
+	 *
+	 * @param column The 1-based column of this Token.
+	 */
+	@Deprecated
+	public void setPos(int column) {
+		setColumn(column);
+	}
 
-    /**
-     * Returns The 1-based column of this Token.
-     *
-     * @return The 1-based column of this Token.
-     */
-    public int getColumn() {
-        return this.column;
-    }
+	/**
+	 * Returns The 1-based column of this Token.
+	 *
+	 * @return The 1-based column of this Token.
+	 */
+	public int getColumn() {
+		return this.column;
+	}
 
-    public void setColumn(@Nonnegative int column) {
-        this.column = column;
-    }
+	public void setColumn(@Nonnegative int column) {
+		this.column = column;
+	}
 
-    @Override
-    public void removeChild(Node child) {
-        throw new IllegalArgumentException("Token has no children.");
-    }
+	@Override
+	public void removeChild(Node child) {
+		throw new IllegalArgumentException("Token has no children.");
+	}
 
-    @Override
-    public void replaceChild(Node prev, Node repl) {
-        throw new IllegalArgumentException("Token has no children.");
-    }
+	@Override
+	public void replaceChild(Node prev, Node repl) {
+		throw new IllegalArgumentException("Token has no children.");
+	}
 
-    @Override
-    public abstract Token clone();
+	@Override
+	public abstract Token clone();
 
-    @Override
-    public abstract Token clone(@Nonnull CloneListener listener);
+	@Override
+	public abstract Token clone(@Nonnull CloneListener listener);
 
-    @Override
-    public void toStringBuilderDefault(@Nonnull StringBuilder buf) {
-        buf.append(getText()).append(' ');
-    }
+	@Override
+	public void toStringBuilderDefault(@Nonnull StringBuilder buf) {
+		buf.append(getText()).append(' ');
+	}
 
-    @Override
-    public String toString() {
-        return getText();
-    }
+	@Override
+	public String toString() {
+		return getText();
+	}
 }

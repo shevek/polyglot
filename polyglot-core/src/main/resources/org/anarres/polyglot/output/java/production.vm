@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 #parse("org/anarres/polyglot/output/java/macros.vm")
+#import($production)
 
 #if ($helper.isOption("CG_APIDOC"))
 #if ($production.javadocComment)
@@ -16,23 +17,23 @@ $production.javadocComment
 /** The abstract superclass of all ${production.name} alternatives. */
 #end
 #end##CG_APIDOC
-#annotate($production)
+#annotate($production, 'javaClassAnnotation')
 public abstract class ${production.javaTypeName}
-        extends $helper.getSuperClass($production, "Node")
-        implements IProduction
+		extends $helper.getSuperClass($production, "Node")
+		implements IProduction
 #implement($production)
-        {
+		{
 
-    public static final ${production.javaTypeName}[] EMPTY_ARRAY = new ${production.javaTypeName}[0];
+	public static final ${production.javaTypeName}[] EMPTY_ARRAY = new ${production.javaTypeName}[0];
 
-    /** Default nullary constructor. */
-    public ${production.javaTypeName}() {
-    }
+	/** Default nullary constructor. */
+	public ${production.javaTypeName}() {
+	}
 
 
-    @Override
-    public abstract ${production.javaTypeName} clone();
+	@Override
+	public abstract ${production.javaTypeName} clone();
 
-    @Override
-    public abstract ${production.javaTypeName} clone(@Nonnull CloneListener listener);
+	@Override
+	public abstract ${production.javaTypeName} clone(@Nonnull CloneListener listener);
 }

@@ -10,118 +10,118 @@ import ${package}.analysis.Visitor;
 /** This class is the root of the parse tree returned from the Parser. */
 public final class ${parserMachine.startClassName} extends Node {
 
-    private ${element.javaTypeName} _${element.javaFieldName}_;
-    private EOF _eof_;
+	private ${element.javaTypeName} _${element.javaFieldName}_;
+	private EOF _eof_;
 
-    public ${parserMachine.startClassName}(@Nonnull ${element.javaTypeName} _${element.javaFieldName}_, @CheckForNull EOF _eof_) {
-        set${element.javaMethodName}(_${element.javaFieldName}_);
-        setEOF(_eof_);
-    }
+	public ${parserMachine.startClassName}(@Nonnull ${element.javaTypeName} _${element.javaFieldName}_, @CheckForNull EOF _eof_) {
+		set${element.javaMethodName}(_${element.javaFieldName}_);
+		setEOF(_eof_);
+	}
 
-    public ${parserMachine.startClassName}() {
-    }
+	public ${parserMachine.startClassName}() {
+	}
 
-    @Override
-    public ${parserMachine.startClassName} clone() {
-        return clone(CloneListener.NONE);
-    }
+	@Override
+	public ${parserMachine.startClassName} clone() {
+		return clone(CloneListener.NONE);
+	}
 
-    @Override
-    public ${parserMachine.startClassName} clone(CloneListener listener) {
-        ${parserMachine.startClassName} clone = new ${parserMachine.startClassName}(
-            cloneNode(listener, this._${element.javaFieldName}_),
-            cloneNode(listener, this._eof_));
+	@Override
+	public ${parserMachine.startClassName} clone(CloneListener listener) {
+		${parserMachine.startClassName} clone = new ${parserMachine.startClassName}(
+			cloneNode(listener, this._${element.javaFieldName}_),
+			cloneNode(listener, this._eof_));
 		listener.fireNodeCloned(this, clone);
 		return clone;
-    }
+	}
 
-    @Override
-    public void apply(Switch s) {
-        s.case${parserMachine.startClassName}(this);
-    }
+	@Override
+	public void apply(Switch s) {
+		s.case${parserMachine.startClassName}(this);
+	}
 
-    @Override
-    public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
-        return v.visit${parserMachine.startClassName}(this, input);
-    }
+	@Override
+	public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
+		return v.visit${parserMachine.startClassName}(this, input);
+	}
 
-    @Nonnull
-    public ${element.javaTypeName} get${element.javaMethodName}() {
-        return this._${element.javaFieldName}_;
-    }
+	@Nonnull
+	public ${element.javaTypeName} get${element.javaMethodName}() {
+		return this._${element.javaFieldName}_;
+	}
 
-    public void set${element.javaMethodName}(@Nonnull ${element.javaTypeName} node) {
+	public void set${element.javaMethodName}(@Nonnull ${element.javaTypeName} node) {
 #if ($helper.isOption("CG_PARENT"))
-        if (this._${element.javaFieldName}_ != null) {
-            this._${element.javaFieldName}_.parent(null);
-        }
+		if (this._${element.javaFieldName}_ != null) {
+			this._${element.javaFieldName}_.parent(null);
+		}
 
-        if (node != null) {
-            Node p = node.parent();
-            if (p != null)
-                p.removeChild(node);
-            node.parent(this);
-        }
+		if (node != null) {
+			Node p = node.parent();
+			if (p != null)
+				p.removeChild(node);
+			node.parent(this);
+		}
 #end##CG_PARENT
 
-        this._${element.javaFieldName}_ = node;
-    }
+		this._${element.javaFieldName}_ = node;
+	}
 
-    @CheckForNull
-    public EOF getEOF() {
-        return this._eof_;
-    }
+	@CheckForNull
+	public EOF getEOF() {
+		return this._eof_;
+	}
 
-    public void setEOF(@CheckForNull EOF node) {
+	public void setEOF(@CheckForNull EOF node) {
 #if ($helper.isOption("CG_PARENT"))
-        if (this._eof_ != null) {
-            this._eof_.parent(null);
-        }
+		if (this._eof_ != null) {
+			this._eof_.parent(null);
+		}
 
-        if (node != null) {
-            Node p = node.parent();
-            if (p != null)
-                p.removeChild(node);
-            node.parent(this);
-        }
+		if (node != null) {
+			Node p = node.parent();
+			if (p != null)
+				p.removeChild(node);
+			node.parent(this);
+		}
 #end##CG_PARENT
 
-        this._eof_ = node;
-    }
+		this._eof_ = node;
+	}
 
-    @Override
-    public void removeChild(Node child) {
-        if (this._${element.javaFieldName}_ == child) {
-            this._${element.javaFieldName}_ = null;
-            return;
-        }
+	@Override
+	public void removeChild(Node child) {
+		if (this._${element.javaFieldName}_ == child) {
+			this._${element.javaFieldName}_ = null;
+			return;
+		}
 
-        if (this._eof_ == child) {
-            this._eof_ = null;
-            return;
-        }
+		if (this._eof_ == child) {
+			this._eof_ = null;
+			return;
+		}
 
-        throw new IllegalArgumentException("Not a child.");
-    }
+		throw new IllegalArgumentException("Not a child.");
+	}
 
-    @Override
-    public void replaceChild(Node prev, Node repl) {
-        if (this._${element.javaFieldName}_ == prev) {
-            set${element.javaMethodName}((${element.javaTypeName}) repl);
-            return;
-        }
+	@Override
+	public void replaceChild(Node prev, Node repl) {
+		if (this._${element.javaFieldName}_ == prev) {
+			set${element.javaMethodName}((${element.javaTypeName}) repl);
+			return;
+		}
 
-        if (this._eof_ == prev) {
-            setEOF((EOF) repl);
-            return;
-        }
+		if (this._eof_ == prev) {
+			setEOF((EOF) repl);
+			return;
+		}
 
-        throw new IllegalArgumentException("Not a child.");
-    }
+		throw new IllegalArgumentException("Not a child.");
+	}
 
-    @Override
-    public void toStringBuilderDefault(StringBuilder buf) {
-        toStringBuilder(buf, get${element.javaMethodName}());
-        toStringBuilder(buf, getEOF());
-    }
+	@Override
+	public void toStringBuilderDefault(StringBuilder buf) {
+		toStringBuilder(buf, get${element.javaMethodName}());
+		toStringBuilder(buf, getEOF());
+	}
 }

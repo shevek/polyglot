@@ -1,0 +1,7 @@
+Package foo;
+
+Abstract Syntax Tree
+
+	@javaFieldAnnotation('@javax.annotation.CheckForSigned')
+	foo =
+		foo* ;

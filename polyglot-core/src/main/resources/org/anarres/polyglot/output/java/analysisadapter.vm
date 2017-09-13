@@ -16,102 +16,102 @@ import ${grammar.package.packageName}.node.*;
  */
 public class AnalysisAdapter implements Analysis {
 
-    @CheckForNull
-    private Map<Node,Object> in;
-    @CheckForNull
-    private Map<Node,Object> out;
+	@CheckForNull
+	private Map<Node,Object> in;
+	@CheckForNull
+	private Map<Node,Object> out;
 
-    @Override
-    public Object getIn(Node node) {
-        if (this.in == null)
-            return null;
-        return this.in.get(node);
-    }
+	@Override
+	public Object getIn(Node node) {
+		if (this.in == null)
+			return null;
+		return this.in.get(node);
+	}
 
-    @Override
-    public void setIn(Node node, Object o) {
-        if (this.in == null) {
-             if (o == null)
-                return;
-            this.in = new WeakHashMap<Node,Object>();
-        }
+	@Override
+	public void setIn(Node node, Object o) {
+		if (this.in == null) {
+			 if (o == null)
+				return;
+			this.in = new WeakHashMap<Node,Object>();
+		}
 
-        if (o != null)
-            this.in.put(node, o);
-        else
-            this.in.remove(node);
-    }
+		if (o != null)
+			this.in.put(node, o);
+		else
+			this.in.remove(node);
+	}
 
-    @Override
-    public Object getOut(Node node) {
-        if (this.out == null)
-            return null;
-        return this.out.get(node);
-    }
+	@Override
+	public Object getOut(Node node) {
+		if (this.out == null)
+			return null;
+		return this.out.get(node);
+	}
 
-    @Override
-    public void setOut(Node node, Object o) {
-        if (this.out == null) {
-            if (o == null)
-                return;
-            this.out = new WeakHashMap<Node,Object>();
-        }
+	@Override
+	public void setOut(Node node, Object o) {
+		if (this.out == null) {
+			if (o == null)
+				return;
+			this.out = new WeakHashMap<Node,Object>();
+		}
 
-        if (o != null)
-            this.out.put(node, o);
-        else
-            this.out.remove(node);
-    }
+		if (o != null)
+			this.out.put(node, o);
+		else
+			this.out.remove(node);
+	}
 
 #foreach ($parserMachine in $parserMachines)
-    @Override
-    public void case${parserMachine.startClassName}(${parserMachine.startClassName} node) {
-        defaultCase(node);
-    }
+	@Override
+	public void case${parserMachine.startClassName}(${parserMachine.startClassName} node) {
+		defaultCase(node);
+	}
 
 #end
 #foreach ($token in $grammar.tokens)
-    @Override
-    public void case${token.javaMethodName}(@Nonnull ${token.javaTypeName} node) {
-        defaultCase(node);
-    }
+	@Override
+	public void case${token.javaMethodName}(@Nonnull ${token.javaTypeName} node) {
+		defaultCase(node);
+	}
 
 #end
 #foreach ($production in $grammar.astProductions)
 #foreach ($alternative in $production.alternatives)
-    @Override
-    public void case${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node) {
-        defaultCase(node);
-    }
+	@Override
+	public void case${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node) {
+		defaultCase(node);
+	}
 
 #end
 #end
 
-    @Override
-    public void caseEOF(EOF node) {
-        defaultCase(node);
-    }
+	@Override
+	public void caseEOF(EOF node) {
+		defaultCase(node);
+	}
 
-    @Override
-    public void caseInvalidToken(InvalidToken node) {
-        defaultCase(node);
-    }
+	@Override
+	public void caseInvalidToken(InvalidToken node) {
+		defaultCase(node);
+	}
 
-    public void defaultCase(Node node) {
-    }
+	public void defaultCase(Node node) {
+	}
 
-    /** Equivalent to node.apply(this) with safety against nulls. */
-    public void applyTo(@CheckForNull Switchable node) {
-        if (node == null)
-            return;
-        node.apply(this);
-    }
+	/** Equivalent to node.apply(this) with safety against nulls. */
+	public void applyTo(@CheckForNull Switchable node) {
+		if (node == null)
+			return;
+		node.apply(this);
+	}
 
-    /** Equivalent to for (node in nodes) node.apply(this) with safety against nulls. */
-    public void applyTo(@CheckForNull Iterable<? extends Switchable> nodes) {
-        if (nodes == null)
-            return;
-        for (Switchable node : nodes)
-            applyTo(node);
-    }
+	/** Equivalent to for (node in nodes) node.apply(this) with safety against nulls. */
+	public void applyTo(@CheckForNull Iterable<? extends Switchable> nodes) {
+		if (nodes == null)
+			return;
+		for (Switchable node : nodes)
+			applyTo(node);
+	}
 }

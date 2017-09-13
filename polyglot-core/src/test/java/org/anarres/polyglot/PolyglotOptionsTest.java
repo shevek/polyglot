@@ -55,5 +55,6 @@ public class PolyglotOptionsTest extends AbstractPolyglotTest {
         parse(file, EnumSet.of(Option.LR1, Option.CG_LEXER_BINARYSEARCH));
         parse(file, EnumSet.of(Option.LR1, Option.CG_LEXER_LINEARSEARCH));
         parse(file, EnumSet.of(Option.LR1, Option.CG_LARGE));
+        parse(file, EnumSet.of(Option.LR1, Option.CG_LISTREFS_MUTABLE));
     }
 }

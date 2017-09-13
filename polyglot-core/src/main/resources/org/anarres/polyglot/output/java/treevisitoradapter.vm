@@ -21,64 +21,64 @@ import ${package}.node.*;
 public class TreeVisitorAdapter<I, O, X extends Exception> extends VisitorAdapter<I, O, X> {
 
 ## Externals could use ialternative rather than Node.
-    public O inExternals(@Nonnull Node node, I input, @Nonnegative int externalCount) throws X {
-        return null;
-    }
+	public O inExternals(@Nonnull Node node, I input, @Nonnegative int externalCount) throws X {
+		return null;
+	}
 
-    public O outExternals(@Nonnull Node node, I input, @Nonnegative int externalCount) throws X {
-        return null;
-    }
+	public O outExternals(@Nonnull Node node, I input, @Nonnegative int externalCount) throws X {
+		return null;
+	}
 #foreach ($externalType in $helper.externalTypes)
 
-    /**
-     * A default handler for externals which can losslessly be converted to ${externalType}.
-     *
-     * By default, returns null.
-     *
-     * @return null
-     */
-    public O visitExternal${helper.getExternalMethodName($externalType)}(@Nonnull Node node, I input, @Nonnull String name, $externalType value) throws X {
-        return null;
-    }
+	/**
+	 * A default handler for externals which can losslessly be converted to ${externalType}.
+	 *
+	 * By default, returns null.
+	 *
+	 * @return null
+	 */
+	public O visitExternal${helper.getExternalMethodName($externalType)}(@Nonnull Node node, I input, @Nonnull String name, $externalType value) throws X {
+		return null;
+	}
 #end
 
-    public O inDefault(@Nonnull Node node, I input) throws X {
-        return null;
-    }
+	public O inDefault(@Nonnull Node node, I input) throws X {
+		return null;
+	}
 
-    public O outDefault(@Nonnull Node node, I input) throws X {
-        return null;
-    }
+	public O outDefault(@Nonnull Node node, I input) throws X {
+		return null;
+	}
 
 #foreach ($parserMachine in $parserMachines)
-    public O in${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X {
-        return inDefault(node, input);
-    }
+	public O in${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X {
+		return inDefault(node, input);
+	}
 
-    public O out${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X {
-        return outDefault(node, input);
-    }
+	public O out${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X {
+		return outDefault(node, input);
+	}
 
 #end
 #foreach ($production in $grammar.astProductions)
 
-    // Production: $production
+	// Production: $production
 #foreach ($alternative in $production.alternatives)
 
-    // Alternative: $alternative
-    public O in${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
-        return inDefault(node, input);
-    }
+	// Alternative: $alternative
+	public O in${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
+		return inDefault(node, input);
+	}
 
-    public O out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
-        return outDefault(node, input);
-    }
+	public O out${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X {
+		return outDefault(node, input);
+	}
 
 #foreach ($external in $alternative.externals)
-    /** Handles the external '${alternative.name}.${external.name}'. */
-    public O visitExternal${alternative.javaMethodName}${external.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input, #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} value) throws X {
-        return visitExternal$helper.getExternalMethodName($external.javaTypeName)(node, input, "${external.name}", value);
-    }
+	/** Handles the external '${alternative.name}.${external.name}'. */
+	public O visitExternal${alternative.javaMethodName}${external.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input, #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} value) throws X {
+		return visitExternal$helper.getExternalMethodName($external.javaTypeName)(node, input, "${external.name}", value);
+	}
 #end##external
 #end##alternative
 #end##production

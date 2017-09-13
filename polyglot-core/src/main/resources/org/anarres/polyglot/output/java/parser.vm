@@ -24,230 +24,231 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 #end##CG_FINDBUGS
 public class ${parserMachine.parserClassName} {
 
-    public static final int SHIFT = 0;
-    public static final int REDUCE = 1;
-    public static final int ACCEPT = 2;
-    public static final int ERROR = 3;
+	public static final int SHIFT = 0;
+	public static final int REDUCE = 1;
+	public static final int ACCEPT = 2;
+	public static final int ERROR = 3;
 
-    /** State. */
-    private static class S extends ArrayList<Object> {
-        public S() {
-            super(1);
-        }
-        int state;
-        String name;
+	/** State. */
+	private static class S extends ArrayList<Object> {
+		public S() {
+			super(1);
+		}
+		int state;
+		String name;
 
-        @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
-        public <T> T t(@Nonnegative int index) {
-            return (T) get(index);
-        }
-    }
+		@SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
+		public <T> T t(@Nonnegative int index) {
+			return (T) get(index);
+		}
+	}
 
-    private final ILexer lexer;
-    private final List<S> stack = new ArrayList<S>();
-    private int stackPointer = -1;   // Points to last valid state on stack.
+	private final ILexer lexer;
+	private final List<S> stack = new ArrayList<S>();
+	private int stackPointer = -1;   // Points to last valid state on stack.
 
-    public ${parserMachine.parserClassName}(@Nonnull ILexer lexer) {
-        this.lexer = lexer;
-    }
+	public ${parserMachine.parserClassName}(@Nonnull ILexer lexer) {
+		this.lexer = lexer;
+	}
 
-    @Nonnull
-    private int[] lookup(@Nonnull int[][] table, int key, int lowStart) {
-        int low = lowStart;
-        int high = table.length - 1;
+	@Nonnull
+	private int[] lookup(@Nonnull int[][] table, int key, int lowStart) {
+		int low = lowStart;
+		int high = table.length - 1;
 
-        while (low <= high) {
-            int middle = (low + high) >>> 1;
-            int[] entry = table[middle];
+		while (low <= high) {
+			int middle = (low + high) >>> 1;
+			int[] entry = table[middle];
 
-            if (key < entry[0])
-                high = middle - 1;
-            else if (key > entry[0])
-                low = middle + 1;
-            else
-                return entry;
-        }
+			if (key < entry[0])
+				high = middle - 1;
+			else if (key > entry[0])
+				low = middle + 1;
+			else
+				return entry;
+		}
 
-        // If the zero index is the default.
-        if (lowStart == 1)
-            return table[0];
-        else
-            throw new IllegalStateException("Table lookup failed for " + key);
-    }
+		// If the zero index is the default.
+		if (lowStart == 1)
+			return table[0];
+		else
+			throw new IllegalStateException("Table lookup failed for " + key);
+	}
 
-    @Nonnegative
-    private int goTo(@Nonnegative int productionIndex) {
-        return lookup(gotoTable[state()], productionIndex, 0)[1];
-    }
+	@Nonnegative
+	private int goTo(@Nonnegative int productionIndex) {
+		return lookup(gotoTable[state()], productionIndex, 0)[1];
+	}
 
-    @Nonnull
-    private S push(@Nonnegative int state, @Nonnull String name) {
-        stackPointer++;
-        S out;
-        if (stackPointer == stack.size()) {
-            out = new S();
-            stack.add(out);
-        } else {
-            out = stack.get(stackPointer);
-            out.clear();
-        }
-        out.state = state;
-        out.name = name;
-        return out;
-    }
+	@Nonnull
+	private S push(@Nonnegative int state, @Nonnull String name) {
+		stackPointer++;
+		S out;
+		if (stackPointer == stack.size()) {
+			out = new S();
+			stack.add(out);
+		} else {
+			out = stack.get(stackPointer);
+			out.clear();
+		}
+		out.state = state;
+		out.name = name;
+		return out;
+	}
 
-    /* Goto, then push. */
-    @Nonnull
-    private S gp(@Nonnegative int productionIndex, @Nonnull String name) {
-        return push(goTo(productionIndex), name);
-    }
+	/* Goto, then push. */
+	@Nonnull
+	private S gp(@Nonnegative int productionIndex, @Nonnull String name) {
+		return push(goTo(productionIndex), name);
+	}
 
-    @Nonnegative
-    private int state() {
-        return stack.get(stackPointer).state;
-    }
+	@Nonnegative
+	private int state() {
+		return stack.get(stackPointer).state;
+	}
 
-    @Nonnull
-    private S pop() {
-##        return stack.remove(stackPointer--);
-        return stack.get(stackPointer--);
-    }
+	@Nonnull
+	private S pop() {
+##		return stack.remove(stackPointer--);
+		return stack.get(stackPointer--);
+	}
 
-    /* Pop, and return the first transform result. */
-    @SuppressWarnings("TypeParameterUnusedInFormals")
-    private <T> T p() {
-        return pop().t(0);
-    }
+	/* Pop, and return the first transform result. */
+	@SuppressWarnings("TypeParameterUnusedInFormals")
+	private <T> T p() {
+		return pop().t(0);
+	}
 
-    protected void ignore(@Nonnull Token token) {
-    }
+	protected void ignore(@Nonnull Token token) {
+	}
 
-    @Nonnull
-    public ${parserMachine.startClassName} parse() throws ParserException, LexerException, IOException {
-        push(0, "${parserMachine.startClassName}");
-        for (;;) {
-            Token token = this.lexer.peek();
-            int index = token.getTokenIndex();
-            if (index == -1) {
-                ignore(this.lexer.next());
-                continue;
-            }
+	@Nonnull
+	public ${parserMachine.startClassName} parse() throws ParserException, LexerException, IOException {
+		push(0, "${parserMachine.startClassName}");
+		for (;;) {
+			Token token = this.lexer.peek();
+			int index = token.getTokenIndex();
+			if (index == -1) {
+				ignore(this.lexer.next());
+				continue;
+			}
 
-            // [1, 2] = Either shift and stack state, or reduce by production number.
-            int state = state();    // TODO: Inline
-            int[] actionEntry = lookup(actionTable[state], index, 1);
-            // dump(token, actionEntry);
+			// [1, 2] = Either shift and stack state, or reduce by production number.
+			int state = state();	// TODO: Inline
+			int[] actionEntry = lookup(actionTable[state], index, 1);
+			// dump(token, actionEntry);
 
-            switch (actionEntry[1]) {
-                case SHIFT:
+			switch (actionEntry[1]) {
+				case SHIFT:
 ## token.getText() hould be TokenModel's descriptiveName annotation if present.
-                    push(actionEntry[2], token.getText()).add(this.lexer.next());
-                    break;
-                case REDUCE:
-                    int reduction = actionEntry[2];
-                    reduce(reduction);
-                    break;
-                case ACCEPT:
-                    EOF eof = (EOF) this.lexer.next();
-                    ${parserMachine.astProductionRoot.javaTypeName} root = (${parserMachine.astProductionRoot.javaTypeName}) pop().get(0);
-                    return new ${parserMachine.startClassName}(root, eof);
-                case ERROR:
-                    StringBuilder buf = new StringBuilder("After");
-                    for (int i = 1; i <= stackPointer; i++)
-                        buf.append(' ').append(stack.get(i).name);
-                    buf.append(", expected [").append(errorTable[actionEntry[2]]);
-                    buf.append("] but got ").append(token.getClass().getSimpleName());
-                    buf.append(": ").append(token.getText());
-                    throw new ParserException(token, buf.toString());
-            }
-        }
-    }
+					push(actionEntry[2], token.getText()).add(this.lexer.next());
+					break;
+				case REDUCE:
+					int reduction = actionEntry[2];
+					reduce(reduction);
+					break;
+				case ACCEPT:
+					EOF eof = (EOF) this.lexer.next();
+					${parserMachine.astProductionRoot.javaTypeName} root = (${parserMachine.astProductionRoot.javaTypeName}) pop().get(0);
+					return new ${parserMachine.startClassName}(root, eof);
+				case ERROR:
+					StringBuilder buf = new StringBuilder("After");
+					for (int i = 1; i <= stackPointer; i++)
+						buf.append(' ').append(stack.get(i).name);
+					buf.append(", got ").append(token.getClass().getSimpleName());
+					buf.append("(").append(token.getText());
+					buf.append(") but expected [").append(errorTable[actionEntry[2]]);
+					buf.append("].");
+					throw new ParserException(token, buf.toString());
+			}
+		}
+	}
 
 #if ($helper.isLarge($parserMachine)) ## reduce-large
 
 #foreach ($alternativeGroup in $helper.alternativeGroups)
-    /* Performs a reduction of an alternative in group ${alternativeGroup.index}. */
-    private void reduce${alternativeGroup.javaMethodName}(@Nonnegative int reduction) throws ParserException {
-        switch (reduction) {
+	/* Performs a reduction of an alternative in group ${alternativeGroup.index}. */
+	private void reduce${alternativeGroup.javaMethodName}(@Nonnegative int reduction) throws ParserException {
+		switch (reduction) {
 #foreach ($alternative in $alternativeGroup.alternatives)
 #if ($parserMachine.isCstAlternativeReachable($alternative))
 #if ($helper.isOption("CG_COMMENT"))
-            // Reduce ${alternative}
+			// Reduce ${alternative}
 #end##CG_COMMENT
-            case ${alternative.index}:
-                ${helper.getReduceMethodName($alternative)}();
-                return;
+			case ${alternative.index}:
+				${helper.getReduceMethodName($alternative)}();
+				return;
 #end##isCstAlternativeReachable
 #end##foreach alternative in alternativeGroup
-            default:
-                throw new IllegalStateException("Illegal reduction in group ${alternativeGroup.javaMethodName}: " + reduction);
-        }
-    }
+			default:
+				throw new IllegalStateException("Illegal reduction in group ${alternativeGroup.javaMethodName}: " + reduction);
+		}
+	}
 #end##foreach alternativeGroup
 
-    // Grammar is large, using grouped strategy.
-    /* Performs a reduction. */
-    private void reduce(@Nonnegative int reduction) throws IOException, LexerException, ParserException {
-        switch (reduction >> $helper.alternativeGroupShift) {
+	// Grammar is large, using grouped strategy.
+	/* Performs a reduction. */
+	private void reduce(@Nonnegative int reduction) throws IOException, LexerException, ParserException {
+		switch (reduction >> $helper.alternativeGroupShift) {
 #foreach ($alternativeGroup in $helper.alternativeGroups)
-            case ${alternativeGroup.index}:
-                reduce${alternativeGroup.javaMethodName}(reduction);
-                return;
+			case ${alternativeGroup.index}:
+				reduce${alternativeGroup.javaMethodName}(reduction);
+				return;
 #end## alternativeGroup
-            default:
-                throw new IllegalStateException("Illegal reduction: " + reduction);
-        }
-    }
+			default:
+				throw new IllegalStateException("Illegal reduction: " + reduction);
+		}
+	}
 
 #else ## reduce-large
 
-    // Grammar is small, using simple strategy.
-    /* Performs a reduction. */
-    private void reduce(@Nonnegative int reduction) throws IOException, LexerException, ParserException {
-        switch (reduction) {
+	// Grammar is small, using simple strategy.
+	/* Performs a reduction. */
+	private void reduce(@Nonnegative int reduction) throws IOException, LexerException, ParserException {
+		switch (reduction) {
 #foreach ($production in $grammar.cstProductions)
 #if ($helper.isOption("CG_COMMENT"))
-            // Reductions for $production
+			// Reductions for $production
 #end##CG_COMMENT
 #foreach ($alternative in $production.alternatives)
 #if ($parserMachine.isCstAlternativeReachable($alternative))
 #if ($helper.isOption("CG_COMMENT"))
-            // Reduce ${alternative}
+			// Reduce ${alternative}
 #end##CG_COMMENT
-            case ${alternative.index}:
-                ${helper.getReduceMethodName($alternative)}();
-                return;
+			case ${alternative.index}:
+				${helper.getReduceMethodName($alternative)}();
+				return;
 #end##isCstAlternativeReachable
 #end
 #end
-            default:
-                throw new IllegalStateException("Illegal reduction: " + reduction);
-        }
-    }
+			default:
+				throw new IllegalStateException("Illegal reduction: " + reduction);
+		}
+	}
 
 #end
 
-    /* ListBuilder. Implements a kind of left-associative addition for lists and items. */
-    private static class L<T> extends ArrayList<T> {
-        @Nonnull
-        public static <T> List<T> e() {
-            return Collections.<T>emptyList();
-        }
+	/* ListBuilder. Implements a kind of left-associative addition for lists and items. */
+	private static class L<T> extends ArrayList<T> {
+		@Nonnull
+		public static <T> List<T> e() {
+			return Collections.<T>emptyList();
+		}
 
-        /* with(). */
-        @Nonnull
-        public L<T> n(@Nonnull T value) {
-            add(value);
-            return this;
-        }
+		/* with(). */
+		@Nonnull
+		public L<T> n(@Nonnull T value) {
+			add(value);
+			return this;
+		}
 
-        /* withAll(). */
-        @Nonnull
-        public L<T> l(@Nonnull Collection<? extends T> value) {
-            addAll(value);
-            return this;
-        }
-    }
+		/* withAll(). */
+		@Nonnull
+		public L<T> l(@Nonnull Collection<? extends T> value) {
+			addAll(value);
+			return this;
+		}
+	}
 
 #macro(list $root $indent)
 #if ($root.items.empty)
@@ -257,7 +258,7 @@ ${indent}new L<${root.javaTypeName}>()
 #foreach ($item in $root.items)##
 ##if ($item.type == "reference" )##
 ${indent}.#if($item.listValue)l#{else}n#{end}(
-#set ($subindent = $indent + "    ")
+#set ($subindent = $indent + "	")
 #expression($item, $subindent)
 
 ${indent})
@@ -278,7 +279,7 @@ ${indent}null##
 #elseif ($root.type == "new")
 ${indent}new ${root.astAlternative.javaTypeName}(
 #foreach ($argument in $root.arguments)##
-#set ($subindent = $indent + "    ")
+#set ($subindent = $indent + "	")
 #expression($argument, $subindent)#if($velocityHasNext),#{end}
 
 #end##argument
@@ -300,21 +301,21 @@ ${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 #if ($parserMachine.isCstAlternativeReachable($alternative))
 #if ($helper.isOption("CG_COMMENT"))
 ## Not javadoc - performance sucks too hard.
-    /*
-     * Rule ${alternative.index}: ${alternative.javaMethodName}.
-     * ${alternative.name} =
-     *      #foreach ($element in $alternative.elements)$element.name #end
+	/*
+	 * Rule ${alternative.index}: ${alternative.javaMethodName}.
+	 * ${alternative.name} =
+	 *	  #foreach ($element in $alternative.elements)$element.name #end
 
-     *          { -> #foreach ($transformExpression in $alternative.transformExpressions)$transformExpression#if($velocityHasNext), #end#end }
-     */
+	 *		  { -> #foreach ($transformExpression in $alternative.transformExpressions)$transformExpression#if($velocityHasNext), #end#end }
+	 */
 #end##CG_COMMENT
-    private void ${helper.getReduceMethodName($alternative)}() {$helper.beginLocalVariables()
+	private void ${helper.getReduceMethodName($alternative)}() {$helper.beginLocalVariables()
 #foreach ($element in $alternative.elementsReversed)## CstElementModel  {{
 #if ($helper.isOption("CG_COMMENT"))
-        // Pop ${element}
+		// Pop ${element}
 #end##CG_COMMENT
 #if ($element.symbol.transformPrototypes.size() != 1)
-        S ${helper.getLocalVariableName($element)} = pop();
+		S ${helper.getLocalVariableName($element)} = pop();
 #end## multiple transformPrototypes
 #foreach ($transformPrototype in $element.symbol.transformPrototypes)## {
 #set($javaTypeName = ${transformPrototype.javaTypeName})
@@ -322,37 +323,37 @@ ${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 #set($javaTypeName = "List<${javaTypeName}>")
 #end
 #if ($helper.isOption("CG_COMMENT"))
-        // Extract $element { -> $transformPrototype }
+		// Extract $element { -> $transformPrototype }
 #end##CG_COMMENT
 #if ($helper.isOption("CG_JSR305_INTERNAL"))
 #if (!$element.nullable)
-        @Nonnull
+		@Nonnull
 #elseif (!$element.list)
-        @CheckForNull
+		@CheckForNull
 #else
-        // @CheckForEmpty
+		// @CheckForEmpty
 #end
 #end##CG_JSR305_INTERNAL
 #if ($element.symbol.transformPrototypes.size() != 1)
-        $javaTypeName ${helper.getLocalVariableName($element, $transformPrototype)} = ${helper.getLocalVariableName($element)}.t($foreach.count - 1);
+		$javaTypeName ${helper.getLocalVariableName($element, $transformPrototype)} = ${helper.getLocalVariableName($element)}.t($foreach.count - 1);
 #else## transformPrototypes.size()
-        $javaTypeName ${helper.getLocalVariableName($element, $transformPrototype)} = p();
+		$javaTypeName ${helper.getLocalVariableName($element, $transformPrototype)} = p();
 #end## transformPrototypes.size()
-#end##transformPrototype                                                }
+#end##transformPrototype												}
 ##
-#end##element                                                           }}
+#end##element														   }}
 ## This push has to happen after we have popped the items, as goTo() looks at the outstanding top state.
-        S out = gp(${production.index}, "$production.descriptiveName");
+		S out = gp(${production.index}, "$production.descriptiveName");
 #foreach ($transformExpression in $alternative.transformExpressions)
 #if ($helper.isOption("CG_COMMENT"))
-        // Generating: $transformExpression
+		// Generating: $transformExpression
 #end##CG_COMMENT
-        out.add(
-#expression($transformExpression, "            ")
+		out.add(
+#expression($transformExpression, "			")
 
-        );
+		);
 #end##transformExpression
-    }$helper.endLocalVariables()
+	}$helper.endLocalVariables()
 
 #end## isCstAlternativeReachable
 #end## alternative
@@ -361,93 +362,93 @@ ${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 ##if ($helper.isOption("CG_COMMENT"))
 ## automaton is no longer available because multiparsers blows up the heap if we keep them all around.
 #if (false)
-    private static final int[][][] actionTable /* = {
-        // Actions for parser, indexed by LR(k) state. Value is [token, shift, stack-state] or [token, reduce, production-number].
+	private static final int[][][] actionTable /* = {
+		// Actions for parser, indexed by LR(k) state. Value is [token, shift, stack-state] or [token, reduce, production-number].
 #if (!$helper.isLarge($parserMachine))
 #foreach ($state in $automaton.states)
-        // Actions for S${state.index}
-        {
-            { -1, ERROR, $state.errorIndex },   // $automaton.errors.get($state.errorIndex)
+		// Actions for S${state.index}
+		{
+			{ -1, ERROR, $state.errorIndex },   // $automaton.errors.get($state.errorIndex)
 #foreach ($action in $state.actionMap.entrySet())
-            { $action.key.index, $action.value.action, #{if}($action.value.value)$action.value.value.index#{end} }, // $action.key -> $action.value
+			{ $action.key.index, $action.value.action, #{if}($action.value.value)$action.value.value.index#{end} }, // $action.key -> $action.value
 #end## action
-        }
+		}
 #end## state
 #end## large
-    } */ ;
+	} */ ;
 
-    private static final int[][][] gotoTable /* = {
-        // Goto for parser, indexed by LR(k) state. Value is [production, stack-state]
+	private static final int[][][] gotoTable /* = {
+		// Goto for parser, indexed by LR(k) state. Value is [production, stack-state]
 #if (!$helper.isLarge($parserMachine))
 #foreach ($state in $automaton.states)
-        // Goto for S${state.index}
-        {
+		// Goto for S${state.index}
+		{
 #foreach ($goto in $state.gotoMap.entrySet())
-            { $goto.key.index, $goto.value.index }, // $goto.key -> $goto.value.name
+			{ $goto.key.index, $goto.value.index }, // $goto.key -> $goto.value.name
 #end## goto
-        }
+		}
 #end## state
 #end## large
-    } */ ;
+	} */ ;
 
-    private static final String[] errorTable /* = {
+	private static final String[] errorTable /* = {
 #if (!$helper.isLarge($parserMachine))
 #foreach ($error in $automaton.errors)
-        "$error",
+		"$error",
 #end
 #end## large
-    } */ ;
+	} */ ;
 #else##CG_COMMENT
-    private static final int[][][] actionTable;
-    private static final int[][][] gotoTable;
-    private static final String[] errorTable;
+	private static final int[][][] actionTable;
+	private static final int[][][] gotoTable;
+	private static final String[] errorTable;
 #end##CG_COMMENT
 
-    private static void readArray(@Nonnull int[] out, @Nonnull DataInputStream in) throws IOException {
-        for (int i = 0; i < out.length; i++)
-            out[i] = in.readInt();
-    }
+	private static void readArray(@Nonnull int[] out, @Nonnull DataInputStream in) throws IOException {
+		for (int i = 0; i < out.length; i++)
+			out[i] = in.readInt();
+	}
 
-    @Nonnull
-    private static int[][] readTable(@Nonnull DataInputStream in, @Nonnegative int sublength) throws IOException {
-        int[][] out = new int[in.readInt()][sublength];
-        for (int i = 0; i < out.length; i++)
-            readArray(out[i], in);
-        return out;
-    }
+	@Nonnull
+	private static int[][] readTable(@Nonnull DataInputStream in, @Nonnegative int sublength) throws IOException {
+		int[][] out = new int[in.readInt()][sublength];
+		for (int i = 0; i < out.length; i++)
+			readArray(out[i], in);
+		return out;
+	}
 
-    static {
-        try {
-            DataInputStream in = new DataInputStream(
+	static {
+		try {
+			DataInputStream in = new DataInputStream(
 #if ($parserMachine.inline)
-                new java.util.zip.GZIPInputStream(
-                    new java.io.ByteArrayInputStream(
-                        javax.xml.bind.DatatypeConverter.parseBase64Binary("$parserMachine.encodedText")
-                    )
-                )
+				new java.util.zip.GZIPInputStream(
+					new java.io.ByteArrayInputStream(
+						javax.xml.bind.DatatypeConverter.parseBase64Binary("$parserMachine.encodedText")
+					)
+				)
 #else
-                new BufferedInputStream(
-                    ${parserMachine.parserClassName}.class.getResourceAsStream("${parserMachine.parserClassName}.dat")
-                )
+				new BufferedInputStream(
+					${parserMachine.parserClassName}.class.getResourceAsStream("${parserMachine.parserClassName}.dat")
+				)
 #end
-            );
+			);
 
-            int parserStateCount = in.readInt();
+			int parserStateCount = in.readInt();
 
-            actionTable = new int[parserStateCount][][];
-            gotoTable = new int[parserStateCount][][];
-            for (int i = 0; i < parserStateCount; i++) {
-                actionTable[i] = readTable(in, 3);
-                gotoTable[i] = readTable(in, 2);
-            }
+			actionTable = new int[parserStateCount][][];
+			gotoTable = new int[parserStateCount][][];
+			for (int i = 0; i < parserStateCount; i++) {
+				actionTable[i] = readTable(in, 3);
+				gotoTable[i] = readTable(in, 2);
+			}
 
-            errorTable = new String[in.readInt()];
-            for (int i = 0; i < errorTable.length; i++)
-                errorTable[i] = in.readUTF();
+			errorTable = new String[in.readInt()];
+			for (int i = 0; i < errorTable.length; i++)
+				errorTable[i] = in.readUTF();
 
-            in.close();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load parser table.", e);
-        }
-    }
+			in.close();
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to load parser table.", e);
+		}
+	}
 }

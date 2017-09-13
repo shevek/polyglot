@@ -15,6 +15,6 @@ import ${package}.analysis.Visitor;
  */
 public interface Switchable {
 
-    /** Implements the Visitor pattern. */
-    public void apply(@Nonnull Switch s);
+	/** Implements the Visitor pattern. */
+	public void apply(@Nonnull Switch s);
 }

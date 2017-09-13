@@ -9,7 +9,14 @@ import javax.annotation.Nonnull;
 import ${package}.analysis.Visitor;
 
 #parse("org/anarres/polyglot/output/java/macros.vm")
+#import($production)
+#import($alternative)
 
+#if ($helper.isOption("CG_LISTREFS_MUTABLE"))
+#set($listArgOf = "List<")
+#else##CG_FINAL
+#set($listArgOf = "Iterable<? extends ")
+#end##CG_FINAL
 #if ($helper.isOption("CG_APIDOC"))
 #if ($alternative.javadocComment)
 $alternative.javadocComment
@@ -20,77 +27,76 @@ $production.javadocComment
 ## /** ${alternative} */
 #end
 #end##CG_APIDOC
-#annotate($alternative)
+#annotate($production, 'javaClassAnnotation')
+#annotate($alternative, 'javaClassAnnotation')
 public class ${alternative.javaTypeName}
-        extends $helper.getSuperClass($alternative, ${production.javaTypeName})
-        implements IAlternative
+		extends $helper.getSuperClass($alternative, ${production.javaTypeName})
+		implements IAlternative
 #implement($alternative)
-        {
+		{
 
-    public static final ${alternative.javaTypeName}[] EMPTY_ARRAY = new ${alternative.javaTypeName}[0];
+	public static final ${alternative.javaTypeName}[] EMPTY_ARRAY = new ${alternative.javaTypeName}[0];
 
-#foreach ($element in $alternative.elements)
-    /** Element ${element.name}. */
+## This deliberately preserves order, so that if we're building e.g. an XML serializer,
+## we don't reorder the elements from the order the user specified. Methods below are
+## still reordered, but if we use CG_LISTREFS_MUTABLE and annotate fields, it works fine.
+#foreach ($element in $alternative.declaredElements)
+#annotate($element, 'javaFieldAnnotation')
 #if ($element.list)
-    private final List<${element.javaTypeName}> _${element.javaFieldName}_ = new ArrayList<${element.javaTypeName}>();
+#if ($element.isExternal() || $helper.isOption("CG_LISTREFS_MUTABLE"))
+	private List<${element.javaTypeName}> _${element.javaFieldName}_;
+#else##CG_LISTREFS_MUTABLE
+	private final List<${element.javaTypeName}> _${element.javaFieldName}_ = new ArrayList<${element.javaTypeName}>();
+#end
 #else##if element.list
-    private ${element.javaTypeName} _${element.javaFieldName}_;
+	private ${element.javaTypeName} _${element.javaFieldName}_;
 #end##if element.list
 #end##foreach alternative.elements
 
-#foreach ($external in $alternative.externals)
-    /** External ${external.name}. */
-#if ($external.list)
-    private List<${external.javaTypeName}> _${external.javaFieldName}_;
-#else##if external.list
-    private ${external.javaTypeName} _${external.javaFieldName}_;
-#end##if external.list
-#end##foreach alternative.externals
-
-    /**
-     * Constructs a new ${alternative.javaTypeName} and sets all elements.
+	/**
+	 * Constructs a new ${alternative.javaTypeName} and sets all elements.
 #foreach ($element in $alternative.elements)
-     * @param _${element.javaFieldName}_ See {@link #get${element.javaMethodName}()}.
+	 * @param _${element.javaFieldName}_ See {@link #get${element.javaMethodName}()}.
 #end
-     */
-    public ${alternative.javaTypeName}(
+	 */
+	public ${alternative.javaTypeName}(
 #foreach ($element in $alternative.elements)
-        #if($element.nullable)@CheckForNull#{else}@Nonnull#{end}##
+		#if($element.nullable)@CheckForNull#{else}@Nonnull#{end}##
 #if ($element.list)
- Iterable<? extends ${element.javaTypeName}> _${element.javaFieldName}_#if($velocityHasNext),#end
+ $listArgOf${element.javaTypeName}> _${element.javaFieldName}_#if($velocityHasNext),#end
 
 #else##if element.list
  ${element.javaTypeName} _${element.javaFieldName}_#if($velocityHasNext),#end
 
 #end##if element.list
 #end##foreach alternative.elements
-        ) {
+		) {
 #foreach ($element in $alternative.elements)
-        set${element.javaMethodName}(_${element.javaFieldName}_);
+		set${element.javaMethodName}(_${element.javaFieldName}_);
 #end##foreach alternative.elements
-    }
+	}
 
 #if (!$alternative.externals.empty)
-    /**
-     * Constructs a new ${alternative.javaTypeName} and sets all elements and externals.
+	/**
+	 * Constructs a new ${alternative.javaTypeName} and sets all elements and externals.
 #foreach ($element in $alternative.elements)
-     * @param _${element.javaFieldName}_ See {@link #get${element.javaMethodName}()}.
+	 * @param _${element.javaFieldName}_ See {@link #get${element.javaMethodName}()}.
 #end
 #foreach ($external in $alternative.externals)
-     * @param _${external.javaFieldName}_ See {@link #get${external.javaMethodName}()}.
+	 * @param _${external.javaFieldName}_ See {@link #get${external.javaMethodName}()}.
 #end
-     */
-    public ${alternative.javaTypeName}(
+	 */
+	public ${alternative.javaTypeName}(
 #foreach ($element in $alternative.elements)
-        #if($element.nullable)@CheckForNull#{else}@Nonnull#{end}##
+		#if($element.nullable)@CheckForNull#{else}@Nonnull#{end}##
 #if ($element.list)
- Iterable<? extends ${element.javaTypeName}> _${element.javaFieldName}_,
+ $listArgOf${element.javaTypeName}> _${element.javaFieldName}_,
 #else##if element.list
  ${element.javaTypeName} _${element.javaFieldName}_,
 #end##if element.list
 #end##foreach alternative.elements
 #foreach ($external in $alternative.externals)
-        #if($external.nullable)@CheckForNull#{else}@Nonnull#{end}##
+		#if($external.nullable)@CheckForNull#{else}@Nonnull#{end}##
 #if ($external.list)
  List<${external.javaTypeName}> _${external.javaFieldName}_#if($velocityHasNext),#end
 
@@ -99,219 +105,234 @@ public class ${alternative.javaTypeName}
 
 #end##if external.list
 #end##foreach alternative.externals
-        ) {
+		) {
 #foreach ($element in $alternative.elements)
-        set${element.javaMethodName}(_${element.javaFieldName}_);
+		set${element.javaMethodName}(_${element.javaFieldName}_);
 #end##foreach alternative.elements
 #foreach ($external in $alternative.externals)
-        set${external.javaMethodName}(_${external.javaFieldName}_);
+		set${external.javaMethodName}(_${external.javaFieldName}_);
 #end##foreach alternative.externals
-    }
+	}
 #end##!externals.empty
 
 #if (!$alternative.elements.empty)
-    /** Constructs a new ${alternative.javaTypeName} without setting any fields. */
-    public ${alternative.javaTypeName}() {
-    }
+	/** Constructs a new ${alternative.javaTypeName} without setting any fields. */
+	public ${alternative.javaTypeName}() {
+	}
 #end
 
-    // Elements
+	// Elements
 #foreach ($element in $alternative.elements)
 #if ($element.list)
 
-    $!element.javadocComment
-    @Nonnull
-#annotate($element)
-    public List<${element.javaTypeName}> get${element.javaMethodName}() {
-        return this._${element.javaFieldName}_;
-    }
+	$!element.javadocComment
+#if ($helper.isOption("CG_LISTREFS_MUTABLE"))
+	@CheckForNull
+#else##CG_LISTREFS_MUTABLE
+	@Nonnull
+#end##CG_LISTREFS_MUTABLE
+#annotate($element, 'javaGetAnnotation')
+	public List<${element.javaTypeName}> get${element.javaMethodName}() {
+		return this._${element.javaFieldName}_;
+	}
 
-    $!element.javadocComment
-    public void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} Iterable<? extends ${element.javaTypeName}> list) {
+	$!element.javadocComment
+#annotate($element, 'javaSetAnnotation')
+	public void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} $listArgOf${element.javaTypeName}> list) {
 #if ($helper.isOption("CG_PARENT"))
-        for (${element.javaTypeName} e : this._${element.javaFieldName}_) {
-            if (e.parent() == this)
-                e.parent(null);
-        }
+		for (${element.javaTypeName} e : this._${element.javaFieldName}_) {
+			if (e.parent() == this)
+				e.parent(null);
+		}
 #end##CG_PARENT
-        this._${element.javaFieldName}_.clear();
+#if ($helper.isOption("CG_LISTREFS_MUTABLE"))
+		this._${element.javaFieldName}_ = list;
+#else##CG_LISTREFS_MUTABLE
+		this._${element.javaFieldName}_.clear();
+#end##CG_LISTREFS_MUTABLE
 
-        if (list != null) {
-            for (${element.javaTypeName} e : list) {
+		if (list != null) {
+			for (${element.javaTypeName} e : list) {
 #if ($helper.isOption("CG_PARENT"))
-                Node p = e.parent();
-                if (p != null)
-                    p.removeChild(e);
-                e.parent(this);
+				Node p = e.parent();
+				if (p != null)
+					p.removeChild(e);
+				e.parent(this);
 #end##CG_PARENT
-                this._${element.javaFieldName}_.add(e);
-            }
-        }
-    }
+#if (!$helper.isOption("CG_LISTREFS_MUTABLE"))
+				this._${element.javaFieldName}_.add(e);
+#end##CG_LISTREFS_MUTABLE
+			}
+		}
+	}
 #else##if element.list
 
-    $!element.javadocComment
+	$!element.javadocComment
 #if ($element.nullable)
-    @CheckForNull
+	@CheckForNull
 #else
-    @Nonnull
+	@Nonnull
 #end
-#annotate($element)
-    public ${element.javaTypeName} get${element.javaMethodName}() {
-        return this._${element.javaFieldName}_;
-    }
+#annotate($element, 'javaGetAnnotation')
+	public ${element.javaTypeName} get${element.javaMethodName}() {
+		return this._${element.javaFieldName}_;
+	}
 
-    $!element.javadocComment
-    public void set${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} ${element.javaTypeName} node) {
+	$!element.javadocComment
+#annotate($element, 'javaSetAnnotation')
+	public void set${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} ${element.javaTypeName} node) {
 #if ($helper.isOption("CG_PARENT"))
-        if (this._${element.javaFieldName}_ != null) {
-            if (this._${element.javaFieldName}_.parent() == this)
-                this._${element.javaFieldName}_.parent(null);
-        }
+		if (this._${element.javaFieldName}_ != null) {
+			if (this._${element.javaFieldName}_.parent() == this)
+				this._${element.javaFieldName}_.parent(null);
+		}
 
-        if (node != null) {
-            Node p = node.parent();
-            if (p != null)
-                p.removeChild(node);
-            node.parent(this);
-        }
+		if (node != null) {
+			Node p = node.parent();
+			if (p != null)
+				p.removeChild(node);
+			node.parent(this);
+		}
 #end##CG_PARENT
 
-        this._${element.javaFieldName}_ = node;
-    }
+		this._${element.javaFieldName}_ = node;
+	}
 #end##if element.list
 
-    @Nonnull
-    public ${alternative.javaTypeName} with${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} #if($element.list)Iterable<? extends ${element.javaTypeName}>#{else}${element.javaTypeName}#{end} value) {
-        set${element.javaMethodName}(value);
-        return this;
-    }
+	@Nonnull
+#annotate($element, 'javaWithAnnotation')
+	public ${alternative.javaTypeName} with${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} #if($element.list)$listArgOf${element.javaTypeName}>#{else}${element.javaTypeName}#{end} value) {
+		set${element.javaMethodName}(value);
+		return this;
+	}
 #end##foreach alternative.elements
 
-    // Externals
+	// Externals
 #foreach ($external in $alternative.externals)
 
-    $!external.javadocComment
+	$!external.javadocComment
 #if ($external.nullable)
-    @CheckForNull
+	@CheckForNull
 #elseif (!$external.symbol.primitive)
-    @Nonnull
+	@Nonnull
 #end
-#annotate($external)
-    public #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} get${external.javaMethodName}() {
-        return this._${external.javaFieldName}_;
-    }
+#annotate($external, 'javaGetAnnotation')
+	public #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} get${external.javaMethodName}() {
+		return this._${external.javaFieldName}_;
+	}
 
-    $!external.javadocComment
-    public void set${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} value) {
-        this._${external.javaFieldName}_ = value;
-    }
+	$!external.javadocComment
+#annotate($external, 'javaSetAnnotation')
+	public void set${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} value) {
+		this._${external.javaFieldName}_ = value;
+	}
 
-    @Nonnull
-    public ${alternative.javaTypeName} with${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} value) {
-        set${external.javaMethodName}(value);
-        return this;
-    }
+	@Nonnull
+#annotate($external, 'javaWithAnnotation')
+	public ${alternative.javaTypeName} with${external.javaMethodName}(#{if}($external.nullable)@CheckForNull#{elseif}(!$external.symbol.primitive)@Nonnull#{end} #if($external.list)List<${external.javaTypeName}>#{else}${external.javaTypeName}#{end} value) {
+		set${external.javaMethodName}(value);
+		return this;
+	}
 #end##foreach alternative.external
 
-    @Override
-    public void removeChild(Node child) {
+	@Override
+	public void removeChild(Node child) {
 #foreach ($element in $alternative.elements)
 #if ($element.list)
-        if (this._${element.javaFieldName}_.remove(child)) {
-            return;
-        }
+		if (this._${element.javaFieldName}_.remove(child)) {
+			return;
+		}
 #else##if element.list
-        if (this._${element.javaFieldName}_ == child) {
-            this._${element.javaFieldName}_ = null;
-            return;
-        }
+		if (this._${element.javaFieldName}_ == child) {
+			this._${element.javaFieldName}_ = null;
+			return;
+		}
 #end##if element.list
 #end##foreach alternative.elements
 
-        throw new IllegalArgumentException("Not a child.");
-    }
+		throw new IllegalArgumentException("Not a child.");
+	}
 
-    @Override
-    public void replaceChild(Node prev, Node repl) {
+	@Override
+	public void replaceChild(Node prev, Node repl) {
 #foreach ($element in $alternative.elements)
 #if ($element.list)
 
-        for (ListIterator<${element.javaTypeName}> it = this._${element.javaFieldName}_.listIterator(); it.hasNext(); /**/) {
-            if (it.next() == prev) {
-                if (repl != null) {
-                    it.set(($element.javaTypeName) repl);
+		for (ListIterator<${element.javaTypeName}> it = this._${element.javaFieldName}_.listIterator(); it.hasNext(); /**/) {
+			if (it.next() == prev) {
+				if (repl != null) {
+					it.set(($element.javaTypeName) repl);
 #if ($helper.isOption("CG_PARENT"))
-                    repl.parent(this);
-                    if (prev.parent() == this)
-                        prev.parent(null);
+					repl.parent(this);
+					if (prev.parent() == this)
+						prev.parent(null);
 #end##CG_PARENT
-                } else {
-                    it.remove();
+				} else {
+					it.remove();
 #if ($helper.isOption("CG_PARENT"))
-                    if (prev.parent() == this)
-                        prev.parent(null);
+					if (prev.parent() == this)
+						prev.parent(null);
 #end##CG_PARENT
-                }
-                return;
-            }
-        }
+				}
+				return;
+			}
+		}
 
 #else##if element.list
 
-        if (this._${element.javaFieldName}_ == prev) {
-            set${element.javaMethodName}((${element.javaTypeName}) repl);
-            return;
-        }
+		if (this._${element.javaFieldName}_ == prev) {
+			set${element.javaMethodName}((${element.javaTypeName}) repl);
+			return;
+		}
 
 #end##if element.list
 #end##foreach alternative.elements
 
-        throw new IllegalArgumentException("Not a child.");
-    }
+		throw new IllegalArgumentException("Not a child.");
+	}
 
-    @Override
+	@Override
 #if ($helper.isOption("CG_FINDBUGS"))
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("CN_IDIOM_NO_SUPER_CALL")
+	@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("CN_IDIOM_NO_SUPER_CALL")
 #end
-    public ${alternative.javaTypeName} clone() {
-        return clone(CloneListener.NONE);
-    }
+	public ${alternative.javaTypeName} clone() {
+		return clone(CloneListener.NONE);
+	}
 
-    @Override
-    public ${alternative.javaTypeName} clone(CloneListener listener) {
-        ${alternative.javaTypeName} out = new ${alternative.javaTypeName}(
+	@Override
+	public ${alternative.javaTypeName} clone(CloneListener listener) {
+		${alternative.javaTypeName} out = new ${alternative.javaTypeName}(
 #foreach ($element in $alternative.elements)
 #if ($element.list)
-            cloneList(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
+			cloneList(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
 
 #else##if element.list
-            cloneNode(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
+			cloneNode(listener, get${element.javaMethodName}())#if($velocityHasNext),#end
 
 #end##if element.list
 #end##foreach alternative.elements
-        );
+		);
 #foreach ($external in $alternative.externals)
-        out.set${external.javaMethodName}(get${external.javaMethodName}());
+		out.set${external.javaMethodName}(get${external.javaMethodName}());
 #end##foreach alternative.externals
-        listener.fireNodeCloned(this, out);
-        return out;
-    }
+		listener.fireNodeCloned(this, out);
+		return out;
+	}
 
-    @Override
-    public void apply(Switch s) {
-        s.case${alternative.javaMethodName}(this);
-    }
+	@Override
+	public void apply(Switch s) {
+		s.case${alternative.javaMethodName}(this);
+	}
 
-    @Override
-    public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
-        return v.visit${alternative.javaMethodName}(this, input);
-    }
+	@Override
+	public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
+		return v.visit${alternative.javaMethodName}(this, input);
+	}
 
-    @Override
-    protected void toStringBuilderDefault(StringBuilder buf) {
+	@Override
+	protected void toStringBuilderDefault(StringBuilder buf) {
 #foreach ($element in $alternative.elements)
-        toStringBuilder(buf, get${element.javaMethodName}());
+		toStringBuilder(buf, get${element.javaMethodName}());
 #end
-    }
+	}
 }

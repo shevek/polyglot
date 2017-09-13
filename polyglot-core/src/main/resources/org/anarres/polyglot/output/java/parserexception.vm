@@ -6,26 +6,26 @@ import ${grammar.package.packageName}.node.Token;
 
 public class ParserException extends Exception {
 
-    @Nonnull
-    private final Token token;
-    private final String rawMessage;
+	@Nonnull
+	private final Token token;
+	private final String rawMessage;
 
-    public ParserException(@Nonnull Token token, @Nonnull String rawMessage) {
-        super("[" + token.getLine() + "," + token.getColumn() + "] " + rawMessage);
-        this.token = token;
+	public ParserException(@Nonnull Token token, @Nonnull String rawMessage) {
+		super("[" + token.getLine() + "," + token.getColumn() + "] " + rawMessage);
+		this.token = token;
 		this.rawMessage = rawMessage;
-    }
+	}
 
 	@Nonnull
-    public Token getToken() {
-        return token;
-    }
+	public Token getToken() {
+		return token;
+	}
 
 #if ($helper.isOption("CG_APIDOC"))
-    /** Returns the raw parser error message. */
+	/** Returns the raw parser error message. */
 #end
-    @Nonnull
-    public String getRawMessage() {
-        return rawMessage;
-    }
+	@Nonnull
+	public String getRawMessage() {
+		return rawMessage;
+	}
 }

@@ -341,7 +341,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         // TODO: Add this to the generic alternative, not just the CST one.
         // We might be a CstProductionTransform. :-( We should probably do separation by type in the grammar.
         if (astAlternative != null) {
-            AstElementModel element = AstElementModel.forNode(errors, node);
+            AstElementModel element = AstElementModel.forNode(errors, astAlternative, node);
             for (AstElementModel e : astAlternative.elements)
                 if (name.equals(e.getName()))
                     errors.addError(node.getSymbolName(), "Duplicate element name '" + name + "' in AST alternative '" + astAlternative.getName() + "'.");

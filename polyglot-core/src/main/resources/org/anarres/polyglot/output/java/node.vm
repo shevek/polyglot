@@ -10,137 +10,139 @@ import javax.annotation.Nonnull;
 public abstract class Node implements INode, Cloneable {
 
 #if ($helper.isOption("CG_PARENT"))
-    private Node parent;
+	private Node parent;
 
-    /**
-     * Returns the parent Node of this Node.
-     *
-     * @return the parent Node of this Node, or null.
-     */
-    @CheckForNull
-    public Node parent() {
-        return this.parent;
-    }
+	/**
+	 * Returns the parent Node of this Node.
+	 *
+	 * @return the parent Node of this Node, or null.
+	 */
+	@CheckForNull
+	public Node parent() {
+		return this.parent;
+	}
 
-    /**
-     * Sets the parent Node of this Node.
-     *
-     * @param parent the new parent Node of this Node.
-     */
-    public void parent(@CheckForNull Node parent) {
-        this.parent = parent;
-    }
+	/**
+	 * Sets the parent Node of this Node.
+	 *
+	 * @param parent the new parent Node of this Node.
+	 */
+	public void parent(@CheckForNull Node parent) {
+		this.parent = parent;
+	}
 #end##CG_PARENT
 
-    /**
-     * Removes a child of this node.
-     *
-     * @param child The child to remove.
-     * @throws RuntimeException if the given child is not a child of this node.
-     */
-    public abstract void removeChild(@Nonnull Node child);
+	/**
+	 * Removes a child of this node.
+	 *
+	 * @param child The child to remove.
+	 * @throws RuntimeException if the given child is not a child of this node.
+	 */
+	public abstract void removeChild(@Nonnull Node child);
 
-    /**
-     * Replaces a child of this node with the given replacement node
-     *
-     * @param prev the child to remove.
-     * @param repl the child to insert in place of prev.
-     * @throws RuntimeException if the given child is not a child of this node.
-     */
-    public abstract void replaceChild(@Nonnull Node prev, @Nonnull Node repl);
+	/**
+	 * Replaces a child of this node with the given replacement node
+	 *
+	 * @param prev the child to remove.
+	 * @param repl the child to insert in place of prev.
+	 * @throws RuntimeException if the given child is not a child of this node.
+	 */
+	public abstract void replaceChild(@Nonnull Node prev, @Nonnull Node repl);
 
 #if ($helper.isOption("CG_PARENT"))
-    /**
-     * Replaces this node under its parent with the given node.
-     *
-     * @param node The node to insert in place of this node.
-     */
-    public void replaceBy(@Nonnull Node node) {
-        this.parent.replaceChild(this, node);
-    }
+	/**
+	 * Replaces this node under its parent with the given node.
+	 *
+	 * @param node The node to insert in place of this node.
+	 */
+	public void replaceBy(@Nonnull Node node) {
+		this.parent.replaceChild(this, node);
+	}
 #end##CG_PARENT
 
-    /**
-     * Recursively clones this node and all children.
-     *
-     * @return The clone of this node.
-     */
-    @Override
-    public abstract Node clone();
+	/**
+	 * Recursively clones this node and all children.
+	 *
+	 * @return The clone of this node.
+	 */
+	@Override
+	public abstract Node clone();
 
-    /**
-     * Recursively clones this node and all children, notifying the {@link CloneListener} of each node cloned.
-     *
-     * @param listener The listener to notify of each individual clone.
-     * @return The clone of this node.
-     */
-    @Nonnull
-    public abstract Node clone(@Nonnull CloneListener listener);
+	/**
+	 * Recursively clones this node and all children, notifying the {@link CloneListener} of each node cloned.
+	 *
+	 * @param listener The listener to notify of each individual clone.
+	 * @return The clone of this node.
+	 */
+	@Nonnull
+	public abstract Node clone(@Nonnull CloneListener listener);
 
-    /**
-     * Recursively clones a possibly-null node and all children.
-     *
-     * @param listener The listener to notify of each individual clone.
-     * @param node The node to clone.
-     * @return The clone of the node, or null.
-     */
-    @SuppressWarnings("unchecked")
-    protected <T extends Node> T cloneNode(@Nonnull CloneListener listener, @CheckForNull T node) {
-        if (node == null)
-            return null;
-        return (T) node.clone(listener);
-    }
+	/**
+	 * Recursively clones a possibly-null node and all children.
+	 *
+	 * @param listener The listener to notify of each individual clone.
+	 * @param node The node to clone.
+	 * @return The clone of the node, or null.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T extends Node> T cloneNode(@Nonnull CloneListener listener, @CheckForNull T node) {
+		if (node == null)
+			return null;
+		return (T) node.clone(listener);
+	}
 
-    /**
-     * Recursively clones a possibly-null list of nodes and all children.
-     *
-     * @param listener The listener to notify of each individual clone.
-     * @param list The list of nodes to clone.
-     * @return The list of clones of the nodes.
-     */
-    @SuppressWarnings("unchecked")
-    protected <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @Nonnull List<? extends T> list) {
-        List<T> out = new ArrayList<T>(list.size());
-        for (T item : list)
-            out.add(cloneNode(listener, item));
-        return out;
-    }
+	/**
+	 * Recursively clones a possibly-null list of nodes and all children.
+	 *
+	 * @param listener The listener to notify of each individual clone.
+	 * @param list The list of nodes to clone.
+	 * @return The list of clones of the nodes.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @Nonnull List<? extends T> list) {
+		List<T> out = new ArrayList<T>(list.size());
+		for (T item : list)
+			out.add(cloneNode(listener, item));
+		return out;
+	}
 
-    protected static void toStringBuilder(@Nonnull StringBuilder buf, @CheckForNull Node node) {
-        if (node != null)
-            node.toStringBuilder(buf);
-    }
+	protected static void toStringBuilder(@Nonnull StringBuilder buf, @CheckForNull Node node) {
+		if (node != null)
+			node.toStringBuilder(buf);
+	}
 
-    protected static void toStringBuilder(@Nonnull StringBuilder buf, @Nonnull List<? extends Node> nodes) {
-        for (Node node : nodes)
-            node.toStringBuilder(buf);
-    }
+	protected static void toStringBuilder(@Nonnull StringBuilder buf, @CheckForNull List<? extends Node> nodes) {
+## For CG_LISTREF_MUTABLE:
+		if (nodes != null)
+			for (Node node : nodes)
+				node.toStringBuilder(buf);
+	}
 
-    protected abstract void toStringBuilderDefault(@Nonnull StringBuilder buf);
+	protected abstract void toStringBuilderDefault(@Nonnull StringBuilder buf);
 
-    /**
-     * Appends the textual content of this node and all children to the given StringBuilder.
-     *
-     * There may be trailing spaces.
-     *
-     * By default, this calls toStringBuilderDefault(), which is implemented in each alternative.
-     * This allows you to override toStringBuilder() in a javaExtends superclass.
-     */
-    public void toStringBuilder(@Nonnull StringBuilder buf) {
-        toStringBuilderDefault(buf);
-    }
+	/**
+	 * Appends the textual content of this node and all children to the given StringBuilder.
+	 *
+	 * There may be trailing spaces.
+	 *
+	 * By default, this calls toStringBuilderDefault(), which is implemented in each alternative.
+	 * This allows you to override toStringBuilder() in a javaExtends superclass.
+	 */
+	public void toStringBuilder(@Nonnull StringBuilder buf) {
+		toStringBuilderDefault(buf);
+	}
 
-    @Override
-    public String toString() {
-        StringBuilder buf = new StringBuilder();
-        toStringBuilder(buf);
-        int length = buf.length();
-        while (length > 0) {
-            if (!Character.isWhitespace(buf.charAt(length - 1)))
-                break;
-            length--;
-        }
-        buf.setLength(length);
-        return buf.toString();
-    }
+	@Override
+	public String toString() {
+		StringBuilder buf = new StringBuilder();
+		toStringBuilder(buf);
+		int length = buf.length();
+		while (length > 0) {
+			if (!Character.isWhitespace(buf.charAt(length - 1)))
+				break;
+			length--;
+		}
+		buf.setLength(length);
+		return buf.toString();
+	}
 }

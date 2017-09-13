@@ -18,16 +18,16 @@ import ${grammar.package.packageName}.node.*;
  */
 public interface Visitor<I, O, X extends Exception> {
 #foreach ($token in $grammar.tokens)
-    public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X;
+	public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X;
 #end
 #foreach ($parserMachine in $parserMachines)
-    public O visit${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X;
+	public O visit${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X;
 #end
 #foreach ($production in $grammar.astProductions)
 #foreach ($alternative in $production.alternatives)
-    public O visit${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X;
+	public O visit${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X;
 #end
 #end
-    public O visitEOF(@Nonnull EOF node, I input) throws X;
-    public O visitInvalidToken(@Nonnull InvalidToken node, I input) throws X;
+	public O visitEOF(@Nonnull EOF node, I input) throws X;
+	public O visitInvalidToken(@Nonnull InvalidToken node, I input) throws X;
 }

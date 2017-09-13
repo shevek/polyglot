@@ -9,140 +9,140 @@ import ${grammar.package.packageName}.node.*;
  */
 public class StringLexer extends AbstractLexer {
 
-    protected final String in;
-    private int offset;
-    private int line;
-    private int column;
-    private boolean cr;
+	protected final String in;
+	private int offset;
+	private int line;
+	private int column;
+	private boolean cr;
 
-    public StringLexer(@Nonnull String in) {
-        this.in = in;
-    }
+	public StringLexer(@Nonnull String in) {
+		this.in = in;
+	}
 
-    @Override
-    protected Token getToken() throws LexerException {
-        int dfa_state = 0;
+	@Override
+	protected Token getToken() throws LexerException {
+		int dfa_state = 0;
 
-        final int start_offset = this.offset;
-        final int start_line = this.line;
-        final int start_column = this.column;
-        final String in = this.in;
-        final int in_length = in.length();
+		final int start_offset = this.offset;
+		final int start_line = this.line;
+		final int start_column = this.column;
+		final String in = this.in;
+		final int in_length = in.length();
 
-        int current_offset = this.offset;
+		int current_offset = this.offset;
 
-        int accept_token = 0;
-        int accept_offset = -1;
+		int accept_token = 0;
+		int accept_offset = -1;
 
-        int state_id = this.state.id();
-        final int[][] gotoTableEntry = AbstractLexer.gotoTable[state_id];
-        final int[] acceptTableEntry = AbstractLexer.acceptTable[state_id];
+		int state_id = this.state.id();
+		final int[][] gotoTableEntry = AbstractLexer.gotoTable[state_id];
+		final int[] acceptTableEntry = AbstractLexer.acceptTable[state_id];
 
-        for (;;) {
-            if (current_offset < in_length) {
-                int c = in.charAt(current_offset++);
-                int[] gotoTableItem = gotoTableEntry[dfa_state];
-                dfa_state = search(gotoTableItem, c);
-            } else {
-                dfa_state = -1;
-            }
+		for (;;) {
+			if (current_offset < in_length) {
+				int c = in.charAt(current_offset++);
+				int[] gotoTableItem = gotoTableEntry[dfa_state];
+				dfa_state = search(gotoTableItem, c);
+			} else {
+				dfa_state = -1;
+			}
 
-            if (dfa_state >= 0) {
-                // If there was a valid transition found on this character.
-                int acceptTableItem = acceptTableEntry[dfa_state];
-                if (acceptTableItem != 0) {
-                    accept_token = acceptTableItem;
-                    accept_offset = current_offset;
-                }
-            }
-            else {
-                // If there was no valid transition found, then we accept from the last accept state.
-                switch (accept_token) {
+			if (dfa_state >= 0) {
+				// If there was a valid transition found on this character.
+				int acceptTableItem = acceptTableEntry[dfa_state];
+				if (acceptTableItem != 0) {
+					accept_token = acceptTableItem;
+					accept_offset = current_offset;
+				}
+			}
+			else {
+				// If there was no valid transition found, then we accept from the last accept state.
+				switch (accept_token) {
 
 #foreach ($token in ${grammar.tokens})
-                    case ${token.index}: {
+					case ${token.index}: {
 #if ($token.fixed)
-                        Token token = new ${token.javaTypeName}(
-                            start_offset,
-                            start_line + 1,
-                            start_column + 1);
+						Token token = new ${token.javaTypeName}(
+							start_offset,
+							start_line + 1,
+							start_column + 1);
 #else## token not fixed
-                        Token token = new ${token.javaTypeName}(
-                            in.substring(start_offset, accept_offset),
-                            start_offset,
-                            start_line + 1,
-                            start_column + 1);
+						Token token = new ${token.javaTypeName}(
+							in.substring(start_offset, accept_offset),
+							start_offset,
+							start_line + 1,
+							start_column + 1);
 #end## token.fixed
-                        accept_at(accept_offset);
+						accept_at(accept_offset);
 #if ($token.transitional)
 
-                        switch (state) {
+						switch (state) {
 #foreach ($transition in $token.transitions)
-                            case ${transition.key.name}: state = State.${transition.value.name}; break;
+							case ${transition.key.name}: state = State.${transition.value.name}; break;
 ## TODO: Have a default -> IllegalStateException here? Would we blow up the method limit?
 #end##foreach transition
-                            default: break;
-                        }
+							default: break;
+						}
 #end##token.transitional
-                        return token;
-                    }
+						return token;
+					}
 #end##foreach token
-                    case 0: {
-                        if (current_offset > start_offset) {
-                            throw new LexerException(
-                                new InvalidToken(
-                                    in.substring(start_offset, start_offset + 1),
-                                    start_offset,
-                                    start_line + 1,
-                                    start_column + 1),
-                                // "[" + (start_line + 1) + "," + (start_column + 1) + "] " +
-                                "Unknown token: " + in.substring(start_offset, current_offset));
-                        }
+					case 0: {
+						if (current_offset > start_offset) {
+							throw new LexerException(
+								new InvalidToken(
+									in.substring(start_offset, start_offset + 1),
+									start_offset,
+									start_line + 1,
+									start_column + 1),
+								// "[" + (start_line + 1) + "," + (start_column + 1) + "] " +
+								"Unknown token: " + in.substring(start_offset, current_offset));
+						}
 
-                        return new EOF(
-                            start_offset,
-                            start_line + 1,
-                            start_column + 1);
-                    }
+						return new EOF(
+							start_offset,
+							start_line + 1,
+							start_column + 1);
+					}
 
-                    default:
-                        throw new IllegalStateException("Internal failure: accept_token=" + accept_token + ", but no handler found.");
-                }   // switch (accept_token)
-            }
-        }
-    }
+					default:
+						throw new IllegalStateException("Internal failure: accept_token=" + accept_token + ", but no handler found.");
+				}   // switch (accept_token)
+			}
+		}
+	}
 
-    private void accept_at(int offset) {
-        int current_line = this.line;
-        int current_column = this.column;
-        boolean current_cr = this.cr;
+	private void accept_at(int offset) {
+		int current_line = this.line;
+		int current_column = this.column;
+		boolean current_cr = this.cr;
 
-        for (int i = this.offset; i < offset; i++) {
-            int c = in.charAt(i);
-            switch (c) {
-                case 10:
-                    if (current_cr) {
-                        current_cr = false;
-                    } else {
-                        current_line++;
-                        current_column = 0;
-                    }
-                    break;
-                case 13:
-                    current_line++;
-                    current_column = 0;
-                    current_cr = true;
-                    break;
-                default:
-                    current_column++;
-                    current_cr = false;
-                    break;
-            }
-        }
+		for (int i = this.offset; i < offset; i++) {
+			int c = in.charAt(i);
+			switch (c) {
+				case 10:
+					if (current_cr) {
+						current_cr = false;
+					} else {
+						current_line++;
+						current_column = 0;
+					}
+					break;
+				case 13:
+					current_line++;
+					current_column = 0;
+					current_cr = true;
+					break;
+				default:
+					current_column++;
+					current_cr = false;
+					break;
+			}
+		}
 
-        this.offset = offset;
-        this.line = current_line;
-        this.column = current_column;
-        this.cr = current_cr;
-    }
+		this.offset = offset;
+		this.line = current_line;
+		this.column = current_column;
+		this.cr = current_cr;
+	}
 }

@@ -10,6 +10,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -75,6 +76,22 @@ public final class AstAlternativeModel extends AbstractNamedJavaModel implements
     @Override
     public String getJavaTypeName() {
         return javaTypeName;
+    }
+
+    /** Returns all elements and externals in declaration order. */
+    @Nonnull
+    @TemplateProperty
+    public List<? extends AstElementModel> getDeclaredElements() {
+        List<AstElementModel> out = new ArrayList<>(elements.size() + externals.size());
+        out.addAll(getElements());
+        out.addAll(getExternals());
+        Collections.sort(out, new Comparator<AstElementModel>() {
+            @Override
+            public int compare(AstElementModel o1, AstElementModel o2) {
+                return Integer.compare(o1.getIndex(), o2.getIndex());
+            }
+        });
+        return out;
     }
 
     @Nonnull

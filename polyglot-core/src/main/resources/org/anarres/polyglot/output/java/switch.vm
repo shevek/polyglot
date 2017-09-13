@@ -11,16 +11,16 @@ import ${package}.analysis.Visitor;
  */
 public interface Switch {
 #foreach ($token in $grammar.tokens)
-    public void case${token.javaMethodName}(@Nonnull ${token.javaTypeName} node);
+	public void case${token.javaMethodName}(@Nonnull ${token.javaTypeName} node);
 #end
 #foreach ($parserMachine in $parserMachines)
-    public void case${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node);
+	public void case${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node);
 #end
 #foreach ($production in $grammar.astProductions)
 #foreach ($alternative in $production.alternatives)
-    public void case${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node);
+	public void case${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node);
 #end
 #end
-    public void caseEOF(@Nonnull EOF node);
-    public void caseInvalidToken(@Nonnull InvalidToken node);
+	public void caseEOF(@Nonnull EOF node);
+	public void caseInvalidToken(@Nonnull InvalidToken node);
 }

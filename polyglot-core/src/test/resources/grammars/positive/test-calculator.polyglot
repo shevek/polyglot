@@ -2,10 +2,13 @@ Package org.anarres.polyglot.test.calculator;
 
 Helpers
 
+	letter = ['a'..'z'] ;
+
 	digit = ['0'..'9'] ;
 
 Tokens
 
+	identifier = letter+ ;
 	integer_constant = digit+ ;
 
 	tok_add = '+' ;
@@ -13,6 +16,10 @@ Tokens
 	tok_mul = '*' ;
 	tok_div = '/' ;
 	tok_rem = '%' ;
+
+	tok_lpar = '(' ;
+	tok_rpar = ')' ;
+	tok_comma = ',' ;
 
 	blank = ' ';
 
@@ -24,6 +31,10 @@ Productions
 	expression { -> expression } =
 		additive_expression
 			{ -> additive_expression.expression } ;
+
+	expression_list { -> expression* } =
+		[e]:expression { -> [e] } |
+		[h]:expression_list tok_comma [t]:expression { -> [h, t] } ;
 
 	additive_expression { -> expression } =
 		{add} additive_expression tok_add multiplicative_expression
@@ -45,7 +56,9 @@ Productions
 
 	primary_expression { -> expression } =
 		integer_constant
-			{ -> New expression.constant(integer_constant) } ;
+			{ -> New expression.constant(integer_constant) } |
+		identifier tok_lpar [a]:expression_list tok_rpar
+			{ -> New expression.function(identifier, [a]) } ;
 
 Abstract Syntax Tree
 
@@ -61,6 +74,7 @@ Abstract Syntax Tree
 		{div} [left]:expression [right]:expression |
 		/** A remainder expression. */
 		{rem} [left]:expression [right]:expression |
+		{function} [name]:identifier [arguments]:expression* |
 		/** An integer constant expression. */
 		{constant} integer_constant ;
 

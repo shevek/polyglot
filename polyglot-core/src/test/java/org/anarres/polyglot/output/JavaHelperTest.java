@@ -34,7 +34,7 @@ public class JavaHelperTest {
         AstProductionModel production = new AstProductionModel(new TIdentifier("prod"), HashMultimap.<String, AnnotationModel>create());
         AstAlternativeModel alternative = new AstAlternativeModel(production, production.getLocation(), new TIdentifier("alt"), HashMultimap.<String, AnnotationModel>create());
         production.alternatives.put(alternative.getName(), alternative);
-        AstElementModel element = new AstElementModel(new TIdentifier("el"), Specifier.ANY, new TIdentifier("sym"), UnaryOperator.NONE, HashMultimap.<String, AnnotationModel>create());
+        AstElementModel element = new AstElementModel(0, new TIdentifier("el"), Specifier.ANY, new TIdentifier("sym"), UnaryOperator.NONE, HashMultimap.<String, AnnotationModel>create());
         alternative.elements.add(element);
 
         GrammarModel grammar = new GrammarModel();

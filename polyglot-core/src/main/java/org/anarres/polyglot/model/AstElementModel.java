@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Objects;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.node.AElement;
@@ -50,8 +51,9 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
     }
 
     @Nonnull
-    public static AstElementModel forNode(@Nonnull ErrorHandler errors, @Nonnull AElement node) {
+    public static AstElementModel forNode(@Nonnull ErrorHandler errors, @Nonnull AstAlternativeModel alternative, @Nonnull AElement node) {
         AstElementModel model = new AstElementModel(
+                alternative.elements.size(), // This is valid during ModelBuilderVisitor only.
                 name(node),
                 Specifier.toSpecifier(node.getSpecifier()),
                 node.getSymbolName(),
@@ -63,13 +65,22 @@ public class AstElementModel extends AbstractElementModel<AstProductionSymbol> i
 
     @Nonnull
     public static AstElementModel forToken(@Nonnull TokenModel token) {
-        AstElementModel out = new AstElementModel(token.toNameToken(), Specifier.TOKEN, token.toNameToken(), UnaryOperator.NONE, ImmutableMultimap.<String, AnnotationModel>of());
+        AstElementModel out = new AstElementModel(0, token.toNameToken(), Specifier.TOKEN, token.toNameToken(), UnaryOperator.NONE, ImmutableMultimap.<String, AnnotationModel>of());
         out.symbol = token;
         return out;
     }
 
-    public AstElementModel(@Nonnull TIdentifier name, @Nonnull Specifier specifier, @Nonnull TIdentifier symbolName, @Nonnull UnaryOperator unaryOperator, Multimap<String, ? extends AnnotationModel> annotations) {
+    private final int index;
+
+    public AstElementModel(@Nonnegative int index, @Nonnull TIdentifier name, @Nonnull Specifier specifier, @Nonnull TIdentifier symbolName, @Nonnull UnaryOperator unaryOperator, Multimap<String, ? extends AnnotationModel> annotations) {
         super(name, specifier, symbolName, unaryOperator, annotations);
+        this.index = index;
+    }
+
+    /** Not an Indexed object, just the order of declaration. */
+    @Nonnegative
+    public int getIndex() {
+        return index;
     }
 
     @Nonnull

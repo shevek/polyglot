@@ -11,13 +11,13 @@ import ${package}.analysis.Visitor;
  */
 public interface Visitable {
 
-    /**
-     * Implements the Visitor pattern.
-     *
-     * @param visitor The visitor to apply.
-     * @param input The input to pass to the visitor method.
-     * @return The return value from the {@link Visitor}.
-     * @throws X if the underlying visitor throws X.
-     */
-    public <I, O, X extends Exception> O apply(@Nonnull Visitor<I, O, X> visitor, I input) throws X;
+	/**
+	 * Implements the Visitor pattern.
+	 *
+	 * @param visitor The visitor to apply.
+	 * @param input The input to pass to the visitor method.
+	 * @return The return value from the {@link Visitor}.
+	 * @throws X if the underlying visitor throws X.
+	 */
+	public <I, O, X extends Exception> O apply(@Nonnull Visitor<I, O, X> visitor, I input) throws X;
 }

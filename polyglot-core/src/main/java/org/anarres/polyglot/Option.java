@@ -11,7 +11,7 @@ package org.anarres.polyglot;
  */
 public enum Option {
 
-    /** Enables SLR parser generation. *//** Enables SLR parser generation. *//** Enables SLR parser generation. *//** Enables SLR parser generation. */
+    /** Enables SLR parser generation. */
     SLR,
     /** Enables LR(1) parser generation. */
     LR1,
@@ -27,6 +27,8 @@ public enum Option {
     CG_JSR305,
     /** Enables jsr305 annotation generation on internal APIs. */
     CG_JSR305_INTERNAL,
+    /** Makes list references mutable, instead of keeping a final list and changing the contents. */
+    CG_LISTREFS_MUTABLE,
     /** Enables findbugs annotation generation. */
     CG_FINDBUGS,
     /** Enables compact code generation. */

@@ -1,14 +1,18 @@
 Package org.anarres.polyglot.test.annotations;
 
+Externals
+
+	e_string = 'java.lang.String' ;
+
 Tokens
 	@javaImplements('java.io.Serializable')
-	@javaAnnotation('@net.jcip.annotations.ThreadSafe')
+	@javaClassAnnotation('@net.jcip.annotations.ThreadSafe')
 	foo = 'foo' ;
 
 Abstract Syntax Tree
 
 	@javaImplements('java.io.Serializable')
-	@javaAnnotation('@net.jcip.annotations.ThreadSafe')
+	@javaClassAnnotation('@net.jcip.annotations.ThreadSafe')
 	@testBare
 	@testNone()
 	@testEmpty('')
@@ -17,7 +21,19 @@ Abstract Syntax Tree
 	@testEscaped('\\\n')
 	program =
 		@javaImplements('java.io.Serializable')
-		@javaAnnotation('@net.jcip.annotations.ThreadSafe')
-		{foo} @javaAnnotation('@javax.annotation.CheckForSigned') foo ;
+		@javaClassAnnotation('@net.jcip.annotations.ThreadSafe')
+		{foo}
+			@javaClassAnnotation('@javax.annotation.CheckForSigned')
+			@javaFieldAnnotation('@javax.annotation.CheckForSigned')
+			@javaSetAnnotation('@javax.annotation.CheckForSigned')
+			@javaGetAnnotation('@javax.annotation.CheckForSigned')
+			foo
+			@javaClassAnnotation('@javax.annotation.Nonnull')
+			@javaFieldAnnotation('@javax.annotation.Nonnull')
+			@javaSetAnnotation('@javax.annotation.Nonnull')
+			@javaGetAnnotation('@javax.annotation.Nonnull')
+			[bar]:e_string ;
+
+
 
 

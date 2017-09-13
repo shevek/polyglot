@@ -9,99 +9,110 @@ import ${package}.analysis.Visitor;
 #if ($token.javadocComment)
 $token.javadocComment
 #end
-#annotate($token)
+#annotate($token, 'javaClassAnnotation')
 public final class ${token.javaTypeName} extends Token
-        implements IToken
+		implements IToken
 #implement($token)
-        {
+		{
 
-    public static final ${token.javaTypeName}[] EMPTY_ARRAY = new ${token.javaTypeName}[0];
+	public static final ${token.javaTypeName}[] EMPTY_ARRAY = new ${token.javaTypeName}[0];
 #if ($helper.hasAnnotation($token, 'DefaultText'))
-    public static final String DEFAULT_TEXT = "${helper.getAnnotationJavaText($token, 'DefaultText')}";
+	public static final String DEFAULT_TEXT = "${helper.getAnnotationJavaText($token, 'DefaultText')}";
 #end##hasAnnotation(DefaultText)
 
-    private String text;
+	private String text;
 
 #if ($helper.hasAnnotation($token, 'DefaultText'))
-    public ${token.javaTypeName}() {
-        this(DEFAULT_TEXT);
-    }
+	public ${token.javaTypeName}() {
+		this(DEFAULT_TEXT);
+	}
 
-    public ${token.javaTypeName}(int offset, int line, int column) {
-        this(DEFAULT_TEXT, offset, line, column);
-    }
+	public ${token.javaTypeName}(int offset, int line, int column) {
+		this(DEFAULT_TEXT, offset, line, column);
+	}
 
-    public ${token.javaTypeName}(@Nonnull Token location) {
-        this(DEFAULT_TEXT, location);
-    }
+	public ${token.javaTypeName}(@Nonnull Token location) {
+		this(DEFAULT_TEXT, location);
+	}
 
 #else##hasAnnotation(DefaultText)
 ## Let's help Kryo and other serializers a little bit.
 #if ($helper.isOption('CG_APIDOC'))
-    /** This helps some serialization libraries. */
+	/** This helps some serialization libraries. */
 #end##CG_APIDOC
-    private ${token.javaTypeName}() {
-    }
+	private ${token.javaTypeName}() {
+	}
 
 #end##hasAnnotation(DefaultText)
-    public ${token.javaTypeName}(@Nonnull String text) {
-        setText(text);
-    }
+	public ${token.javaTypeName}(@Nonnull String text) {
+		setText(text);
+	}
 
-    public ${token.javaTypeName}(@Nonnull String text, int offset, int line, int column) {
-        this(text);
-        setOffset(offset);
-        setLine(line);
-        setColumn(column);
-    }
+	public ${token.javaTypeName}(@Nonnull String text, int offset, int line, int column) {
+		this(text);
+		setOffset(offset);
+		setLine(line);
+		setColumn(column);
+	}
 
-    public ${token.javaTypeName}(@Nonnull String text, @Nonnull Token location) {
-        this(text,
-            location.getOffset(),
-            location.getLine(),
-            location.getColumn());
-    }
+	public ${token.javaTypeName}(@Nonnull String text, @Nonnull Token location) {
+		this(text,
+			location.getOffset(),
+			location.getLine(),
+			location.getColumn());
+	}
 
-    @Override
-    public int getTokenIndex() {
+	@Override
+	public int getTokenIndex() {
 #if ($token.ignored)
-        return -1;
+		return -1;
 #else
-        return ${token.index};
+		return ${token.index};
 #end
-    }
+	}
 
-    @Override
-    public String getText() {
-        return this.text;
-    }
+	@Override
+	public String getText() {
+###if ($helper.hasAnnotation($token, 'DefaultText'))
+##		String t = this.text;
+##		if (t == null)
+##			return DEFAULT_TEXT;
+##		return t;
+###else
+		return this.text;
+###end
+	}
 
-    public void setText(@Nonnull String text) {
-        if (text == null)
-            throw new NullPointerException("Text was null.");
-        this.text = text;
-    }
+	public void setText(@Nonnull String text) {
+		if (text == null)
+			throw new NullPointerException("Text was null.");
+###if ($helper.hasAnnotation($token, 'DefaultText'))
+##		if (DEFAULT_TEXT.equals(text))
+##			text = null;
+###end
+		this.text = text;
+	}
 
-    @Override
-    public ${token.javaTypeName} clone() {
-        return clone(CloneListener.NONE);
-    }
+	@Override
+	public ${token.javaTypeName} clone() {
+		return clone(CloneListener.NONE);
+	}
 
-    @Override
-    public ${token.javaTypeName} clone(CloneListener listener) {
-        ${token.javaTypeName} clone = new ${token.javaTypeName}(getText(), getOffset(), getLine(), getColumn());
-        listener.fireNodeCloned(this, clone);
-        return clone;
-    }
+	@Override
+	public ${token.javaTypeName} clone(CloneListener listener) {
+		${token.javaTypeName} clone = new ${token.javaTypeName}(getText(), getOffset(), getLine(), getColumn());
+		listener.fireNodeCloned(this, clone);
+		return clone;
+	}
 
-    @Override
-    public void apply(Switch s) {
-        s.case${token.javaMethodName}(this);
-    }
+	@Override
+	public void apply(Switch s) {
+		s.case${token.javaMethodName}(this);
+	}
 
-    @Override
-    public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
-        return v.visit${token.javaMethodName}(this, input);
-    }
+	@Override
+	public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
+		return v.visit${token.javaMethodName}(this, input);
+	}
 
 }

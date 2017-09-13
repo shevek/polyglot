@@ -15,11 +15,11 @@ import ${grammar.package.packageName}.node.Switch;
  */
 public interface Analysis extends Switch {
 
-    public Object getIn(@Nonnull Node node);
+	public Object getIn(@Nonnull Node node);
 
-    public void setIn(@Nonnull Node node, Object o);
+	public void setIn(@Nonnull Node node, Object o);
 
-    public Object getOut(@Nonnull Node node);
+	public Object getOut(@Nonnull Node node);
 
-    public void setOut(@Nonnull Node node, Object o);
+	public void setOut(@Nonnull Node node, Object o);
 }
