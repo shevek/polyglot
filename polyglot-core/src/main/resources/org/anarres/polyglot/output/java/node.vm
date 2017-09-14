@@ -98,8 +98,16 @@ public abstract class Node implements INode, Cloneable {
 	 * @param list The list of nodes to clone.
 	 * @return The list of clones of the nodes.
 	 */
+	@CheckForNull
 	@SuppressWarnings("unchecked")
+#if ($helper.isOption("CG_LISTREFS_MUTABLE"))
+	protected <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @CheckForNull List<? extends T> list) {
+		if (list == null)
+			return null;
+#else##CG_LISTREFS_MUTABLE
 	protected <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @Nonnull List<? extends T> list) {
+#end##CG_LISTREFS_MUTABLE
+## We use a mutable list even if the list is empty.
 		List<T> out = new ArrayList<T>(list.size());
 		for (T item : list)
 			out.add(cloneNode(listener, item));

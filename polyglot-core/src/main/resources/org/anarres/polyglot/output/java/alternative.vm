@@ -244,8 +244,13 @@ public class ${alternative.javaTypeName}
 	public void removeChild(Node child) {
 #foreach ($element in $alternative.elements)
 #if ($element.list)
-		if (this._${element.javaFieldName}_.remove(child)) {
-			return;
+#if ($helper.isOption("CG_LISTREFS_MUTABLE"))
+		if (this._${element.javaFieldName}_ != null) {
+#else##CG_LISTREFS_MUTABLE
+		{
+#end##CG_LISTREFS_MUTABLE
+			if (this._${element.javaFieldName}_.remove(child))
+				return;
 		}
 #else##if element.list
 		if (this._${element.javaFieldName}_ == child) {
@@ -263,23 +268,29 @@ public class ${alternative.javaTypeName}
 #foreach ($element in $alternative.elements)
 #if ($element.list)
 
-		for (ListIterator<${element.javaTypeName}> it = this._${element.javaFieldName}_.listIterator(); it.hasNext(); /**/) {
-			if (it.next() == prev) {
-				if (repl != null) {
-					it.set(($element.javaTypeName) repl);
+#if ($helper.isOption("CG_LISTREFS_MUTABLE"))
+		if (this._${element.javaFieldName}_ != null) {
+#else##CG_LISTREFS_MUTABLE
+		{
+#end##CG_LISTREFS_MUTABLE
+			for (ListIterator<${element.javaTypeName}> it = this._${element.javaFieldName}_.listIterator(); it.hasNext(); /**/) {
+				if (it.next() == prev) {
+					if (repl != null) {
+						it.set(($element.javaTypeName) repl);
 #if ($helper.isOption("CG_PARENT"))
-					repl.parent(this);
-					if (prev.parent() == this)
-						prev.parent(null);
+						repl.parent(this);
+						if (prev.parent() == this)
+							prev.parent(null);
 #end##CG_PARENT
-				} else {
-					it.remove();
+					} else {
+						it.remove();
 #if ($helper.isOption("CG_PARENT"))
-					if (prev.parent() == this)
-						prev.parent(null);
+						if (prev.parent() == this)
+							prev.parent(null);
 #end##CG_PARENT
+					}
+					return;
 				}
-				return;
 			}
 		}
 
