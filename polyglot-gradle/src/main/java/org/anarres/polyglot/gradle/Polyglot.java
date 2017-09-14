@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.anarres.jdiagnostics.DefaultQuery;
 import org.anarres.polyglot.DebugHandler;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.PolyglotEngine;
@@ -30,6 +31,8 @@ import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -37,6 +40,7 @@ import org.gradle.api.tasks.TaskAction;
  */
 public class Polyglot extends SourceTask {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Polyglot.class);
     private File inputDir;
     private File outputDir;
     @CheckForNull
@@ -89,10 +93,16 @@ public class Polyglot extends SourceTask {
 
     @InputFiles
     /* pp */ Collection<? extends File> getTemplateFiles() {
-        List<File> out = new ArrayList<>();
-        for (PolyglotTemplateSet templateSet : templates.values())
-            out.addAll(templateSet.getTemplates().values());
-        return out;
+        try {
+            List<File> out = new ArrayList<>();
+            for (PolyglotTemplateSet templateSet : templates.values())
+                out.addAll(templateSet.getTemplates().values());
+            return out;
+        } catch (LinkageError e) {
+            // If we have a conflict on Guava versions, we can get a NoSuchMethodError here.
+            LOG.warn(new DefaultQuery(e).call().toString());
+            throw e;
+        }
     }
 
     public void templates(@Nonnull String glob, @Nonnull Action<? super PolyglotTemplateSet> action) {
