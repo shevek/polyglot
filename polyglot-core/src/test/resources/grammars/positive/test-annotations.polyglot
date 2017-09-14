@@ -28,10 +28,10 @@ Abstract Syntax Tree
 			@javaSetAnnotation('@javax.annotation.CheckForSigned')
 			@javaGetAnnotation('@javax.annotation.CheckForSigned')
 			foo
-			@javaClassAnnotation('@javax.annotation.Nonnull')
-			@javaFieldAnnotation('@javax.annotation.Nonnull')
-			@javaSetAnnotation('@javax.annotation.Nonnull')
-			@javaGetAnnotation('@javax.annotation.Nonnull')
+			@javaClassAnnotation('@javax.annotation.Nonnegative')
+			@javaFieldAnnotation('@javax.annotation.Nonnegative')
+			@javaSetAnnotation('@javax.annotation.Nonnegative')
+			@javaGetAnnotation('@javax.annotation.Nonnegative')
 			[bar]:e_string ;
 
 
