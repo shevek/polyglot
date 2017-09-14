@@ -21,7 +21,7 @@ Abstract Syntax Tree
 	@testEscaped('\\\n')
 	program =
 		@javaImplements('java.io.Serializable')
-		@javaClassAnnotation('@net.jcip.annotations.ThreadSafe')
+		@javaClassAnnotation('@net.jcip.annotations.Immutable')
 		{foo}
 			@javaClassAnnotation('@javax.annotation.CheckForSigned')
 			@javaFieldAnnotation('@javax.annotation.CheckForSigned')
