@@ -9,6 +9,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -335,6 +336,7 @@ public class HtmlHelper extends AbstractHelper {
 
     private static final Function<AbstractNamedModel, Iterable<String>> FUNCTION_GET_ANNOTATION_NAMES = new Function<AbstractNamedModel, Iterable<String>>() {
         @Override
+        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
         public Iterable<String> apply(AbstractNamedModel input) {
             return input.getAnnotations().keySet();
         }

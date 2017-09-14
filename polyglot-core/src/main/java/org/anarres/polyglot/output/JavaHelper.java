@@ -99,7 +99,7 @@ public class JavaHelper extends AbstractHelper {
     }
 
     @Nonnull
-    public String escape(String in) {
+    public String escape(@Nonnull String in) {
         return ESCAPER.escape(Preconditions.checkNotNull(in, "Cannot escape null string."));
     }
 
@@ -225,7 +225,10 @@ public class JavaHelper extends AbstractHelper {
      */
     @Nonnull
     public String getAnnotationJavaText(@Nonnull AstModel model, @Nonnull String name) {
-        return escape(getAnnotation(model, name));
+        String text = getAnnotation(model, name);
+        if (text == null)
+            throw new IllegalArgumentException("Annotation '" + name + "' has no value on " + model + ".");
+        return escape(text);
     }
 
     @Nonnull

@@ -7,6 +7,7 @@ package org.anarres.polyglot.model;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Multimap;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.Token;
@@ -26,6 +27,7 @@ public interface ProductionSymbol {
 
     public static final Function<ProductionSymbol, String> FUNCTION_GET_DESCRIPTIVE_NAME = new Function<ProductionSymbol, String>() {
         @Override
+        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
         public String apply(ProductionSymbol input) {
             return input.getDescriptiveName();
         }
