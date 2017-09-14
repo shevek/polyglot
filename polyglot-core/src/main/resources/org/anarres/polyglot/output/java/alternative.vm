@@ -139,10 +139,15 @@ public class ${alternative.javaTypeName}
 	$!element.javadocComment
 #annotate($element, 'javaSetAnnotation')
 	public void set${element.javaMethodName}(#if($element.nullable)@CheckForNull#{else}@Nonnull#{end} $listArgOf${element.javaTypeName}> list) {
+## Clear the old list.
+## If we're CG_LISTREFS_MUTABLE then the existing list might be null.
 #if ($helper.isOption("CG_PARENT"))
-		for (${element.javaTypeName} e : this._${element.javaFieldName}_) {
-			if (e.parent() == this)
-				e.parent(null);
+		List<${element.javaTypeName}> l = this._${element.javaFieldName}_;
+		if (l != null && !l.isEmpty()) {
+			for (${element.javaTypeName} e : l) {
+				if (e.parent() == this)
+					e.parent(null);
+			}
 		}
 #end##CG_PARENT
 #if ($helper.isOption("CG_LISTREFS_MUTABLE"))
