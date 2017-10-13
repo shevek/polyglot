@@ -49,15 +49,7 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
 
 #foreach ($element in $alternative.elements)
 #if ($element.list)
-		{
-			List<${element.javaTypeName}> orig = node.get${element.javaMethodName}();
-## For CG_LISTREF_MUTABLE:
-			if (orig != null) {
-				${element.javaTypeName}[] copy = orig.toArray(${element.javaTypeName}.EMPTY_ARRAY);
-				for (${element.javaTypeName} e : copy)
-					applyTo(e, input);
-			}
-		}
+		voidApplyToCopyOf(node.get${element.javaMethodName}(), input);
 #else##list
 		applyTo(node.get${element.javaMethodName}(), input);
 #end##list

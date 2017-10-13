@@ -1,6 +1,7 @@
 /* ${header} */
 package ${grammar.package.packageName}.analysis;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.WeakHashMap;
 import javax.annotation.CheckForNull;
@@ -112,6 +113,14 @@ public class AnalysisAdapter implements Analysis {
 		if (nodes == null)
 			return;
 		for (Switchable node : nodes)
+			applyTo(node);
+	}
+
+	/** Equivalent to for (node in nodes.toArray()) node.apply(this) with safety against nulls and concurrent mutation. */
+	public void applyToCopyOf(@CheckForNull Collection<? extends Switchable> nodes) {
+		if (nodes == null)
+			return;
+		for (Switchable node : nodes.toArray(Switchable.EMPTY_ARRAY))
 			applyTo(node);
 	}
 }

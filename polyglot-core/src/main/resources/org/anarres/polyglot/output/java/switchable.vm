@@ -15,6 +15,8 @@ import ${package}.analysis.Visitor;
  */
 public interface Switchable {
 
+	public static final Switchable[] EMPTY_ARRAY = new Switchable[0];
+
 	/** Implements the Visitor pattern. */
 	public void apply(@Nonnull Switch s);
 }

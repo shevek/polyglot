@@ -113,6 +113,17 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
 	}
 
 	/**
+	 * Equivalent to for (node in nodes.toArray()) node.apply(this) with safety against nulls and concurrent mutation.
+	 */
+	@Nonnull
+	protected void voidApplyToCopyOf(@CheckForNull Collection<? extends Visitable> nodes, I input) throws X {
+		if (nodes == null || nodes.isEmpty())
+			return;
+		for (Visitable node : nodes.toArray(Visitable.EMPTY_ARRAY))
+			applyTo(node, input);
+	}
+
+	/**
 	 * Equivalent to for (node in nodes) node.apply(this) with safety against nulls.
 	 *
 	 * @return The list of return values from the node.apply() calls, with null for null nodes.

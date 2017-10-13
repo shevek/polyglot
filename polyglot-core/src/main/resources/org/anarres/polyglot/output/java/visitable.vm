@@ -11,6 +11,8 @@ import ${package}.analysis.Visitor;
  */
 public interface Visitable {
 
+	public static final Visitable[] EMPTY_ARRAY = new Visitable[0];
+
 	/**
 	 * Implements the Visitor pattern.
 	 *
