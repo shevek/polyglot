@@ -252,6 +252,10 @@ public class GrammarModel implements GraphVizScope {
         return prev == null || prev.hasAnnotation(AnnotationName.Weak);
     }
 
+    public boolean removeAstProduction(@Nonnull AstProductionModel astProduction) {
+        return astProductions.remove(astProduction.getName()) != null;
+    }
+
     private boolean isSingleAlternativeProduction(@Nonnull CstProductionModel production) {
         return production.alternatives.size() == 1;
     }

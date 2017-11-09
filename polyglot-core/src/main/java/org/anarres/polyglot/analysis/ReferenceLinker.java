@@ -84,11 +84,18 @@ public class ReferenceLinker implements Runnable {
         }
     }
 
-    private final ErrorHandler errors;
-    private final GrammarModel grammar;
-    private final CstTransformExpressionModel.Visitor<CstAlternativeModel, Void, RuntimeException> expressionVisitor = new CstTransformExpressionModel.AbstractVisitor<CstAlternativeModel, Void, RuntimeException>() {
+    private class ExpressionLinker extends CstTransformExpressionModel.AbstractVisitor<Void, Void, RuntimeException> {
+
+        private final CstAlternativeModel cstAlternative;
+        private final Set<? super AstProductionModel> astProductionsReferenced;
+
+        public ExpressionLinker(@Nonnull CstAlternativeModel cstAlternative, @Nonnull Set<? super AstProductionModel> astProductionsReferenced) {
+            this.cstAlternative = cstAlternative;
+            this.astProductionsReferenced = astProductionsReferenced;
+        }
+
         @Override
-        public Void visitReference(CstTransformExpressionModel.Reference expression, CstAlternativeModel cstAlternative) throws RuntimeException {
+        public Void visitReference(CstTransformExpressionModel.Reference expression, Void input) throws RuntimeException {
 
             ELEMENT:
             {
@@ -111,11 +118,11 @@ public class ReferenceLinker implements Runnable {
                     return null;
             }
 
-            return super.visitReference(expression, cstAlternative);
+            return super.visitReference(expression, input);
         }
 
         @Override
-        public Void visitNew(CstTransformExpressionModel.New expression, CstAlternativeModel cstAlternative) throws RuntimeException {
+        public Void visitNew(CstTransformExpressionModel.New expression, Void input) throws RuntimeException {
             String productionName = expression.getProductionName();
             AstProductionModel astProduction = grammar.astProductions.get(productionName);
             PRODUCTION:
@@ -125,6 +132,8 @@ public class ReferenceLinker implements Runnable {
                     return null;
                 }
             }
+
+            astProductionsReferenced.add(astProduction);
 
             ALTERNATIVE:
             {
@@ -147,10 +156,13 @@ public class ReferenceLinker implements Runnable {
                 }
             }
 
-            return super.visitNew(expression, cstAlternative);
+            return super.visitNew(expression, input);
         }
 
     };
+
+    private final ErrorHandler errors;
+    private final GrammarModel grammar;
 
     public ReferenceLinker(@Nonnull ErrorHandler errors, @Nonnull GrammarModel grammar) {
         this.errors = errors;
@@ -294,6 +306,8 @@ public class ReferenceLinker implements Runnable {
     @Override
     public void run() {
 
+        Set<AstProductionModel> astProductionsReferenced = new HashSet<>();
+
         CST:
         {
             // All known weak productions are in the weak set.
@@ -332,20 +346,30 @@ public class ReferenceLinker implements Runnable {
                         if (cstProductionsWeak.remove(symbol))  // doubles as an instanceof check.
                             cstProductionsTodo.add((CstProductionModel) symbol);
                     }
+                    ExpressionLinker linker = new ExpressionLinker(cstAlternative, astProductionsReferenced);
                     for (CstTransformExpressionModel transformExpression : cstAlternative.getTransformExpressions()) {
-                        transformExpression.apply(expressionVisitor, cstAlternative);
+                        transformExpression.apply(linker, null);
                     }
                 }
             }
 
             for (CstProductionModel cstProduction : cstProductionsWeak) {
-                LOG.info("Discarded unreferenced weak production " + cstProduction.getName());
+                LOG.info("Discarded unreferenced weak CST production " + cstProduction.getName());
                 grammar.removeCstProduction(cstProduction);
             }
         }
 
         AST:
         {
+            for (AstProductionModel astProduction : grammar.getAstProductions()) {
+                if (!astProductionsReferenced.contains(astProduction)) {
+                    if (astProduction.hasAnnotation(AnnotationName.Weak)) {
+                        LOG.info("Discarded unreferenced weak AST production " + astProduction.getName());
+                        grammar.removeAstProduction(astProduction);
+                    }
+                }
+            }
+
             // TODO: Possibly require all unreferenced AST symbols to be annotated @Weak?
             // TODO: Possibly discard unreferenced AST symbols? (Probably not.)
             for (AstProductionModel astProduction : grammar.getAstProductions()) {
