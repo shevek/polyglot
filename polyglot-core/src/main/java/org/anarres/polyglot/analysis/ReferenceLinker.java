@@ -22,6 +22,7 @@ import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstProductionModel;
+import org.anarres.polyglot.model.AstProductionSymbol;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
@@ -87,11 +88,11 @@ public class ReferenceLinker implements Runnable {
     private class ExpressionLinker extends CstTransformExpressionModel.AbstractVisitor<Void, Void, RuntimeException> {
 
         private final CstAlternativeModel cstAlternative;
-        private final Set<? super AstProductionModel> astProductionsReferenced;
+        private final Set<? super AstProductionModel> astProductionsRoot;
 
-        public ExpressionLinker(@Nonnull CstAlternativeModel cstAlternative, @Nonnull Set<? super AstProductionModel> astProductionsReferenced) {
+        public ExpressionLinker(@Nonnull CstAlternativeModel cstAlternative, @Nonnull Set<? super AstProductionModel> astProductionsRoot) {
             this.cstAlternative = cstAlternative;
-            this.astProductionsReferenced = astProductionsReferenced;
+            this.astProductionsRoot = astProductionsRoot;
         }
 
         @Override
@@ -133,7 +134,7 @@ public class ReferenceLinker implements Runnable {
                 }
             }
 
-            astProductionsReferenced.add(astProduction);
+            astProductionsRoot.add(astProduction);
 
             ALTERNATIVE:
             {
@@ -306,7 +307,7 @@ public class ReferenceLinker implements Runnable {
     @Override
     public void run() {
 
-        Set<AstProductionModel> astProductionsReferenced = new HashSet<>();
+        Set<AstProductionModel> astProductionsRoot = new HashSet<>();
 
         CST:
         {
@@ -346,7 +347,7 @@ public class ReferenceLinker implements Runnable {
                         if (cstProductionsWeak.remove(symbol))  // doubles as an instanceof check.
                             cstProductionsTodo.add((CstProductionModel) symbol);
                     }
-                    ExpressionLinker linker = new ExpressionLinker(cstAlternative, astProductionsReferenced);
+                    ExpressionLinker linker = new ExpressionLinker(cstAlternative, astProductionsRoot);
                     for (CstTransformExpressionModel transformExpression : cstAlternative.getTransformExpressions()) {
                         transformExpression.apply(linker, null);
                     }
@@ -361,30 +362,45 @@ public class ReferenceLinker implements Runnable {
 
         AST:
         {
+            Set<AstProductionModel> astProductionsWeak = new HashSet<>();
+            Deque<AstProductionModel> astProductionsTodo = new ArrayDeque<>(astProductionsRoot);
             for (AstProductionModel astProduction : grammar.getAstProductions()) {
-                if (!astProductionsReferenced.contains(astProduction)) {
-                    if (astProduction.hasAnnotation(AnnotationName.Weak)) {
-                        LOG.info("Discarded unreferenced weak AST production " + astProduction.getName());
-                        grammar.removeAstProduction(astProduction);
-                    }
+                if (!astProductionsRoot.contains(astProduction)) {
+                    if (astProduction.hasAnnotation(AnnotationName.Weak))
+                        astProductionsWeak.add(astProduction);
+                    else
+                        astProductionsTodo.add(astProduction);
                 }
             }
+            // Now every AST production is either weak, or TODO.
 
-            // TODO: Possibly require all unreferenced AST symbols to be annotated @Weak?
-            // TODO: Possibly discard unreferenced AST symbols? (Probably not.)
-            for (AstProductionModel astProduction : grammar.getAstProductions()) {
+            for (;;) {
+                AstProductionModel astProduction = astProductionsTodo.poll();
+                if (astProduction == null)
+                    break;
+
                 for (AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
                     // for (AstElementModel astElement : astAlternative.getElements()) { linkAstElement(astElement); }
                     String prefix = "In AST alternative " + astAlternative.getName();
                     for (Iterator<AstElementModel> it = astAlternative.elements.iterator(); it.hasNext(); /* */) {
                         AstElementModel astElement = it.next();
                         linkAstElement(astElement, prefix);
-                        if (astElement.symbol instanceof ExternalModel) {
+                        AstProductionSymbol symbol = astElement.symbol;
+                        if (astProductionsWeak.remove(symbol))  // doubles as an instanceof check.
+                            astProductionsTodo.add((AstProductionModel) symbol);
+                        if (symbol instanceof AstProductionModel) {
+                            astProductionsRoot.add(astElement.getAstProduction());
+                        } else if (symbol instanceof ExternalModel) {
                             it.remove();
                             astAlternative.externals.add(astElement);
                         }
                     }
                 }
+            }
+
+            for (AstProductionModel astProduction : astProductionsWeak) {
+                LOG.info("Discarded unreferenced weak AST production " + astProduction.getName());
+                grammar.removeAstProduction(astProduction);
             }
         }
     }
