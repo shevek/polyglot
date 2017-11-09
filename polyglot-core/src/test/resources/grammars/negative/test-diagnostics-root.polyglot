@@ -8,8 +8,9 @@ Tokens
 
 Productions
 
-	program { -> } =
-		statement+ ;
+	program { -> program } =
+		statement+
+			{ -> New program() } ;
 
 	statement { -> } =
 		{wrapped} tok_lpar statement tok_rpar |
