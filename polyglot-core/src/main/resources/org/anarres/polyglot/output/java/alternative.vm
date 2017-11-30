@@ -29,6 +29,9 @@ $production.javadocComment
 #end##CG_APIDOC
 #annotate($production, 'javaClassAnnotation')
 #annotate($alternative, 'javaClassAnnotation')
+## If we write a method in a superclass, the bean method in here
+## doesn't know that it's an override, and errorprone complains.
+@SuppressWarnings("MissingOverride")
 public class ${alternative.javaTypeName}
 		extends $helper.getSuperClass($alternative, ${production.javaTypeName})
 		implements IAlternative
