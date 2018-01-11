@@ -123,10 +123,10 @@ public abstract class CstTransformExpressionModel extends AbstractModel {
         private final TIdentifier transformName;
         public CstElementModel element;
         public CstTransformPrototypeModel transform;
+
         /* The index into CstProductionModel.transformPrototype or CstAlternativeModel.transformExpressions. */
         // public int transformIndex;
         // private final Throwable created = new Exception();
-
         public Reference(@Nonnull TIdentifier elementName, @CheckForNull TIdentifier transformName) {
             super(elementName);
             this.elementName = Preconditions.checkNotNull(elementName, "Element name was null.");
@@ -307,6 +307,17 @@ public abstract class CstTransformExpressionModel extends AbstractModel {
             return true;
         }
 
+        /**
+         * Since we can't multiply reference a list returned from a child production,
+         * we can fast-path an append by just returning the list returned from the parent.
+         * This condition is a bit too complex to evaluate in the template.
+         */
+        @TemplateProperty("parser.vm")
+        public boolean isSimpleListCopy() {
+            return getItems().size() == 1
+                    && getItems().get(0).isListValue();
+        }
+
         @Override
         public <I, O, X extends Exception> O apply(Visitor<I, O, X> visitor, I input) throws X {
             return visitor.visitList(this, input);
@@ -343,7 +354,7 @@ public abstract class CstTransformExpressionModel extends AbstractModel {
      *
      * @return true if this is an explicit list OR if it's a list-typed variable (reference to a list).
      */
-    @TemplateProperty
+    @TemplateProperty("parser.vm")
     public boolean isListValue() {
         return false;
     }

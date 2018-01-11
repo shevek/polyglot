@@ -5,7 +5,6 @@ import java.io.DataInputStream;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -244,20 +243,41 @@ public class ${parserMachine.parserClassName} {
 
 		/* withAll(). */
 		@Nonnull
-		public L<T> l(@Nonnull Collection<? extends T> value) {
-			addAll(value);
+		public L<T> l(@Nonnull List<? extends T> value) {
+## EmptyList.toArray() allocates a new Object[0].
+			if (!value.isEmpty())
+				addAll(value);
 			return this;
+		}
+	}
+
+## Since we can't multiply reference a list returned from a child production,
+## we can fast-path an append by just appending to the list returned from the parent.
+	private static class LF {
+		@Nonnull
+		public static <T> L<T> n(@Nonnull T value) {
+			return new L<T>().n(value);
+		}
+
+		@Nonnull
+		public static <T> L<T> l(@Nonnull List<? extends T> value) {
+			if (value instanceof L)
+				return (L<T>) value;
+			return new L<T>().l(value);
 		}
 	}
 
 #macro(list $root $indent)
 #if ($root.items.empty)
 ${indent}L.<${root.javaTypeName}>e()
+#elseif ($root.isSimpleListCopy())
+## If we're returning a copy of a list, return by reference
+#expression($root.items.get(0), $indent)
 #else##not empty
-${indent}new L<${root.javaTypeName}>()
+${indent}LF
 #foreach ($item in $root.items)##
-##if ($item.type == "reference" )##
-${indent}.#if($item.listValue)l#{else}n#{end}(
+## If we don't put the P-type name in here, javac does NOT infer the P-type in LF.n(A0).n(A1)
+${indent}.<${root.javaTypeName}>#if($item.listValue)l#{else}n#{end}(
 #set ($subindent = $indent + "	")
 #expression($item, $subindent)
 
@@ -336,7 +356,7 @@ ${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 #end##CG_JSR305_INTERNAL
 #if ($element.symbol.transformPrototypes.size() != 1)
 		$javaTypeName ${helper.getLocalVariableName($element, $transformPrototype)} = ${helper.getLocalVariableName($element)}.t($foreach.count - 1);
-#else## transformPrototypes.size()
+#else## transformPrototypes.size() == 1
 		$javaTypeName ${helper.getLocalVariableName($element, $transformPrototype)} = p();
 #end## transformPrototypes.size()
 #end##transformPrototype												}
