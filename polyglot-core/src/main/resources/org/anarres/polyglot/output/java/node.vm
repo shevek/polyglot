@@ -10,8 +10,10 @@ import javax.annotation.Nonnull;
 /** The superclass of all {@link Token}, production and alternative types. */
 public abstract class Node implements INode, Cloneable {
 
+	/** Utility for alternatives. */
+	@SuppressWarnings("unchecked")
 	protected static <T> boolean replaceChildInList(@CheckForNull List<T> list, @Nonnull Node prev, @Nonnull Node repl, @Nonnull Node parent) {
-		if (list == null)
+		if (list == null || list.isEmpty())
 			return false;
 		for (ListIterator<T> it = list.listIterator(); it.hasNext(); /**/) {
 			if (it.next() == prev) {
@@ -41,6 +43,7 @@ public abstract class Node implements INode, Cloneable {
 				child.parent(null);
 	}
 
+	/** Utility for alternatives. */
 	protected static void removeAllFromParent(@CheckForNull List<? extends Node> children, @Nonnull Node parent) {
 		if (children != null && !children.isEmpty())
 			for (Node child : children)
