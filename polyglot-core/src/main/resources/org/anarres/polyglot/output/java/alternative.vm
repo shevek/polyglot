@@ -3,7 +3,6 @@ package ${grammar.package.packageName}.node;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import ${package}.analysis.Visitor;
@@ -145,13 +144,7 @@ public class ${alternative.javaTypeName}
 ## Clear the old list.
 ## If we're CG_LISTREFS_MUTABLE then the existing list might be null.
 #if ($helper.isOption("CG_PARENT"))
-		List<${element.javaTypeName}> l = this._${element.javaFieldName}_;
-		if (l != null && !l.isEmpty()) {
-			for (${element.javaTypeName} e : l) {
-				if (e.parent() == this)
-					e.parent(null);
-			}
-		}
+		removeAllFromParent(this._${element.javaFieldName}_, this);
 #end##CG_PARENT
 #if ($helper.isOption("CG_LISTREFS_MUTABLE"))
 		this._${element.javaFieldName}_ = list;
@@ -162,10 +155,7 @@ public class ${alternative.javaTypeName}
 		if (list != null) {
 			for (${element.javaTypeName} e : list) {
 #if ($helper.isOption("CG_PARENT"))
-				Node p = e.parent();
-				if (p != null)
-					p.removeChild(e);
-				e.parent(this);
+				moveToParent(e, this);
 #end##CG_PARENT
 #if (!$helper.isOption("CG_LISTREFS_MUTABLE"))
 				this._${element.javaFieldName}_.add(e);
@@ -190,19 +180,9 @@ public class ${alternative.javaTypeName}
 #annotate($element, 'javaSetAnnotation')
 	public void set${element.javaMethodName}(#{if}($element.nullable)@CheckForNull#{else}@Nonnull#{end} ${element.javaTypeName} node) {
 #if ($helper.isOption("CG_PARENT"))
-		if (this._${element.javaFieldName}_ != null) {
-			if (this._${element.javaFieldName}_.parent() == this)
-				this._${element.javaFieldName}_.parent(null);
-		}
-
-		if (node != null) {
-			Node p = node.parent();
-			if (p != null)
-				p.removeChild(node);
-			node.parent(this);
-		}
+		removeFromParent(this._${element.javaFieldName}_, this);
+		moveToParent(node, this);
 #end##CG_PARENT
-
 		this._${element.javaFieldName}_ = node;
 	}
 #end##if element.list
@@ -270,35 +250,10 @@ public class ${alternative.javaTypeName}
 	public void replaceChild(Node prev, Node repl) {
 #foreach ($element in $alternative.elements)
 #if ($element.list)
-
-#if ($helper.isOption("CG_LISTREFS_MUTABLE"))
-		if (this._${element.javaFieldName}_ != null) {
-#else##CG_LISTREFS_MUTABLE
-		{
-#end##CG_LISTREFS_MUTABLE
-			for (ListIterator<${element.javaTypeName}> it = this._${element.javaFieldName}_.listIterator(); it.hasNext(); /**/) {
-				if (it.next() == prev) {
-					if (repl != null) {
-						it.set(($element.javaTypeName) repl);
-#if ($helper.isOption("CG_PARENT"))
-						repl.parent(this);
-						if (prev.parent() == this)
-							prev.parent(null);
-#end##CG_PARENT
-					} else {
-						it.remove();
-#if ($helper.isOption("CG_PARENT"))
-						if (prev.parent() == this)
-							prev.parent(null);
-#end##CG_PARENT
-					}
-					return;
-				}
-			}
-		}
+		if (replaceChildInList(this._${element.javaFieldName}_, prev, repl, this))
+			return;
 
 #else##if element.list
-
 		if (this._${element.javaFieldName}_ == prev) {
 			set${element.javaMethodName}((${element.javaTypeName}) repl);
 			return;
