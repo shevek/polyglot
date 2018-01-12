@@ -232,11 +232,18 @@ public class ${alternative.javaTypeName}
 #else##CG_LISTREFS_MUTABLE
 		{
 #end##CG_LISTREFS_MUTABLE
-			if (this._${element.javaFieldName}_.remove(child))
+			if (this._${element.javaFieldName}_.remove(child)) {
+#if ($helper.isOption("CG_PARENT"))
+				removeFromParent(child, this);
+#end##CG_PARENT
 				return;
+			}
 		}
 #else##if element.list
 		if (this._${element.javaFieldName}_ == child) {
+#if ($helper.isOption("CG_PARENT"))
+			removeFromParent(child, this);
+#end##CG_PARENT
 			this._${element.javaFieldName}_ = null;
 			return;
 		}
