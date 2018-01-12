@@ -278,7 +278,7 @@ ${indent}L.<${root.javaTypeName}>e()
 ${indent}LF
 #foreach ($item in $root.items)##
 ## If we don't put the P-type name in here, javac does NOT infer the P-type in LF.n(A0).n(A1)
-${indent}.<${root.javaTypeName}>#if($item.listValue)l#{else}n#{end}(
+${indent}.#if($velocityCount == 1)<${root.javaTypeName}>#end#if($item.listValue)l#{else}n#{end}(
 #set ($subindent = $indent + "	")
 #expression($item, $subindent)
 
