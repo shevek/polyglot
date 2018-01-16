@@ -59,11 +59,7 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter {
 
 #foreach ($element in $alternative.elementsReversed)
 #if ($element.list)
-		{
-			${element.javaTypeName}[] copy = node.get${element.javaMethodName}().toArray(${element.javaTypeName}.EMPTY_ARRAY);
-			for (int i = copy.length - 1; i >= 0; i--)
-				applyTo(copy[i]);
-		}
+		applyToCopyOfReversed(node.get${element.javaMethodName}());
 #else##list
 		applyTo(node.get${element.javaMethodName}());
 #end##list
