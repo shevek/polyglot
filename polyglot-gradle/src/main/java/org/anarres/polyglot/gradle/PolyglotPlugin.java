@@ -2,13 +2,11 @@ package org.anarres.polyglot.gradle;
 
 import com.google.common.base.Throwables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import groovy.lang.Closure;
 import java.io.Externalizable;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +22,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.CopySpec;
-import org.gradle.api.internal.file.FileResolver;
 import org.gradle.api.internal.file.SourceDirectorySetFactory;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.plugins.JavaPluginConvention;
@@ -130,7 +127,8 @@ public class PolyglotPlugin implements Plugin<Project> {
                 task.setContextValues(context);
             }
         });
-        polyglotGrammarTask.setSource(polyglotSourceSet.getPolyglot());
+        // The cast-to-Object is required to compile against 4.5.1 but run against 3.4.1 or earlier.
+        polyglotGrammarTask.setSource((Object) polyglotSourceSet.getPolyglot());
         polyglotGrammarTask.setOutputDir(project.file(intermediateDir));
 
         String polyglotParserTaskName = sourceSet.getTaskName("polyglot", "Parser");

@@ -167,3 +167,7 @@ project(':polyglot-maven') {
 		testCompile 'org.apache.maven.shared:maven-plugin-testing-harness:1.1'
 	}
 }
+
+wrapper {
+	gradleVersion = '4.5.1'
+}

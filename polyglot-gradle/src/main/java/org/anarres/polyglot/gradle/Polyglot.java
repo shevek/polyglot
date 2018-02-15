@@ -25,6 +25,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.file.EmptyFileVisitor;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileVisitDetails;
+import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Optional;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author shevek
  */
+@CacheableTask
 public class Polyglot extends SourceTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(Polyglot.class);
