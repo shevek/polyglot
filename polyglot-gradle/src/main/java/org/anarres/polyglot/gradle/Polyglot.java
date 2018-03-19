@@ -30,6 +30,8 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.slf4j.Logger;
@@ -94,6 +96,7 @@ public class Polyglot extends SourceTask {
     }
 
     @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
     /* pp */ Collection<? extends File> getTemplateFiles() {
         try {
             List<File> out = new ArrayList<>();
