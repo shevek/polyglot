@@ -15,6 +15,8 @@ import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
 
 /**
+ * Ensures that nobody references a nullable production optionally,
+ * because that's an automatic shift-reduce conflict.
  *
  * @author shevek
  */
