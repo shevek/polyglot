@@ -316,7 +316,7 @@ public class ReferenceLinker implements Runnable {
             // we enqueue the weak production. This causes subsidiary weak productions to
             // be linked, and so forth.
             // At the end, we may, if we choose, remove all remaining weak productions.
-            Set<CstProductionModel> cstProductionsRoot = new HashSet<>(grammar.getCstProductionRoots());
+            Set<CstProductionModel> cstProductionsRoot = new HashSet<CstProductionModel>(grammar.getCstProductionRoots());
             Set<CstProductionModel> cstProductionsWeak = new HashSet<>();
             Deque<CstProductionModel> cstProductionsTodo = new ArrayDeque<>(cstProductionsRoot);
             for (CstProductionModel cstProduction : grammar.getCstProductions()) {

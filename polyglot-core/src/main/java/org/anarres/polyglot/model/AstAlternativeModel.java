@@ -103,7 +103,7 @@ public final class AstAlternativeModel extends AbstractNamedJavaModel implements
     @Nonnull
     @TemplateProperty
     public List<? extends AstElementModel> getElementsReversed() {
-        List<AstElementModel> elements = new ArrayList<>(getElements());
+        List<AstElementModel> elements = new ArrayList<AstElementModel>(getElements());
         Collections.reverse(elements);
         return elements;
     }
@@ -126,7 +126,7 @@ public final class AstAlternativeModel extends AbstractNamedJavaModel implements
     @Nonnull
     @TemplateProperty
     public List<? extends AstElementModel> getExternalsReversed() {
-        List<AstElementModel> externals = new ArrayList<>(getExternals());
+        List<AstElementModel> externals = new ArrayList<AstElementModel>(getExternals());
         Collections.reverse(externals);
         return externals;
     }

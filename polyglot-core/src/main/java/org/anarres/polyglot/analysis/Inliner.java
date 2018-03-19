@@ -253,7 +253,7 @@ public class Inliner {
     @CheckReturnValue
     public boolean substitute(@Nonnull Iterable<? extends CstAlternativeModel> inlineAlternatives) {
         grammar.check();
-        Set<CstProductionModel> cstProductionRoots = new HashSet<>(grammar.getCstProductionRoots());
+        Set<CstProductionModel> cstProductionRoots = new HashSet<CstProductionModel>(grammar.getCstProductionRoots());
 
         for (CstAlternativeModel inlineAlternative : inlineAlternatives) {
             CstProductionModel inlineProduction = inlineAlternative.getProduction();
@@ -267,6 +267,7 @@ public class Inliner {
             // If we inline one alternative of a recursive production, we break it
             // when we remove the alternative from the production itself.
             if (isRecursive(inlineProduction)) {
+                // It's only an error if we attempted to force inlining.
                 if (!inlineProduction.getAnnotations(AnnotationName.Inline).isEmpty())
                     errors.addError(inlineProduction.getLocation(), "Production '" + inlineProduction.getName() + "' is recursive, and may not be inlined.");
                 continue;
