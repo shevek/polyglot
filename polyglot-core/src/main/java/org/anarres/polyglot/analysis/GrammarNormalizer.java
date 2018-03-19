@@ -8,6 +8,7 @@ package org.anarres.polyglot.analysis;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -52,6 +53,7 @@ public class GrammarNormalizer implements Runnable {
         private final List<CstElementModel> elements;
         // After construction, this list remains a fixed size.
         private final List<CstTransformExpressionModel> transformExpressions;
+        private final Multimap<String, ? extends AnnotationModel> annotations;
 
         public CstAlternativeSubstitute(@Nonnull CstAlternativeModel alternative) {
             // We can't use alternative.getSourceName() here because
@@ -65,6 +67,7 @@ public class GrammarNormalizer implements Runnable {
             this.elementsSize = alternative.elements.size();
             this.elements = new ArrayList<>(elementsSize);
             this.transformExpressions = new ArrayList<>(alternative.getTransformExpressions());
+            this.annotations = alternative.getAnnotations();
         }
 
         public CstAlternativeSubstitute(@Nonnull CstAlternativeSubstitute source) {
@@ -73,11 +76,12 @@ public class GrammarNormalizer implements Runnable {
             this.elements = new ArrayList<>(elementsSize);
             this.elements.addAll(source.elements);
             this.transformExpressions = new ArrayList<>(source.transformExpressions);
+            this.annotations = source.annotations;
         }
 
         @Nonnull
         public CstAlternativeModel toCstAlternative(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel production, @Nonnull Token location) {
-            CstAlternativeModel out = CstAlternativeModel.forName(grammar.cstAlternativeIndex++, production, new TIdentifier(name.toString(), location));
+            CstAlternativeModel out = CstAlternativeModel.forName(grammar.cstAlternativeIndex++, production, new TIdentifier(name.toString(), location), annotations);
             out.elements.addAll(elements);
             out.transformExpressions.addAll(transformExpressions);
             return out;
