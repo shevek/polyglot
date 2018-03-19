@@ -50,9 +50,14 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
     }
 
     @Nonnull
-    public static CstAlternativeModel forName(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull TIdentifier name) {
+    public static CstAlternativeModel forName(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull TIdentifier name, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
         int alternativeIndex = production.alternativeIndex++;
-        return new CstAlternativeModel(index, production, name, name, alternativeIndex, ImmutableMultimap.<String, AnnotationModel>of());
+        return new CstAlternativeModel(index, production, name, name, alternativeIndex, annotations);
+    }
+
+    @Nonnull
+    public static CstAlternativeModel forName(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull TIdentifier name) {
+        return forName(index, production, name, ImmutableMultimap.<String, AnnotationModel>of());
     }
 
     @Nonnull

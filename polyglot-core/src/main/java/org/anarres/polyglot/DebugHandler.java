@@ -60,7 +60,7 @@ public interface DebugHandler {
     /** Metadata about a debug target. */
     public static enum Target {
 
-        GRAMMAR_PARSED(TargetType.GRAMMAR), GRAMMAR_LINKED(TargetType.GRAMMAR), GRAMMAR_NORMALIZED(TargetType.GRAMMAR), GRAMMAR_SUBSTITUTED(TargetType.GRAMMAR),
+        GRAMMAR_PARSED(TargetType.GRAMMAR), GRAMMAR_LINKED(TargetType.GRAMMAR), GRAMMAR_NORMALIZED(TargetType.GRAMMAR), GRAMMAR_INLINED(TargetType.GRAMMAR), GRAMMAR_SIMPLIFIED(TargetType.GRAMMAR), GRAMMAR_SUBSTITUTED(TargetType.GRAMMAR),
         GRAMMAR_CST(TargetType.DOT), GRAMMAR_AST(TargetType.DOT),
         STATE_NFA(TargetType.DOT), STATE_DFA(TargetType.DOT),
         FUNCTIONS(TargetType.TEXT),

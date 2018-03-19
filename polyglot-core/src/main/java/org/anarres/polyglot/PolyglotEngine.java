@@ -38,7 +38,9 @@ import org.anarres.graphviz.builder.GraphVizable;
 import org.anarres.polyglot.analysis.AnnotationChecker;
 import org.anarres.polyglot.analysis.ConflictChecker;
 import org.anarres.polyglot.analysis.EpsilonChecker;
+import org.anarres.polyglot.analysis.GrammarInliner;
 import org.anarres.polyglot.analysis.GrammarNormalizer;
+import org.anarres.polyglot.analysis.GrammarSimplifier;
 import org.anarres.polyglot.analysis.GrammarWriterVisitor;
 import org.anarres.polyglot.analysis.Inliner;
 import org.anarres.polyglot.analysis.ModelBuilderVisitor;
@@ -290,10 +292,8 @@ public class PolyglotEngine {
         if (errors.isFatal())
             return grammar;
         dump(debugHandler.forTarget(GRAMMAR_PARSED, ".parsed.grammar"), grammar);
-        // dump("Raw model", grammar);
+
         new AnnotationChecker(errors, grammar).run();
-        if (errors.isFatal())
-            return grammar;
         new ReferenceLinker(errors, grammar).run();
         if (errors.isFatal())
             return grammar;
@@ -308,11 +308,7 @@ public class PolyglotEngine {
 
         // dump("Linked model", grammar);
         new EpsilonChecker(errors, grammar).run();
-        if (errors.isFatal())
-            return grammar;
         new StartChecker(errors, grammar).run();
-        if (errors.isFatal())
-            return grammar;
         new ConflictChecker(errors, grammar).run();
         if (errors.isFatal())
             return grammar;
@@ -327,6 +323,21 @@ public class PolyglotEngine {
         new TypeChecker(errors, grammar).run();
         if (errors.isFatal())
             return grammar;
+
+        if (isOption(Option.INLINE_EXPLICIT)) {
+            new GrammarInliner(errors, grammar).run();
+            // dump(debugHandler.forTarget(GRAMMAR_INLINED, ".inlined.grammar"), grammar);
+            if (errors.isFatal())
+                return grammar;
+        }
+        if (isOption(Option.INLINE_OPPORTUNISTIC)) {
+            new GrammarSimplifier(errors, grammar).run();
+            // dump(debugHandler.forTarget(GRAMMAR_SIMPLIFIED, ".simplified.grammar"), grammar);
+            if (errors.isFatal())
+                return grammar;
+        }
+        LOG.debug("{}: Simplified grammar has {} alternatives.", getName(), grammar.getCstAlternativeCount());
+
         ast.apply(new NFABuilderVisitor(errors, grammar));
 
         LOG.info("{}: Building model took {}", getName(), stopwatch);

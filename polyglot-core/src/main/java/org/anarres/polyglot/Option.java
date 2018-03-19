@@ -15,6 +15,10 @@ public enum Option {
     SLR,
     /** Enables LR(1) parser generation. */
     LR1,
+    /** Enables the explicit inliner. */
+    INLINE_EXPLICIT,
+    /** Enables the opportunistic inliner. */
+    INLINE_OPPORTUNISTIC,
     /** Enables the inliner to solve simple conflicts. */
     INLINE_ON_CONFLICT,
     /** Enables inline table (base64/gzip) table generation. */
