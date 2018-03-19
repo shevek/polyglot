@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -15,13 +16,13 @@ import javax.annotation.Nonnull;
 public enum AnnotationName {
 
     /** Used on a TokenModel or CstProductionModel to indicate the user-visible name of the syntactic construct. */
-    Named(TokenModel.class, AstProductionModel.class),
+    Named(AbstractNamedModel.class), // Basically anything.
     /** Used on a TokenModel to set a default text, even if the regex is variable. */
     DefaultText(TokenModel.class),
     /** Used on a TokenModel to force a fixed text, even if the regex is variable. */
     Text(TokenModel.class),
     /** Used on a CstProductionModel to request deliberate early inlining. */
-    Inline(CstProductionModel.class),
+    Inline(CstProductionModel.class, CstAlternativeModel.class),
     /** Indicates that a production may be overwritten, or discarded if unreferenced. */
     Weak(TokenModel.class, ExternalModel.class, CstProductionModel.class, AstProductionModel.class),
     /** (Currently informal) Indicates whether a CST production is for general use, or is a private refactoring. */
@@ -38,15 +39,16 @@ public enum AnnotationName {
     /** Indicates the relative precedence of a reduction. */
     ParserPrecedence(CstAlternativeModel.class),
     /** Used on an AstAlternativeModel to specify the Java superclass of the alternative. */
-    javaExtends(TokenModel.class, AstProductionModel.class),
+    javaExtends(AstProductionModel.class, AstAlternativeModel.class),
     /** Used on an AstProductionModel or AstAlternativeModel to specify a Java interface for the alternative. */
-    javaImplements(TokenModel.class, AstProductionModel.class),
+    javaImplements(AstProductionModel.class, AstAlternativeModel.class),
+    /** Used on an AstElementModel to indicate that the javaExtends superclass implements the getter and setter. */
+    javaProvided(AstElementModel.class),
     /** Used on an AstProductionModel, AstAlternativeModel or ElementModel to indicate an annotation for the class or method. */
     javaClassAnnotation(TokenModel.class, AstProductionModel.class, AstAlternativeModel.class),
     javaGetAnnotation(AstElementModel.class),
     javaSetAnnotation(AstElementModel.class),
-    javaFieldAnnotation(AstElementModel.class),
-    ;
+    javaFieldAnnotation(AstElementModel.class),;
 
     private final Class<? extends Model>[] targets;
 
@@ -54,6 +56,12 @@ public enum AnnotationName {
     @SuppressWarnings("varargs")
     private AnnotationName(@Nonnull Class<? extends Model>... targets) {
         this.targets = targets;
+    }
+
+    @Nonnull
+    @SuppressFBWarnings("EI_EXPOSE_REP")
+    public Class<? extends Model>[] getTargets() {
+        return targets;
     }
 
     public boolean isTarget(@Nonnull Class<? extends Model> type) {

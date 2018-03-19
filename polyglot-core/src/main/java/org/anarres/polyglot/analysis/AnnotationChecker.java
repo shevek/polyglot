@@ -5,12 +5,18 @@
  */
 package org.anarres.polyglot.analysis;
 
+import com.google.common.base.Joiner;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.model.AbstractNamedModel;
 import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AnnotationName;
+import org.anarres.polyglot.model.AstAlternativeModel;
+import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstProductionModel;
+import org.anarres.polyglot.model.CstAlternativeModel;
+import org.anarres.polyglot.model.CstElementModel;
+import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
 
 /**
@@ -34,14 +40,29 @@ public class AnnotationChecker implements Runnable {
                 continue;
             if (annotationName.isTarget(m.getClass()))
                 continue;
-            errors.addError(m.getLocation(), "Annotation type " + annotationName + " is not applicable to model type " + m.getClass().getSimpleName());
+            errors.addError(a.getLocation(), "Annotation type " + annotationName + " is not applicable to model type " + m.getClass().getSimpleName() + "; only " + Joiner.on(", ").join(annotationName.getTargets()) + ".");
         }
     }
 
     @Override
     public void run() {
+        for (CstProductionModel cstProduction : grammar.getCstProductions()) {
+            check(cstProduction);
+            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+                check(cstAlternative);
+                for (CstElementModel cstElement : cstAlternative.getElements()) {
+                    check(cstElement);
+                }
+            }
+        }
         for (AstProductionModel astProduction : grammar.getAstProductions()) {
             check(astProduction);
+            for (AstAlternativeModel astAlternative : astProduction.getAlternatives()) {
+                check(astAlternative);
+                for (AstElementModel astElement : astAlternative.getElements()) {
+                    check(astElement);
+                }
+            }
         }
     }
 

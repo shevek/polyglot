@@ -23,12 +23,12 @@ Abstract Syntax Tree
 		@javaImplements('java.io.Serializable')
 		@javaClassAnnotation('@net.jcip.annotations.Immutable')
 		{foo}
-			@javaClassAnnotation('@javax.annotation.CheckForSigned')
+			// @javaClassAnnotation('@javax.annotation.CheckForSigned')
 			@javaFieldAnnotation('@javax.annotation.CheckForSigned')
 			@javaSetAnnotation('@javax.annotation.CheckForSigned')
 			@javaGetAnnotation('@javax.annotation.CheckForSigned')
 			foo
-			@javaClassAnnotation('@javax.annotation.Nonnegative')
+			// @javaClassAnnotation('@javax.annotation.Nonnegative')
 			@javaFieldAnnotation('@javax.annotation.Nonnegative')
 			@javaSetAnnotation('@javax.annotation.Nonnegative')
 			@javaGetAnnotation('@javax.annotation.Nonnegative')
