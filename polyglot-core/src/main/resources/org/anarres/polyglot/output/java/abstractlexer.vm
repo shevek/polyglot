@@ -13,7 +13,7 @@ import ${grammar.package.packageName}.node.*;
 /**
  * An abstract base lexer class.
  */
-public abstract class AbstractLexer implements ILexer {
+public abstract class ${lexerMachine.getLexerClassName("Abstract", "")} implements ILexer {
 
 	protected State state = State.${grammar.states.get(0).name};
 	protected Token token;
@@ -83,33 +83,8 @@ public abstract class AbstractLexer implements ILexer {
 	@Nonnull
 	protected abstract Token getToken() throws LexerException, IOException;
 
-#if ($helper.isOption("CG_COMMENT"))
-	/* pp */ static final int[][][] gotoTable /* = {
-#foreach ($state in $grammar.states)
-		// Transitions for ${state.name}, indexed by DFA state. Value is [start, end, dfa-state].
-		{
-#if ($state.dfa)
-#foreach ($dfaState in $state.dfa.states)
-			{ #foreach ($dfaTransition in $dfaState.transitions){$dfaTransition.startCode, $dfaTransition.endCode, $dfaTransition.destination.index}, #end}, // DFA State ${dfaState.index}
-#end##dfaState
-#end##state.dfa
-		},
-#end
-	} */ ;
-#else##CG_COMMENT
 	/* pp */ static final int[][][] gotoTable;
-#end##CG_COMMENT
-
-#if ($helper.isOption("CG_COMMENT"))
-	/* pp */ static final int[][] acceptTable /* = {
-#foreach ($state in $grammar.states)
-		// Accept table for ${state.name}, indexed by DFA state. Value is token index. 0 is non-accepting.
-		{ #if($state.dfa)#foreach ($dfaState in $state.dfa.states)${dfaState.acceptTokenIndex}, #end#end},
-#end
-	} */ ;
-#else##CG_COMMENT
 	/* pp */ static final int[][] acceptTable;
-#end##CG_COMMENT
 
 	public static enum State {
 #foreach ($state in $grammar.states)
@@ -149,7 +124,7 @@ public abstract class AbstractLexer implements ILexer {
 				)
 #else
 				new java.io.BufferedInputStream(
-					AbstractLexer.class.getResourceAsStream("Lexer.dat")
+					ILexer.class.getResourceAsStream("${lexerMachine.lexerClassName}.dat")
 				)
 #end
 			);

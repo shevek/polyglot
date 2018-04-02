@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -49,6 +50,7 @@ import org.anarres.polyglot.analysis.ReferenceLinker;
 import org.anarres.polyglot.analysis.StartChecker;
 import org.anarres.polyglot.analysis.TypeChecker;
 import org.anarres.polyglot.dfa.DFA;
+import org.anarres.polyglot.dfa.NFA;
 import org.anarres.polyglot.lexer.Lexer;
 import org.anarres.polyglot.lexer.LexerException;
 import org.anarres.polyglot.lr.FirstFunction;
@@ -66,6 +68,7 @@ import org.anarres.polyglot.lr.LRState;
 import org.anarres.polyglot.lr.TokenSet;
 import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AnnotationName;
+import org.anarres.polyglot.model.AnnotationUtils;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.StateModel;
@@ -344,24 +347,48 @@ public class PolyglotEngine {
         return grammar;
     }
 
-    @CheckForNull
-    protected EncodedStateMachine.Lexer buildLexer(@Nonnull GrammarModel grammar) throws IOException {
+    @Nonnull
+    protected EncodedStateMachine.Lexer buildLexer(@Nonnull GrammarModel grammar, @Nonnull String machineName) throws IOException {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
         try {
-            DFA.TokenMask mask = new DFA.TokenMask(grammar);
+            List<DFA> dfas = new ArrayList<>();
+            DFA.TokenMask mask = new DFA.TokenMask(grammar, machineName);
 
             for (StateModel state : grammar.states.values()) {
-                if (state.nfa == null)
-                    continue;
-                dump(debugHandler.forTarget(STATE_NFA, "." + state.getName() + ".nfa.dot"), state.nfa);
+                // LOG.info("Building for state " + state.getName());
+                // Build the NFA for this state.
+                NFA stateNfa = null;
+                for (TokenModel token : grammar.tokens.values()) {
+                    if (token.hasAnnotation(AnnotationName.LexerIgnore))
+                        continue;
+                    if (!AnnotationUtils.isIncluded(token, AnnotationName.LexerInclude, AnnotationName.LexerExclude, machineName))
+                        continue;
+                    // Out of all the tokens which "start" in that state.
+                    if (token.transitions.containsKey(state)
+                            || (token.transitions.isEmpty() && state.isInitialState())) {
+                        // LOG.info("Token " + token.getName() + " in state " + state.getName());
+                        NFA tokenNfa = token.nfa;
+                        if (stateNfa == null)
+                            stateNfa = tokenNfa;
+                        else
+                            stateNfa = stateNfa.merge(tokenNfa);
+                    }
+                }
 
-                DFA.Builder builder = new DFA.Builder(errors, grammar, mask, state.nfa);
+                // If we have no tokens in the state, then the state NFA is still null.
+                if (stateNfa == null) {
+                    dfas.add(null);
+                    continue;
+                }
+                dump(debugHandler.forTarget(STATE_NFA, "." + state.getName() + ".nfa.dot"), stateNfa);
+
+                DFA.Builder builder = new DFA.Builder(errors, grammar, mask, stateNfa);
                 DFA dfa = builder.build();
                 // LOG.info(state + " -> " + dfa);
-                state.dfa = dfa;
+                dfas.add(dfa);
 
-                dump(debugHandler.forTarget(STATE_DFA, "." + state.getName() + ".dfa.dot"), state.dfa);
+                dump(debugHandler.forTarget(STATE_DFA, "." + state.getName() + ".dfa.dot"), dfa);
             }
 
             for (Map.Entry<TokenModel, TokenSet> e : mask.entrySet()) {
@@ -382,7 +409,8 @@ public class PolyglotEngine {
                     LOG.warn("{}: {}: {}", getName(), ErrorHandler.toLocationString(token.getLocation()), buf);
             }
 
-            return EncodedStateMachine.forLexer(grammar, isOption(Option.CG_INLINE_TABLES));
+            machineName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, machineName);
+            return EncodedStateMachine.forLexer(machineName, grammar, dfas, isOption(Option.CG_INLINE_TABLES));
         } finally {
             LOG.info("{}: Building lexer took {}", getName(), stopwatch);
         }
@@ -524,12 +552,12 @@ public class PolyglotEngine {
     protected void buildOutputs(
             @Nonnull PolyglotExecutor executor,
             @Nonnull GrammarModel grammar,
-            @CheckForNull EncodedStateMachine.Lexer lexerMachine,
+            @Nonnull List<EncodedStateMachine.Lexer> lexerMachines,
             @Nonnull List<? extends EncodedStateMachine.Parser> parserMachines,
             Predicate<? super OutputLanguage> languages) throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
         LOG.info("{}: Writing output.", getName());
-        OutputData data = new OutputData(getName(), grammar, lexerMachine, parserMachines, options);
+        OutputData data = new OutputData(getName(), grammar, lexerMachines, parserMachines, options);
         try {
             for (Map.Entry<OutputLanguage, File> e : outputDirs.entrySet()) {
                 if (languages.apply(e.getKey())) {
@@ -569,9 +597,14 @@ public class PolyglotEngine {
             if (errors.isFatal())
                 return false;
             // dump("Parsed grammar", ast);
-            EncodedStateMachine.Lexer lexerMachine = buildLexer(grammar);
-            if (errors.isFatal())
-                return false;
+            List<EncodedStateMachine.Lexer> lexerMachines = new ArrayList<>();
+            for (String lexerName : grammar.getLexerMachineNames()) {
+                EncodedStateMachine.Lexer lexerMachine = buildLexer(grammar, lexerName);
+                if (errors.isFatal())
+                    return false;
+                lexerMachines.add(lexerMachine);
+            }
+
             buildFunctions(grammar);
             if (errors.isFatal())
                 return false;
@@ -613,7 +646,7 @@ public class PolyglotEngine {
                 parserMachines.add(EncodedStateMachine.forParser(machineName, automaton, cstProductionRoot, isOption(Option.CG_INLINE_TABLES)));
             }
 
-            buildOutputs(executor, grammar, lexerMachine, parserMachines,
+            buildOutputs(executor, grammar, lexerMachines, parserMachines,
                     Predicates.not(Predicates.equalTo(OutputLanguage.html)));
             if (errors.isFatal())
                 return false;

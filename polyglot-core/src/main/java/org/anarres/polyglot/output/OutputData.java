@@ -7,7 +7,6 @@ package org.anarres.polyglot.output;
 
 import java.util.List;
 import java.util.Set;
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.model.GrammarModel;
@@ -20,19 +19,19 @@ public class OutputData {
 
     private final String name;
     private final GrammarModel grammar;
-    private final EncodedStateMachine.Lexer lexerMachine;
+    private final List<? extends EncodedStateMachine.Lexer> lexerMachines;
     private final List<? extends EncodedStateMachine.Parser> parserMachines;
     private final Set<? extends Option> options;
 
     public OutputData(
             @Nonnull String name,
             @Nonnull GrammarModel grammar,
-            @CheckForNull EncodedStateMachine.Lexer lexerMachine,
+            @Nonnull List<? extends EncodedStateMachine.Lexer> lexerMachines,
             @Nonnull List<? extends EncodedStateMachine.Parser> parserMachines,
             @Nonnull Set<? extends Option> options) {
         this.name = name;
         this.grammar = grammar;
-        this.lexerMachine = lexerMachine;
+        this.lexerMachines = lexerMachines;
         this.parserMachines = parserMachines;
         this.options = options;
     }
@@ -47,9 +46,9 @@ public class OutputData {
         return grammar;
     }
 
-    @CheckForNull
-    public EncodedStateMachine.Lexer getLexerMachine() {
-        return lexerMachine;
+    @Nonnull
+    public List<? extends EncodedStateMachine.Lexer> getLexerMachines() {
+        return lexerMachines;
     }
 
     @Nonnull

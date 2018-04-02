@@ -7,7 +7,7 @@ import ${grammar.package.packageName}.node.*;
 /**
  * A fast string-reading concrete lexer implementation.
  */
-public class StringLexer extends AbstractLexer {
+public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMachine.getLexerClassName("Abstract", "")} {
 
 	protected final String in;
 	private int offset;
@@ -15,7 +15,7 @@ public class StringLexer extends AbstractLexer {
 	private int column;
 	private boolean cr;
 
-	public StringLexer(@Nonnull String in) {
+	public ${lexerMachine.getLexerClassName("", "String")}(@Nonnull String in) {
 		this.in = in;
 	}
 
@@ -35,8 +35,8 @@ public class StringLexer extends AbstractLexer {
 		int accept_offset = -1;
 
 		int state_id = this.state.id();
-		final int[][] gotoTableEntry = AbstractLexer.gotoTable[state_id];
-		final int[] acceptTableEntry = AbstractLexer.acceptTable[state_id];
+		final int[][] gotoTableEntry = gotoTable[state_id];
+		final int[] acceptTableEntry = acceptTable[state_id];
 
 		for (;;) {
 			if (current_offset < in_length) {

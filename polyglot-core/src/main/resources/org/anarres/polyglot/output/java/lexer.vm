@@ -13,7 +13,7 @@ import ${grammar.package.packageName}.node.*;
 /**
  * The default concrete lexer implementation.
  */
-public class Lexer extends AbstractLexer {
+public class ${lexerMachine.getLexerClassName()} extends ${lexerMachine.getLexerClassName("Abstract", "")} {
 
 	protected final PushbackReader in;
 
@@ -23,7 +23,7 @@ public class Lexer extends AbstractLexer {
 	private boolean cr;
 	private final StringBuilder text = new StringBuilder();
 
-	public Lexer(@Nonnull PushbackReader in) {
+	public ${lexerMachine.getLexerClassName()}(@Nonnull PushbackReader in) {
 		this.in = in;
 	}
 
@@ -34,7 +34,7 @@ public class Lexer extends AbstractLexer {
 		return new PushbackReader(in, lookahead_length);
 	}
 
-	public Lexer(@Nonnull Reader in, @Nonnegative int lookahead_length) {
+	public ${lexerMachine.getLexerClassName()}(@Nonnull Reader in, @Nonnegative int lookahead_length) {
 		this(toPushbackReader(in, lookahead_length));
 	}
 
@@ -52,8 +52,8 @@ public class Lexer extends AbstractLexer {
 		int accept_column = -1;
 		int accept_length = -1;
 
-		int[][] gotoTableEntry = AbstractLexer.gotoTable[this.state.id()];
-		int[] acceptTableEntry = AbstractLexer.acceptTable[this.state.id()];
+		int[][] gotoTableEntry = gotoTable[this.state.id()];
+		int[] acceptTableEntry = acceptTable[this.state.id()];
 		this.text.setLength(0);
 
 		for (;;) {

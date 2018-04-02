@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -117,6 +119,24 @@ public class GrammarModel implements GraphVizScope {
     public boolean addHelper(@Nonnull HelperModel model) {
         HelperModel prev = helpers.put(model.getName(), model);
         return prev == null || prev.hasAnnotation(AnnotationName.Weak);
+    }
+
+    @Nonnull
+    public Set<String> getLexerMachineNames() {
+        if (tokens.isEmpty())
+            return Collections.emptySet();
+        Set<String> out = new HashSet<>();
+        for (TokenModel token : tokens.values()) {
+            if (token.hasAnnotation(AnnotationName.LexerInclude))
+                for (AnnotationModel annotation : token.getAnnotations(AnnotationName.LexerInclude))
+                    out.add(annotation.getValue());
+            if (token.hasAnnotation(AnnotationName.LexerExclude))
+                for (AnnotationModel annotation : token.getAnnotations(AnnotationName.LexerExclude))
+                    out.add(annotation.getValue());
+        }
+        if (out.isEmpty())
+            return Collections.singleton("");
+        return out;
     }
 
     @Nonnull

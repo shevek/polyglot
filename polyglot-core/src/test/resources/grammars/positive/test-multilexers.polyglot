@@ -1,0 +1,43 @@
+Package org.anarres.polyglot.test.multilexers;
+
+Helpers
+
+	digit = ['0'..'9'] ;
+
+Tokens
+
+	integer_constant = digit+ ;
+
+	@LexerInclude('a')
+	tok_a = 'a';
+
+	@LexerInclude('b')
+	tok_b = 'b';
+
+	@LexerExclude('a')
+	tok_c = 'c';
+
+	@LexerExclude('b')
+	tok_d = 'd';
+
+	blank = ' ';
+
+Ignored Tokens
+	blank;
+
+Productions
+
+	expression =
+		tok_a { -> New expression.a(tok_a) } |
+		tok_b { -> New expression.b(tok_b) } |
+		tok_c { -> New expression.c(tok_c) } |
+		tok_d { -> New expression.d(tok_d) } ;
+
+Abstract Syntax Tree
+
+	expression = 
+		{a} tok_a | 
+		{b} tok_b | 
+		{c} tok_c | 
+		{d} tok_d ;
+

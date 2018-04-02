@@ -12,14 +12,13 @@ import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.dfa.CharSet;
 import org.anarres.polyglot.dfa.NFA;
 import org.anarres.polyglot.model.AnnotationName;
+import org.anarres.polyglot.model.AnnotationUtils;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.HelperModel;
-import org.anarres.polyglot.model.StateModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.node.AAlternateMatcher;
 import org.anarres.polyglot.node.AConcatMatcher;
 import org.anarres.polyglot.node.ADifferenceMatcher;
-import org.anarres.polyglot.node.AGrammar;
 import org.anarres.polyglot.node.AHelper;
 import org.anarres.polyglot.node.AHelperMatcher;
 import org.anarres.polyglot.node.AIntervalMatcher;
@@ -236,6 +235,8 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
             throw new IllegalStateException("No such token " + name);
         if (token.hasAnnotation(AnnotationName.LexerIgnore))
             return;
+        if (AnnotationUtils.isAnnotated(token, AnnotationName.LexerExclude, null))
+            return;
 
         NFA nfa = getNFA(node.getMatcher());
         // nfa.states[nfa.states.length - 1].accept = token;
@@ -245,34 +246,4 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
 
         // LOG.info(name + " -> " + nfa);
     }
-
-    @Override
-    public void outAGrammar(AGrammar node) {
-        // Build the NFA for each state.
-        for (StateModel state : grammar.states.values()) {
-
-            // LOG.info("Building for state " + state.getName());
-            NFA stateNfa = null;
-            for (TokenModel token : grammar.tokens.values()) {
-                if (token.hasAnnotation(AnnotationName.LexerIgnore))
-                    continue;
-                // Out of all the tokens which "start" in that state.
-                if (token.transitions.containsKey(state)
-                        || (token.transitions.isEmpty() && state.isInitialState())) {
-                    // LOG.info("Token " + token.getName() + " in state " + state.getName());
-                    NFA tokenNfa = token.nfa;
-                    if (stateNfa == null)
-                        stateNfa = tokenNfa;
-                    else
-                        stateNfa = stateNfa.merge(tokenNfa);
-                }
-            }
-
-            // If we have no tokens in the state, then the state NFA is still null.
-            state.nfa = stateNfa;
-
-            // LOG.info(state.getName() + " -> " + stateNfa);
-        }
-    }
-
 }

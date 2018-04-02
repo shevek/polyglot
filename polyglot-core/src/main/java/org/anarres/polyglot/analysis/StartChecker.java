@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AnnotationName;
+import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
 
@@ -70,7 +71,11 @@ public class StartChecker implements Runnable {
                 errors.addError(cstProduction.getLocation(), "Duplicate parser name '" + machineName + "' on CST production '" + cstProduction.getName() + "'.");
         }
 
-        // TODO: Check ParserIgnore on tokens and alts all refer to valid machine names.
+        for (CstProductionModel cstProduction : grammar.cstProductions.values()) {
+            for (CstAlternativeModel cstAlternative : cstProduction.alternatives.values()) {
+                // TODO: Check ParserInclude / ParserExclude on tokens and alts all refer to valid machine names.
+            }
+        }
     }
 
 }

@@ -6,6 +6,7 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.collect.Multimap;
+import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.output.TemplateProperty;
 
@@ -18,4 +19,9 @@ public interface AnnotatedModel extends Model {
     @Nonnull
     @TemplateProperty
     public Multimap<String, ? extends AnnotationModel> getAnnotations();
+
+    public boolean hasAnnotation(@Nonnull AnnotationName name);
+
+    @Nonnull
+    public Collection<? extends AnnotationModel> getAnnotations(@Nonnull AnnotationName name);
 }

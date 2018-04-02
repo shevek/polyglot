@@ -7,11 +7,8 @@ package org.anarres.polyglot.model;
 
 import com.google.common.collect.ImmutableMultimap;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.dfa.DFA;
-import org.anarres.polyglot.dfa.NFA;
 import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.node.TIdentifier;
-import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  *
@@ -25,8 +22,8 @@ public class StateModel extends AbstractNamedModel implements Indexed {
     }
 
     private final int index;
-    public NFA nfa;
-    public DFA dfa;
+    // public NFA nfa;
+    // public DFA dfa;
 
     public StateModel(int index, TIdentifier name) {
         super(name, name(name), ImmutableMultimap.<String, AnnotationModel>of());
@@ -47,11 +44,7 @@ public class StateModel extends AbstractNamedModel implements Indexed {
         return getIndex() == 0;
     }
 
-    @TemplateProperty
-    public DFA getDfa() {
-        return dfa;
-    }
-
+    // @TemplateProperty public DFA getDfa() { return dfa; } 
     @Override
     public TIdentifier toNode() {
         return toNameToken();

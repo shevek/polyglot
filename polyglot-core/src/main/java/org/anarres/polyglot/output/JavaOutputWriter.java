@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.PolyglotExecutor;
-import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
@@ -65,9 +64,10 @@ public class JavaOutputWriter extends AbstractOutputWriter {
         process(executor, "parserexception.vm", "parser/ParserException.java");
         List<? extends EncodedStateMachine.Parser> parserMachines = getOutputData().getParserMachines();
         for (EncodedStateMachine.Parser parserMachine : parserMachines) {
+            Map<String, Object> contextValues = ImmutableMap.<String, Object>of("parserMachine", parserMachine);
             // LRAutomaton automaton = parserMachine.getAutomaton();
-            process(executor, "parser.vm", "parser/" + parserMachine.getParserClassName() + ".java", ImmutableMap.<String, Object>of("parserMachine", parserMachine));
-            process(executor, "start.vm", "node/" + parserMachine.getStartClassName() + ".java", ImmutableMap.<String, Object>of("parserMachine", parserMachine));
+            process(executor, "parser.vm", "parser/" + parserMachine.getParserClassName() + ".java", contextValues);
+            process(executor, "start.vm", "node/" + parserMachine.getStartClassName() + ".java", contextValues);
             write(executor, parserMachine.getEncodedData(), "parser/" + parserMachine.getParserClassName() + ".dat");
         }
 
@@ -76,12 +76,13 @@ public class JavaOutputWriter extends AbstractOutputWriter {
         // Lexer
         process(executor, "ilexer.vm", "lexer/ILexer.java");
         process(executor, "lexerexception.vm", "lexer/LexerException.java");
-        EncodedStateMachine.Lexer lexerMachine = getOutputData().getLexerMachine();
-        if (lexerMachine != null) {
-            process(executor, "abstractlexer.vm", "lexer/AbstractLexer.java");
-            process(executor, "lexer.vm", "lexer/Lexer.java");
-            process(executor, "stringlexer.vm", "lexer/StringLexer.java");
-            write(executor, lexerMachine.getEncodedData(), "lexer/Lexer.dat");
+        List<? extends EncodedStateMachine.Lexer> lexerMachines = getOutputData().getLexerMachines();
+        for (EncodedStateMachine.Lexer lexerMachine : lexerMachines) {
+            Map<String, Object> contextValues = ImmutableMap.<String, Object>of("lexerMachine", lexerMachine);
+            process(executor, "abstractlexer.vm", "lexer/" + lexerMachine.getLexerClassName("Abstract", "") + ".java", contextValues);
+            process(executor, "lexer.vm", "lexer/" + lexerMachine.getLexerClassName() + ".java", contextValues);
+            process(executor, "stringlexer.vm", "lexer/" + lexerMachine.getLexerClassName("", "String") + ".java", contextValues);
+            write(executor, lexerMachine.getEncodedData(), "lexer/" + lexerMachine.getLexerClassName() + ".dat");
         }
 
         // Nodes and tokens

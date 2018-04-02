@@ -26,6 +26,7 @@ import org.anarres.polyglot.lr.TokenMap;
 import org.anarres.polyglot.lr.TokenSet;
 import org.anarres.polyglot.lr.TokenUniverse;
 import org.anarres.polyglot.model.AnnotationName;
+import org.anarres.polyglot.model.AnnotationUtils;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.output.TemplateProperty;
@@ -386,10 +387,12 @@ public class DFA implements GraphVizable, GraphVizScope {
          *
          * @param universe The universe of tokens.
          */
-        public TokenMask(@Nonnull TokenUniverse universe) {
+        public TokenMask(@Nonnull TokenUniverse universe, @Nonnull String machineName) {
             super(universe);
             for (TokenModel token : universe.getItems()) {
                 if (token.hasAnnotation(AnnotationName.LexerIgnore))
+                    continue;
+                if (!AnnotationUtils.isIncluded(token, AnnotationName.LexerInclude, AnnotationName.LexerExclude, machineName))
                     continue;
                 if (token.hasAnnotation(AnnotationName.LexerAllowMasking))
                     continue;
@@ -399,8 +402,8 @@ public class DFA implements GraphVizable, GraphVizScope {
             }
         }
 
-        public TokenMask(@Nonnull GrammarModel grammar) {
-            this(new TokenUniverse(grammar));
+        public TokenMask(@Nonnull GrammarModel grammar, @Nonnull String machineName) {
+            this(new TokenUniverse(grammar), machineName);
         }
 
         /**

@@ -197,15 +197,8 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
 
     /** Passing null asks if ignored for all machines. */
     public boolean isIgnored(@CheckForNull String machineName) {
-        // LOG.debug("isIgnored: " + machineName + "." + getName());
-        for (AnnotationModel annotation : getAnnotations(AnnotationName.ParserIgnore)) {
-            String annotationValue = annotation.getValue();
-            // LOG.info("Actual: " + annotationValue);
-            if (annotationValue == null)
-                return true;
-            if (annotationValue.equals(machineName))
-                return true;
-        }
+        if (AnnotationUtils.isAnnotated(this, AnnotationName.ParserIgnore, machineName))
+            return true;
         return getProduction().isIgnored(machineName);
     }
 

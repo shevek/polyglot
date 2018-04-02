@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import javax.annotation.CheckForNull;
@@ -27,7 +28,6 @@ import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstTransformPrototypeModel;
 import org.anarres.polyglot.model.GrammarModel;
-import org.anarres.polyglot.model.StateModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.runtime.AbstractParser;
 
@@ -40,21 +40,22 @@ public class EncodedStateMachine {
     public static final int MAX_INLINE_TABLE_LENGTH = 64000;
 
     @CheckForNull
-    public static EncodedStateMachine.Lexer forLexer(@Nonnull GrammarModel grammar, boolean inline) throws IOException {
+    public static EncodedStateMachine.Lexer forLexer(@Nonnull String name, @Nonnull GrammarModel grammar, List<DFA> dfas, boolean inline) throws IOException {
         if (grammar.tokens.isEmpty())
             return null;
-        byte[] encodedData = newLexerTable(grammar);
+        byte[] encodedData = newLexerTable(grammar, dfas);
         String encodedText = newStringTable(encodedData, inline ? MAX_INLINE_TABLE_LENGTH : 0);
-        return new Lexer(encodedData, encodedText);
+        return new Lexer(name, encodedData, encodedText);
     }
 
     @Nonnull
-    private static byte[] newLexerTable(@Nonnull GrammarModel grammar) throws IOException {
+    private static byte[] newLexerTable(@Nonnull GrammarModel grammar, @Nonnull List<DFA> dfas) throws IOException {
+        if (grammar.states.size() != dfas.size())
+            throw new IllegalArgumentException("Bad DFA count: states.size=" + grammar.states.size() + ", dfas.size=" + dfas.size());
         ByteArrayOutputStream buf = new ByteArrayOutputStream(8192);
         try (DataOutputStream out = new DataOutputStream(buf)) {
-            out.writeInt(grammar.states.size());
-            for (StateModel lexerState : grammar.getStates()) {
-                DFA dfa = lexerState.dfa;
+            out.writeInt(dfas.size());
+            for (DFA dfa : dfas) {
                 if (dfa == null) {
                     out.writeInt(0);
                     continue;
@@ -156,8 +157,27 @@ public class EncodedStateMachine {
 
     public static class Lexer extends EncodedStateMachine {
 
-        public Lexer(@Nonnull byte[] encodedData, @CheckForNull String encodedText) {
+        private final String name;
+
+        public Lexer(@Nonnull String name,
+                @Nonnull byte[] encodedData, @CheckForNull String encodedText) {
             super(encodedData, encodedText);
+            this.name = name;
+        }
+
+        @Nonnull
+        public String getName() {
+            return name;
+        }
+
+        @Nonnull
+        public String getLexerClassName(@Nonnull String prefix, @Nonnull String infix) {
+            return prefix + getName() + infix + "Lexer";
+        }
+
+        @Nonnull
+        public String getLexerClassName() {
+            return getLexerClassName("", "");
         }
     }
 

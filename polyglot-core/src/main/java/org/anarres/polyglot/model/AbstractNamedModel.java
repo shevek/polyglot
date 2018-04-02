@@ -134,7 +134,7 @@ public abstract class AbstractNamedModel extends AbstractModel implements Annota
         return getAnnotations().get(name);
     }
 
-    @Nonnull
+    @Override
     public Collection<? extends AnnotationModel> getAnnotations(@Nonnull AnnotationName name) {
         return getAnnotations(name.name());
     }
@@ -153,6 +153,7 @@ public abstract class AbstractNamedModel extends AbstractModel implements Annota
         return getAnnotations().containsKey(name);
     }
 
+    @Override
     public boolean hasAnnotation(@Nonnull AnnotationName name) {
         return hasAnnotation(name.name());
     }
