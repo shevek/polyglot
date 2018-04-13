@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.dfa;
 
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.CheckForNull;
@@ -55,51 +56,56 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
         // I think this can be condensed to 1 state.
         this(2);
         states[0] = new State();
-        states[0].transitions.add(new Transition(null, 1));
+        states[0].transitions.add(new CharSetTransition(null, 1));
         states[1] = new State();
     }
 
     /** Constructs an NFA which accepts on any char in the CharSet. */
-    public NFA(@Nonnull CharSet chars) {
-        this(2);
-        states[0] = new State();
-        states[0].transitions.add(new Transition(chars, 1));
-        states[1] = new State();
+    @Nonnull
+    public static NFA forCharSet(@Nonnull CharSet chars) {
+        NFA out = new NFA(2);
+        out.states[0] = new State();
+        out.states[0].transitions.add(new CharSetTransition(chars, 1));
+        out.states[1] = new State();
+        return out;
     }
 
-    public NFA(@Nonnull String string) {
-        this(string.length() + 1);
+    @Nonnull
+    public static NFA forString(@Nonnull String string) {
+        NFA out = new NFA(string.length() + 1);
 
         for (int i = 0; i < string.length(); i++) {
-            states[i] = new State();
-            states[i].transitions.add(new Transition(new CharSet(string.charAt(i)), i + 1));
+            out.states[i] = new State();
+            out.states[i].transitions.add(new CharSetTransition(new CharSet(string.charAt(i)), i + 1));
         }
 
-        states[string.length()] = new State();
+        out.states[string.length()] = new State();
+
+        return out;
     }
 
-    public NFA(@Nonnull NFA nfa) {
-        this(nfa.states.length);
-
-        for (int i = 0; i < nfa.states.length; i++) {
-            // Clones the state, but not the transitions.
-            states[i] = nfa.states[i].offsetBy(0);
-        }
+    @Nonnull
+    public static NFA forCustomMatcher(@Nonnull String name) {
+        NFA out = new NFA(2);
+        out.states[0] = new State();
+        out.states[0].transitions.add(new CustomTransition(name, 1));
+        out.states[1] = new State();
+        return out;
     }
 
     @Nonnull
     public NFA zeroOrMore() {
         NFA nfa = new NFA(states.length + 2);
         nfa.states[0] = new State();
-        nfa.states[0].transitions.add(new Transition(null, 1));
-        nfa.states[0].transitions.add(new Transition(null, states.length + 1));
+        nfa.states[0].transitions.add(new CharSetTransition(null, 1));
+        nfa.states[0].transitions.add(new CharSetTransition(null, states.length + 1));
 
         for (int i = 0; i < states.length; i++) {
             nfa.states[i + 1] = states[i].offsetBy(1);
         }
 
-        nfa.states[states.length].transitions.add(new Transition(null, 1));
-        nfa.states[states.length].transitions.add(new Transition(null, states.length + 1));
+        nfa.states[states.length].transitions.add(new CharSetTransition(null, 1));
+        nfa.states[states.length].transitions.add(new CharSetTransition(null, states.length + 1));
 
         nfa.states[states.length + 1] = new State();
 
@@ -110,14 +116,14 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
     public NFA zeroOrOne() {
         NFA nfa = new NFA(states.length + 2);
         nfa.states[0] = new State();
-        nfa.states[0].transitions.add(new Transition(null, 1));
-        nfa.states[0].transitions.add(new Transition(null, states.length + 1));
+        nfa.states[0].transitions.add(new CharSetTransition(null, 1));
+        nfa.states[0].transitions.add(new CharSetTransition(null, states.length + 1));
 
         for (int i = 0; i < states.length; i++) {
             nfa.states[i + 1] = states[i].offsetBy(1);
         }
 
-        nfa.states[states.length].transitions.add(new Transition(null, states.length + 1));
+        nfa.states[states.length].transitions.add(new CharSetTransition(null, states.length + 1));
 
         nfa.states[states.length + 1] = new State();
 
@@ -128,14 +134,14 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
     public NFA oneOrMore() {
         NFA nfa = new NFA(states.length + 2);
         nfa.states[0] = new State();
-        nfa.states[0].transitions.add(new Transition(null, 1));
+        nfa.states[0].transitions.add(new CharSetTransition(null, 1));
 
         for (int i = 0; i < states.length; i++) {
             nfa.states[i + 1] = states[i].offsetBy(1);
         }
 
-        nfa.states[states.length].transitions.add(new Transition(null, 1));
-        nfa.states[states.length].transitions.add(new Transition(null, states.length + 1));
+        nfa.states[states.length].transitions.add(new CharSetTransition(null, 1));
+        nfa.states[states.length].transitions.add(new CharSetTransition(null, states.length + 1));
 
         nfa.states[states.length + 1] = new State();
 
@@ -150,6 +156,7 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
             nfa.states[i] = states[i].offsetBy(0);
         }
 
+        // Copies next[INITIAL] in place of this.[FINAL].
         for (int i = 0; i < next.states.length; i++) {
             nfa.states[states.length + i - 1] = next.states[i].offsetBy(states.length - 1);
         }
@@ -166,7 +173,7 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
             nfa.states[i] = states[i].offsetBy(0);
         }
         // Outgoing transition from first NFA to final state.
-        nfa.states[states.length - 1].transitions.add(new Transition(null, states.length + next.states.length - 1));
+        nfa.states[states.length - 1].transitions.add(new CharSetTransition(null, states.length + next.states.length - 1));
 
         // Append outgoing transitions from state 0 of the second NFA to state 0 of the first NFA.
         for (Transition transition : next.states[0].transitions) {
@@ -179,7 +186,7 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
 
         // Outgoing transition from second NFA to final state.
         nfa.states[states.length + next.states.length - 2].transitions.add(
-                new Transition(null, states.length + next.states.length - 1));
+                new CharSetTransition(null, states.length + next.states.length - 1));
 
         // Final state.
         nfa.states[states.length + next.states.length - 1] = new State();
@@ -230,7 +237,13 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
                     label = graph.edge(this, state, states[transition.destination]).label();
                     if (!label.isEmpty())
                         label.append(", ");
-                    label.append(transition.chars == null ? "e" : transition.chars.toString());
+                    if (transition instanceof CharSetTransition) {
+                        CharSetTransition c = (CharSetTransition) transition;
+                        label.append(c.chars == null ? "e" : c.chars.toString());
+                    } else {
+                        CustomTransition c = (CustomTransition) transition;
+                        label.append("!");
+                    }
                 }
             }
         }
@@ -247,7 +260,7 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
         return buf.toString();
     }
 
-    public static class State {
+    /* pp */ static class State {
 
         @CheckForNull
         public TokenModel accept;
@@ -275,31 +288,97 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
             toStringBuilder(buf);
             return buf.toString();
         }
-
     }
 
-    public static class Transition {
+    /* pp */ static class CharSetTransition extends Transition {
 
         @CheckForNull
         public final CharSet chars;
-        @Nonnegative
-        public final int destination;
 
-        public Transition(@CheckForNull CharSet chars, @Nonnegative int destination) {
+        public CharSetTransition(CharSet chars, int destination) {
+            super(destination);
             this.chars = chars;
-            this.destination = destination;
         }
 
-        @Nonnull
+        @Override
+        public boolean isEpsilon() {
+            return chars == null;
+        }
+
+        @Override
+        public boolean isCustom() {
+            return false;
+        }
+
+        @Override
         public Transition offsetBy(int destinationOffset) {
             if (destinationOffset == 0)
                 return this;
-            return new Transition(chars, destination + destinationOffset);
+            return new CharSetTransition(chars, destination + destinationOffset);
         }
 
         @Override
         public String toString() {
             return destination + ":{" + chars + "}";
         }
+    }
+
+    /* pp */ static class CustomTransition extends Transition {
+
+        private final String name;
+
+        public CustomTransition(@Nonnull String name, @Nonnegative int destination) {
+            super(destination);
+            this.name = Preconditions.checkNotNull(name, "Name was null.");
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public boolean isEpsilon() {
+            return false;
+        }
+
+        @Override
+        public boolean isCustom() {
+            return true;
+        }
+
+        @Override
+        public Transition offsetBy(int destinationOffset) {
+            if (destinationOffset == 0)
+                return this;
+            return new CustomTransition(name, destination + destinationOffset);
+        }
+
+        @Override
+        public String toString() {
+            return destination + ":!";
+        }
+    }
+
+    /* pp */ static abstract class Transition {
+
+        @Nonnegative
+        public final int destination;
+
+        public Transition(@Nonnegative int destination) {
+            this.destination = destination;
+        }
+
+        @Nonnegative
+        public int getDestination() {
+            return destination;
+        }
+
+        /** Returns true iff this is an epsilon transition. */
+        public abstract boolean isEpsilon();
+
+        public abstract boolean isCustom();
+
+        @Nonnull
+        public abstract Transition offsetBy(int destinationOffset);
     }
 }

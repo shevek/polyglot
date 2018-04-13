@@ -82,6 +82,7 @@ Tokens
 	hex_char = '0' ('x' | 'X') hex_digit+;
 
 	string = ''' s_char* ''';
+	custom_name = '`' nondigit (nondigit | digit)* '`' ;
 
 	blank = (eol | tab | ' ')+ ;
 	javadoc_comment = '/**' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
@@ -220,7 +221,9 @@ Productions
 			{ -> New matcher.literal(char_matcher.literal) } |
 		// A helper might name an NFA or a CharSet.
 		{helper} identifier
-			{ -> New matcher.helper(identifier) } ;
+			{ -> New matcher.helper(identifier) } |
+		{custom} custom_name
+			{ -> New matcher.custom(custom_name) } ;
 
 	char_matcher { -> literal } =
 		{string} string
@@ -443,6 +446,8 @@ Abstract Syntax Tree
 		// {string}     string |
 		// Either an NFA or a CharSet
 		{helper}     [helper_name]:identifier |
+		// Kind of like a literal, in that it just consumes characters.
+		{custom}     custom_name |
 		// CharSet operations
 		{union}      [left]:matcher [right]:matcher [op]:tok_plus  |
 		{difference} [left]:matcher [right]:matcher [op]:tok_minus |

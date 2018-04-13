@@ -118,11 +118,12 @@ public class DFA implements GraphVizable, GraphVizScope {
             if (out.get(nfaState))
                 return;
             out.set(nfaState);
+            // LOG.info("includes " + nfaState);
 
             for (NFA.Transition transition : nfa.states[nfaState].transitions) {
-                if (transition == null)
+                if (transition == null) // I'd like to say this was notreached, but it's handled rigorously.
                     continue;
-                if (transition.chars != null)
+                if (!transition.isEpsilon()) // custom transitions are never epsilon.
                     continue;
                 buildEClosureCache(out, transition.destination);
             }
@@ -166,6 +167,20 @@ public class DFA implements GraphVizable, GraphVizScope {
         }
 
         @Nonnull
+        private DFA.State getDfaState(@Nonnull List<DFA.State> dfaStates, @Nonnull Map<BitSet, DFA.State> dfaStateMap, @Nonnull BitSet dstNfaStates) {
+            State dfaStateTarget = dfaStateMap.get(dstNfaStates);
+
+            if (dfaStateTarget == null) {
+                TokenModel acceptToken = getAcceptForState(dstNfaStates);
+                dfaStateTarget = new State(dfaStates.size(), dstNfaStates, acceptToken);
+                dfaStates.add(dfaStateTarget);
+                dfaStateMap.put(dstNfaStates, dfaStateTarget);
+            }
+
+            return dfaStateTarget;
+        }
+
+        @Nonnull
         public DFA build() {
             BitSet[] eclosures = buildEClosureCache();
             List<DFA.State> dfaStates = new ArrayList<>();
@@ -186,17 +201,21 @@ public class DFA implements GraphVizable, GraphVizScope {
                     end = (char) 0xffff;
                     boolean transitionFound = false;
 
+                    // We are iterating over a previously constructed closure.
                     for (int nfaStateIdx = dfaState.nfaStates.nextSetBit(0); nfaStateIdx >= 0; nfaStateIdx = dfaState.nfaStates.nextSetBit(nfaStateIdx + 1)) {
                         NFA.State nfaState = nfa.states[nfaStateIdx];
                         for (NFA.Transition nfaTransition : nfaState.transitions) {
                             if (nfaTransition == null)
                                 continue;
                             // It's an epsilon-transition, and the destination is already included in nfaStates.
-                            if (nfaTransition.chars == null)
+                            if (nfaTransition.isEpsilon())
+                                continue;
+                            if (nfaTransition.isCustom())
                                 continue;
 
                             // We're looking for the shortest common interval in all transitions starting from 'start'.
-                            CharInterval overlap = CharInterval.findFirstOverlappingInterval(nfaTransition.chars.getIntervals(), start, end);
+                            NFA.CharSetTransition c = (NFA.CharSetTransition) nfaTransition;
+                            CharInterval overlap = CharInterval.findFirstOverlappingInterval(c.chars.getIntervals(), start, end);
                             if (overlap != null) {
                                 if (overlap.getStart() > start) {
                                     // Consider the previous region only.
@@ -217,17 +236,7 @@ public class DFA implements GraphVizable, GraphVizScope {
 
                     if (transitionFound) {
                         dstNfaStates = eclosure(eclosures, dstNfaStates);
-                        State dfaStateTarget = dfaStateMap.get(dstNfaStates);
-
-                        if (dfaStateTarget == null) {
-                            // TODO: Compute accept here.
-                            TokenModel acceptToken = getAcceptForState(dstNfaStates);
-                            dfaStateTarget = new State(dfaStates.size(), dstNfaStates, acceptToken);
-                            dfaStates.add(dfaStateTarget);
-                            dfaStateMap.put(dstNfaStates, dfaStateTarget);
-
-                        }
-
+                        State dfaStateTarget = getDfaState(dfaStates, dfaStateMap, dstNfaStates);
                         // These are generated in strictly ascending order.
                         dfaState.addTransition(new Transition(start, end, dfaStateTarget));
                     }
@@ -235,23 +244,43 @@ public class DFA implements GraphVizable, GraphVizScope {
                     // Look for the next character range.
                     start = (char) (end + 1);
                 } while (end != (char) 0xffff);
-            }
+
+                for (int nfaStateIdx = dfaState.nfaStates.nextSetBit(0); nfaStateIdx >= 0; nfaStateIdx = dfaState.nfaStates.nextSetBit(nfaStateIdx + 1)) {
+                    NFA.State nfaState = nfa.states[nfaStateIdx];
+                    for (NFA.Transition nfaTransition : nfaState.transitions) {
+                        if (!nfaTransition.isCustom())
+                            continue;
+                        NFA.CustomTransition c = (NFA.CustomTransition) nfaTransition;
+
+                        BitSet dstNfaStates = new BitSet();
+                        dstNfaStates.set(c.getDestination());
+                        dstNfaStates = eclosure(eclosures, dstNfaStates);
+                        State dfaStateTarget = getDfaState(dfaStates, dfaStateMap, dstNfaStates);
+                        dfaState.addCustomTransition(c.getName(), dfaStateTarget);
+                    }
+                }
+
+            }   // foreach dfaState
 
             return new DFA(dfaStates);
         }
     }
 
+    // MUST use identity equality.
     public static class State {
 
         private final int index;
         private final BitSet nfaStates;
         public final TokenModel acceptToken;
         public final List<Transition> transitions = new ArrayList<>();
+        private final List<CustomTransition> customTransitions = new ArrayList<>();
 
         public State(int index, BitSet nfaStates, @CheckForNull TokenModel accept) {
             this.index = index;
             this.nfaStates = nfaStates;
             this.acceptToken = accept;
+
+            // LOG.debug("DFA state " + index + " represents " + nfaStates);
         }
 
         @TemplateProperty
@@ -290,6 +319,10 @@ public class DFA implements GraphVizable, GraphVizScope {
             transitions.add(transition);
         }
 
+        public void addCustomTransition(@Nonnull String name, @Nonnull State destination) {
+            this.customTransitions.add(new CustomTransition(destination, name));
+        }
+
         @Override
         public String toString() {
             StringBuilder buf = new StringBuilder();
@@ -297,6 +330,8 @@ public class DFA implements GraphVizable, GraphVizScope {
                 buf.append("(").append(acceptToken.getName()).append(") ");
             for (Transition transition : transitions)
                 buf.append(transition).append(",");
+            for (CustomTransition customTransition : customTransitions)
+                buf.append(customTransition).append(",");
             return buf.toString() /*+ " " + nfaStates*/;
         }
     }
@@ -376,6 +411,49 @@ public class DFA implements GraphVizable, GraphVizScope {
 
     }
 
+    public static final class CustomTransition {
+
+        private final State destination;
+        private final String customName;
+
+        public CustomTransition(State destination, String customName) {
+            this.destination = destination;
+            this.customName = customName;
+        }
+
+        public State getDestination() {
+            return destination;
+        }
+
+        @Nonnull
+        public String getCustomName() {
+            return customName;
+        }
+
+        @Override
+        public int hashCode() {
+            return getDestination().hashCode() ^ getCustomName().hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (null == obj)
+                return false;
+            if (!getClass().equals(obj.getClass()))
+                return false;
+            CustomTransition o = (CustomTransition) obj;
+            return getDestination().equals(o.getDestination())
+                    && getCustomName().equals(o.getCustomName());
+        }
+
+        @Override
+        public String toString() {
+            return getDestination().index + ":`" + getCustomName() + "`";
+        }
+    }
+
     /**
      * A data structure for detecting which {@link TokenModel tokens}
      * can never be matched by any DFA state.
@@ -414,6 +492,9 @@ public class DFA implements GraphVizable, GraphVizScope {
          * @param by The token by which it was masked.
          */
         public void mask(@Nonnull TokenModel masked, @Nonnull TokenModel by) {
+            // We call getDfaState() per nfa-set multiple times, but that can only call getAcceptForState once.
+            // LOG.debug("Token " + masked + " masked by " + by);
+            // if (masked.equals(by)) return;
             TokenSet set = get(masked);
             if (set != null)
                 set.add(by);

@@ -18,6 +18,7 @@ import org.anarres.polyglot.model.HelperModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.node.AAlternateMatcher;
 import org.anarres.polyglot.node.AConcatMatcher;
+import org.anarres.polyglot.node.ACustomMatcher;
 import org.anarres.polyglot.node.ADifferenceMatcher;
 import org.anarres.polyglot.node.AHelper;
 import org.anarres.polyglot.node.AHelperMatcher;
@@ -97,11 +98,11 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
         if (o instanceof NFA)
             return ((NFA) o);
         if (o instanceof CharSet)
-            return new NFA((CharSet) o);
+            return NFA.forCharSet((CharSet) o);
         if (o instanceof Character)
-            return new NFA(Character.toString((Character) o));
+            return NFA.forString(Character.toString((Character) o));
         if (o instanceof String)
-            return new NFA((String) o);
+            return NFA.forString((String) o);
         throw new IllegalStateException("What is " + o.getClass() + " for " + node.getClass());
     }
 
@@ -144,6 +145,13 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
             return;
         }
         setOut(node, helper.value);
+    }
+
+    @Override
+    public void outACustomMatcher(ACustomMatcher node) {
+        String name = node.getCustomName().getText();
+        name = name.substring(1, name.length() - 2);
+        setOut(node, NFA.forCustomMatcher(name));
     }
 
     @Override
@@ -219,7 +227,7 @@ public class NFABuilderVisitor extends MatcherParserVisitor {
             if (s.length() == 1)
                 value = new CharSet(s.charAt(0));
             else
-                value = new NFA(s);
+                value = NFA.forString(s);
         } else {
             value = (HelperModel.Value) o;
         }
