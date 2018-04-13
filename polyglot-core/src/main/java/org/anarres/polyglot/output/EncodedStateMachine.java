@@ -81,16 +81,16 @@ public class EncodedStateMachine {
     }
 
     @CheckForNull
-    public static EncodedStateMachine.Parser forParser(@Nonnull String name, @Nonnull LRAutomaton automaton, @Nonnull CstProductionModel cstProductionRoot, boolean inline) throws IOException {
+    public static EncodedStateMachine.Parser forParser(@Nonnull String name, @Nonnull GrammarModel grammar, @Nonnull LRAutomaton automaton, @Nonnull CstProductionModel cstProductionRoot, boolean inline) throws IOException {
         IntOpenHashSet cstAlternativeSet = new IntOpenHashSet();
-        byte[] encodedData = newParserTable(automaton, cstAlternativeSet);
+        byte[] encodedData = newParserTable(grammar, automaton, cstAlternativeSet);
         String encodedText = newStringTable(encodedData, inline ? MAX_INLINE_TABLE_LENGTH : 0);
         return new Parser(name, /* automaton, */ cstProductionRoot, cstAlternativeSet, encodedData, encodedText);
     }
 
     // This takes an argument with a different nullability annotation than the field.
     @Nonnull
-    private static byte[] newParserTable(@Nonnull LRAutomaton automaton, @Nonnull IntSet cstAlternativeSet) throws IOException {
+    private static byte[] newParserTable(@Nonnull GrammarModel grammar, @Nonnull LRAutomaton automaton, @Nonnull IntSet cstAlternativeSet) throws IOException {
         ByteArrayOutputStream buf = new ByteArrayOutputStream(8192);
         try (DataOutputStream out = new DataOutputStream(buf)) {
             out.writeInt(automaton.getStates().size()); // parserStateCount

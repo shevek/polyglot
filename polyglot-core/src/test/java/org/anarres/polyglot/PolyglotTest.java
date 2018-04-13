@@ -92,6 +92,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // if (!file.getName().equals("test-multilexers.polyglot"))
             // if (!file.getName().equals("test-multistart.polyglot"))
             // if (!file.getName().equals("test-parserignore.polyglot"))
+            // if (!file.getName().equals("test-precedence.polyglot"))
             // if (!file.getName().equals("test-no-lexer.polyglot"))
             // if (!file.getName().equals("test-nonmasked.polyglot"))
             // if (!file.getName().equals("test-no-parser.polyglot"))

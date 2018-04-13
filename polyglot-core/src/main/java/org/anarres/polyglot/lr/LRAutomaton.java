@@ -39,6 +39,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
 
     private static final Logger LOG = LoggerFactory.getLogger(LRAutomaton.class);
     private final String machineName;
+    /** These are guaranteed indexed sequentially. */
     private final Map<ImmutableIndexedSet<? extends LRItem>, LRState> states = new LinkedHashMap<>();
     private List<String> errors;
     private final LRConflict.Map conflicts = new LRConflict.Map();
@@ -48,6 +49,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
         this.machineName = machineName;
     }
 
+    /** These are guaranteed indexed sequentially. */
     @Nonnull
     @TemplateProperty
     public Collection<? extends LRState> getStates() {

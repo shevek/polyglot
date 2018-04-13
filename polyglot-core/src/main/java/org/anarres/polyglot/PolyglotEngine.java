@@ -643,7 +643,7 @@ public class PolyglotEngine {
                     errors.addError(null, "Failed to build an automaton: No more strategies.");
                     return false;
                 }
-                parserMachines.add(EncodedStateMachine.forParser(machineName, automaton, cstProductionRoot, isOption(Option.CG_INLINE_TABLES)));
+                parserMachines.add(EncodedStateMachine.forParser(machineName, grammar, automaton, cstProductionRoot, isOption(Option.CG_INLINE_TABLES)));
             }
 
             buildOutputs(executor, grammar, lexerMachines, parserMachines,

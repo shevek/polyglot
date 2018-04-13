@@ -153,6 +153,7 @@ public class GrammarModel implements GraphVizScope {
         return out;
     }
 
+    /** Sorted by index. */
     @Nonnull
     @TemplateProperty("java")
     public List<TokenModel> getTokens() {

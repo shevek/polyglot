@@ -1,0 +1,28 @@
+Package org.anarres.polyglot.test.precedence;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_b = 'b' ;
+	tok_c = 'c' ;
+
+Productions
+
+	root =
+		tok_a tok_b { -> New root() } |
+		tok_a nonreserved { -> New root() } ;
+
+	nonreserved { -> nonreserved } =
+		@ParserPrecedence('-1')
+		{a} tok_a { -> New nonreserved.a() } |
+		@ParserPrecedence('-1')
+		{b} tok_b { -> New nonreserved.b() } |
+		@ParserPrecedence('-1')
+		{c} tok_c { -> New nonreserved.c() } ;
+
+Abstract Syntax Tree
+
+	root = ;
+
+	nonreserved = {a} | {b} | {c} ;
+
