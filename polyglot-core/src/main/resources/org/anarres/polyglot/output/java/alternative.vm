@@ -13,9 +13,9 @@ import ${package}.analysis.Visitor;
 
 #if ($helper.isOption("CG_LISTREFS_MUTABLE"))
 #set($listArgOf = "List<")
-#else##CG_FINAL
+#else##CG_LISTREFS_MUTABLE
 #set($listArgOf = "Iterable<? extends ")
-#end##CG_FINAL
+#end##CG_LISTREFS_MUTABLE
 #if ($helper.isOption("CG_APIDOC"))
 #if ($alternative.javadocComment)
 $alternative.javadocComment
@@ -128,11 +128,13 @@ public class ${alternative.javaTypeName}
 #if ($element.list)
 
 	$!element.javadocComment
+#if ($helper.isOption("CG_JSR305"))
 #if ($helper.isOption("CG_LISTREFS_MUTABLE"))
 	@CheckForNull
 #else##CG_LISTREFS_MUTABLE
 	@Nonnull
 #end##CG_LISTREFS_MUTABLE
+#end##CG_JSR305
 #annotate($element, 'javaGetAnnotation')
 	public List<${element.javaTypeName}> get${element.javaMethodName}() {
 		return this._${element.javaFieldName}_;
@@ -151,17 +153,9 @@ public class ${alternative.javaTypeName}
 #else##CG_LISTREFS_MUTABLE
 		this._${element.javaFieldName}_.clear();
 #end##CG_LISTREFS_MUTABLE
-
-		if (list != null) {
-			for (${element.javaTypeName} e : list) {
 #if ($helper.isOption("CG_PARENT"))
-				moveToParent(e, this);
-#end##CG_PARENT
-#if (!$helper.isOption("CG_LISTREFS_MUTABLE"))
-				this._${element.javaFieldName}_.add(e);
-#end##CG_LISTREFS_MUTABLE
-			}
-		}
+		moveAllToParent(this._${element.javaFieldName}_, this, list);
+#end
 	}
 #else##if element.list
 
@@ -227,18 +221,9 @@ public class ${alternative.javaTypeName}
 	public void removeChild(Node child) {
 #foreach ($element in $alternative.elements)
 #if ($element.list)
-#if ($helper.isOption("CG_LISTREFS_MUTABLE"))
-		if (this._${element.javaFieldName}_ != null) {
-#else##CG_LISTREFS_MUTABLE
-		{
-#end##CG_LISTREFS_MUTABLE
-			if (this._${element.javaFieldName}_.remove(child)) {
-#if ($helper.isOption("CG_PARENT"))
-				removeFromParent(child, this);
-#end##CG_PARENT
-				return;
-			}
-		}
+		if (removeChildFromList(this._${element.javaFieldName}_, this, child))
+			return;
+
 #else##if element.list
 		if (this._${element.javaFieldName}_ == child) {
 #if ($helper.isOption("CG_PARENT"))
@@ -247,9 +232,9 @@ public class ${alternative.javaTypeName}
 			this._${element.javaFieldName}_ = null;
 			return;
 		}
+
 #end##if element.list
 #end##foreach alternative.elements
-
 		throw new IllegalArgumentException("Not a child.");
 	}
 
@@ -268,7 +253,6 @@ public class ${alternative.javaTypeName}
 
 #end##if element.list
 #end##foreach alternative.elements
-
 		throw new IllegalArgumentException("Not a child.");
 	}
 

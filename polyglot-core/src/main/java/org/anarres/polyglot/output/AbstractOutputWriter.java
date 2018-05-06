@@ -145,8 +145,9 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         };
         context.put("esc", escapeTool);
 
-        context.put("header", "This file was generated automatically by Polyglot. Edits will be lost.");
+        context.put("header", "This file was generated automatically by Polyglot from " + getOutputData().getName() + ". Edits will be lost.");
         context.put("grammarName", getOutputData().getName());
+        context.put("grammarOptions", getOutputData().getOptions().toString());
         context.put("grammar", getGrammar());
         context.put("lexerMachines", getOutputData().getLexerMachines());
         context.put("parserMachines", getOutputData().getParserMachines());
