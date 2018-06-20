@@ -27,6 +27,8 @@ public enum Option {
     CG_APIDOC,
     /** Enables additional comment generation. */
     CG_COMMENT,
+    /** Enables generation of debugging code, which may be expensive. */
+    CG_DEBUG,
     /** Enables jsr305 annotation generation on public APIs. */
     CG_JSR305,
     /** Enables jsr305 annotation generation on internal APIs. */

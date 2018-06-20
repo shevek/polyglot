@@ -46,6 +46,9 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 			} else {
 				dfa_state = -1;
 			}
+#if ($helper.isOption("CG_DEBUG"))
+			debug_transition(current_offset, dfa_state);
+#end##CG_DEBUG
 
 			if (dfa_state >= 0) {
 				// If there was a valid transition found on this character.
@@ -73,6 +76,9 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 							start_line + 1,
 							start_column + 1);
 #end## token.fixed
+#if ($helper.isOption("CG_DEBUG"))
+						debug_accept(current_offset, start_offset, accept_offset, t);
+#end##CG_DEBUG
 						accept_at(accept_offset);
 #if ($token.transitional)
 
@@ -145,4 +151,12 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 		this.column = current_column;
 		this.cr = current_cr;
 	}
+#if ($helper.isOption("CG_DEBUG"))
+
+	protected void debug_transition(int current_offset, int dfa_state) {
+	}
+
+	protected void debug_accept(int current_offset, int start_offset, int accept_offset, Token t) {
+	}
+#end##CG_DEBUG
 }
