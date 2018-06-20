@@ -62,12 +62,12 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 #foreach ($token in ${grammar.tokens})
 					case ${token.index}: {
 #if ($token.fixed)
-						Token token = new ${token.javaTypeName}(
+						Token t = new ${token.javaTypeName}(
 							start_offset,
 							start_line + 1,
 							start_column + 1);
 #else## token not fixed
-						Token token = new ${token.javaTypeName}(
+						Token t = new ${token.javaTypeName}(
 							in.substring(start_offset, accept_offset),
 							start_offset,
 							start_line + 1,
@@ -84,7 +84,7 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 							default: break;
 						}
 #end##token.transitional
-						return token;
+						return t;
 					}
 #end##foreach token
 					case 0: {

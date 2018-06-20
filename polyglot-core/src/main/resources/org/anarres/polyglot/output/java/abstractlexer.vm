@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import javax.annotation.CheckForNull;
+import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
@@ -38,6 +39,9 @@ public abstract class ${lexerMachine.getLexerClassName("Abstract", "")} implemen
 		return out;
 	}
 
+#if ($helper.isOption("CG_JSR305"))
+	@CheckForSigned
+#end##CG_JSR305
 	protected static int search_binary(@Nonnull int[] gotoTable, int c) {
 		int low = 0;
 		int high = (gotoTable.length / 3) - 1;
@@ -57,6 +61,9 @@ public abstract class ${lexerMachine.getLexerClassName("Abstract", "")} implemen
 		return -1;
 	}
 
+#if ($helper.isOption("CG_JSR305"))
+	@CheckForSigned
+#end##CG_JSR305
 	protected static int search_linear(@Nonnull int[] gotoTable, int c) {
 		for (int tableOffset = 0; tableOffset < gotoTable.length; tableOffset += 3) {
 			if (c > gotoTable[tableOffset + 1])
@@ -68,6 +75,9 @@ public abstract class ${lexerMachine.getLexerClassName("Abstract", "")} implemen
 		return -1;
 	}
 
+#if ($helper.isOption("CG_JSR305"))
+	@CheckForSigned
+#end##CG_JSR305
 	protected int search(@Nonnull int[] gotoTable, int c) {
 #if ($helper.isOption("CG_LEXER_LINEARSEARCH"))
 		return search_linear(gotoTable, c);
