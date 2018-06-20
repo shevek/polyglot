@@ -45,10 +45,11 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
 		visitExternal${alternative.javaMethodName}${external.javaMethodName}(node, input, node.get${external.javaMethodName}());
 #end##foreach alternative.externals
 		outExternals(node, input, $alternative.externals.size());
-#end
 
+#end##externals
 #foreach ($element in $alternative.elements)
 #if ($element.list)
+## We prefer to copy this here because the visitation might mutate the list, and we don't want to break by default.
 		voidApplyToCopyOf(node.get${element.javaMethodName}(), input);
 #else##list
 		applyTo(node.get${element.javaMethodName}(), input);
@@ -60,5 +61,4 @@ public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAda
 
 #end
 #end
-
 }
