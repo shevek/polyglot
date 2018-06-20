@@ -77,7 +77,7 @@ public class Polyglot extends SourceTask {
      */
     @CheckForNull
     @Optional
-    @OutputDirectory
+    @Input  // We only care about the directory name, not the contents.
     public File getDebugDir() {
         return debugDir;
     }
@@ -86,8 +86,8 @@ public class Polyglot extends SourceTask {
      * Sets the directory into which to output debug information.
      * If not set, then extra debugging output is disabled.
      */
-    public void setDebugDir(@Nonnull File debugDir) {
-        this.debugDir = debugDir;
+    public void setDebugDir(@Nonnull Object debugDir) {
+        this.debugDir = getProject().file(debugDir);
     }
 
     @Input
