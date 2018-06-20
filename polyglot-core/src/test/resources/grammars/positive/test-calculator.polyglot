@@ -1,5 +1,9 @@
 Package org.anarres.polyglot.test.calculator;
 
+Externals
+
+	j_int = 'int' ;
+
 Helpers
 
 	letter = ['a'..'z'] ;
@@ -76,5 +80,5 @@ Abstract Syntax Tree
 		{rem} [left]:expression [right]:expression |
 		{function} [name]:identifier [arguments]:expression* |
 		/** An integer constant expression. */
-		{constant} integer_constant ;
+		{constant} integer_constant [value]:j_int ;
 
