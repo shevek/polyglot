@@ -18,15 +18,15 @@ import javax.annotation.concurrent.Immutable;
 public class CharInterval implements Comparable<CharInterval> {
 
     @CheckForNull
-    public static CharInterval findFirstOverlappingInterval(@Nonnull List<? extends CharInterval> intervals, char start, char end) {
+    public static <T extends CharInterval> T findFirstOverlappingInterval(@Nonnull List<? extends T> intervals, char start, char end) {
         int low = 0;
         int high = intervals.size() - 1;
-        CharInterval result = null;
+        T result = null;
 
         while (high >= low) {
             int middle = (high + low) >>> 1;
 
-            CharInterval candidate = intervals.get(middle);
+            T candidate = intervals.get(middle);
 
             if (start <= candidate.getEnd()) {
                 if (end >= candidate.getStart()) {

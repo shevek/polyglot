@@ -385,6 +385,9 @@ public class PolyglotEngine {
 
                 DFA.Builder builder = new DFA.Builder(errors, grammar, mask, stateNfa);
                 DFA dfa = builder.build();
+                LOG.debug("{}: DFA has {} states.", getName(), dfa.getStates().size());
+                dfa.minimize();
+                LOG.debug("{}: Minimized DFA has {} states.", getName(), dfa.getStates().size());
                 // LOG.info(state + " -> " + dfa);
                 dfas.add(dfa);
 

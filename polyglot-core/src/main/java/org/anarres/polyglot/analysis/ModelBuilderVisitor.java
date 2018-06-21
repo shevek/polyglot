@@ -130,9 +130,8 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         // We have to do this here, as we might not even have a states section.
         if (grammar.states.isEmpty()) {
             TIdentifier identifier = new TIdentifier("DEFAULT");
-            String name = StateModel.name(identifier);
             StateModel model = new StateModel(grammar.stateIndex++, identifier);
-            grammar.states.put(name, model);
+            grammar.states.put(model.getName(), model);
         }
     }
 

@@ -19,10 +19,15 @@ public class IndexedUniverse<IndexedItem extends Indexed> {
 
     /** A map from LRItem.index to LRItem, which allows us to emulate Set&lt;LRItem&gt; and also to find LRItem(CstAlternativeModel, n+1). */
     private final Class<? extends Indexed> itemType;
-    protected final List<IndexedItem> itemList = new ArrayList<>();
+    protected final List<IndexedItem> itemList;
+
+    public IndexedUniverse(@Nonnull Class<? extends Indexed> itemType, @Nonnull List<IndexedItem> itemList) {
+        this.itemType = Preconditions.checkNotNull(itemType, "ItemType was null.");
+        this.itemList = Preconditions.checkNotNull(itemList, "ItemList was null.");
+    }
 
     public IndexedUniverse(@Nonnull Class<? extends Indexed> itemType) {
-        this.itemType = itemType;
+        this(itemType, new ArrayList<IndexedItem>());
     }
 
     @Nonnull
