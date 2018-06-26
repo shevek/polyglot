@@ -15,12 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
-import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstModel;
@@ -38,7 +36,8 @@ import org.slf4j.LoggerFactory;
  */
 public class JavaHelper extends AbstractHelper {
 
-    private static final int ALTERNATIVE_GROUP_SHIFT = 9;
+    /** Cut this down to 9 (512) if you exceed the JVM method size limit. Right now, 10 seems to work. */
+    private static final int ALTERNATIVE_GROUP_SHIFT = 10;
     private static final int ALTERNATIVE_GROUP_SIZE = 1 << ALTERNATIVE_GROUP_SHIFT;
 
     public static class CstAlternativeGroup extends ArrayList<CstAlternativeModel> {
@@ -104,28 +103,16 @@ public class JavaHelper extends AbstractHelper {
     }
 
     /**
-     * Since our template engine is slow, this allows us not to emit uninteresting tables.
+     * Used to choose a different emit-strategy for the switch in the parser.
      *
-     * @return false if the grammar or the automaton is "large".
+     * @return true if the grammar or the automaton is "large".
      */
-    @TemplateProperty
-    public boolean isLarge(@CheckForNull LRAutomaton automaton) {
-        if (options.contains(Option.CG_LARGE))
-            return true;
-        if (grammar.cstProductions.size() > ALTERNATIVE_GROUP_SIZE)
-            return true;
-        if (automaton != null)
-            if (automaton.getStates().size() > ALTERNATIVE_GROUP_SIZE)
-                return true;
-        return false;
-    }
-
     @TemplateProperty
     public boolean isLarge(EncodedStateMachine.Parser parserMachine) {
         // return isLarge(parserMachine.getAutomaton());
         if (options.contains(Option.CG_LARGE))
             return true;
-        if (grammar.cstProductions.size() > ALTERNATIVE_GROUP_SIZE)
+        if (grammar.cstAlternativeIndex > ALTERNATIVE_GROUP_SIZE)
             return true;
         return false;
     }
@@ -151,17 +138,22 @@ public class JavaHelper extends AbstractHelper {
         return out;
     }
 
+    @Nonnull
+    @TemplateProperty("parser.vm")
     public String beginLocalVariables() {
         locals.remove();
         return "";
     }
 
+    @Nonnull
+    @TemplateProperty("parser.vm")
     public String endLocalVariables() {
         locals.remove();
         return "";
     }
 
     @Nonnull
+    @TemplateProperty("parser.vm")
     public String getReduceMethodName(@Nonnull CstAlternativeModel model) {
         if (options.contains(Option.CG_COMPACT))
             return "r" + model.getIndex();
@@ -182,6 +174,7 @@ public class JavaHelper extends AbstractHelper {
     }
 
     @Nonnull
+    @TemplateProperty("parser.vm")
     public String getLocalVariableName(@Nonnull CstElementModel element) {
         String out = element.getJavaFieldName() + "_nodes";
         if (options.contains(Option.CG_COMPACT))
@@ -190,6 +183,7 @@ public class JavaHelper extends AbstractHelper {
     }
 
     @Nonnull
+    @TemplateProperty("parser.vm")
     public String getLocalVariableName(@Nonnull CstElementModel element, @Nonnull CstTransformPrototypeModel transformPrototype) {
         String out = element.getJavaFieldName() + "__" + transformPrototype.getName();
         if (options.contains(Option.CG_COMPACT))
@@ -211,6 +205,7 @@ public class JavaHelper extends AbstractHelper {
         return options.contains(option);
     }
 
+    @TemplateProperty
     public boolean isOption(@Nonnull String name) {
         return isOption(Option.valueOf(name));
     }
