@@ -247,10 +247,8 @@ public class GrammarModel implements GraphVizScope {
     }
 
     @Nonnull
-    public List<AstProductionModel> getAstProductions() {
-        List<AstProductionModel> out = new ArrayList<>(astProductions.values());
-        // Collections.sort(out, AstProductionModel.Comparator.INSTANCE);
-        return out;
+    public Collection<? extends AstProductionModel> getAstProductions() {
+        return astProductions.values();
     }
 
     @Nonnull
