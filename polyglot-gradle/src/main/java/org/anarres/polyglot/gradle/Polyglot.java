@@ -32,6 +32,7 @@ import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
+import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.slf4j.Logger;
@@ -45,7 +46,6 @@ import org.slf4j.LoggerFactory;
 public class Polyglot extends SourceTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(Polyglot.class);
-    private File inputDir;
     private File outputDir;
     @CheckForNull
     private File debugDir;
@@ -56,6 +56,7 @@ public class Polyglot extends SourceTask {
 
     @Deprecated // Use setSource.
     public void setInputDir(File inputDir) {
+        getLogger().warn("Polyglot.setInputDir is deprecated. Please use Polyglot.setSource() from SourceTask.");
         setSource(inputDir);
     }
 
@@ -78,6 +79,7 @@ public class Polyglot extends SourceTask {
     @CheckForNull
     @Optional
     @Input  // We only care about the directory name, not the contents.
+    @PathSensitive(PathSensitivity.RELATIVE)
     public File getDebugDir() {
         return debugDir;
     }
@@ -88,6 +90,15 @@ public class Polyglot extends SourceTask {
      */
     public void setDebugDir(@Nonnull Object debugDir) {
         this.debugDir = getProject().file(debugDir);
+    }
+
+    // The override exists only for the PathSensitive annotation.
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    @SkipWhenEmpty
+    @Override
+    public FileTree getSource() {
+        return super.getSource();
     }
 
     @Input
