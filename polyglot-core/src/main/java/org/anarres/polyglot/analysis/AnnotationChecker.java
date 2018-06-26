@@ -18,6 +18,7 @@ import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
+import org.anarres.polyglot.model.TokenModel;
 
 /**
  *
@@ -46,6 +47,10 @@ public class AnnotationChecker implements Runnable {
 
     @Override
     public void run() {
+        for (TokenModel token : grammar.getTokens()) {
+            check(token);
+        }
+
         for (CstProductionModel cstProduction : grammar.getCstProductions()) {
             check(cstProduction);
             for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
@@ -55,6 +60,7 @@ public class AnnotationChecker implements Runnable {
                 }
             }
         }
+
         for (AstProductionModel astProduction : grammar.getAstProductions()) {
             check(astProduction);
             for (AstAlternativeModel astAlternative : astProduction.getAlternatives()) {

@@ -51,8 +51,8 @@ public enum AnnotationName {
     /** Used on an AstAlternativeModel to specify the Java superclass of the alternative. */
     javaExtends(AstProductionModel.class, AstAlternativeModel.class),
     /** Used on an AstProductionModel or AstAlternativeModel to specify a Java interface for the alternative. */
-    javaImplements(AstProductionModel.class, AstAlternativeModel.class),
-    /** Used on an AstElementModel to indicate that the javaExtends superclass implements the getter and setter. */
+    javaImplements(TokenModel.class, AstProductionModel.class, AstAlternativeModel.class),
+    /** Used on an AstElementModel to indicate that the javaExtends superclass provides getter and setter accessors for this (possibly virtual) field. */
     javaProvided(AstElementModel.class),
     /** Used on an AstProductionModel, AstAlternativeModel or ElementModel to indicate an annotation for the class or method. */
     javaClassAnnotation(TokenModel.class, AstProductionModel.class, AstAlternativeModel.class),
