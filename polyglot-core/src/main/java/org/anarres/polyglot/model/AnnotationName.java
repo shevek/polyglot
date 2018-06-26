@@ -29,7 +29,7 @@ public enum AnnotationName {
     Public(CstProductionModel.class, AstProductionModel.class),
     Private(CstProductionModel.class, AstProductionModel.class),
     /** Used on a TokenModel to indicate that the token is ignored by the lexer. */
-    // @Deprecated
+    @Deprecated
     LexerIgnore(TokenModel.class),
     /** Used on a TokenModel to indicate that the token is included by only the named lexer(s). */
     LexerInclude(TokenModel.class),
@@ -38,12 +38,12 @@ public enum AnnotationName {
     /** Used on a TokenModel to indicate that it may be masked, i.e. never match. */
     LexerAllowMasking(TokenModel.class),
     /** Used on a TokenModel to indicate that the token or production is ignored by the parser with the given name(s). */
-    // @Deprecated
+    @Deprecated
     ParserIgnore(TokenModel.class, CstProductionModel.class, CstAlternativeModel.class),
-    // /** Used on a TokenModel to indicate that the token or production is included by only the parser with the given name(s). */
-    // ParserInclude(TokenModel.class, CstProductionModel.class, CstAlternativeModel.class),
-    // /** Used on a TokenModel to indicate that the token or production is excluded by the parser with the given name(s). */
-    // ParserExclude(TokenModel.class, CstProductionModel.class, CstAlternativeModel.class),
+    /** Used on a CstProductionModel or CstAlternativeModel to indicate that the production is included by only the parser with the given name(s). */
+    ParserInclude(TokenModel.class, CstProductionModel.class, CstAlternativeModel.class),
+    /** Used on a CstProductionModel or CstAlternativeModel to indicate that the production is excluded by the parser with the given name(s). */
+    ParserExclude(TokenModel.class, CstProductionModel.class, CstAlternativeModel.class),
     /** Indicates that this is the start production for a Parser. */
     ParserStart(CstProductionModel.class),
     /** Indicates the relative precedence of a reduction. */

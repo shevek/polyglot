@@ -101,6 +101,8 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
 
     /** Passing null asks if ignored for all machines. */
     public boolean isIgnored(@CheckForNull String machineName) {
+        if (!AnnotationUtils.isIncluded(this, AnnotationName.ParserInclude, AnnotationName.ParserExclude, machineName))
+            return true;
         if (AnnotationUtils.isAnnotated(this, AnnotationName.ParserIgnore, machineName))
             return true;
         return false;

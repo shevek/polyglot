@@ -11,11 +11,13 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
+import org.anarres.polyglot.model.AbstractNamedModel;
 import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
+import org.anarres.polyglot.model.TokenModel;
 
 /**
  * <ul>
@@ -37,7 +39,10 @@ public class StartChecker implements Runnable {
         String value = annotation.getValue();
         if (value == null)
             return "";
-        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, value);
+        // Deprecated code path.
+        if (value.indexOf('_') != -1)
+            return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, value);
+        return value;
     }
 
     private final ErrorHandler errors;
@@ -46,6 +51,20 @@ public class StartChecker implements Runnable {
     public StartChecker(@Nonnull ErrorHandler errors, @Nonnull GrammarModel grammar) {
         this.errors = errors;
         this.grammar = grammar;
+    }
+
+    private void checkMachineNames(@Nonnull Set<? extends String> machineNames, @Nonnull AbstractNamedModel model, @Nonnull AnnotationName name) {
+        for (AnnotationModel annotation : model.getAnnotations(name)) {
+            String machineName = getMachineName(annotation);
+            if (!machineNames.contains(machineName))
+                errors.addError(model.getLocation(), "Production '" + model.getName() + "' annotated @" + name.name() + " references an unknown parser-machine '" + machineName + "'.");
+        }
+    }
+
+    private void checkMachineNames(@Nonnull Set<? extends String> machineNames, @Nonnull AbstractNamedModel model) {
+        checkMachineNames(machineNames, model, AnnotationName.ParserInclude);
+        checkMachineNames(machineNames, model, AnnotationName.ParserExclude);
+        checkMachineNames(machineNames, model, AnnotationName.ParserIgnore);
     }
 
     @Override
@@ -71,9 +90,13 @@ public class StartChecker implements Runnable {
                 errors.addError(cstProduction.getLocation(), "Duplicate parser name '" + machineName + "' on CST production '" + cstProduction.getName() + "'.");
         }
 
+        for (TokenModel token : grammar.tokens.values()) {
+            checkMachineNames(machineNames, token);
+        }
         for (CstProductionModel cstProduction : grammar.cstProductions.values()) {
+            checkMachineNames(machineNames, cstProduction);
             for (CstAlternativeModel cstAlternative : cstProduction.alternatives.values()) {
-                // TODO: Check ParserInclude / ParserExclude on tokens and alts all refer to valid machine names.
+                checkMachineNames(machineNames, cstAlternative);
             }
         }
     }

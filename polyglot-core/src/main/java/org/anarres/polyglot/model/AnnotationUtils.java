@@ -27,7 +27,8 @@ public class AnnotationUtils {
         return false;
     }
 
-    public static boolean isIncluded(@Nonnull AnnotatedModel model, @Nonnull AnnotationName includeName, @Nonnull AnnotationName excludeName, @Nonnull String value) {
+    /** Returns overall true if no match on either annotation. */
+    public static boolean isIncluded(@Nonnull AnnotatedModel model, @Nonnull AnnotationName includeName, @Nonnull AnnotationName excludeName, @CheckForNull String value) {
         if (model.hasAnnotation(includeName))
             return isAnnotated(model, includeName, value);    // Returns overall false if no match.
         if (model.hasAnnotation(excludeName))
