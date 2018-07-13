@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
@@ -129,10 +130,10 @@ public class GrammarModel implements GraphVizScope {
         for (TokenModel token : tokens.values()) {
             if (token.hasAnnotation(AnnotationName.LexerInclude))
                 for (AnnotationModel annotation : token.getAnnotations(AnnotationName.LexerInclude))
-                    out.add(annotation.getValue());
+                    out.add(MoreObjects.firstNonNull(annotation.getValue(), ""));
             if (token.hasAnnotation(AnnotationName.LexerExclude))
                 for (AnnotationModel annotation : token.getAnnotations(AnnotationName.LexerExclude))
-                    out.add(annotation.getValue());
+                    out.add(MoreObjects.firstNonNull(annotation.getValue(), ""));
         }
         if (out.isEmpty())
             return Collections.singleton("");

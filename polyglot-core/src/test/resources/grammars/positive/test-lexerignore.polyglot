@@ -5,4 +5,13 @@ Tokens
 	tok_a = 'a' ;
 	@LexerIgnore
 	tok_b = 'b' ;
+	@LexerInclude
+	tok_c = 'c' ;
+	@LexerExclude
+	tok_d = 'd' ;
+
+	@LexerInclude('foo')
+	tok_e = 'e' ;
+	@LexerExclude('bar_baz')
+	tok_f = 'f' ;
 
