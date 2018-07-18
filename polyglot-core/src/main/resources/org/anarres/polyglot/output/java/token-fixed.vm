@@ -16,6 +16,12 @@ public final class ${token.javaTypeName} extends Token
 		{
 
 	public static final ${token.javaTypeName}[] EMPTY_ARRAY = new ${token.javaTypeName}[0];
+#if (!$token.ignored)
+#if ($helper.isOption('CG_APIDOC'))
+	/** The return value of {@link ${esc.h}getTokenIndex()}. */
+#end##CG_APIDOC
+	public static final int INDEX = ${token.index};
+#end
 	public static final String DEFAULT_TEXT = "${token.javaText}";
 
 	public ${token.javaTypeName}() {
@@ -40,7 +46,7 @@ public final class ${token.javaTypeName} extends Token
 #if ($token.ignored)
 		return -1;
 #else
-		return ${token.index};
+		return INDEX;
 #end
 	}
 
