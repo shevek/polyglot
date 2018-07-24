@@ -6,6 +6,7 @@
 package org.anarres.polyglot.output;
 
 import com.google.common.collect.Iterables;
+import com.google.common.io.BaseEncoding;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.xml.bind.DatatypeConverter;
 import org.anarres.polyglot.dfa.DFA;
 import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.lr.LRAction;
@@ -141,8 +141,8 @@ public class EncodedStateMachine {
         try (GZIPOutputStream out = new GZIPOutputStream(buf)) {
             out.write(table);
         }
-        // return BaseEncoding.base64().encode(buf.toByteArray());
-        return DatatypeConverter.printBase64Binary(buf.toByteArray());
+        return BaseEncoding.base64().encode(buf.toByteArray());
+        // return DatatypeConverter.printBase64Binary(buf.toByteArray());
     }
 
     @CheckForNull

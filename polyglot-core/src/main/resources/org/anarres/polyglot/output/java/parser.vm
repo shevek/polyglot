@@ -443,7 +443,8 @@ ${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 #if ($parserMachine.inline)
 				new java.util.zip.GZIPInputStream(
 					new java.io.ByteArrayInputStream(
-						javax.xml.bind.DatatypeConverter.parseBase64Binary("$parserMachine.encodedText")
+						// javax.xml.bind.DatatypeConverter.parseBase64Binary("$parserMachine.encodedText")
+						com.google.common.io.BaseEncoding.base64().decode("$parserMachine.encodedText")
 					)
 				)
 #else

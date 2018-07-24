@@ -129,7 +129,8 @@ public abstract class ${lexerMachine.getLexerClassName("Abstract", "")} implemen
 #if ($lexerMachine.inline)
 				new java.util.zip.GZIPInputStream(
 					new java.io.ByteArrayInputStream(
-						javax.xml.bind.DatatypeConverter.parseBase64Binary("$lexerMachine.encodedText")
+						// javax.xml.bind.DatatypeConverter.parseBase64Binary("$lexerMachine.encodedText")
+						com.google.common.io.BaseEncoding.base64().decode("$lexerMachine.encodedText")
 					)
 				)
 #else
