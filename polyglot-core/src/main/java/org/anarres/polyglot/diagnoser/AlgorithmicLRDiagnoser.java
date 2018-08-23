@@ -11,10 +11,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -80,7 +80,7 @@ public class AlgorithmicLRDiagnoser implements LRDiagnoser {
 
         // TODO: ConcurrentNavigableMap<Object, Object> x = new ConcurrentSkipListMap<>();
         // private final Queue<State> queue = new PriorityQueue<>();
-        private final Queue<State> queue = new LinkedList<>();
+        private final Queue<State> queue = new ArrayDeque<>();
         // private final Int2IntMap seenWithToken = new Int2IntOpenHashMap();
         // private final Int2IntMap seenWithRoot = new Int2IntOpenHashMap();
         private final Object2IntMap<CstElementModel> seenWithToken = new Object2IntOpenHashMap<>();
