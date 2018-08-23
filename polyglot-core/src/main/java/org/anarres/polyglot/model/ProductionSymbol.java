@@ -6,22 +6,19 @@
 package org.anarres.polyglot.model;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Multimap;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.node.TIdentifier;
-import org.anarres.polyglot.node.Token;
 import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  *
  * @author shevek
  */
-public interface ProductionSymbol {
+public interface ProductionSymbol extends AnnotatedModel {
 
-    @Nonnull
-    public Token getLocation();
-
+    // @Nonnull
+    // public Token getLocation();
     @Nonnull
     public String getName();
 
@@ -42,7 +39,7 @@ public interface ProductionSymbol {
     @TemplateProperty
     public boolean isTerminal();
 
-    @Nonnull
-    @TemplateProperty
-    public Multimap<String, ? extends AnnotationModel> getAnnotations();
+    // @Nonnull
+    // @TemplateProperty
+    // public Multimap<String, ? extends AnnotationModel> getAnnotations();
 }
