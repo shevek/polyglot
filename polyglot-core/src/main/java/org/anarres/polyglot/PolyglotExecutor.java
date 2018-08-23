@@ -5,15 +5,14 @@
  */
 package org.anarres.polyglot;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.util.concurrent.BlockingQueue;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -32,10 +31,9 @@ public abstract class PolyglotExecutor {
         }
 
         @Override
-        public <V> Future<V> execute(Callable<V> r) throws ExecutionException {
+        public void execute(Callable<?> r) throws ExecutionException {
             try {
-                V value = r.call();
-                return Futures.immediateCheckedFuture(value);
+                r.call();
             } catch (Exception e) {
                 throw new ExecutionException("Failed to execute " + r + ": " + e, e);
             }
@@ -54,7 +52,7 @@ public abstract class PolyglotExecutor {
 
         private final int parallelism;
         private final ExecutorService executor;
-        private final BlockingQueue<Future<?>> futures = new LinkedBlockingQueue<>();
+        private final Queue<Future<?>> futures = new ArrayDeque<>();
 
         public Parallel(@Nonnull String name, int parallelism) {
             this.parallelism = parallelism;
@@ -67,10 +65,9 @@ public abstract class PolyglotExecutor {
         }
 
         @Override
-        public <V> Future<V> execute(@Nonnull Callable<V> r) throws ExecutionException {
-            Future<V> out = executor.submit(r);
+        public void execute(@Nonnull Callable<?> r) throws ExecutionException {
+            Future<?> out = executor.submit(r);
             futures.add(out);
-            return out;
         }
 
         @Override
@@ -94,7 +91,7 @@ public abstract class PolyglotExecutor {
     public abstract int getParallelism();
 
     @Nonnull
-    public abstract <V> Future<V> execute(@Nonnull Callable<V> r) throws ExecutionException;
+    public abstract void execute(@Nonnull Callable<?> r) throws ExecutionException;
 
     public abstract void await() throws InterruptedException, ExecutionException;
 
