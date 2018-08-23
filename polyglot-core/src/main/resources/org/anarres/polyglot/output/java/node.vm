@@ -171,7 +171,7 @@ public abstract class Node implements INode, Cloneable {
 	 * @return The clone of the node, or null.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends Node> T cloneNode(@Nonnull CloneListener listener, @CheckForNull T node) {
+	protected static <T extends Node> T cloneNode(@Nonnull CloneListener listener, @CheckForNull T node) {
 		if (node == null)
 			return null;
 		return (T) node.clone(listener);
@@ -187,11 +187,11 @@ public abstract class Node implements INode, Cloneable {
 	@CheckForNull
 	@SuppressWarnings("unchecked")
 #if ($helper.isOption("CG_LISTREFS_MUTABLE"))
-	protected <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @CheckForNull List<? extends T> list) {
+	protected static <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @CheckForNull List<? extends T> list) {
 		if (list == null)
 			return null;
 #else##CG_LISTREFS_MUTABLE
-	protected <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @Nonnull List<? extends T> list) {
+	protected static <T extends Node> List<T> cloneList(@Nonnull CloneListener listener, @Nonnull List<? extends T> list) {
 #end##CG_LISTREFS_MUTABLE
 ## We use a mutable list even if the list is empty.
 		List<T> out = new ArrayList<T>(list.size());
