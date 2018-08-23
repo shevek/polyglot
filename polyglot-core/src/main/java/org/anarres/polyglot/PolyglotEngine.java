@@ -397,7 +397,7 @@ public class PolyglotEngine {
             for (Map.Entry<TokenModel, TokenSet> e : mask.entrySet()) {
                 TokenModel token = e.getKey();
                 StringBuilder buf = new StringBuilder();
-                buf.append("Token '").append(token.getName()).append(" will never match because of higher priority token(s) ");
+                buf.append("Token '").append(token.getName()).append("' will never match because of higher priority token(s) ");
                 boolean b = false;
                 for (TokenModel t : e.getValue()) {
                     if (b)
@@ -444,13 +444,15 @@ public class PolyglotEngine {
     }
 
     @Nonnull
-    protected LRAutomaton buildParserLr0(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) throws IOException, InterruptedException, ExecutionException {
+    protected LRAutomaton buildParserLr0(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot, @Nonnull String machineName)
+            throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
+        LOG.info("{}: Building SLR parser '{}'.", getName(), machineName);
         LR0ItemUniverse universe = new LR0ItemUniverse(grammar, cstProductionRoot);
-        LOG.debug("{}: SLR Universe took {} and created {} items.", getName(), stopwatch, universe.size());
+        LOG.debug("{}: Allocating SLR Universe took {} and created {} items.", getName(), stopwatch, universe.size());
         LRAutomaton automaton = universe.build(executor);
-        LOG.info("{}: Building SLR parser took {} and created {} states at {}/s.", getName(), stopwatch, automaton.getStates().size(), rate(automaton, stopwatch));
+        LOG.info("{}: Building SLR parser '{}' took {} and created {} states at {}/s.", getName(), machineName, stopwatch, automaton.getStates().size(), rate(automaton, stopwatch));
 
         dump(debugHandler.forTarget(AUTOMATON_LR0_DESC, ".lr0.txt"), debugHandler.forTarget(AUTOMATON_LR0, ".lr0.dot"), grammar, cstProductionRoot, automaton);
 
@@ -465,18 +467,19 @@ public class PolyglotEngine {
     }
 
     @Nonnull
-    protected LRAutomaton buildParserLr1(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) throws IOException, InterruptedException, ExecutionException {
+    protected LRAutomaton buildParserLr1(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot, @Nonnull String machineName)
+            throws IOException, InterruptedException, ExecutionException {
         LRAutomaton automaton;
 
         for (int i = 0; true; i++) {
             Stopwatch stopwatch = Stopwatch.createStarted();
 
             // LOG.info("\n===\n=== Building LR(1) automaton, round {}\n===", i);
-            LOG.info("{}: Building LR(1) parser, round {}.", getName(), i);
+            LOG.info("{}: Building LR(1) parser '{}', round {}.", getName(), machineName, i);
             LR1ItemUniverse universe = new LR1ItemUniverse(grammar, cstProductionRoot);
-            LOG.debug("{}: LR(1) Universe took {} and created {} items.", getName(), stopwatch, universe.size());
+            LOG.debug("{}: Allocating LR(1) Universe took {} and created {} items.", getName(), stopwatch, universe.size());
             automaton = universe.build(executor);
-            LOG.info("{}: Building LR(1) parser took {} and created {} states at {}/s.", getName(), stopwatch, automaton.getStates().size(), rate(automaton, stopwatch));
+            LOG.info("{}: Building LR(1) parser '{}' took {} and created {} states at {}/s.", getName(), machineName, stopwatch, automaton.getStates().size(), rate(automaton, stopwatch));
 
             dump(debugHandler.forTarget(AUTOMATON_LR1_DESC, ".lr1.v" + i + ".txt"), debugHandler.forTarget(AUTOMATON_LR1, ".lr1.v" + i + ".dot"), grammar, cstProductionRoot, automaton);
 
@@ -623,7 +626,7 @@ public class PolyglotEngine {
                     LRConflict.Map conflicts = null;
 
                     if (isOption(Option.SLR)) {
-                        automaton = buildParserLr0(executor, grammar, cstProductionRoot);
+                        automaton = buildParserLr0(executor, grammar, cstProductionRoot, machineName);
                         conflicts = automaton.getConflicts();
                         if (conflicts.isEmpty())
                             break AUTOMATON;
@@ -633,7 +636,7 @@ public class PolyglotEngine {
                     }
 
                     if (isOption(Option.LR1)) {
-                        automaton = buildParserLr1(executor, grammar, cstProductionRoot);
+                        automaton = buildParserLr1(executor, grammar, cstProductionRoot, machineName);
                         conflicts = automaton.getConflicts();
                         if (conflicts.isEmpty())
                             break AUTOMATON;
