@@ -27,6 +27,7 @@ import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstTransformPrototypeModel;
 import org.anarres.polyglot.model.GrammarModel;
+import org.anarres.polyglot.model.TokenModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,28 +37,50 @@ import org.slf4j.LoggerFactory;
  */
 public class JavaHelper extends AbstractHelper {
 
-    /** Cut this down to 9 (512) if you exceed the JVM method size limit. Right now, 10 seems to work. */
-    private static final int ALTERNATIVE_GROUP_SHIFT = 10;
+    private static final int LEXER_GROUP_SHIFT = 8;
+    private static final int LEXER_GROUP_SIZE = 1 << LEXER_GROUP_SHIFT;
+    /** If this is 9, then the generated methods should not exceed the JIT method size limit. */
+    private static final int ALTERNATIVE_GROUP_SHIFT = 9;
     private static final int ALTERNATIVE_GROUP_SIZE = 1 << ALTERNATIVE_GROUP_SHIFT;
 
-    public static class CstAlternativeGroup extends ArrayList<CstAlternativeModel> {
+    public static class AbstractGroup<T> extends ArrayList<T> {
 
         private final int index;
 
-        public CstAlternativeGroup(@Nonnegative int index) {
+        public AbstractGroup(@Nonnegative int index) {
             this.index = index;
         }
 
         @Nonnegative
-        @TemplateProperty("parser.vm")
+        @TemplateProperty("stringlexer.vm")
         public int getIndex() {
             return index;
         }
 
         @Nonnull
-        @TemplateProperty("parser.vm")
+        @TemplateProperty("stringlexer.vm")
         public String getJavaMethodName() {
             return "G" + index;
+        }
+    }
+
+    public static class LexerGroup extends AbstractGroup<TokenModel> {
+
+        public LexerGroup(int index) {
+            super(index);
+        }
+
+        @Nonnull
+        @TemplateProperty("stringlexer.vm")
+        public List<TokenModel> getTokens() {
+            return this;
+        }
+    }
+
+    public static class CstAlternativeGroup extends AbstractGroup<CstAlternativeModel> {
+
+        public CstAlternativeGroup(@Nonnegative int index) {
+            super(index);
         }
 
         /**
@@ -66,7 +89,7 @@ public class JavaHelper extends AbstractHelper {
          * @return this object.
          */
         @Nonnull
-        @TemplateProperty
+        @TemplateProperty("parser.vm")
         public List<CstAlternativeModel> getAlternatives() {
             return this;
         }
@@ -107,7 +130,39 @@ public class JavaHelper extends AbstractHelper {
      *
      * @return true if the grammar or the automaton is "large".
      */
-    @TemplateProperty
+    @TemplateProperty("stringlexer.vm")
+    public boolean isLarge(EncodedStateMachine.Lexer lexerMachine) {
+        if (options.contains(Option.CG_LARGE))
+            return true;
+        if (grammar.tokenIndex > LEXER_GROUP_SIZE)
+            return true;
+        return false;
+    }
+
+    @TemplateProperty("stringlexer.vm")
+    public int getLexerGroupShift() {
+        return LEXER_GROUP_SHIFT;
+    }
+
+    @Nonnull
+    @TemplateProperty("stringlexer.vm")
+    public List<LexerGroup> getLexerGroups() {
+        List<LexerGroup> out = new ArrayList<>();
+        for (TokenModel token : grammar.tokens.values()) {
+            int groupIndex = token.getIndex() >> LEXER_GROUP_SHIFT;
+            while (out.size() <= groupIndex)
+                out.add(new LexerGroup(out.size()));
+            out.get(groupIndex).add(token);
+        }
+        return out;
+    }
+
+    /**
+     * Used to choose a different emit-strategy for the switch in the parser.
+     *
+     * @return true if the grammar or the automaton is "large".
+     */
+    @TemplateProperty("parser.vm")
     public boolean isLarge(EncodedStateMachine.Parser parserMachine) {
         // return isLarge(parserMachine.getAutomaton());
         if (options.contains(Option.CG_LARGE))

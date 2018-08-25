@@ -105,24 +105,18 @@ public class ${lexerMachine.getLexerClassName()} extends ${lexerMachine.getLexer
 			}
 			else {
 				// If there was no valid transition found, then we accept from the last accept state.
+				int tok_line = start_line + 1;
+				int tok_column = start_column + 1;
 				switch (accept_token) {
 
 #foreach ($token in ${grammar.tokens})
 					case ${token.index}: {
-#if ($token.fixed)
 						Token token = new ${token.javaTypeName}(
-							start_offset,
-							start_line + 1,
-							start_column + 1);
-#else## token not fixed
-						Token token = new ${token.javaTypeName}(
+#if (!$token.fixed)
 							getText(accept_length),
-							start_offset,
-							start_line + 1,
-							start_column + 1);
 #end## token.fixed
-						unread_except(accept_length);
-						accept_at(accept_offset, accept_line, accept_column);
+							start_offset, tok_line, tok_column);
+						accept_at(accept_offset, accept_line, accept_column, accept_length);
 #if ($token.transitional)
 
 						switch (state) {
@@ -139,15 +133,12 @@ public class ${lexerMachine.getLexerClassName()} extends ${lexerMachine.getLexer
 					case 0: {
 						if (this.text.length() > 0) {
 							throw new LexerException(
-								new InvalidToken(this.text.substring(0, 1), start_offset, start_line + 1, start_column + 1),
-								// "[" + (start_line + 1) + "," + (start_column + 1) + "] " +
+								new InvalidToken(this.text.substring(0, 1), start_offset, tok_line, tok_column),
+								// "[" + tok_line + "," + tok_column + "] " +
 								"Unknown token: " + this.text);
 						}
 
-						return new EOF(
-							start_offset,
-							start_line + 1,
-							start_column + 1);
+						return new EOF(start_offset, tok_line, tok_column);
 					}
 
 					default:
@@ -157,17 +148,12 @@ public class ${lexerMachine.getLexerClassName()} extends ${lexerMachine.getLexer
 		}
 	}
 
-	private void unread_except(/* @Nonnegative */ int acceptLength) throws IOException {
-		int length = this.text.length();
-		for (int i = length - 1; i >= acceptLength; i--) {
+	private void accept_at(int accept_offset, int accept_line, int accept_column, int accept_length) throws IOException {
+		for (int i = this.text.length() - 1; i >= accept_length; i--)
 			this.in.unread(this.text.charAt(i));
-		}
-	}
-
-	private void accept_at(int offset, int line, int column) {
-		this.offset = offset;
-		this.line = line;
-		this.column = column;
+		this.offset = accept_offset;
+		this.line = accept_line;
+		this.column = accept_column;
 	}
 
 ##	protected void unread(@Nonnull Token token) throws IOException {

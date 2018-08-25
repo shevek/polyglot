@@ -1,6 +1,7 @@
 /* ${header} */
 package ${grammar.package.packageName}.lexer;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
 
@@ -32,7 +33,7 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 		int current_offset = this.offset;
 
 		int accept_token = 0;
-		int accept_offset = -1;
+		int accept_offset = current_offset;
 
 		int state_id = this.state.id();
 		final int[][] gotoTableEntry = gotoTable[state_id];
@@ -60,70 +61,98 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 			}
 			else {
 				// If there was no valid transition found, then we accept from the last accept state.
+				int tok_line = start_line + 1;
+				int tok_column = start_column + 1;
+				accept_at(accept_offset);
+#if ($helper.isLarge($lexerMachine)) ## lexer-large
+				switch (accept_token >> $helper.lexerGroupShift) {
+#foreach ($lexerGroup in $helper.lexerGroups)
+					case ${lexerGroup.index}:
+						return lex${lexerGroup.javaMethodName}(accept_token, start_offset, current_offset, accept_offset, tok_line, tok_column);
+#end## alternativeGroup
+					default:
+						throw new IllegalStateException("Internal failure: accept_token=" + accept_token + ", but no handler found.");
+				} // switch (accept_group)
+#else##lexer-large
 				switch (accept_token) {
 
 #foreach ($token in ${grammar.tokens})
 					case ${token.index}: {
-#if ($token.fixed)
-						Token t = new ${token.javaTypeName}(
-							start_offset,
-							start_line + 1,
-							start_column + 1);
-#else## token not fixed
-						Token t = new ${token.javaTypeName}(
-							in.substring(start_offset, accept_offset),
-							start_offset,
-							start_line + 1,
-							start_column + 1);
-#end## token.fixed
 #if ($helper.isOption("CG_DEBUG"))
-						debug_accept(current_offset, start_offset, accept_offset, t);
+						debug_accept(start_offset, accept_offset, current_offset, ${token.javaTypeName}.class);
 #end##CG_DEBUG
-						accept_at(accept_offset);
 #if ($token.transitional)
-
 						switch (state) {
 #foreach ($transition in $token.transitions)
 							case ${transition.key.name}: state = State.${transition.value.name}; break;
-## TODO: Have a default -> IllegalStateException here? Would we blow up the method limit?
 #end##foreach transition
 							default: break;
 						}
 #end##token.transitional
-						return t;
+						return new ${token.javaTypeName}(
+#if (!$token.fixed)
+							in.substring(start_offset, accept_offset),
+#end## token.fixed
+							start_offset, tok_line, tok_column);
 					}
 #end##foreach token
-					case 0: {
-						if (current_offset > start_offset) {
-							throw new LexerException(
-								new InvalidToken(
-									in.substring(start_offset, start_offset + 1),
-									start_offset,
-									start_line + 1,
-									start_column + 1),
-								// "[" + (start_line + 1) + "," + (start_column + 1) + "] " +
-								"Unknown token: " + in.substring(start_offset, current_offset));
-						}
-
-						return new EOF(
-							start_offset,
-							start_line + 1,
-							start_column + 1);
-					}
-
+					case 0:
+						return reject_at(start_offset, current_offset, tok_line, tok_column);
 					default:
 						throw new IllegalStateException("Internal failure: accept_token=" + accept_token + ", but no handler found.");
-				}   // switch (accept_token)
+				} // switch (accept_token)
+#end##lexer-large
 			}
 		}
 	}
+#if ($helper.isLarge($lexerMachine)) ## lexer-large
 
-	private void accept_at(int offset) {
+#foreach ($lexerGroup in $helper.lexerGroups)
+	@Nonnull
+	private Token lex${lexerGroup.javaMethodName}(
+			@Nonnegative int accept_token,
+			@Nonnegative int start_offset,
+			@Nonnegative int current_offset,
+			@Nonnegative int accept_offset,
+			@Nonnegative int tok_line,
+			@Nonnegative int tok_column) throws LexerException {
+		switch (accept_token) {
+#foreach ($token in $lexerGroup.tokens)
+			case ${token.index}:
+#if ($helper.isOption("CG_DEBUG"))
+				debug_accept(start_offset, accept_offset, current_offset, ${token.javaTypeName}.class);
+#end##CG_DEBUG
+#if ($token.transitional)
+				switch (state) {
+#foreach ($transition in $token.transitions)
+					case ${transition.key.name}: state = State.${transition.value.name}; break;
+#end##foreach transition
+					default: break;
+				}
+#end##token.transitional
+				return new ${token.javaTypeName}(
+#if (!$token.fixed)
+					in.substring(start_offset, accept_offset),
+#end## token.fixed
+					start_offset, tok_line, tok_column);
+#end##foreach token in lexerGroup
+#if ($lexerGroup.index == 0)
+			case 0:
+				return reject_at(start_offset, current_offset, tok_line, tok_column);
+#end
+			default:
+				throw new IllegalStateException("Illegal token index in group ${lexerGroup.javaMethodName}: " + accept_token);
+		}
+	}
+#end##foreach lexerGroup
+#end##large
+
+	private void accept_at(int accept_offset) {
 		int current_line = this.line;
 		int current_column = this.column;
 		boolean current_cr = this.cr;
 
-		for (int i = this.offset; i < offset; i++) {
+		for (int i = this.offset; i < accept_offset; i++) {
 			int c = in.charAt(i);
 			switch (c) {
 				case 10:
@@ -146,17 +175,32 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 			}
 		}
 
-		this.offset = offset;
+		this.offset = accept_offset;
 		this.line = current_line;
 		this.column = current_column;
 		this.cr = current_cr;
+	}
+
+	@Nonnull
+	private Token reject_at(int start_offset, int current_offset, int tok_line, int tok_column) throws LexerException {
+		if (current_offset > start_offset) {
+			throw new LexerException(
+				new InvalidToken(
+					in.substring(start_offset, start_offset + 1),
+					start_offset,
+					tok_line,
+					tok_column),
+				// "[" + tok_line + "," + tok_column + "] " +
+				"Unknown token: " + in.substring(start_offset, current_offset));
+		}
+		return new EOF(start_offset, tok_line, tok_column);
 	}
 #if ($helper.isOption("CG_DEBUG"))
 
 	protected void debug_transition(int current_offset, int dfa_state) {
 	}
 
-	protected void debug_accept(int current_offset, int start_offset, int accept_offset, Token t) {
+	protected void debug_accept(int start_offset, int accept_offset, int current_offset, Class<? extends Token> type) {
 	}
 #end##CG_DEBUG
 }
