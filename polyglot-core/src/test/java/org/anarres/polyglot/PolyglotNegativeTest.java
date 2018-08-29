@@ -8,6 +8,7 @@ package org.anarres.polyglot;
 import com.google.common.io.Files;
 import java.io.File;
 import javax.annotation.Nonnull;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,13 @@ public class PolyglotNegativeTest extends AbstractPolyglotTest {
     private static final Logger LOG = LoggerFactory.getLogger(PolyglotNegativeTest.class);
 
     public static final String DIR = "build/resources/test/grammars/negative";
+    private static final File ROOT = new File(DIR);
+
+    @BeforeClass
+    public static void setUpClass() {
+        LOG.info("Root dir is " + ROOT);
+        assertTrue(ROOT.isDirectory());
+    }
 
     private void parse(@Nonnull File file) throws Exception {
         // File dst = new File("build/test/velocity/" + file.getName());
@@ -38,21 +46,7 @@ public class PolyglotNegativeTest extends AbstractPolyglotTest {
 
     @Test
     public void testExperiments() throws Exception {
-        File root = new File(DIR);
-        LOG.info("Root dir is " + root);
-
-        assertTrue(root.isDirectory());
-
-        for (File file : Files.fileTreeTraverser().preOrderTraversal(root)) {
-            LOG.info("File is " + file);
-            if (!file.isFile())
-                continue;
-            if (file.getName().startsWith("."))
-                continue;
-            if (!file.getName().endsWith(".polyglot"))
-                continue;
-
-            // if (!file.getName().equals("test-diagnostics-root.polyglot")) continue;
+        for (File file : Files.fileTreeTraverser().preOrderTraversal(ROOT).filter(new TestFilePredicate())) {
             parse(file);
         }
     }

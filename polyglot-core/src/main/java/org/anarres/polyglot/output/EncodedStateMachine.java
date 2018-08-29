@@ -23,7 +23,7 @@ import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.lr.LRAction;
 import org.anarres.polyglot.lr.LRAutomaton;
 import org.anarres.polyglot.lr.LRState;
-import org.anarres.polyglot.model.AstProductionModel;
+import org.anarres.polyglot.model.AstProductionSymbol;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstTransformPrototypeModel;
@@ -227,11 +227,11 @@ public class EncodedStateMachine {
         }
 
         @Nonnull
-        public AstProductionModel getAstProductionRoot() {
+        public AstProductionSymbol getAstProductionRoot() {
             CstTransformPrototypeModel transformPrototype = Iterables.getFirst(getCstProductionRoot().getTransformPrototypes(), null);
             if (transformPrototype == null)
                 throw new IllegalStateException("CST production " + cstProductionRoot + " has no transform prototypes.");
-            return transformPrototype.getAstProduction();
+            return transformPrototype.getSymbol();
         }
     }
 

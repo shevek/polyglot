@@ -1,0 +1,10 @@
+Package org.anarres.polyglot.test.rootistoken;
+
+Tokens
+
+	tok_a = 'a' ;
+
+Productions
+
+	root { -> tok_a } = tok_a { -> tok_a } ;
+

@@ -5,14 +5,19 @@
  */
 package org.anarres.polyglot;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
 import com.google.testing.compile.JavaFileObjects;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.tools.JavaFileObject;
 import org.anarres.polyglot.output.OutputLanguage;
@@ -30,6 +35,51 @@ import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 public abstract class AbstractPolyglotTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPolyglotTest.class);
+    private static final String TEST_PARAMETER_NAME = "test.parameter";
+
+    @CheckForNull
+    public static String getTestParameterValue() {
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            @Override
+            public String run() {
+                return System.getProperty(TEST_PARAMETER_NAME);
+            }
+        });
+    }
+
+    @Nonnull
+    public static Predicate<CharSequence> getTestPredicate() {
+        final String testParameterValue = getTestParameterValue();
+        if (testParameterValue == null)
+            return Predicates.alwaysTrue();
+        return Predicates.containsPattern(testParameterValue);
+    }
+
+    protected static class TestFilePredicate implements Predicate<File> {
+
+        private final boolean fast = System.getProperty("test.fast") != null;
+        private final Predicate<CharSequence> testPredicate = getTestPredicate();
+
+        @Override
+        public boolean apply(File file) {
+            if (!file.isFile())
+                return false;
+            if (file.getName().startsWith("."))
+                return false;
+            if (!file.getName().endsWith(".polyglot"))
+                if (!file.getName().endsWith(".sablecc"))
+                    return false;
+            if (fast)
+                if (file.length() > 16384)
+                    // if (file.getName().startsWith("private-"))
+                    return false;
+            if (!testPredicate.apply(file.getName()))
+                return false;
+            LOG.info("Accepting " + file);
+            return true;
+        }
+    }
+
     protected final File destinationDir = new File("../polyglot-tests/build/generated-sources/polyglot-java");
 
     @Before

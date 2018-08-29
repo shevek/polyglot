@@ -52,6 +52,12 @@ subprojects {
 		options.compilerArgs << "500"
 	}
 
+	test {
+		String k = "test.parameter";
+		if (System.properties[k])
+			systemProperty k, System.properties[k]
+	}
+
 	dependencies {
 		testCompile 'com.google.testing.compile:compile-testing:0.7'
 	}
