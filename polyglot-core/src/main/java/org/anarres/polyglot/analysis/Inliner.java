@@ -256,20 +256,30 @@ public class Inliner {
         Set<CstProductionModel> cstProductionRoots = new HashSet<CstProductionModel>(grammar.getCstProductionRoots());
 
         for (CstAlternativeModel inlineAlternative : inlineAlternatives) {
+            if (DEBUG)
+                LOG.debug("Considering conflicting alternative " + inlineAlternative);
             CstProductionModel inlineProduction = inlineAlternative.getProduction();
             // It is possible that a substitute() inlines into an otherwise conflicting alternative.
             // In that case, a CstAlternativeModel in this Iterable will apparently "vanish".
-            if (inlineProduction.alternatives.get(inlineAlternative.getName()) != inlineAlternative)
+            if (inlineProduction.alternatives.get(inlineAlternative.getName()) != inlineAlternative) {
+                if (DEBUG)
+                    LOG.debug("Not inlining: Already inlined or modified.");
                 continue;
+            }
             // Let's not inline this.
-            if (cstProductionRoots.contains(inlineProduction))
+            if (cstProductionRoots.contains(inlineProduction)) {
+                if (DEBUG)
+                    LOG.debug("Not inlining: Is a root.");
                 continue;
+            }
             // If we inline one alternative of a recursive production, we break it
             // when we remove the alternative from the production itself.
             if (isRecursive(inlineProduction)) {
                 // It's only an error if we attempted to force inlining.
                 if (!inlineProduction.getAnnotations(AnnotationName.Inline).isEmpty())
                     errors.addError(inlineProduction.getLocation(), "Production '" + inlineProduction.getName() + "' is recursive, and may not be inlined.");
+                if (DEBUG)
+                    LOG.debug("Not inlining: Is recursive.");
                 continue;
             }
             // Do the dirty.

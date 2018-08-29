@@ -25,6 +25,8 @@ public enum AnnotationName {
     Inline(CstProductionModel.class, CstAlternativeModel.class),
     /** Indicates that a production may be overwritten, or discarded if unreferenced. */
     Weak(TokenModel.class, ExternalModel.class, CstProductionModel.class, AstProductionModel.class),
+    // /** Used to mark a production as deprecated. */
+    // Deprecated(HelperModel.class, TokenModel.class, ExternalModel.class, CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class, AstProductionModel.class, AstAlternativeModel.class, AstElementModel.class),
     /** (Currently informal) Indicates whether a CST production is for general use, or is a private refactoring. */
     Public(CstProductionModel.class, AstProductionModel.class),
     Private(CstProductionModel.class, AstProductionModel.class),

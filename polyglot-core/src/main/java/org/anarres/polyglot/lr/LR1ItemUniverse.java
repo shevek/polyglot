@@ -181,7 +181,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
                     // for (int lookahead : lookaheads) {
                     int lookahead = it.nextInt();
                     // TokenModel lookahead = tokenUniverse.getItemByIndex(i);
-                    // Allocation-free version of new LR1Item(subalternative, 0);
+                    // Allocation-free version of new LR1Item(subalternative, 0, lookahead);
                     LR1Item subitem = findZeroItem(subalternative, lookahead);
                     if (!out.contains(subitem)) {
                         // if (DEBUG) LOG.info("      Enqueued " + subitem);

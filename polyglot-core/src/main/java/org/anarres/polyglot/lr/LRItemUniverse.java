@@ -131,6 +131,8 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         for (int index : indices) {
             I item = getItemByIndex(index);
             CstProductionSymbol productionSymbol = item.getSymbol();
+            // If the item after the dot is the symbol we are interested in,
+            // we step past it, and add to the new closure.
             if (symbol.equals(productionSymbol)) {
                 // The item we are looking for HAS to be the next item in the itemList.
                 I follow = getItemByIndex(item.getIndex() + 1);
@@ -146,6 +148,10 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
 
     /**
      * Possibly adds a state to the automaton.
+     *
+     * From a given source state, for each production symbol which is after the
+     * dot in an LRItem, we call this routine to generate the state after the
+     * transition.
      *
      * @param automaton The automaton.
      * @param queue The queue on which to enqueue the new state, if added.
