@@ -1,0 +1,21 @@
+Package conflict_lr2;
+
+Tokens
+
+	kw_from = 'from';
+	kw_map = 'map';
+	kw_keys = 'keys';
+
+	identifier = 'a' ;
+
+Productions
+
+	root = kw_from identifier body+ { -> New root() } ;
+
+	body { -> } = kw_map identifier storage_option? ;
+
+	storage_option { -> } = kw_map kw_keys ;
+
+Abstract Syntax Tree
+
+	root = ;

@@ -28,6 +28,7 @@ public class PolyglotNegativeTest extends AbstractPolyglotTest {
         PolyglotEngine engine = new PolyglotEngine(file, destinationDir);
         setUp(engine, file);
         engine.getOptions().add(Option.DIAGNOSIS);
+        engine.getOptions().add(Option.VERBOSE);
 
         if (engine.run())
             throw new Exception("Polyglot succeeded unexpectedly");
