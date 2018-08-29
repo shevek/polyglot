@@ -211,10 +211,8 @@ Productions
 		// {string} string { -> New matcher.string(string) } ;
 
 	charset_matcher { -> matcher } =
-		{union} tok_lsquare [left]:charset_matcher tok_plus [right]:charset_matcher tok_rsquare
-			{ -> New matcher.union(left.matcher, right.matcher, tok_plus) } |
-		{difference} tok_lsquare [left]:charset_matcher tok_minus [right]:charset_matcher tok_rsquare
-			{ -> New matcher.difference(left.matcher, right.matcher, tok_minus) } |
+		{expression} tok_lsquare charset_expression_matcher tok_rsquare
+			{ -> charset_expression_matcher.matcher } |
 		{interval} tok_lsquare [left]:char_matcher tok_dotdot [right]:char_matcher tok_rsquare
 			{ -> New matcher.interval(left.literal, right.literal, tok_dotdot) } |
 		{char} char_matcher
@@ -224,6 +222,14 @@ Productions
 			{ -> New matcher.helper(identifier) } |
 		{custom} custom_name
 			{ -> New matcher.custom(custom_name) } ;
+
+	charset_expression_matcher { -> matcher } =
+		{simple} charset_matcher
+			{ -> charset_matcher.matcher } |
+		{union} [left]:charset_expression_matcher tok_plus [right]:charset_matcher
+			{ -> New matcher.union(left.matcher, right.matcher, tok_plus) } |
+		{difference} [left]:charset_expression_matcher tok_minus [right]:charset_matcher
+			{ -> New matcher.difference(left.matcher, right.matcher, tok_minus) } ;
 
 	char_matcher { -> literal } =
 		{string} string

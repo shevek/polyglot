@@ -89,6 +89,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
             // if (!file.getName().equals("test-externals.polyglot"))
             // if (!file.getName().equals("test-inlining.polyglot"))
             // if (!file.getName().equals("test-lookaheads.polyglot"))
+            // if (!file.getName().equals("test-matchers.polyglot"))
             // if (!file.getName().equals("test-multilexers.polyglot"))
             // if (!file.getName().equals("test-multistart.polyglot"))
             // if (!file.getName().equals("test-parserignore.polyglot"))

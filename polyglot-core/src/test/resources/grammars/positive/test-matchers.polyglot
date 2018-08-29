@@ -1,0 +1,16 @@
+Package org.anarres.polyglot.test.matchers;
+
+Tokens
+
+	tok_a = ['a' + 'b' + 'c' + ['f' .. 'z'] - 't'] ;
+	tok_b = [['a' .. 'd'] - ['b' .. 'c'] + 'z' + 'y'];
+
+Productions
+
+	root = tok_a tok_b { -> New root() } ;
+
+Abstract Syntax Tree
+
+	root = ;
+
+
