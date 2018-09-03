@@ -17,7 +17,6 @@ import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
-import org.anarres.polyglot.model.TokenModel;
 
 /**
  * <ul>
@@ -90,9 +89,9 @@ public class StartChecker implements Runnable {
                 errors.addError(cstProduction.getLocation(), "Duplicate parser name '" + machineName + "' on CST production '" + cstProduction.getName() + "'.");
         }
 
-        for (TokenModel token : grammar.tokens.values()) {
-            checkMachineNames(machineNames, token);
-        }
+        // for (TokenModel token : grammar.tokens.values()) {
+        // checkMachineNames(machineNames, token);
+        // }
         for (CstProductionModel cstProduction : grammar.cstProductions.values()) {
             checkMachineNames(machineNames, cstProduction);
             for (CstAlternativeModel cstAlternative : cstProduction.alternatives.values()) {
