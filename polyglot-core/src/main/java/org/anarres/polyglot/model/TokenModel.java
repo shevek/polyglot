@@ -194,7 +194,7 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
     /** Returns true if this token is ignored by the parser. */
     @TemplateProperty
     public boolean isIgnored() {
-        return hasAnnotation(AnnotationName.ParserExclude) || hasAnnotation(AnnotationName.ParserIgnore) || ignored;
+        return hasAnnotation(AnnotationName.ParserIgnore) || /*deprecated*/ hasAnnotation(AnnotationName.ParserExclude) || /*deprecated*/ ignored;
     }
 
     @Deprecated

@@ -347,7 +347,7 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
             astAlternative.elements.add(element);
             setOut(node, element);
         } else if (cstAlternative != null) {
-            CstElementModel element = CstElementModel.forNode(node);
+            CstElementModel element = CstElementModel.forNode(errors, node);
             for (CstElementModel e : cstAlternative.elements)
                 if (name.equals(e.getName()))
                     errors.addError(node.getSymbolName(), "Duplicate element name '" + name + "' in CST alternative '" + cstAlternative.getName() + "'.");

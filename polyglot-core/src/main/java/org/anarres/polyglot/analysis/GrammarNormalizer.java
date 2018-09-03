@@ -146,7 +146,7 @@ public class GrammarNormalizer implements Runnable {
     private CstAlternativeModel newBaseAlternative(@Nonnull CstProductionModel production, @Nonnull CstElementModel element) {
         Token location = element.getLocation();
         CstAlternativeModel out = CstAlternativeModel.forName(grammar.cstAlternativeIndex++, production, new TIdentifier("base", location));
-        CstElementModel outElement = new CstElementModel(new TIdentifier("tail", location), element.getSpecifier(), element.symbol.toNameToken(), UnaryOperator.NONE);
+        CstElementModel outElement = new CstElementModel(new TIdentifier("tail", location), element.getSpecifier(), element.symbol.toNameToken(), UnaryOperator.NONE, element.getAnnotations());
         outElement.symbol = element.symbol;
         out.elements.add(outElement);
 
@@ -175,11 +175,11 @@ public class GrammarNormalizer implements Runnable {
         Token location = element.getLocation();
         CstAlternativeModel out = CstAlternativeModel.forName(grammar.cstAlternativeIndex++, production, new TIdentifier("list", location));
 
-        CstElementModel outHeadElement = new CstElementModel(new TIdentifier("head", location), Specifier.PRODUCTION, production.toNameToken(), UnaryOperator.NONE);
+        CstElementModel outHeadElement = new CstElementModel(new TIdentifier("head", location), Specifier.PRODUCTION, production.toNameToken(), UnaryOperator.NONE, element.getAnnotations());
         outHeadElement.symbol = production;
         out.elements.add(outHeadElement);
 
-        CstElementModel outTailElement = new CstElementModel(new TIdentifier("tail", location), element.getSpecifier(), element.symbol.toNameToken(), UnaryOperator.NONE);
+        CstElementModel outTailElement = new CstElementModel(new TIdentifier("tail", location), element.getSpecifier(), element.symbol.toNameToken(), UnaryOperator.NONE, element.getAnnotations());
         outTailElement.symbol = element.symbol;
         out.elements.add(outTailElement);
 

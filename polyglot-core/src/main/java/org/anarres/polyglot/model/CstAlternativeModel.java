@@ -100,7 +100,6 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
         return index;
     }
 
-
     /*
      @Override
      public String getJavaTypeName() {

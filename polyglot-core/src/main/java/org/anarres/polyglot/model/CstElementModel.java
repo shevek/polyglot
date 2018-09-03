@@ -7,10 +7,10 @@ package org.anarres.polyglot.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMultimap;
-import java.util.Collections;
+import com.google.common.collect.Multimap;
 import java.util.Objects;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.node.AAnnotation;
+import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.TIdentifier;
 import org.slf4j.Logger;
@@ -27,17 +27,18 @@ public class CstElementModel extends AbstractElementModel<CstProductionSymbol> {
     private static final Logger LOG = LoggerFactory.getLogger(CstElementModel.class);
 
     @Nonnull
-    public static CstElementModel forNode(@Nonnull AElement node) {
+    public static CstElementModel forNode(@Nonnull ErrorHandler errors, @Nonnull AElement node) {
         return new CstElementModel(
                 name(node),
                 Specifier.toSpecifier(node.getSpecifier()),
                 node.getSymbolName(),
-                UnaryOperator.toUnaryOperator(node.getUnOp()));
+                UnaryOperator.toUnaryOperator(node.getUnOp()),
+                annotations(errors, node.getAnnotations()));
     }
 
     @Nonnull
     public static CstElementModel forToken(@Nonnull TokenModel token) {
-        CstElementModel out = new CstElementModel(token.toNameToken(), Specifier.TOKEN, token.toNameToken(), UnaryOperator.NONE);
+        CstElementModel out = new CstElementModel(token.toNameToken(), Specifier.TOKEN, token.toNameToken(), UnaryOperator.NONE, ImmutableMultimap.<String, AnnotationModel>of());
         out.symbol = token;
         return out;
     }
@@ -50,8 +51,8 @@ public class CstElementModel extends AbstractElementModel<CstProductionSymbol> {
         return identifier;
     }
 
-    public CstElementModel(TIdentifier name, Specifier specifier, TIdentifier symbolName, UnaryOperator unaryOperator) {
-        super(name, specifier, symbolName, unaryOperator, ImmutableMultimap.<String, AnnotationModel>of());
+    public CstElementModel(@Nonnull TIdentifier name, Specifier specifier, TIdentifier symbolName, UnaryOperator unaryOperator, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
+        super(name, specifier, symbolName, unaryOperator, annotations);
     }
 
     @Nonnull
@@ -74,6 +75,6 @@ public class CstElementModel extends AbstractElementModel<CstProductionSymbol> {
                 toSpecifier(),
                 new TIdentifier(getSymbolName(), getLocation()),
                 getUnaryOperator().newUnOp(),
-                Collections.<AAnnotation>emptyList());
+                toAnnotations(getAnnotations()));
     }
 }

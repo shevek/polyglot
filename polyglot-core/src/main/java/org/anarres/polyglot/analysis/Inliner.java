@@ -92,7 +92,8 @@ public class Inliner {
                             new TIdentifier(replacementElementName, sourceElement.getLocation()),
                             sourceElement.getSpecifier(),
                             new TIdentifier(sourceElement.getSymbolName(), sourceElement.getLocation()), // TODO: Accurate location loss.
-                            sourceElement.getUnaryOperator());
+                            sourceElement.getUnaryOperator(),
+                            sourceElement.getAnnotations());
                     replacementElement.symbol = sourceElement.symbol;
 
                     out.elements.add(replacementElement);

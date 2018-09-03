@@ -53,7 +53,8 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
                 new TIdentifier(rootProduction.getName()),
                 Specifier.PRODUCTION,
                 new TIdentifier(rootProduction.getName()),
-                UnaryOperator.NONE);
+                UnaryOperator.NONE,
+                ImmutableMultimap.<String, AnnotationModel>of());
         element.symbol = rootProduction;
         alternative.elements.add(element);
 
