@@ -5,10 +5,10 @@
  */
 package org.anarres.polyglot.lr;
 
+import com.google.common.base.Preconditions;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.model.CstAlternativeModel;
-import org.anarres.polyglot.output.TemplateProperty;
 import org.anarres.polyglot.runtime.AbstractParser;
 
 /**
@@ -21,29 +21,29 @@ public abstract class LRAction {
     public enum Action {
 
         SHIFT {
-                    @Override
-                    public int getOpcode() {
-                        return AbstractParser.SHIFT;
-                    }
-                },
+            @Override
+            public int getOpcode() {
+                return AbstractParser.SHIFT;
+            }
+        },
         REDUCE {
-                    @Override
-                    public int getOpcode() {
-                        return AbstractParser.REDUCE;
-                    }
-                },
+            @Override
+            public int getOpcode() {
+                return AbstractParser.REDUCE;
+            }
+        },
         ACCEPT {
-                    @Override
-                    public int getOpcode() {
-                        return AbstractParser.ACCEPT;
-                    }
-                },
+            @Override
+            public int getOpcode() {
+                return AbstractParser.ACCEPT;
+            }
+        },
         ERROR {
-                    @Override
-                    public int getOpcode() {
-                        return AbstractParser.ERROR;
-                    }
-                };
+            @Override
+            public int getOpcode() {
+                return AbstractParser.ERROR;
+            }
+        };
 
         public abstract int getOpcode();
     }
@@ -52,7 +52,8 @@ public abstract class LRAction {
 
         private final LRState newState;
 
-        public Shift(@Nonnull LRState newState) {
+        public Shift(@Nonnull LRItem item, @Nonnull LRState newState) {
+            super(item);
             this.newState = newState;
         }
 
@@ -66,10 +67,9 @@ public abstract class LRAction {
             return newState;
         }
 
-        @Nonnull
         @Override
         public Indexed getTarget() {
-            return newState;
+            return getNewState();
         }
 
         @Override
@@ -80,35 +80,34 @@ public abstract class LRAction {
 
     public static class Reduce extends LRAction {
 
-        private final CstAlternativeModel reduction;
-
-        public Reduce(@Nonnull CstAlternativeModel reduction) {
-            this.reduction = reduction;
+        // private final CstAlternativeModel reduction;
+        public Reduce(@Nonnull LRItem item) {
+            super(item);
         }
 
+        // public Reduce(CstAlternativeModel reduction) { this.reduction = reduction; }
         @Override
         public Action getAction() {
             return Action.REDUCE;
         }
 
-        @Nonnull
-        public CstAlternativeModel getRule() {
-            return reduction;
-        }
-
-        @Nonnull
         @Override
         public Indexed getTarget() {
-            return reduction;
+            return getProductionAlternative();
         }
 
         @Override
         public String toString() {
+            CstAlternativeModel reduction = getProductionAlternative();
             return super.toString() + " " + reduction.getName() + " (rule " + reduction.getIndex() + ")";
         }
     }
 
     public static class Accept extends LRAction {
+
+        public Accept(LRItem item) {
+            super(item);
+        }
 
         @Override
         public Action getAction() {
@@ -121,12 +120,47 @@ public abstract class LRAction {
         }
     }
 
+    /** Used to implement nonassociative rules. */
+    public static class Error extends LRAction {
+
+        public Error(LRItem item) {
+            super(item);
+        }
+
+        @Override
+        public Action getAction() {
+            return Action.ERROR;
+        }
+
+        @Override
+        public Indexed getTarget() {
+            return null;
+        }
+    }
+
+    private final LRItem item;
+
+    protected LRAction(@Nonnull LRItem item) {
+        this.item = Preconditions.checkNotNull(item, "LRItem was null.");
+    }
+
     @Nonnull
     public abstract Action getAction();
 
-    @TemplateProperty
+    // Called by EncodedStateMachine.
     public abstract Indexed getTarget();
 
+    @Nonnull
+    public LRItem getItem() {
+        return item;
+    }
+
+    @Nonnull
+    public CstAlternativeModel getProductionAlternative() {
+        return getItem().getProductionAlternative();
+    }
+
+    // This is used in a Map by LRActionMapBuilder to store the set of items causing a conflict.
     @Override
     public int hashCode() {
         return Objects.hashCode(getAction()) ^ Objects.hashCode(getTarget());

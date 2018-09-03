@@ -78,7 +78,9 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
     public final List<CstElementModel> elements = new ArrayList<>();
     /** @see CstProductionModel#transformPrototypes */
     public final List<CstTransformExpressionModel> transformExpressions = new ArrayList<>(1);   // We very rarely get more than one.
-    public final LRAction.Reduce reduceActionCache = new LRAction.Reduce(this);
+    // public final LRAction.Reduce reduceActionCache = new LRAction.Reduce(this);
+    @CheckForNull
+    private final String precedence;
 
     private CstAlternativeModel(@Nonnegative int index, @Nonnull CstProductionModel production, @Nonnull Token location, @CheckForNull TIdentifier name, @Nonnegative int alternativeIndex, Multimap<String, ? extends AnnotationModel> annotations) {
         // TODO: This is a really bad choice for Location as it points to the production not the elements.
@@ -87,6 +89,11 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
         this.production = Preconditions.checkNotNull(production, "CstProductionModel was null.");
         this.alternativeName = name;
         this.alternativeIndex = alternativeIndex;
+
+        AnnotationModel annotation = getAnnotation(AnnotationName.Precedence);
+        if (annotation == null)
+            annotation = production.getAnnotation(AnnotationName.Precedence);
+        this.precedence = annotation == null ? null : annotation.getValue();
     }
 
     /**
@@ -179,6 +186,12 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
     @Override
     public void addTransformExpression(CstTransformExpressionModel expression) {
         transformExpressions.add(expression);
+    }
+
+    // To be looked up in PrecedenceComparator.
+    @CheckForNull
+    public String getPrecedence() {
+        return precedence;
     }
 
     @Nonnull

@@ -9,6 +9,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.model.CstAlternativeModel;
+import org.anarres.polyglot.model.CstElementAssociativity;
 import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstProductionSymbol;
@@ -34,6 +35,10 @@ public interface LRItem extends Indexed {
     /** Returns the element at the position (after the dot), or null. */
     @CheckForNull
     public CstElementModel getElement();
+
+    /** If the dot is at the end, i.e. this is a reduce action, returns UNSPECIFIED. */
+    @Nonnull
+    public CstElementAssociativity getAssociativity();
 
     /** Returns the symbol of the element at the position (after the dot), or null. */
     @CheckForNull

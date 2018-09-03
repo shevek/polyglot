@@ -44,6 +44,7 @@ Tokens
 	kw_new         = 'New';
 	kw_null        = 'Null';
 	kw_package     = 'Package';
+	kw_precedences = 'Precedences';
 	kw_productions = 'Productions';
 	kw_states      = 'States';
 	kw_syntax      = 'Syntax';
@@ -54,26 +55,27 @@ Tokens
 	production_specifier = 'P';
 	external_specifier   = 'E';
 
+	tok_arrow    = '->';
 	tok_at       = '@';
+	tok_bar      = '|';
+	tok_colon    = ':';
+	tok_comma    = ',';
 	tok_dot      = '.';
 	tok_dotdot   = '..';
-	tok_semi     = ';';
 	tok_eq       = '=';
-	tok_lsquare  = '[';
-	tok_rsquare  = ']';
-	tok_lpar     = '(';
-	tok_rpar     = ')';
+	tok_gt       = '>';
 	tok_lbrace   = '{';
-	tok_rbrace   = '}';
-	tok_plus     = '+';
+	tok_lpar     = '(';
+	tok_lsquare  = '[';
 	tok_minus    = '-';
+	tok_plus     = '+';
 	tok_question = '?';
-	tok_star     = '*';
-	tok_bar      = '|';
-	tok_comma    = ',';
+	tok_rbrace   = '}';
+	tok_rpar     = ')';
+	tok_rsquare  = ']';
+	tok_semi     = ';';
 	tok_slash    = '/';
-	tok_arrow    = '->';
-	tok_colon    = ':';
+	tok_star     = '*';
 
 	identifier = nondigit (nondigit | digit)* ;
 
@@ -107,6 +109,7 @@ Productions
 		{tokens}         tokens         { -> tokens.section } |
 		{ignored_tokens} ignored_tokens { -> ignored_tokens.section } |
 		{externals}      externals      { -> externals.section } |
+		{precedence}     precedences    { -> precedences.section } |
 		{productions}    productions    { -> productions.section } |
 		{ast}            ast            { -> ast.section } ;
 
@@ -129,6 +132,26 @@ Productions
 		javadoc_comment?
 		annotation* identifier tok_eq string tok_semi
 			{ -> New external(javadoc_comment, identifier, string, [annotation.annotation]) } ;
+
+	precedences { -> section } =
+		kw_precedences precedence_chain+
+			{ -> New section.precedences([precedence_chain]) } ;
+
+	precedence_chain =
+		[list]:precedence_item_list tok_semi
+			{ -> New precedence_chain([list]) } ;
+
+	precedence_item_list { -> identifier* } =
+		{empty}
+			{ -> [] } |
+		{single} [item]:precedence_item
+			{ -> [item] } |
+		{list} [head]:precedence_item_list tok_gt [tail]:precedence_item
+			{ -> [head, tail] } ;
+
+	precedence_item { -> identifier } =
+		javadoc_comment? identifier
+			{ -> identifier } ;
 
 	helpers { -> section } =
 		kw_helpers [helpers]:helper*
@@ -416,8 +439,13 @@ Abstract Syntax Tree
 		{states}         [names]:identifier* |
 		{tokens}         [tokens]:token* |
 		{ignored_tokens} [names]:identifier* |
+		{precedences}    [chains]:precedence_chain* |
 		{productions}    [productions]:cst_production* |
 		{ast}            [productions]:ast_production* ;
+
+	precedence_chain =
+		[identifiers]:identifier*
+		;
 
 	external =
 		javadoc_comment?

@@ -10,6 +10,7 @@ import java.util.List;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.model.CstAlternativeModel;
+import org.anarres.polyglot.model.CstElementAssociativity;
 import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstProductionSymbol;
@@ -65,6 +66,14 @@ public class LR0Item implements LRItem {
         if (p == elements.size())
             return null;
         return elements.get(p);
+    }
+
+    @Override
+    public CstElementAssociativity getAssociativity() {
+        CstElementModel element = getElement();
+        if (element == null)
+            return CstElementAssociativity.UNSPECIFIED;
+        return element.getAssociativity();
     }
 
     @Override

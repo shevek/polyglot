@@ -114,7 +114,7 @@ public class EncodedStateMachine {
                     // Keep track of all the CstProductionModels which are reachable from this Parser.
                     if (action instanceof LRAction.Reduce) {
                         LRAction.Reduce reduceAction = (LRAction.Reduce) action;
-                        cstAlternativeSet.add(reduceAction.getRule().getIndex());
+                        cstAlternativeSet.add(reduceAction.getProductionAlternative().getIndex());
                     }
                 }
 

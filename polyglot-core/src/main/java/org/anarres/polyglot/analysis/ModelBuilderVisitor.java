@@ -1,8 +1,12 @@
 package org.anarres.polyglot.analysis;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.model.AstAlternativeModel;
@@ -34,6 +38,7 @@ import org.anarres.polyglot.node.AListExpression;
 import org.anarres.polyglot.node.ANewExpression;
 import org.anarres.polyglot.node.ANullExpression;
 import org.anarres.polyglot.node.APackage;
+import org.anarres.polyglot.node.APrecedenceChain;
 import org.anarres.polyglot.node.AReferenceExpression;
 import org.anarres.polyglot.node.AStatesSection;
 import org.anarres.polyglot.node.AToken;
@@ -96,6 +101,17 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         ExternalModel external = ExternalModel.forNode(errors, node);
         if (!grammar.addExternal(external))
             errors.addError(node.getName(), "Duplicate external name '" + external.getName() + "'.");
+    }
+
+    @Override
+    public void caseAPrecedenceChain(APrecedenceChain node) {
+        List<String> names = Lists.transform(node.getIdentifiers(), new Function<TIdentifier, String>() {
+            @Override
+            public String apply(TIdentifier input) {
+                return input.getText();
+            }
+        });
+        grammar.precedenceComparator.add(names);
     }
 
     @Override

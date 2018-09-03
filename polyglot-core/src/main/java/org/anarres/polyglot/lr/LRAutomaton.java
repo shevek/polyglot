@@ -25,6 +25,7 @@ import org.anarres.graphviz.builder.GraphVizScope;
 import org.anarres.graphviz.builder.GraphVizable;
 import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstProductionSymbol;
+import org.anarres.polyglot.model.PrecedenceComparator;
 import org.anarres.polyglot.model.ProductionSymbol;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.output.TemplateProperty;
@@ -105,9 +106,10 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
     protected abstract Iterable<? extends TokenModel> getLookaheads(@Nonnull LRItem item);
 
     // TODO: Make multithreaded.
+    // Dragon book page 293: shift and reduce descriptions in yacc.
     @Nonnull
-    /* pp */ void buildMaps() {
-        LRActionMapBuilder actionBuilder = new LRActionMapBuilder();    // NOTTHREADSAFE
+    /* pp */ void buildMaps(PrecedenceComparator precedenceComparator) {
+        LRActionMapBuilder actionBuilder = new LRActionMapBuilder(precedenceComparator);    // NOTTHREADSAFE
         // @GuardedBy("errorMap")
         final Map<String, Integer> errorMap = new LinkedHashMap<>();
 
@@ -120,19 +122,21 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
                 for (LRItem item : state.getItems()) {
                     // LOG.info("Building action for " + getName() + " / " + item);
                     if (item.getIndex() == 1) { // [S' -> S, $] is always item 1.
-                        actionBuilder.addAction(item, TokenModel.EOF.INSTANCE, new LRAction.Accept());
+                        actionBuilder.addAction(item, TokenModel.EOF.INSTANCE, new LRAction.Accept(item));
                     } else {
                         CstProductionSymbol symbol = item.getSymbol();
                         if (symbol == null) {
                             // Reduce on lookahead (LR1) or follow (LR0)
-                            LRAction.Reduce reduceAction = item.getProductionAlternative().reduceActionCache;
+                            // LRAction.Reduce reduceAction = item.getProductionAlternative().reduceActionCache;
+                            LRAction.Reduce reduceAction = new LRAction.Reduce(item);
                             for (TokenModel token : getLookaheads(item))
                                 actionBuilder.addAction(item, token, reduceAction);
                             // transitionMap.get(item.getProductionAlternative().getProduction());
                         } else if (symbol.isTerminal()) {
                             // Shift.
                             LRState target = state.getTransitionMap().get(symbol);
-                            actionBuilder.addAction(item, (TokenModel) symbol, target.shiftActionCache);
+                            // actionBuilder.addAction(item, (TokenModel) symbol, target.shiftActionCache);
+                            actionBuilder.addAction(item, (TokenModel) symbol, new LRAction.Shift(item, target));
                         }
                     }
                 }

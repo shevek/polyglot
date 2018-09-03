@@ -54,6 +54,7 @@ public class GrammarModel implements GraphVizScope {
     private final Map<String, HelperModel> helpers = new DefaultMap<>(); // Temporarily preserve order.
     public int stateIndex = 0;
     public final Map<String, StateModel> states = new DefaultMap<>();   // Must be linked/sorted.
+    public final PrecedenceComparator precedenceComparator = new PrecedenceComparator();
     public int tokenIndex = 1;  // Allow for EOF.
     // public final TokenModel.EOF tokenEof = new TokenModel.EOF();
     public final Map<String, TokenModel> tokens = new DefaultMap<>();

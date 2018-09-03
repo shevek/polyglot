@@ -51,8 +51,16 @@ public class CstElementModel extends AbstractElementModel<CstProductionSymbol> {
         return identifier;
     }
 
+    private final CstElementAssociativity associativity;
+
     public CstElementModel(@Nonnull TIdentifier name, Specifier specifier, TIdentifier symbolName, UnaryOperator unaryOperator, @Nonnull Multimap<String, ? extends AnnotationModel> annotations) {
         super(name, specifier, symbolName, unaryOperator, annotations);
+        this.associativity = CstElementAssociativity.forModel(this);
+    }
+
+    @Nonnull
+    public CstElementAssociativity getAssociativity() {
+        return associativity;
     }
 
     @Nonnull

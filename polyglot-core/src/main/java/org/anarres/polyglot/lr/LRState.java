@@ -40,7 +40,7 @@ public class LRState implements Indexed {
     /* pp */ Collection<? extends LRConflict> conflicts;
 
     // Cache
-    /* pp */ final LRAction.Shift shiftActionCache = new LRAction.Shift(this);
+    // /* pp */ final LRAction.Shift shiftActionCache = new LRAction.Shift(this);
 
     public LRState(
             // @Nonnull LRAutomaton automaton,
