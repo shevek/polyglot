@@ -59,7 +59,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
     private static final Logger LOG = LoggerFactory.getLogger(LR1ItemUniverse.class);
     // private static final boolean DEBUG = false;
     private final FirstFunction firstFunction;
-    // private final FollowFunction followFunction = new FollowFunction(grammar, firstFunction);
+    private final FollowFunction followFunction;
     private final Map<CstAlternativeModel, TokenMap<LR1Item>> itemMapInitial = new HashMap<>();
 
     public LR1ItemUniverse(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
@@ -67,6 +67,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
 
         IgnoredProductionsSet ignoredProductions = getIgnoredProductions();
         this.firstFunction = new FirstFunction(grammar, ignoredProductions);
+        this.followFunction = new FollowFunction(grammar, cstProductionRoot, firstFunction);
 
         addAlternative(startProduction);
         for (CstProductionModel production : grammar.cstProductions.values()) {
@@ -85,8 +86,10 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
         itemMapInitial.put(alternative, itemMapLocal);
 
         addAlternative(itemMapLocal, alternative, TokenModel.EOF.INSTANCE);
-        for (TokenModel lookahead : grammar.tokens.values()) {
-            addAlternative(itemMapLocal, alternative, lookahead);
+        if (alternative != startProduction) {
+            for (TokenModel lookahead : followFunction.apply(alternative.getProduction())) {
+                addAlternative(itemMapLocal, alternative, lookahead);
+            }
         }
     }
 
