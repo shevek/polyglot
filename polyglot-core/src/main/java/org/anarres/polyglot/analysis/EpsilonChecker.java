@@ -30,6 +30,7 @@ public class EpsilonChecker implements Runnable {
         this.grammar = grammar;
     }
 
+    // TODO:x? did not warn when referenced x = a? b? | b a ; where a and b were both list prods.
     @Override
     public void run() {
         FirstFunction firstFunction = new FirstFunction(grammar, IgnoredProductionsSet.EMPTY);
