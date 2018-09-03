@@ -41,7 +41,7 @@ public class AnnotationChecker implements Runnable {
                 continue;
             if (annotationName.isTarget(m.getClass()))
                 continue;
-            errors.addError(a.getLocation(), "Annotation type " + annotationName + " is not applicable to model type " + m.getClass().getSimpleName() + "; only " + Joiner.on(", ").join(annotationName.getTargets()) + ".");
+            errors.addError(a.getLocation(), "Annotation type " + annotationName + " is not applicable to model type " + m.getClass().getSimpleName() + " '" + m.getName() + "'; only " + Joiner.on(", ").join(annotationName.getTargets()) + ".");
         }
     }
 
