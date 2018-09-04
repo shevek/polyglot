@@ -140,7 +140,7 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
                 I follow = getItemByIndex(item.getIndex() + 1);
                 // item.assertFollowedBy(follow);
                 // LOG.info("Closing on " + follow);
-                if (!out.contains(follow))  // Avoid allocating the Deque in the subclass.
+                if (!out.contains(follow))  // Avoid allocating the Deque in the subclass. TODO: But we don't, any more. We allocate it here.
                     closure(out, tmpClosureQueue, follow, tmpClosureLookaheads);
                 Preconditions.checkState(tmpClosureQueue.isEmpty(), "Queue not empty.");
             }

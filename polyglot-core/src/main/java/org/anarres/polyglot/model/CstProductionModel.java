@@ -46,6 +46,7 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
     private final int index;
     /** @see CstAlternativeModel#transformExpressions */
     public final List<CstTransformPrototypeModel> transformPrototypes = new ArrayList<>();
+    // TODO: Switch to ArrayList and use linear search for lookup-by-name. Make LR1ItemUniverse do for(int i) iteration.
     public final Map<String, CstAlternativeModel> alternatives = new LinkedHashMap<>();
     /* pp */ int alternativeIndex = 0;
 

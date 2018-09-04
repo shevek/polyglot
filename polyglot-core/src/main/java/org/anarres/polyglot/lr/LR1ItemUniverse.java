@@ -35,7 +35,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
     // private static final boolean DEBUG = false;
     private final FirstFunction firstFunction;
     private final FollowFunction followFunction;
-    private final Map<CstAlternativeModel, TokenFunction<LR1Item>> itemMapInitial = new HashMap<>();
+    private final Map<CstAlternativeModel, DenseIndexedMap<TokenModel, LR1Item>> itemMapInitial = new HashMap<>();
 
     public LR1ItemUniverse(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         super(LR1Item.class, grammar, cstProductionRoot);
@@ -57,7 +57,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
     }
 
     private void addAlternative(@Nonnull CstAlternativeModel alternative) {
-        TokenFunction<LR1Item> itemMapLocal = new TokenFunction<>(firstFunction.getUniverse().size());
+        DenseIndexedMap<TokenModel, LR1Item> itemMapLocal = new DenseIndexedMap<>(firstFunction.getUniverse().size());
         itemMapInitial.put(alternative, itemMapLocal);
 
         addAlternative(itemMapLocal, alternative, TokenModel.EOF.INSTANCE);
@@ -68,7 +68,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
         }
     }
 
-    private void addAlternative(@Nonnull TokenFunction<LR1Item> itemMapLocal, CstAlternativeModel alternative, @Nonnull TokenModel lookahead) {
+    private void addAlternative(@Nonnull DenseIndexedMap<TokenModel, LR1Item> itemMapLocal, CstAlternativeModel alternative, @Nonnull TokenModel lookahead) {
         for (int i = 0; i < alternative.elements.size() + 1; i++) {
             LR1Item item = new LR1Item(size(), alternative, i, lookahead);
             if (i == 0)
