@@ -109,7 +109,7 @@ public class JavaHelper extends AbstractHelper {
     private final Set<? extends Option> options;
     @Nonnull
     private final GrammarModel grammar;
-    private static final ThreadLocal<Map<String, String>> locals = new ThreadLocal<Map<String, String>>() {
+    private static final ThreadLocal<Map<String, String>> LOCALS = new ThreadLocal<Map<String, String>>() {
         @Override
         protected Map<String, String> initialValue() {
             return new HashMap<>();
@@ -199,14 +199,14 @@ public class JavaHelper extends AbstractHelper {
     @Nonnull
     @TemplateProperty("parser.vm")
     public String beginLocalVariables() {
-        locals.remove();
+        LOCALS.remove();
         return "";
     }
 
     @Nonnull
     @TemplateProperty("parser.vm")
     public String endLocalVariables() {
-        locals.remove();
+        LOCALS.remove();
         return "";
     }
 
@@ -221,7 +221,7 @@ public class JavaHelper extends AbstractHelper {
 
     @Nonnull
     private String newCompactLocalName(@Nonnull String in) {
-        Map<String, String> locals = this.locals.get();
+        Map<String, String> locals = LOCALS.get();
         String out = locals.get(in);
         if (out == null) {
             out = "v" + locals.size();
