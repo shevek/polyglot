@@ -49,6 +49,7 @@ public class ErrorHandler {
         return text;
     }
 
+    @SuppressWarnings("JavaLangClash")
     public static class Error {
 
         private final Token location;

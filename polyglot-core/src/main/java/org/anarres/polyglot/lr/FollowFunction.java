@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Computes the set of terminals which can possibly follow a nonterminal.
  *
  * @author shevek
  */

@@ -121,6 +121,7 @@ public abstract class LRAction {
     }
 
     /** Used to implement nonassociative rules. */
+    @SuppressWarnings("JavaLangClash")
     public static class Error extends LRAction {
 
         public Error(LRItem item) {

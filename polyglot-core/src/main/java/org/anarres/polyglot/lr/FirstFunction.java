@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Computes the set of possible first-terminals of a of a symbol subsequence.
+ * The returned value may also indicate the inclusion of epsilon.
  *
  * @author shevek
  */

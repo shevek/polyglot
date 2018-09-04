@@ -523,7 +523,7 @@ public class PolyglotEngine {
             return new SimpleLRDiagnoser(grammar, cstProductionRoot);
         try {
             Class<?> factoryType = Class.forName("org.anarres.polyglot.diagnoser.ChocoLRDiagnoser$Factory");
-            LRDiagnoser.Factory factory = factoryType.asSubclass(LRDiagnoser.Factory.class).newInstance();
+            LRDiagnoser.Factory factory = factoryType.asSubclass(LRDiagnoser.Factory.class).getConstructor().newInstance();
             return factory.newDiagnoser(grammar, cstProductionRoot, getOptions());
         } catch (ClassNotFoundException e) {
             LOG.info("{}: Failed to construct ChocoLRDiagnoser: {}", getName(), e);

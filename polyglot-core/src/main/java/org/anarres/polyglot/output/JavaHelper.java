@@ -326,8 +326,7 @@ public class JavaHelper extends AbstractHelper {
 
     private static enum State {
 
-        CONST, @Deprecated
-        DOLLAR, PERCENT, VAR;
+        CONST, PERCENT, VAR;
     }
 
     public static class FormatToken {

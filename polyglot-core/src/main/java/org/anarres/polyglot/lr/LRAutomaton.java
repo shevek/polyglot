@@ -218,6 +218,9 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
                             edge.color("blue");
                             break;
                         }
+                        default:
+                            // errorprone
+                            break;
                     }
                 }
             }

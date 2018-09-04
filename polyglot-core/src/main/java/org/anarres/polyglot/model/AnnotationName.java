@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
  *
  * @author shevek
  */
+@SuppressWarnings("ImmutableEnumChecker")   // targets should be an ImmutableList.
 public enum AnnotationName {
 
     /** Used on a TokenModel or CstProductionModel to indicate the user-visible name of the syntactic construct. */

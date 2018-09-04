@@ -19,11 +19,11 @@ import javax.annotation.Nonnull;
  */
 public class PrecedenceComparator {
 
-    public enum Result {
+    public static enum Result {
         LOWER, EQUAL, HIGHER, INCOMPARABLE
     }
 
-    private final class Key {
+    private static final class Key {
 
         private final String high;
         private final String low;
