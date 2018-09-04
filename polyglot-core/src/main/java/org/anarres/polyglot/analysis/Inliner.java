@@ -139,7 +139,7 @@ public class Inliner {
     @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
     private void substitute(@Nonnull CstAlternativeModel haystackAlternative, CstElementModel needleElement, CstProductionModel replacementProduction) {
         CstProductionModel haystackProduction = haystackAlternative.getProduction();
-        for (CstAlternativeModel replacementAlternative : replacementProduction.getAlternatives().values()) {
+        for (CstAlternativeModel replacementAlternative : replacementProduction.getAlternatives()) {
             CstAlternativeModel resultAlternative = substitute(haystackAlternative, needleElement, replacementAlternative);
             if (haystackProduction.alternatives.put(resultAlternative.getName(), resultAlternative) != null)
                 throw new IllegalStateException("Name clash!");
@@ -159,7 +159,7 @@ public class Inliner {
     }
 
     private boolean isRecursive(@Nonnull CstProductionModel production) {
-        for (CstAlternativeModel alternative : production.getAlternatives().values())
+        for (CstAlternativeModel alternative : production.getAlternatives())
             if (isRecursive(alternative))
                 return true;
         return false;
@@ -175,7 +175,7 @@ public class Inliner {
     @SuppressWarnings("unused")
     @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
     private boolean isErasing(@Nonnull CstProductionModel production) {
-        for (CstAlternativeModel alternative : production.getAlternatives().values()) {
+        for (CstAlternativeModel alternative : production.getAlternatives()) {
             if (alternative.getElements().isEmpty())
                 return true;
         }
@@ -193,7 +193,7 @@ public class Inliner {
         // Strictly, we only need to do this in the production in the state pointing to the conflict state.
         // So we should really walk states, not the entire grammar here.
         for (CstProductionModel haystackProduction : grammar.getCstProductions()) {
-            for (CstAlternativeModel haystackAlternative : haystackProduction.getAlternatives().values()) {
+            for (CstAlternativeModel haystackAlternative : haystackProduction.getAlternatives()) {
                 CstAlternativeModel resultAlternative = haystackAlternative;
                 for (CstElementModel haystackElement : haystackAlternative.getElements()) {
                     if (haystackElement.symbol != inlineProduction)
@@ -322,7 +322,7 @@ public class Inliner {
         // Strictly, we only need to do this in the production in the state pointing to the conflict state.
         // So we should really walk states, not the entire grammar here.
         for (CstProductionModel haystackProduction : grammar.getCstProductions()) {
-            for (CstAlternativeModel haystackAlternative : haystackProduction.getAlternatives().values()) {
+            for (CstAlternativeModel haystackAlternative : haystackProduction.getAlternatives()) {
                 CstAlternativeModel resultAlternative = haystackAlternative;
                 for (CstElementModel haystackElement : haystackAlternative.getElements()) {
                     if (!(haystackElement.symbol instanceof CstProductionModel))
@@ -386,7 +386,7 @@ public class Inliner {
                     CstProductionModel haystackProduction = haystackItem.getProduction();
                     CstAlternativeModel haystackAlternative = haystackItem.getProductionAlternative();
                     CstElementModel haystackElement = haystackItem.getElement();
-                    for (CstAlternativeModel replacementAlternative : conflictProduction.getAlternatives().values()) {
+                    for (CstAlternativeModel replacementAlternative : conflictProduction.getAlternatives()) {
                         CstAlternativeModel resultAlternative = inlinedAlternatives.get(haystackItem, replacementAlternative);
                         // Avoid substituting the same thing twice, once per conflictItem.
                         if (resultAlternative == null) {

@@ -190,13 +190,13 @@ public class SimpleLRDiagnoser implements LRDiagnoser {
             }
 
             if (false) {
-                for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+                for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                     LOG.info(indent(depth, cstSymbolPathIndex) + "Alt of production " + cstProduction.getName() + " is " + cstAlternative.getName());
                 }
             }
 
             ALTERNATIVE:
-            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                 // We have to check seen on alternatives, because sometimes we need to go twice around a list production.
                 if (!context.enter(cstAlternative)) {
                     LOG.info(indent(depth, cstSymbolPathIndex) + "Not entering alternative " + cstAlternative.getName());

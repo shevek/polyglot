@@ -7,6 +7,7 @@ package org.anarres.polyglot.model;
 
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,8 +81,8 @@ public final class CstProductionModel extends AbstractNamedModel implements CstP
 
     @Nonnull
     @TemplateProperty("parser.vm")
-    public Map<String, CstAlternativeModel> getAlternatives() {
-        return alternatives;
+    public Collection<? extends CstAlternativeModel> getAlternatives() {
+        return alternatives.values();
     }
 
     public void addAlternative(@Nonnull CstAlternativeModel alternative) {

@@ -38,10 +38,10 @@ public class GrammarInliner implements Runnable {
         Set<CstAlternativeModel> inlineAlternatives = new HashSet<>();
         for (CstProductionModel cstProduction : grammar.getCstProductions()) {
             if (cstProduction.hasAnnotation(AnnotationName.Inline)) {
-                inlineAlternatives.addAll(cstProduction.getAlternatives().values());
+                inlineAlternatives.addAll(cstProduction.getAlternatives());
                 continue;
             }
-            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                 if (cstAlternative.hasAnnotation(AnnotationName.Inline)) {
                     inlineAlternatives.add(cstAlternative);
                     continue;

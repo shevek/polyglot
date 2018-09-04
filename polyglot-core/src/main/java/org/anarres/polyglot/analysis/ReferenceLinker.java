@@ -339,7 +339,7 @@ public class ReferenceLinker implements Runnable {
                         linkCstTransformPrototype(transformPrototype, prefix);
                     }
                 }
-                for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+                for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                     String prefix = "In CST alternative " + cstAlternative.getName();
                     for (CstElementModel cstElement : cstAlternative.getElements()) {
                         linkCstElement(cstElement, prefix);

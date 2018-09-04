@@ -91,7 +91,7 @@ public class ConflictChecker implements Runnable {
     @Override
     public void run() {
         for (CstProductionModel cstProduction : grammar.getCstProductions()) {
-            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                 // Check for duplicate use of an element/transform pair.
                 TransformVisitor visitor = new TransformVisitor(errors);
                 for (CstTransformExpressionModel transformExpression : cstAlternative.getTransformExpressions()) {

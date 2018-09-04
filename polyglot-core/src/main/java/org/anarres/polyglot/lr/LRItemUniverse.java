@@ -104,6 +104,7 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
      }
      }
      */
+    /** Only used for the closure of the root element. */
     @Nonnull
     private ImmutableIndexedSet<? extends I> closure(@Nonnull I root) {
         // This allocates, but this method is only called once per build.

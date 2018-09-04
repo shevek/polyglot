@@ -210,7 +210,7 @@ public class ${parserMachine.parserClassName} {
 	/* Performs a reduction. */
 	private void reduce(@Nonnegative int reduction) throws IOException, LexerException, ParserException {
 		switch (reduction) {
-#foreach ($production in $grammar.cstProductions)
+#foreach ($production in $grammar.cstProductionsSorted)
 #if ($helper.isOption("CG_COMMENT"))
 			// Reductions for $production
 #end##CG_COMMENT
@@ -318,7 +318,7 @@ ${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 #end
 #end## macro
 
-#foreach ($production in $grammar.cstProductions)
+#foreach ($production in $grammar.cstProductionsSorted)
 
 #if ($helper.isOption("CG_COMMENT"))
 // Reductions for $production

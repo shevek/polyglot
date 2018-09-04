@@ -183,18 +183,34 @@ public class GrammarModel implements GraphVizScope {
     }
 
     /**
+     * Returns the CST productions in undefined order.
+     *
+     * @return the CST productions in undefined order.
+     */
+    @Nonnull
+    @TemplateProperty("parser.vm")
+    public Collection<? extends CstProductionModel> getCstProductions() {
+        return cstProductions.values();
+    }
+
+    /**
      * Returns the CST productions in definition order.
      *
      * @return the CST productions in definition order.
      */
     @Nonnull
     @TemplateProperty("parser.vm")
-    public List<CstProductionModel> getCstProductions() {
+    public List<CstProductionModel> getCstProductionsSorted() {
         List<CstProductionModel> out = new ArrayList<>(cstProductions.values());
         Collections.sort(out, CstProductionModel.IndexComparator.INSTANCE);
         return out;
     }
 
+    /**
+     * Returns the CST productions in alphabetical order.
+     *
+     * @return the CST productions in alphabetical order.
+     */
     @Nonnull
     @TemplateProperty("html")
     public List<CstProductionModel> getCstProductionsAlphabetical() {
@@ -205,8 +221,8 @@ public class GrammarModel implements GraphVizScope {
 
     @Nonnull
     public List<? extends CstProductionModel> getCstProductionRoots() {
-        List<CstProductionModel> out = new ArrayList<CstProductionModel>();
-        for (CstProductionModel cstProduction : cstProductions.values())
+        List<CstProductionModel> out = new ArrayList<>();
+        for (CstProductionModel cstProduction : getCstProductions())
             if (cstProduction.hasAnnotation(AnnotationName.ParserStart))
                 out.add(cstProduction);
         if (!out.isEmpty())
@@ -438,7 +454,7 @@ public class GrammarModel implements GraphVizScope {
         CST:
         {
             List<ACstProduction> productions = new ArrayList<>();
-            for (CstProductionModel e : getCstProductions())
+            for (CstProductionModel e : getCstProductionsSorted())
                 productions.add(e.toNode());
             sections.add(new AProductionsSection(productions));
         }
@@ -487,7 +503,7 @@ public class GrammarModel implements GraphVizScope {
         for (Map.Entry<String, CstProductionModel> e : cstProductions.entrySet()) {
             if (!e.getKey().equals(e.getValue().getName()))
                 throw new IllegalStateException("Mis-named CST production " + e.getKey() + " -> " + e.getValue());
-            for (CstAlternativeModel cstAlternative : e.getValue().getAlternatives().values()) {
+            for (CstAlternativeModel cstAlternative : e.getValue().getAlternatives()) {
                 for (CstElementModel cstElement : cstAlternative.getElements()) {
                     if (!cstElement.isTerminal()) {
                         CstProductionModel subProduction = cstElement.getCstProduction();

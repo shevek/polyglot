@@ -68,7 +68,7 @@ public class HtmlOutputWriter extends AbstractOutputWriter {
 
         for (CstProductionModel production : getGrammar().getCstProductions()) {
             process(executor, "cst-production.vm", helper.a(production) + ".html", ImmutableMap.<String, Object>of("model", production));
-            for (CstAlternativeModel alternative : production.getAlternatives().values()) {
+            for (CstAlternativeModel alternative : production.getAlternatives()) {
                 process(executor, "cst-alternative.vm", helper.a(alternative) + ".html", ImmutableMap.<String, Object>of("model", alternative));
             }
         }

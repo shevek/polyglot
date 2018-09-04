@@ -65,7 +65,7 @@ public class AlgorithmicLRDiagnoser implements LRDiagnoser {
         this.firstFunction = new FirstFunction(grammar, IgnoredProductionsSet.EMPTY);
 
         for (CstProductionModel production : grammar.getCstProductions()) {
-            for (CstAlternativeModel alternative : production.getAlternatives().values()) {
+            for (CstAlternativeModel alternative : production.getAlternatives()) {
                 for (CstElementModel element : alternative.getElements()) {
                     CstProductionSymbol symbol = element.getSymbol();
                     if (symbol instanceof CstProductionModel) {

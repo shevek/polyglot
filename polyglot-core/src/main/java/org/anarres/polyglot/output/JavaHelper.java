@@ -11,6 +11,7 @@ import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,13 +184,15 @@ public class JavaHelper extends AbstractHelper {
     public List<CstAlternativeGroup> getAlternativeGroups() {
         List<CstAlternativeGroup> out = new ArrayList<>();
         for (CstProductionModel production : grammar.getCstProductions()) {
-            for (CstAlternativeModel alternative : production.getAlternatives().values()) {
+            for (CstAlternativeModel alternative : production.getAlternatives()) {
                 int groupIndex = alternative.getIndex() >> ALTERNATIVE_GROUP_SHIFT;
                 while (out.size() <= groupIndex)
                     out.add(new CstAlternativeGroup(out.size()));
                 out.get(groupIndex).add(alternative);
             }
         }
+        for (CstAlternativeGroup alternativeGroup : out)
+            Collections.sort(alternativeGroup, CstAlternativeModel.IndexComparator.INSTANCE);
         return out;
     }
 

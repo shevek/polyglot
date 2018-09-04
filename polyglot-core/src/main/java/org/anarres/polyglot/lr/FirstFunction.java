@@ -197,6 +197,7 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
      * @param start the starting point in the vector.
      * @return true iff the symbol sequence was nullable.
      */
+    // @CheckReturnValue
     public boolean addFirst(@Nonnull Set<TokenModel> out, @Nonnull List<? extends CstElementModel> elements, @Nonnegative int start) {
         for (int i = start; i < elements.size(); i++) {
             CstElementModel element = elements.get(i);
@@ -217,6 +218,7 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
         return true;
     }
 
+    // @CheckReturnValue
     public boolean addFirst(@Nonnull IntSet out, @Nonnull List<? extends CstElementModel> elements, @Nonnegative int start) {
         for (int i = start; i < elements.size(); i++) {
             CstElementModel element = elements.get(i);

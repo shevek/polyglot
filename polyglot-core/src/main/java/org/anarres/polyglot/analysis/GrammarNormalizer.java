@@ -342,11 +342,11 @@ public class GrammarNormalizer implements Runnable {
 
     @Override
     public void run() {
-        for (CstProductionModel cstProduction : grammar.getCstProductions()) {
+        for (CstProductionModel cstProduction : new ArrayList<>(grammar.getCstProductions())) {
             for (CstTransformPrototypeModel cstTransformPrototype : cstProduction.getTransformPrototypes()) {
                 normalize(cstTransformPrototype);
             }
-            for (CstAlternativeModel cstAlternative : new ArrayList<>(cstProduction.getAlternatives().values())) {
+            for (CstAlternativeModel cstAlternative : new ArrayList<>(cstProduction.getAlternatives())) {
                 // LOG.info("Normalizing " + cstAlternative);
                 addSyntheticProductions(cstAlternative);
             }

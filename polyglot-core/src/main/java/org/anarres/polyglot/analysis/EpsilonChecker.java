@@ -34,8 +34,8 @@ public class EpsilonChecker implements Runnable {
     @Override
     public void run() {
         FirstFunction firstFunction = new FirstFunction(grammar, IgnoredProductionsSet.EMPTY);
-        for (CstProductionModel cstProduction : grammar.cstProductions.values()) {
-            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+        for (CstProductionModel cstProduction : grammar.getCstProductions()) {
+            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                 for (CstElementModel cstElement : cstAlternative.getElements()) {
                     if (cstElement.isTerminal())
                         continue;

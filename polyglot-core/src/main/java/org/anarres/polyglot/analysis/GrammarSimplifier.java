@@ -39,7 +39,7 @@ public class GrammarSimplifier implements Runnable {
         Object2IntOpenHashMap<CstProductionModel> cstProductionReferenceCount = new Object2IntOpenHashMap<>();
 
         for (CstProductionModel cstProduction : grammar.getCstProductions()) {
-            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                 for (CstElementModel cstElement : cstAlternative.getElements()) {
                     if (!cstElement.isTerminal()) {
                         cstProductionReferenceCount.addTo(cstElement.getCstProduction(), 1);
@@ -62,7 +62,7 @@ public class GrammarSimplifier implements Runnable {
                 continue;
             if (cstProduction.getAlternatives().size() != 1)
                 continue;
-            inlineAlternatives.addAll(cstProduction.getAlternatives().values());
+            inlineAlternatives.addAll(cstProduction.getAlternatives());
         }
         if (!inlineAlternatives.isEmpty()) {
             Inliner inliner = new Inliner(errors, grammar);

@@ -137,7 +137,7 @@ public class TypeChecker implements Runnable {
     @Override
     public void run() {
         for (CstProductionModel cstProduction : grammar.getCstProductions()) {
-            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                 if (cstAlternative.getTransformExpressions().size() != cstProduction.getTransformPrototypes().size()) {
                     errors.addError(cstAlternative.getLocation(), "Production " + cstProduction.getName() + " has " + cstProduction.getTransformPrototypes().size() + " transformation prototypes"
                             + " but alternative " + cstAlternative.getName() + " has " + cstAlternative.getTransformExpressions().size() + " transform expressions.");

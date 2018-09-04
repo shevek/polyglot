@@ -53,7 +53,7 @@ public class AnnotationChecker implements Runnable {
 
         for (CstProductionModel cstProduction : grammar.getCstProductions()) {
             check(cstProduction);
-            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+            for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                 check(cstAlternative);
                 for (CstElementModel cstElement : cstAlternative.getElements()) {
                     check(cstElement);

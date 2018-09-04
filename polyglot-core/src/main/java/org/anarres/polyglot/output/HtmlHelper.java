@@ -383,7 +383,7 @@ public class HtmlHelper extends AbstractHelper {
         }
 
         cstRootUsage.addAll(grammar.getCstProductionRoots());
-        for (final CstProductionModel cstProduction : grammar.cstProductions.values()) {
+        for (final CstProductionModel cstProduction : grammar.getCstProductions()) {
             for (final CstTransformPrototypeModel cstTransformPrototype : cstProduction.getTransformPrototypes()) {
                 if (cstTransformPrototype.symbol.isTerminal())
                     tokenCstProductionUsage.put(cstTransformPrototype.getToken(), cstProduction);
@@ -392,7 +392,7 @@ public class HtmlHelper extends AbstractHelper {
             }
             annotationUsage.put(cstProduction, FUNCTION_GET_ANNOTATION_NAMES);
 
-            for (final CstAlternativeModel cstAlternative : cstProduction.getAlternatives().values()) {
+            for (final CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
                 for (CstElementModel cstElement : cstAlternative.getElements()) {
                     if (cstElement.isTerminal())
                         tokenCstAlternativeUsage.put(cstElement.getToken(), cstAlternative);
