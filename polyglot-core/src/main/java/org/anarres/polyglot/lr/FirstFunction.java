@@ -157,6 +157,13 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
         return firstMap.get(production).isNullable();
     }
 
+    public boolean isNullable(@Nonnull CstAlternativeModel alternative) {
+        for (int i = 0; i < alternative.elements.size(); i++)
+            if (!isNullable(alternative.elements.get(i).getSymbol()))
+                return false;
+        return true;
+    }
+
     /**
      * Returns FIRST(symbol).
      *
