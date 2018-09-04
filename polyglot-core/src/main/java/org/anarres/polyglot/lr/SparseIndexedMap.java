@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
  *
  * @author shevek
  */
-public class SparseIndexedMap<K extends Indexed, V> extends AbstractMap<K, V> {
+public class SparseIndexedMap<K extends Indexed, V> extends AbstractMap<K, V> implements IndexedMap<K, V> {
 
     private final IndexedUniverse<K> universe;
     // private final List<V> data = new ArrayList<>();
@@ -43,12 +43,15 @@ public class SparseIndexedMap<K extends Indexed, V> extends AbstractMap<K, V> {
     }
 
     @Override
-    public V get(Object _key) {
-        if (!isCompatibleObject(_key))
+    public V get(K key) {
+        return data.get(key.getIndex());
+    }
+
+    @Override
+    public V get(Object key) {
+        if (!isCompatibleObject(key))
             return null;
-        Indexed key = (Indexed) _key;
-        int index = key.getIndex();
-        return data.get(index);
+        return get((K) key);
     }
 
     @Override
@@ -58,13 +61,17 @@ public class SparseIndexedMap<K extends Indexed, V> extends AbstractMap<K, V> {
     }
 
     @Override
-    public V remove(Object _key) {
-        if (!isCompatibleObject(_key))
+    public V remove(K key) {
+        if (key == null)
             return null;
-        Indexed key = (Indexed) _key;
-        int index = key.getIndex();
-        // for (int i = data.size() - 1; i < index; i++) data.add(null);
-        return data.remove(index);
+        return data.remove(key.getIndex());
+    }
+
+    @Override
+    public V remove(Object key) {
+        if (!isCompatibleObject(key))
+            return null;
+        return remove((K) key);
     }
 
     @Override

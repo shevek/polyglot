@@ -6,7 +6,6 @@
 package org.anarres.polyglot.lr;
 
 import java.util.Arrays;
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
@@ -18,7 +17,7 @@ import javax.annotation.Nonnull;
  * @see TokenMap
  * @author shevek
  */
-/* pp */ class DenseIndexedMap<K extends Indexed, V> {
+/* pp */ class DenseIndexedMap<K extends Indexed, V> implements IndexedMap<K, V> {
 
     private final Object[] data;
 
@@ -30,22 +29,25 @@ import javax.annotation.Nonnull;
         this(universe.size());
     }
 
-    @Nonnull
     @SuppressWarnings(value = "unchecked")
     public V get(@Nonnull int index) {
         return (V) data[index];
     }
 
-    @Nonnull
+    @Override
     public V get(@Nonnull K key) {
         return get(key.getIndex());
     }
 
-    public void put(@Nonnull K key, @Nonnull V value) {
-        data[key.getIndex()] = value;
+    @Override
+    public V put(@Nonnull K key, V value) {
+        int index = key.getIndex();
+        V out = (V) data[index];
+        data[index] = value;
+        return out;
     }
 
-    @CheckForNull
+    @Override
     public V remove(@Nonnull K key) {
         int index = key.getIndex();
         // for (int i = data.size() - 1; i < index; i++) data.add(null);
@@ -54,7 +56,7 @@ import javax.annotation.Nonnull;
         return value;
     }
 
-    // @Override
+    @Override
     public void clear() {
         Arrays.fill(data, null);
     }
