@@ -48,6 +48,7 @@ public class SparseIndexedMap<K extends Indexed, V> extends AbstractMap<K, V> im
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public V get(Object key) {
         if (!isCompatibleObject(key))
             return null;
@@ -68,6 +69,7 @@ public class SparseIndexedMap<K extends Indexed, V> extends AbstractMap<K, V> im
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public V remove(Object key) {
         if (!isCompatibleObject(key))
             return null;
@@ -145,7 +147,7 @@ public class SparseIndexedMap<K extends Indexed, V> extends AbstractMap<K, V> im
 
             @Override
             public Iterator<K> iterator() {
-                return new KeyIterator(universe, data.keySet().iterator());
+                return new KeyIterator<>(universe, data.keySet().iterator());
             }
         };
     }

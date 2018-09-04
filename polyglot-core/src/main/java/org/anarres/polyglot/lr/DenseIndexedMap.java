@@ -42,6 +42,7 @@ import javax.annotation.Nonnull;
     @Override
     public V put(@Nonnull K key, V value) {
         int index = key.getIndex();
+        @SuppressWarnings("unchecked")
         V out = (V) data[index];
         data[index] = value;
         return out;
@@ -51,6 +52,7 @@ import javax.annotation.Nonnull;
     public V remove(@Nonnull K key) {
         int index = key.getIndex();
         // for (int i = data.size() - 1; i < index; i++) data.add(null);
+        @SuppressWarnings("unchecked")
         V value = (V) data[index];
         data[index] = null;
         return value;

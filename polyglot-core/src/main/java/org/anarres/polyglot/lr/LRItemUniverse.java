@@ -127,10 +127,8 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         // Passing source as an LRState rather than as an ImmutableIndexedSet saves
         // us a hash lookup on every call, but means that LRState has to expose
         // ImmutableIndexedSet rather than just Set to enable this allocation optimization.
-        int[] indices = source.getItems().getIndices();
-        // for (int index = indices.nextSetBit(0); index >= 0; index = indices.nextSetBit(index + 1)) {
         // for (I item : items) {   // Allocates an iterator.
-        for (int index : indices) {
+        for (int index : source.getItems().getIndices()) {
             I item = getItemByIndex(index);
             CstProductionSymbol productionSymbol = item.getSymbol();
             // If the item after the dot is the symbol we are interested in,
