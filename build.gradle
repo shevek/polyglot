@@ -4,6 +4,7 @@ buildscript {
 		mavenCentral()
 		jcenter()
 		// maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+		maven { url "https://plugins.gradle.org/m2/" }
 	}
 
 	dependencies {
@@ -11,6 +12,7 @@ buildscript {
 		// classpath "org.anarres.gradle:gradle-sablecc-plugin:1.0.4"
 		// classpath 'org.anarres.sablecc:sablecc-gradle:3.7.1-SNAPSHOT'
 		classpath 'org.anarres.polyglot:polyglot-gradle:1.0.0'
+		classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.13'
 	}
 }
 
@@ -35,6 +37,8 @@ subprojects {
 			uri = new URI("http://www.anarres.org/")
 		}
 	}
+
+	apply plugin: 'net.ltgt.errorprone'
 
 	sourceCompatibility = 1.7
 	animalsniffer {
