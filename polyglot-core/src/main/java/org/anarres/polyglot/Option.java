@@ -15,6 +15,8 @@ public enum Option {
     SLR,
     /** Enables LR(1) parser generation. */
     LR1,
+    /** Enables LR(k) parser generation. */
+    LRK,
     /** Enables the explicit inliner. */
     INLINE_EXPLICIT,
     /** Enables the opportunistic inliner. */

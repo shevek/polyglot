@@ -65,7 +65,8 @@ public interface DebugHandler {
         STATE_NFA(TargetType.DOT), STATE_DFA(TargetType.DOT),
         FUNCTIONS(TargetType.TEXT),
         AUTOMATON_LR0_DESC(TargetType.TEXT), AUTOMATON_LR0(TargetType.DOT),
-        AUTOMATON_LR1_DESC(TargetType.TEXT), AUTOMATON_LR1(TargetType.DOT),;
+        AUTOMATON_LR1_DESC(TargetType.TEXT), AUTOMATON_LR1(TargetType.DOT),
+        AUTOMATON_LRK_DESC(TargetType.TEXT), AUTOMATON_LRK(TargetType.DOT),;
         private final TargetType type;
 
         private Target(@Nonnull TargetType type) {
