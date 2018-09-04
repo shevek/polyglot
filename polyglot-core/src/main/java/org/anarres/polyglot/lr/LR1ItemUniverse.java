@@ -30,35 +30,12 @@ import org.slf4j.LoggerFactory;
  */
 public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
 
-    private static class TokenMap<V> {
-
-        private final Object[] data;
-
-        public TokenMap(@Nonnegative int size) {
-            this.data = new Object[size];
-        }
-
-        @Nonnull
-        @SuppressWarnings("unchecked")
-        public V get(@Nonnull int index) {
-            return (V) data[index];
-        }
-
-        @Nonnull
-        public V get(@Nonnull TokenModel token) {
-            return get(token.getIndex());
-        }
-
-        public void put(@Nonnull TokenModel token, @Nonnull V value) {
-            data[token.getIndex()] = value;
-        }
-    }
 
     private static final Logger LOG = LoggerFactory.getLogger(LR1ItemUniverse.class);
     // private static final boolean DEBUG = false;
     private final FirstFunction firstFunction;
     private final FollowFunction followFunction;
-    private final Map<CstAlternativeModel, TokenMap<LR1Item>> itemMapInitial = new HashMap<>();
+    private final Map<CstAlternativeModel, TokenFunction<LR1Item>> itemMapInitial = new HashMap<>();
 
     public LR1ItemUniverse(@Nonnull GrammarModel grammar, @Nonnull CstProductionModel cstProductionRoot) {
         super(LR1Item.class, grammar, cstProductionRoot);
@@ -80,7 +57,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
     }
 
     private void addAlternative(@Nonnull CstAlternativeModel alternative) {
-        TokenMap<LR1Item> itemMapLocal = new TokenMap<>(firstFunction.getUniverse().size());
+        TokenFunction<LR1Item> itemMapLocal = new TokenFunction<>(firstFunction.getUniverse().size());
         itemMapInitial.put(alternative, itemMapLocal);
 
         addAlternative(itemMapLocal, alternative, TokenModel.EOF.INSTANCE);
@@ -91,7 +68,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
         }
     }
 
-    private void addAlternative(@Nonnull TokenMap<LR1Item> itemMapLocal, CstAlternativeModel alternative, @Nonnull TokenModel lookahead) {
+    private void addAlternative(@Nonnull TokenFunction<LR1Item> itemMapLocal, CstAlternativeModel alternative, @Nonnull TokenModel lookahead) {
         for (int i = 0; i < alternative.elements.size() + 1; i++) {
             LR1Item item = new LR1Item(size(), alternative, i, lookahead);
             if (i == 0)
