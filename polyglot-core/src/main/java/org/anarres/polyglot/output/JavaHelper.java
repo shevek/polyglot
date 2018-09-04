@@ -109,7 +109,7 @@ public class JavaHelper extends AbstractHelper {
     private final Set<? extends Option> options;
     @Nonnull
     private final GrammarModel grammar;
-    private final ThreadLocal<Map<String, String>> locals = new ThreadLocal<Map<String, String>>() {
+    private static final ThreadLocal<Map<String, String>> locals = new ThreadLocal<Map<String, String>>() {
         @Override
         protected Map<String, String> initialValue() {
             return new HashMap<>();
