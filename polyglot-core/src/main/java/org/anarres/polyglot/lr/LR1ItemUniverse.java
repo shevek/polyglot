@@ -13,10 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.PolyglotExecutor;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
 import org.anarres.polyglot.model.CstProductionModel;
@@ -196,7 +194,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
     }
 
     @Override
-    public LRAutomaton build(PolyglotExecutor executor) throws InterruptedException, ExecutionException {
-        return build(executor, new LR1Automaton(cstProductionRoot));
+    protected LRAutomaton newAutomaton() {
+        return new LR1Automaton(cstProductionRoot);
     }
 }

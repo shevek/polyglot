@@ -212,13 +212,18 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         }
     }
 
+    @Nonnull
+    protected abstract LRAutomaton newAutomaton();
+
     // Page 224/227/232.
     @Nonnull
-    protected LRAutomaton build(@Nonnull PolyglotExecutor executor, @Nonnull final LRAutomaton automaton) throws InterruptedException, ExecutionException {
+    public LRAutomaton build(@Nonnull PolyglotExecutor executor) throws InterruptedException, ExecutionException {
         // A queue of lrstates for which we have not yet computed follows.
         // Using a PriorityBlockingQueue causes us to process shorter stacks first,
         // thus generating simpler shift-reduce conflict errors.
         // It's no slower than a LinkedBlockingQueue.
+        final LRAutomaton automaton = newAutomaton();
+
         final BlockingQueue<LRState> queue = new PriorityBlockingQueue<>(64, new Comparator<LRState>() {
             @Override
             public int compare(LRState o1, LRState o2) {
@@ -251,7 +256,4 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         automaton.buildMaps(grammar.precedenceComparator);
         return automaton;
     }
-
-    @Nonnull
-    public abstract LRAutomaton build(@Nonnull PolyglotExecutor executor) throws InterruptedException, ExecutionException;
 }
