@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Computes the set of terminals which can possibly follow a nonterminal.
  *
+ * This function is itself a function of the chosen CST root.
+ *
  * @author shevek
  */
 public class FollowFunction implements Function<CstProductionModel, Set<TokenModel>> {

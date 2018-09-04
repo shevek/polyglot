@@ -34,7 +34,7 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
     private static final Logger LOG = LoggerFactory.getLogger(FirstFunction.class);
     private static final boolean DEBUG = false;
 
-    public static class Result extends TokenSet {
+    private static class Result extends TokenSet {
 
         private boolean nullable = false;
 
@@ -48,21 +48,6 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
 
         public boolean isNullable() {
             return nullable;
-        }
-
-        @Override
-        public int hashCode() {
-            return super.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (!super.equals(o))
-                return false;
-            Result r = (Result) o;
-            return isNullable() == r.isNullable();
         }
 
         @Override
