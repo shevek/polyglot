@@ -20,6 +20,8 @@ import org.anarres.polyglot.model.CstProductionSymbol;
  */
 public interface LRItem extends Indexed {
 
+    public static final LRItem[] EMPTY_ARRAY = new LRItem[0];
+
     /** The left hand side. */
     @Nonnull
     public CstProductionModel getProduction();

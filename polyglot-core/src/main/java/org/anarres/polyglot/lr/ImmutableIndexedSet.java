@@ -148,6 +148,26 @@ public class ImmutableIndexedSet<IndexedItem extends Indexed> extends AbstractIn
     }
 
     @Override
+    public Object[] toArray() {
+        int size = size();
+        Object[] out = new Object[size];
+        for (int i = 0; i < size; i++)
+            out[i] = universe.getItemByIndex(indices[i]);
+        return out;
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        int size = size();
+        T[] out = a.length >= size
+                ? a
+                : (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+        for (int i = 0; i < size; i++)
+            out[i] = (T) universe.getItemByIndex(indices[i]);
+        return out;
+    }
+
+    @Override
     public int hashCode() {
         return hashCode;
     }

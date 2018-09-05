@@ -65,7 +65,7 @@ public class LR0ItemUniverse extends LRItemUniverse<LR0Item> {
     /** This routine is meant to be allocation-free. */
     // Page 224.
     @Override
-    protected void closure(Set<? super LR0Item> out, Queue<LR0Item> queue, LR0Item root, IntSet tmp) {
+    protected void closure(Set<? super LR0Item> out, Queue<LR0Item> queue, LR0Item root, IntSet unused) {
         // Invariant: Queue contains all unwalked items (and possibly some duplicates).
         // When an item is removed from the queue, it is added to the result.
         IgnoredProductionsSet ignoredProductions = getIgnoredProductions();

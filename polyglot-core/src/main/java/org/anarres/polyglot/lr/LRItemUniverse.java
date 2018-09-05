@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableMultimap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Queue;
@@ -19,6 +20,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.PolyglotExecutor;
 import org.anarres.polyglot.analysis.StartChecker;
@@ -29,6 +31,7 @@ import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.CstProductionSymbol;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.Specifier;
+import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.model.UnaryOperator;
 import org.anarres.polyglot.node.TIdentifier;
 import org.slf4j.Logger;
@@ -114,22 +117,18 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         return out.toImmutableSet();
     }
 
-    // @Nonnull protected abstract void _goto(@Nonnull Set<? super LRItem> out, @Nonnull Iterable<? extends LRItem> items, @Nonnull CstProductionSymbol symbol);
-    /** This routine is meant to be allocation-free. */
-    // @Override
-    private void _goto(@Nonnull Set<? super I> out, @Nonnull LRState source, @Nonnull CstProductionSymbol symbol) {
+    /**
+     * This routine is meant to be allocation-free.
+     * Returns the next index in sourceItems which contains an item with a DIFFERENT symbol.
+     */
+    @Nonnegative
+    private int _goto(@Nonnull Set<? super I> out, @Nonnull Queue<I> tmpClosureQueue, @Nonnull IntSet tmpClosureLookaheads, @Nonnull LRItem[] sourceItems, @Nonnegative int sourceItemIndex, @Nonnull CstProductionSymbol symbol) {
         // LOG.info("Computing GOTO from " + items + " on " + symbol);
         // Preconditions.checkState(out.isEmpty(), "Output set not empty before GOTO.");
         // TODO: This allocates an iterator, which is the majority of our memory allocation.
         // If, instead, we require items to be an IndexedSet, we could walk the bitfield.
-        Queue<I> tmpClosureQueue = new ArrayDeque<>();
-        IntSet tmpClosureLookaheads = new IntOpenHashSet();
-        // Passing source as an LRState rather than as an ImmutableIndexedSet saves
-        // us a hash lookup on every call, but means that LRState has to expose
-        // ImmutableIndexedSet rather than just Set to enable this allocation optimization.
-        // for (I item : items) {   // Allocates an iterator.
-        for (int index : source.getItems().getIndices()) {
-            I item = getItemByIndex(index);
+        for (int i = sourceItemIndex; i < sourceItems.length; i++) {
+            LRItem item = sourceItems[i];
             CstProductionSymbol productionSymbol = item.getSymbol();
             // If the item after the dot is the symbol we are interested in,
             // we step past it, and add to the new closure.
@@ -141,39 +140,71 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
                 if (!out.contains(follow))  // Avoid allocating the Deque in the subclass. TODO: But we don't, any more. We allocate it here.
                     closure(out, tmpClosureQueue, follow, tmpClosureLookaheads);
                 Preconditions.checkState(tmpClosureQueue.isEmpty(), "Queue not empty.");
+            } else {
+                return i;
             }
         }
+        return sourceItems.length;
         // LOG.info("Computed " + out);
     }
 
     /**
      * Possibly adds a state to the automaton.
      *
-     * From a given source state, for each production symbol which is after the
-     * dot in an LRItem, we call this routine to generate the state after the
-     * transition.
+     * From a given source state, for a given closure of LRItems generated
+     * from the source state and the chosen symbol, we call this routine to add
+     * the state after the transition.
      *
      * @param automaton The automaton.
      * @param queue The queue on which to enqueue the new state, if added.
-     * @param tmpSet The temporary, reusable LRItem set. Invariant: Empty on call.
-     * @param in The starting state.
-     * @param symbol The follow symbol.
+     * @param source The starting state.
+     * @param targetItems The symbols comprisong the ending state.
+     * @param symbol The transition symbol, terminal or nonterminal.
      */
     // @ThreadSafe
-    private void addState(@Nonnull LRAutomaton automaton, @Nonnull Queue<? super LRState> queue, @Nonnull MutableIndexedSet<I> tmpSet, @Nonnull LRState source, @Nonnull CstProductionSymbol symbol) {
-        // tmpSet.clear();    // Not required, as empty by invariant.
-        _goto(tmpSet, source, symbol);
-        if (tmpSet.isEmpty())
-            return;
-        ImmutableIndexedSet<I> out = tmpSet.toImmutableSet();
-        tmpSet.clear();
-        LRState target = automaton.addStateAndTransition(source, out, symbol);
+    private void addState(@Nonnull LRAutomaton automaton, @Nonnull Queue<? super LRState> queue, @Nonnull LRState source, @Nonnull ImmutableIndexedSet<I> targetItems, @Nonnull CstProductionSymbol symbol) {
+        LRState target = automaton.addStateAndTransition(source, targetItems, symbol);
         if (target != null) {
             if ((target.getIndex() & 511) == 0) {
                 LOG.debug("Created {} with {} remaining.", target.getName(), queue.size());
                 // tmpSet.trim();  // This prevents us from continuously blowing the size of the array, but hurts the GC a lot.
             }
             queue.add(target);
+        }
+    }
+
+    private static class LRItemSymbolComparator implements Comparator<LRItem> {
+
+        public static final LRItemSymbolComparator INSTANCE = new LRItemSymbolComparator();
+        private static final int LEFT_SORTS_FIRST = -1;
+        private static final int RIGHT_SORTS_FIRST = 1;
+
+        @Override
+        public int compare(LRItem o1, LRItem o2) {
+            CstProductionSymbol s1 = o1.getSymbol();
+            CstProductionSymbol s2 = o2.getSymbol();
+            if (s1 == s2)
+                return 0;
+            // Nulls sort first.
+            if (s1 == null)
+                return LEFT_SORTS_FIRST;
+            if (s2 == null)
+                return RIGHT_SORTS_FIRST;
+
+            if (s1 instanceof TokenModel) {
+                if (s2 instanceof TokenModel) {
+                    return Integer.compare(s1.getIndex(), s2.getIndex());
+                } else {
+                    // Tokens sort first.
+                    return LEFT_SORTS_FIRST;
+                }
+            } else {
+                if (s2 instanceof TokenModel) {
+                    return RIGHT_SORTS_FIRST;
+                } else {
+                    return Integer.compare(s1.getIndex(), s2.getIndex());
+                }
+            }
         }
     }
 
@@ -184,28 +215,40 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         // This doesn't make it any faster.
         // Set<Set<? extends I>> seenStates = new HashSet<>();
         // We allocate exactly one of these.
-        MutableIndexedSet<I> tmpSet = new MutableIndexedSet<>(this);
+        MutableIndexedSet<I> tmpTargetItems = new MutableIndexedSet<>(this);
+        Queue<I> tmpClosureQueue = new ArrayDeque<>();
+        IntSet tmpClosureLookaheads = new IntOpenHashSet();
         // Set<CstProductionSymbol> follow = new HashSet<>();   // This allocates.
-        SymbolFilter follow = new SymbolFilter();
         for (;;) {
-            LRState state = queue.poll(50, TimeUnit.MILLISECONDS);
-            if (state == null)
+            LRState source = queue.poll(50, TimeUnit.MILLISECONDS);
+            if (source == null)
                 break;
             // if (seenStates.contains(set)) continue;
             // Invariant: 'tmp' is empty and unreferenced at the top of each loop.
             // Rather than walking over all grammar.tokens and grammar.cstProductions,
             // we walk the state set, and only handle those tokens which actually appear.
             // This optimization makes the loop about twice as fast.
-            follow.clear(); // Make sure we process each follow symbol at most once.
-            // for (LRItem item : state.getItems()) {   // Allocates an iterator.
-            for (int index : state.getItems().getIndices()) {
-                I item = getItemByIndex(index);
-                CstProductionSymbol symbol = item.getSymbol();
-                if (symbol == null)
+            // The combination of this loop and the loop in addState()->_goto() is effectively quadratic.
+            // We use sorting to avoid the quadratic nature.
+
+            LRItem[] sourceItems = source.getItemsAsArray();   // TODO: Read into an array allocated in this frame; keep a length.
+            Arrays.sort(sourceItems, LRItemSymbolComparator.INSTANCE);
+            // for (int index : state.getItems().getIndices()) {
+            // I item = getItemByIndex(index);
+            int sourceItemIndex = 0;
+            while (sourceItemIndex < sourceItems.length) {
+                CstProductionSymbol symbol = sourceItems[sourceItemIndex].getSymbol();
+                if (symbol == null) {
+                    sourceItemIndex++;
                     continue;
-                if (!follow.add(symbol))
-                    continue;
-                addState(automaton, queue, tmpSet, state, symbol);
+                }
+                // The sort guarantees we process each potential 'next' symbol at most once.
+                sourceItemIndex = _goto(tmpTargetItems, tmpClosureQueue, tmpClosureLookaheads, sourceItems, sourceItemIndex, symbol);
+                if (tmpTargetItems.isEmpty())
+                    return;
+                ImmutableIndexedSet<I> targetItems = tmpTargetItems.toImmutableSet();
+                tmpTargetItems.clear();
+                addState(automaton, queue, source, targetItems, symbol);
             }
             // seenStates.add(set);
         }

@@ -76,6 +76,11 @@ public class LRState implements Indexed {
     }
 
     @Nonnull
+    public LRItem[] getItemsAsArray() {
+        return items.toArray(LRItem.EMPTY_ARRAY);
+    }
+
+    @Nonnull
     public Map<? extends CstProductionSymbol, ? extends LRState> getTransitionMap() {
         return transitionMap;
     }

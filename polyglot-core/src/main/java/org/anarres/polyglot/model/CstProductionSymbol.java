@@ -7,14 +7,18 @@ package org.anarres.polyglot.model;
 
 import java.util.List;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.output.TemplateProperty;
 
 /**
  * Either a terminal or a nonterminal.
  *
+ * While this does extend Indexed, that does not imply that all
+ * CstProductionSymbols have unique indices.
+ *
  * @author shevek
  */
-public interface CstProductionSymbol extends ProductionSymbol {
+public interface CstProductionSymbol extends ProductionSymbol, Indexed {
 
     /**
      * Returns the list of transform prototypes.
