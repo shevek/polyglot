@@ -41,7 +41,6 @@ public class LRState implements Indexed {
 
     // Cache
     // /* pp */ final LRAction.Shift shiftActionCache = new LRAction.Shift(this);
-
     public LRState(
             // @Nonnull LRAutomaton automaton,
             @Nonnull List<? extends CstProductionSymbol> stack,

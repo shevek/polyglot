@@ -128,7 +128,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
                         if (symbol == null) {
                             // Reduce on lookahead (LR1) or follow (LR0)
                             // LRAction.Reduce reduceAction = item.getProductionAlternative().reduceActionCache;
-                            LRAction.Reduce reduceAction = new LRAction.Reduce(item);
+                            LRAction.Reduce reduceAction = item.getReduceAction();
                             for (TokenModel token : getLookaheads(item))
                                 actionBuilder.addAction(item, token, reduceAction);
                             // transitionMap.get(item.getProductionAlternative().getProduction());

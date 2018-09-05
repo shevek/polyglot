@@ -30,6 +30,7 @@ public class LR0Item implements LRItem {
     // /* pp */ Set<? extends LRItem> closure;
     // Cache this, it's used heavily.
     private final CstProductionSymbol symbol;
+    private final LRAction.Reduce reduceAction;
 
     public LR0Item(@Nonnegative int index, @Nonnull CstAlternativeModel production, @Nonnegative int position) {
         Preconditions.checkPositionIndex(position, production.getElements().size(), "Illegal position.");
@@ -37,6 +38,7 @@ public class LR0Item implements LRItem {
         this.production = production;
         this.position = position;
         this.symbol = (production.getElements().size() == position) ? null : production.getElements().get(position).getSymbol();
+        this.reduceAction = (symbol == null) ? new LRAction.Reduce(this) : null;
     }
 
     @Override
@@ -79,6 +81,11 @@ public class LR0Item implements LRItem {
     @Override
     public CstProductionSymbol getSymbol() {
         return symbol;
+    }
+
+    @Override
+    public LRAction.Reduce getReduceAction() {
+        return Preconditions.checkNotNull(reduceAction, "Not a Reduce LRItem.");
     }
 
     @Override

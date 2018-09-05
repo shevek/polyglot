@@ -46,6 +46,9 @@ public interface LRItem extends Indexed {
     @CheckForNull
     public CstProductionSymbol getSymbol();
 
+    @Nonnull
+    public LRAction.Reduce getReduceAction();
+
     public void assertFollowedBy(@Nonnull LRItem follow);
 
     public void toStringBuilderWithoutLookahead(@Nonnull StringBuilder buf);

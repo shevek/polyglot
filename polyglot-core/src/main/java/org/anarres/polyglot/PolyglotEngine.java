@@ -620,7 +620,7 @@ public class PolyglotEngine {
                 AnnotationModel startAnnotation = cstProductionRoot.getAnnotation(AnnotationName.ParserStart);
                 String machineName = startAnnotation == null ? "" : StartChecker.getMachineName(startAnnotation);
 
-                LRAutomaton automaton;
+                LRAutomaton automaton = null;	// Helps the GC.
                 AUTOMATON:
                 {
                     LRConflict.Map conflicts = null;
