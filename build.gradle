@@ -60,6 +60,8 @@ subprojects {
 		String k = "test.parameter";
 		if (System.properties[k])
 			systemProperty k, System.properties[k]
+		// Make the test JVM amenable to profiling with perf.
+		jvmArgs "-XX:+PreserveFramePointer", "-XX:MaxInlineSize=0"
 	}
 
 	dependencies {
