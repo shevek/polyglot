@@ -166,8 +166,13 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         LRState target = automaton.addStateAndTransition(source, targetItems, symbol);
         if (target != null) {
             if ((target.getIndex() & 511) == 0) {
-                LOG.debug("Created {} with {} remaining.", target.getName(), queue.size());
-                // tmpSet.trim();  // This prevents us from continuously blowing the size of the array, but hurts the GC a lot.
+                if (LOG.isDebugEnabled()) {
+                    StringBuilder buf = new StringBuilder("[ ");
+                    target.toStringBuilderStack(buf);
+                    buf.append("]");
+                    LOG.debug("Created {} with {} remaining: {}", target.getName(), queue.size(), buf);
+                    // tmpSet.trim();  // This prevents us from continuously blowing the size of the array, but hurts the GC a lot.
+                }
             }
             queue.add(target);
         }

@@ -111,13 +111,17 @@ public class LRState implements Indexed {
         return errorIndex;
     }
 
+    public void toStringBuilderStack(@Nonnull StringBuilder buf) {
+        for (CstProductionSymbol symbol : stack)
+            buf.append(symbol.getName()).append(' ');
+    }
+
     public void toStringBuilder(@Nonnull StringBuilder buf) {
         buf.append("State ").append(getName()).append("\n");
 
         STACK:
         buf.append("    Stack is ");
-        for (CstProductionSymbol symbol : stack)
-            buf.append(symbol.getName()).append(' ');
+        toStringBuilderStack(buf);
         buf.append("\n");
 
         ITEMS:

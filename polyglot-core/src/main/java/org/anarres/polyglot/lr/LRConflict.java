@@ -109,8 +109,7 @@ public class LRConflict {
         buf.append("In state ");
         buf.append(state.getName()).append(": ");
         buf.append("[ ");
-        for (CstProductionSymbol symbol : state.getStack())
-            buf.append(symbol.getName()).append(' ');
+        state.toStringBuilderStack(buf);
         buf.append("], on token ").append(token.getName());
     }
 
