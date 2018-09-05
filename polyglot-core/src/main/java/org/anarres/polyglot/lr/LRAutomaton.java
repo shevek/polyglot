@@ -8,6 +8,8 @@ package org.anarres.polyglot.lr;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -111,7 +113,9 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
     /* pp */ void buildMaps(PrecedenceComparator precedenceComparator) {
         LRActionMapBuilder actionBuilder = new LRActionMapBuilder(precedenceComparator);    // NOTTHREADSAFE
         // @GuardedBy("errorMap")
-        final Map<String, Integer> errorMap = new LinkedHashMap<>();
+        // Just for unification of identical errors.
+        final Object2IntMap<String> errorMap = new Object2IntOpenHashMap<>();
+        errorMap.defaultReturnValue(-1);
 
         for (LRState state : getStates()) {
 
@@ -165,8 +169,8 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
                 List<TokenModel> tokens = new ArrayList<>(state.getActionMap().keySet());
                 Collections.sort(tokens, TokenModel.IndexComparator.INSTANCE);
                 String error = Joiner.on(", ").join(Iterables.transform(tokens, ProductionSymbol.FUNCTION_GET_DESCRIPTIVE_NAME));
-                Integer errorIndex = errorMap.get(error);
-                if (errorIndex == null) {
+                int errorIndex = errorMap.getInt(error);
+                if (errorIndex < 0) {
                     errorIndex = errorMap.size();
                     errorMap.put(error, errorIndex);
                 }
