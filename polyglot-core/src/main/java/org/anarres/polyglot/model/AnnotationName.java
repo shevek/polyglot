@@ -50,7 +50,7 @@ public enum AnnotationName {
     ParserStart(CstProductionModel.class),
     LeftAssociative(CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class),
     RightAssociative(CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class),
-    NonAssociative(CstProductionModel.class, CstAlternativeModel.class),
+    NonAssociative(CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class),
     Precedence(CstProductionModel.class, CstAlternativeModel.class),
     /** Indicates the relative precedence of a reduction. */
     @Deprecated
