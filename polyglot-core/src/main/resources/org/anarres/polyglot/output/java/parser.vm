@@ -193,7 +193,7 @@ public class ${parserMachine.parserClassName} {
 	// Grammar is large, using grouped strategy.
 	/* Performs a reduction. */
 	private void reduce(@Nonnegative int reduction) throws IOException, LexerException, ParserException {
-		switch (reduction >> $helper.alternativeGroupShift) {
+		switch (reduction >>> $helper.alternativeGroupShift) {
 #foreach ($alternativeGroup in $helper.alternativeGroups)
 			case ${alternativeGroup.index}:
 				reduce${alternativeGroup.javaMethodName}(reduction);

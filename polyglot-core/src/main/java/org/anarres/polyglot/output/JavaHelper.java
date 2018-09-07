@@ -20,6 +20,7 @@ import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
+import org.anarres.polyglot.lr.Indexed;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstModel;
@@ -44,7 +45,7 @@ public class JavaHelper extends AbstractHelper {
     private static final int ALTERNATIVE_GROUP_SHIFT = 9;
     private static final int ALTERNATIVE_GROUP_SIZE = 1 << ALTERNATIVE_GROUP_SHIFT;
 
-    public static class AbstractGroup<T> extends ArrayList<T> {
+    public static class AbstractGroup<T extends Indexed> extends ArrayList<T> {
 
         private final int index;
 
@@ -93,6 +94,16 @@ public class JavaHelper extends AbstractHelper {
         @TemplateProperty("parser.vm")
         public List<CstAlternativeModel> getAlternatives() {
             return this;
+        }
+    }
+
+    private static void validateGroups(@Nonnull List<? extends AbstractGroup<? extends Indexed>> groups, @Nonnegative int shift) {
+        for (int i = 0; i < groups.size(); i++) {
+            AbstractGroup<? extends Indexed> group = groups.get(i);
+            Collections.sort(group, Indexed.IndexComparator.INSTANCE);
+            Preconditions.checkState(group.getIndex() == i, "Group has wrong index.");
+            for (Indexed item : group)
+                Preconditions.checkState((item.getIndex() >>> shift) == i, "Item in wrong group");
         }
     }
 
@@ -150,11 +161,12 @@ public class JavaHelper extends AbstractHelper {
     public List<LexerGroup> getLexerGroups() {
         List<LexerGroup> out = new ArrayList<>();
         for (TokenModel token : grammar.tokens.values()) {
-            int groupIndex = token.getIndex() >> LEXER_GROUP_SHIFT;
+            int groupIndex = token.getIndex() >>> LEXER_GROUP_SHIFT;
             while (out.size() <= groupIndex)
                 out.add(new LexerGroup(out.size()));
             out.get(groupIndex).add(token);
         }
+        validateGroups(out, LEXER_GROUP_SHIFT);
         return out;
     }
 
@@ -185,14 +197,13 @@ public class JavaHelper extends AbstractHelper {
         List<CstAlternativeGroup> out = new ArrayList<>();
         for (CstProductionModel production : grammar.getCstProductions()) {
             for (CstAlternativeModel alternative : production.getAlternatives()) {
-                int groupIndex = alternative.getIndex() >> ALTERNATIVE_GROUP_SHIFT;
+                int groupIndex = alternative.getIndex() >>> ALTERNATIVE_GROUP_SHIFT;
                 while (out.size() <= groupIndex)
                     out.add(new CstAlternativeGroup(out.size()));
                 out.get(groupIndex).add(alternative);
             }
         }
-        for (CstAlternativeGroup alternativeGroup : out)
-            Collections.sort(alternativeGroup, CstAlternativeModel.IndexComparator.INSTANCE);
+        validateGroups(out, ALTERNATIVE_GROUP_SHIFT);
         return out;
     }
 

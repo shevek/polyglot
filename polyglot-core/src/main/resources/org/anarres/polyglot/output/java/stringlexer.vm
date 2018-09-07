@@ -65,7 +65,7 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 				int tok_column = start_column + 1;
 				accept_at(accept_offset);
 #if ($helper.isLarge($lexerMachine)) ## lexer-large
-				switch (accept_token >> $helper.lexerGroupShift) {
+				switch (accept_token >>> $helper.lexerGroupShift) {
 #foreach ($lexerGroup in $helper.lexerGroups)
 					case ${lexerGroup.index}:
 						return lex${lexerGroup.javaMethodName}(accept_token, start_offset, current_offset, accept_offset, tok_line, tok_column);
