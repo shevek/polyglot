@@ -18,4 +18,9 @@ public class TokenSet extends MutableIndexedSet<TokenModel> {
     public TokenSet(@Nonnull TokenUniverse universe) {
         super(universe);
     }
+
+    @Override
+    protected boolean isCompatibleObject(Object in) {
+        return in instanceof TokenModel;
+    }
 }
