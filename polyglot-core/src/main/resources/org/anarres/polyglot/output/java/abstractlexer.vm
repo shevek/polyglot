@@ -3,9 +3,6 @@ package ${grammar.package.packageName}.lexer;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.PushbackReader;
-import java.io.Reader;
-import javax.annotation.CheckForNull;
 import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
