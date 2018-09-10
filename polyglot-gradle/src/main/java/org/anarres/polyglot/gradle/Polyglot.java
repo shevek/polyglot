@@ -62,6 +62,8 @@ public class Polyglot extends SourceTask {
 
     @Nonnull
     @OutputDirectory
+    // I don't think this is relevant for output directories.
+    // @PathSensitive(PathSensitivity.RELATIVE)
     public File getOutputDir() {
         return outputDir;
     }
