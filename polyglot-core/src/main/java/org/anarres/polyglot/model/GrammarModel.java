@@ -155,10 +155,15 @@ public class GrammarModel implements GraphVizScope {
         return out;
     }
 
+    @Nonnull
+    public Collection<? extends TokenModel> getTokens() {
+        return tokens.values();
+    }
+
     /** Sorted by index. */
     @Nonnull
     @TemplateProperty("java")
-    public List<TokenModel> getTokens() {
+    public List<TokenModel> getTokensSorted() {
         List<TokenModel> out = new ArrayList<>(tokens.values());
         Collections.sort(out, TokenModel.IndexComparator.INSTANCE);
         return out;
@@ -446,7 +451,7 @@ public class GrammarModel implements GraphVizScope {
         TOKENS:
         {
             List<AToken> tokens = new ArrayList<>();
-            for (TokenModel e : getTokens())
+            for (TokenModel e : getTokensSorted())
                 tokens.add(e.toNode());
             sections.add(new ATokensSection(tokens));
         }

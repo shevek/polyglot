@@ -109,7 +109,7 @@ public class ${lexerMachine.getLexerClassName()} extends ${lexerMachine.getLexer
 				int tok_column = start_column + 1;
 				switch (accept_token) {
 
-#foreach ($token in ${grammar.tokens})
+#foreach ($token in ${grammar.tokensSorted})
 					case ${token.index}: {
 						Token token = new ${token.javaTypeName}(
 #if (!$token.fixed)

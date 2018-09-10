@@ -76,7 +76,7 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 #else##lexer-large
 				switch (accept_token) {
 
-#foreach ($token in ${grammar.tokens})
+#foreach ($token in ${grammar.tokensSorted})
 					case ${token.index}: {
 #if ($helper.isOption("CG_DEBUG"))
 						debug_accept(start_offset, accept_offset, current_offset, ${token.javaTypeName}.class);

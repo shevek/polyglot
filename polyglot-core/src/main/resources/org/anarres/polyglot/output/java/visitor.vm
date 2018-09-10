@@ -17,13 +17,13 @@ import ${grammar.package.packageName}.node.*;
  * @see VisitorAdapter
  */
 public interface Visitor<I, O, X extends Exception> {
-#foreach ($token in $grammar.tokens)
+#foreach ($token in $grammar.tokensAlphabetical)
 	public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X;
 #end
 #foreach ($parserMachine in $parserMachines)
 	public O visit${parserMachine.startClassName}(@Nonnull ${parserMachine.startClassName} node, I input) throws X;
 #end
-#foreach ($production in $grammar.astProductions)
+#foreach ($production in $grammar.astProductionsAlphabetical)
 #foreach ($alternative in $production.alternatives)
 	public O visit${alternative.javaMethodName}(@Nonnull ${alternative.javaTypeName} node, I input) throws X;
 #end

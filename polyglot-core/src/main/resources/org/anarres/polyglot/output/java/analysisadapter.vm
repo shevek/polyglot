@@ -71,7 +71,7 @@ public class AnalysisAdapter implements Analysis {
 	}
 
 #end
-#foreach ($token in $grammar.tokens)
+#foreach ($token in $grammar.tokensAlphabetical)
 	@Override
 	public void case${token.javaMethodName}(@Nonnull ${token.javaTypeName} node) {
 		defaultCase(node);

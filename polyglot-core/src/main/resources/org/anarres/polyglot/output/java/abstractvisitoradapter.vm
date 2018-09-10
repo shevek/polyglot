@@ -60,7 +60,7 @@ public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implemen
 	}
 
 #end
-#foreach ($token in $grammar.tokens)
+#foreach ($token in $grammar.tokensAlphabetical)
 #javadocVisitToken()
 	@Override
 	public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X {
