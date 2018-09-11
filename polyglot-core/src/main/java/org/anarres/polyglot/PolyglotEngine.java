@@ -419,14 +419,24 @@ public class PolyglotEngine {
         }
     }
 
+    /**
+     * This is a no-op if we aren't running in debug mode, because we don't do anything useful with the built functions.
+     *
+     * @param grammar The grammar.
+     * @throws IOException If it goes wrong.
+     */
     protected void buildFunctions(@Nonnull GrammarModel grammar) throws IOException {
         CharSink sink = debugHandler.forTarget(FUNCTIONS, ".functions.txt");
         if (sink != null) {
             try (Writer writer = sink.openBufferedStream()) {
-                FirstFunction firstFunction = new FirstFunction(grammar, IgnoredProductionsSet.EMPTY);
-                for (CstProductionModel production : grammar.cstProductions.values())
-                    writer.write("FIRST " + production.getName() + " -> " + firstFunction.apply(production) + "\n");
                 for (CstProductionModel cstProductionRoot : grammar.getCstProductionRoots()) {
+                    IgnoredProductionsSet ignoredProductions = new IgnoredProductionsSet(grammar, cstProductionRoot);
+                    writer.write("ROOT " + cstProductionRoot);
+
+                    FirstFunction firstFunction = new FirstFunction(grammar, ignoredProductions);
+                    for (CstProductionModel production : grammar.cstProductions.values())
+                        writer.write("FIRST " + production.getName() + " -> " + firstFunction.apply(production) + "\n");
+
                     FollowFunction followFunction = new FollowFunction(grammar, cstProductionRoot, firstFunction);
                     for (CstProductionModel production : grammar.cstProductions.values())
                         writer.write("FOLLOW " + production.getName() + " -> " + followFunction.apply(production) + "\n");

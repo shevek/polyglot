@@ -6,6 +6,7 @@
 package org.anarres.polyglot.lr;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,10 +67,12 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
     }
 
     private final TokenUniverse universe;
+    private final IgnoredProductionsSet ignoredProductions;
     private final Map<CstProductionModel, Result> firstMap = new HashMap<>();
 
     public FirstFunction(@Nonnull TokenUniverse universe, @Nonnull GrammarModel grammar, @Nonnull IgnoredProductionsSet ignoredProductions) {
-        this.universe = universe;
+        this.universe = Preconditions.checkNotNull(universe, "TokenUniverse was null.");
+        this.ignoredProductions = Preconditions.checkNotNull(ignoredProductions, "IgnoredProductionsSet was null.");
         build(grammar, ignoredProductions);
     }
 
@@ -80,6 +83,11 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
     @Nonnull
     public TokenUniverse getUniverse() {
         return universe;
+    }
+
+    @Nonnull
+    public IgnoredProductionsSet getIgnoredProductions() {
+        return ignoredProductions;
     }
 
     // Dragon book page 189.

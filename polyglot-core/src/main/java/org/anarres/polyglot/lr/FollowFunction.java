@@ -74,6 +74,7 @@ public class FollowFunction implements Function<CstProductionModel, Set<TokenMod
                 // LOG.info("Evaluating FOLLOW for " + production.getName() + " -> ... with initial follow " + followSet);
                 ALTERNATIVE:
                 for (CstAlternativeModel alternative : production.alternatives.values()) {
+                    // Walking BACKWARDS, and stop as soon as we know the tail-end of this production cannot result in epsilon.
                     ELEMENT:
                     for (int i = alternative.elements.size() - 1; i >= 0; i--) {
                         CstElementModel element = alternative.elements.get(i);  // B
