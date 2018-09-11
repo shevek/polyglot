@@ -85,13 +85,16 @@ public class FollowFunction implements Function<CstProductionModel, Set<TokenMod
                             break ELEMENT;
                         }
 
+                        // Given that A is the current production, and
+                        // B is the nonterminal element of the current production,, and
+                        // B is followed by a potential epsilon:
                         // Everything in FOLLOW(A) is in FOLLOW(B).
                         if (followMap.get(element.getCstProduction()).addAll(followSet)) {
                             // LOG.info("Modified FOLLOW(" + element.getCstProduction() + ") with " + followSet);
                             modified = true;
                         }
 
-                        // If this production does not contain epsilon
+                        // If this element may not reduce to epsilon
                         if (!firstFunction.isNullable(element.symbol)) {
                             // LOG.info("Breaking from " + alternative + " -> " + alternative.elements + " at " + i + " - no epsilon in " + element.symbol);
                             break ELEMENT;
