@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.model.CstAlternativeModel;
-import org.anarres.polyglot.model.CstProductionSymbol;
 import org.anarres.polyglot.model.TokenModel;
 
 /**
@@ -118,7 +117,11 @@ public class LRConflict {
             buf.append("    ");
             // f.getValue().toStringBuilderWithoutLookahead(buf);
             e.getValue().toStringBuilder(buf);
-            buf.append(" (").append(e.getKey().getAction()).append(")\n");
+            buf.append(" (").append(e.getKey().getAction()).append(")");
+            String precedence = e.getKey().getProductionAlternative().getPrecedence();
+            if (precedence != null)
+                buf.append("(precedence=").append(precedence).append(")");
+            buf.append("\n");
         }
     }
 

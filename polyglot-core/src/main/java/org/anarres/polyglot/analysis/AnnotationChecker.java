@@ -54,6 +54,12 @@ public class AnnotationChecker implements Runnable {
         for (CstProductionModel cstProduction : grammar.getCstProductions()) {
             check(cstProduction);
             for (CstAlternativeModel cstAlternative : cstProduction.getAlternatives()) {
+                String precedence = cstAlternative.getPrecedence();
+                if (precedence != null) {
+                    if (!grammar.precedenceComparator.isLegal(precedence)) {
+                        errors.addError(cstAlternative.getLocation(), "Precedence '" + precedence + "' is not known.");
+                    }
+                }
                 check(cstAlternative);
                 for (CstElementModel cstElement : cstAlternative.getElements()) {
                     check(cstElement);

@@ -18,7 +18,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.lr.Indexed;
-import org.anarres.polyglot.lr.LRAction;
 import org.anarres.polyglot.node.ACstAlternative;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.PExpression;
@@ -236,6 +235,8 @@ public final class CstAlternativeModel extends AbstractNamedModel implements Ind
     @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
+        if (precedence != null)
+            buf.append("@Precedence('").append(precedence).append("') ");
         buf.append(getName()).append(" =");
         for (CstElementModel e : getElements())
             buf.append(' ').append(e);

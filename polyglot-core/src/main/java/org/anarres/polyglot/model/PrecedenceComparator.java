@@ -51,14 +51,21 @@ public class PrecedenceComparator {
         }
     }
 
-    private final ObjectSet<Key> data = new ObjectOpenHashSet<>();
+    private final ObjectSet<String> names = new ObjectOpenHashSet<>();
+    private final ObjectSet<Key> order = new ObjectOpenHashSet<>();
 
     public void add(@Nonnull List<String> chain) {
+        names.add(chain.get(0));
         for (int i = 0; i < chain.size() - 1; i++) {
+            names.add(chain.get(i + 1));
             for (int j = i + 1; j < chain.size(); j++) {
-                data.add(new Key(chain.get(i), chain.get(j)));
+                order.add(new Key(chain.get(i), chain.get(j)));
             }
         }
+    }
+
+    public boolean isLegal(@Nonnull String name) {
+        return names.contains(name);
     }
 
     @Nonnull
@@ -69,9 +76,9 @@ public class PrecedenceComparator {
             return Result.INCOMPARABLE;
         if (o1.equals(o2))
             return Result.EQUAL;
-        if (data.contains(new Key(o1, o2)))
+        if (order.contains(new Key(o1, o2)))
             return Result.HIGHER;
-        if (data.contains(new Key(o2, o1)))
+        if (order.contains(new Key(o2, o1)))
             return Result.LOWER;
         return Result.INCOMPARABLE;
     }
