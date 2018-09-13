@@ -6,7 +6,6 @@
 package org.anarres.polyglot.lr;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Table;
@@ -18,9 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import javax.annotation.CheckForNull;
-import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.PrecedenceComparator;
@@ -45,20 +42,6 @@ import org.slf4j.LoggerFactory;
 
     public LRActionMapBuilder(@Nonnull PrecedenceComparator precedenceComparator) {
         this.precedenceComparator = precedenceComparator;
-    }
-
-    /** Negative = lower priority. Positive = higher priority. */
-    @CheckForSigned
-    private int getActionPrecedence(@Nonnull LRItem item) {
-        CstAlternativeModel cstAlternative = item.getProductionAlternative();
-        AnnotationModel annotation = cstAlternative.getAnnotation(AnnotationName.ParserPrecedence);
-        if (annotation == null)
-            return 0;
-        String value = annotation.getValue();
-        // This is grandfathered in.
-        if (Strings.isNullOrEmpty(value))
-            return 1;
-        return Integer.parseInt(value);
     }
 
     // Appel, Modern Compiler Implementation in C, page 73.
