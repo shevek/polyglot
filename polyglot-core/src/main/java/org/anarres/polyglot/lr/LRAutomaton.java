@@ -8,6 +8,7 @@ package org.anarres.polyglot.lr;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
@@ -114,7 +115,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
         LRActionMapBuilder actionBuilder = new LRActionMapBuilder(precedenceComparator);    // NOTTHREADSAFE
         // @GuardedBy("errorMap")
         // Just for unification of identical errors.
-        final Object2IntMap<String> errorMap = new Object2IntOpenHashMap<>();
+        final Object2IntMap<String> errorMap = new Object2IntLinkedOpenHashMap<>();
         errorMap.defaultReturnValue(-1);
 
         for (LRState state : getStates()) {
