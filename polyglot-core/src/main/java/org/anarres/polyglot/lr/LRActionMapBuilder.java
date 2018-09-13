@@ -75,7 +75,9 @@ import org.slf4j.LoggerFactory;
                 break;
             case INCOMPARABLE:
             default:
-                return null;
+                // If we return null here, then a token cannot have associativity if both rules don't have a precedence.
+                // return null;
+                break;
         }
         if (DEBUG)
             LOG.debug("Associativity = " + shiftAction.getItem().getAssociativity());

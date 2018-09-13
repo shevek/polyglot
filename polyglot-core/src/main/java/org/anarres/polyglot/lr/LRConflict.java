@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.model.CstAlternativeModel;
+import org.anarres.polyglot.model.CstElementAssociativity;
 import org.anarres.polyglot.model.TokenModel;
 
 /**
@@ -120,7 +121,10 @@ public class LRConflict {
             buf.append(" (").append(e.getKey().getAction()).append(")");
             String precedence = e.getKey().getProductionAlternative().getPrecedence();
             if (precedence != null)
-                buf.append("(precedence=").append(precedence).append(")");
+                buf.append(" (precedence=").append(precedence).append(")");
+            CstElementAssociativity associativity = e.getKey().getItem().getAssociativity();
+            if (associativity != null)
+                buf.append(" (associativity=").append(associativity).append(")");
             buf.append("\n");
         }
     }
