@@ -35,5 +35,6 @@ public enum OutputLanguage {
                 }
             };
 
+    @Nonnull
     public abstract OutputWriter newOutputWriter(@Nonnull ErrorHandler errors, @Nonnull File destinationDir, @Nonnull Map<? extends String, ? extends File> templates, @Nonnull OutputData data);
 }

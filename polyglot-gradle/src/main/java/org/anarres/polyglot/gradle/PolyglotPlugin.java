@@ -107,6 +107,7 @@ public class PolyglotPlugin implements Plugin<Project> {
 
             @Override
             public void execute(VelocityTask task) {
+                task.setDescription("Pre-processes Polyglot grammar files using Velocity.");
 
                 task.conventionMapping("includeDirs", new Callable<List<File>>() {
                     @Override
@@ -136,7 +137,7 @@ public class PolyglotPlugin implements Plugin<Project> {
             @Override
             public void execute(Polyglot task) {
                 task.dependsOn(polyglotGrammarTask);
-                task.setDescription("Preprocesses Polyglot grammar files.");
+                task.setDescription("Builds Polyglot code from grammar files.");
 
                 task.conventionMapping("debugDir", new Callable<File>() {
                     @Override
