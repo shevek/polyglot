@@ -7,6 +7,7 @@ package org.anarres.polyglot.analysis;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -22,6 +23,7 @@ import org.anarres.polyglot.lr.LRAction;
 import org.anarres.polyglot.lr.LRConflict;
 import org.anarres.polyglot.lr.LRItem;
 import org.anarres.polyglot.lr.LRState;
+import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.CstAlternativeModel;
 import org.anarres.polyglot.model.CstElementModel;
@@ -81,7 +83,9 @@ public class Inliner {
             LOG.debug("Inlining " + haystackAlternative.getName() + " <- " + replacementAlternative.getName());
 
         String name = haystackAlternative.getSourceName() + "$inl_" + (grammar.inlineIndex++) + "_" + needleElement.getSourceName();
-        CstAlternativeModel out = CstAlternativeModel.forName(grammar.cstAlternativeIndex++, haystackAlternative.getProduction(), new TIdentifier(name, haystackAlternative.getLocation()));
+        Multimap<String, AnnotationModel> annotations = HashMultimap.<String, AnnotationModel>create(haystackAlternative.getAnnotations());
+        annotations.removeAll(AnnotationName.Inline.name());
+        CstAlternativeModel out = CstAlternativeModel.forName(grammar.cstAlternativeIndex++, haystackAlternative.getProduction(), new TIdentifier(name, haystackAlternative.getLocation()), annotations);
         ExpressionSubstituteVisitor.SubstitutionMap elementSubstitutions = new ExpressionSubstituteVisitor.SubstitutionMap();
         for (CstElementModel haystackElement : haystackAlternative.getElements()) {
             if (haystackElement == needleElement) {
