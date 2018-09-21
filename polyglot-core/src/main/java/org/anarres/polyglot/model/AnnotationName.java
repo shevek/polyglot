@@ -48,9 +48,18 @@ public enum AnnotationName {
     ParserExclude(TokenModel.class, CstProductionModel.class, CstAlternativeModel.class),
     /** Indicates that this is the start production for a Parser. */
     ParserStart(CstProductionModel.class),
+    /** Equivalent to OnConflictReduce. */
     LeftAssociative(CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class),
+    /** Equivalent to OnConflictShift. */
     RightAssociative(CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class),
+    /** Equivalent to OnConflictReject. */
     NonAssociative(CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class),
+    /** Equivalent to LeftAssociative. */
+    OnConflictReduce(CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class),
+    /** Equivalent to RightAssociative. */
+    OnConflictShift(CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class),
+    /** Equivalent to NonAssociative. */
+    OnConflictReject(CstProductionModel.class, CstAlternativeModel.class, CstElementModel.class),
     Precedence(CstProductionModel.class, CstAlternativeModel.class),
     /** Indicates the relative precedence of a reduction. */
     @Deprecated

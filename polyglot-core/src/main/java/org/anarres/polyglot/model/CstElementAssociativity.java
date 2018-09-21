@@ -16,11 +16,11 @@ public enum CstElementAssociativity {
 
     @Nonnull
     public static CstElementAssociativity forModel(@Nonnull AnnotatedModel model) {
-        if (model.hasAnnotation(AnnotationName.LeftAssociative))
+        if (model.hasAnnotation(AnnotationName.LeftAssociative) || model.hasAnnotation(AnnotationName.OnConflictReduce))
             return CstElementAssociativity.LEFT;
-        else if (model.hasAnnotation(AnnotationName.RightAssociative))
+        else if (model.hasAnnotation(AnnotationName.RightAssociative) || model.hasAnnotation(AnnotationName.OnConflictShift))
             return CstElementAssociativity.RIGHT;
-        else if (model.hasAnnotation(AnnotationName.NonAssociative))
+        else if (model.hasAnnotation(AnnotationName.NonAssociative) || model.hasAnnotation(AnnotationName.OnConflictReject))
             return CstElementAssociativity.NONE;
         else
             return CstElementAssociativity.UNSPECIFIED;
