@@ -1,0 +1,45 @@
+Package org.anarres.polyglot.test.precedence.illegal;
+
+Tokens
+
+	tok_a = 'a' ;
+	tok_lpar = '(' ;
+	tok_rpar = ')' ;
+	tok_add = '+' ;
+	tok_sub = '-' ;
+	tok_mul = '*' ;
+	tok_div = '/' ;
+
+Precedences
+
+	mul > add > atom;
+
+Productions
+
+	root =
+		expression
+			{ -> New root(expression) } ;
+
+	expression =
+		{identifier} tok_a { -> New expression.identifier(tok_a) } |
+		{parens} tok_lpar expression tok_rpar { -> expression } |
+		@Precedence('foo')
+		{add} [l]:expression @LeftAssociative tok_add [r]:expression { -> New expression.add(l, r) } |
+		@Precedence('add')
+		{sub} [l]:expression @LeftAssociative tok_sub [r]:expression { -> New expression.sub(l, r) } |
+		@Precedence('mul')
+		{mul} [l]:expression @LeftAssociative tok_mul [r]:expression { -> New expression.mul(l, r) } |
+		@Precedence('mul')
+		{div} [l]:expression @LeftAssociative tok_div [r]:expression { -> New expression.div(l, r) } ;
+
+Abstract Syntax Tree
+
+	root = expression ;
+
+	expression =
+		{identifier} tok_a |
+		{add} [l]:expression [r]:expression |
+		{sub} [l]:expression [r]:expression |
+		{mul} [l]:expression [r]:expression |
+		{div} [l]:expression [r]:expression ;
+
