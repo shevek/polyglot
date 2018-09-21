@@ -87,7 +87,8 @@ project(':polyglot-core') {
 		compile 'org.anarres.graphviz:graphviz-builder:1.0.3'
 		compile 'org.anarres.jdiagnostics:jdiagnostics:1.0.2'
 		// compile 'com.googlecode.javaewah:JavaEWAH:1.1.2'	// Slower than BitSet.
-		compile 'it.unimi.dsi:fastutil:7.0.10'
+		// compile 'it.unimi.dsi:fastutil:7.0.10'
+		compile 'it.unimi.dsi:fastutil:8.2.1'
 
 		compile "org.apache.velocity:velocity:1.7"
 		compile "org.apache.velocity:velocity-tools:2.0"
