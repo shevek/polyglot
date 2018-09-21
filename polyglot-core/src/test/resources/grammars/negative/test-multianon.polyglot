@@ -1,0 +1,10 @@
+Package foo;
+
+Tokens
+	tok_a = 'a' ;
+
+Abstract Syntax Tree
+	foo =
+		tok_a |
+		tok_a ;
+		

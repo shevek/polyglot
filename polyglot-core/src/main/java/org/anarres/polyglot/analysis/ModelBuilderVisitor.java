@@ -4,7 +4,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -325,7 +324,12 @@ public class ModelBuilderVisitor extends DepthFirstAdapter {
         if (!grammar.addAstProduction(astProduction))
             errors.addError(astProduction.getLocation(), "Duplicate AST production name '" + astProduction.getName() + "'");
 
+        boolean astRequireNames = node.getAlternatives().size() > 1;
         for (PAstAlternative alternative : node.getAlternatives()) {
+            if (astRequireNames && ((AAstAlternative) alternative).getName() == null) {
+                errors.addError(astProduction.getLocation(), "AST production has multiple alternatives, but at least one is anonymous.");
+                astRequireNames = false;
+            }
             alternative.apply(this);
         }
         setOut(node, astProduction);
