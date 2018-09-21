@@ -6,22 +6,67 @@
 package org.anarres.polyglot;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.Assert.*;
 
 /**
  *
  * @author shevek
  */
+@RunWith(Parameterized.class)
 public class PolyglotOptionsTest extends AbstractPolyglotTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(PolyglotOptionsTest.class);
     public static final String FILE = "build/resources/test/grammars/positive/test-calculator.polyglot";
+
+    private static void add(@Nonnull List<Object[]> out, @Nonnull Set<Option> options) {
+        out.add(new Object[]{options});
+    }
+
+    private static void add(@Nonnull List<Object[]> out, @Nonnull Option... options) {
+        EnumSet<Option> set = EnumSet.noneOf(Option.class);
+        set.addAll(Arrays.asList(options));
+        add(out, set);
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static List<Object[]> data() {
+        List<Object[]> out = new ArrayList<>();
+
+        add(out, EnumSet.of(Option.LR1, Option.CG_INLINE_TABLES, Option.PARALLEL));
+        add(out, EnumSet.of(Option.LR1, Option.CG_PARENT, Option.PARALLEL));
+        add(out, EnumSet.of(Option.LR1, Option.CG_APIDOC, Option.PARALLEL));
+        add(out, EnumSet.of(Option.LR1, Option.CG_FINDBUGS, Option.PARALLEL));
+        add(out, EnumSet.of(Option.LR1, Option.CG_COMMENT, Option.PARALLEL));
+        add(out, EnumSet.of(Option.LR1, Option.CG_JSR305, Option.PARALLEL));
+        add(out, EnumSet.of(Option.LR1, Option.CG_JSR305_INTERNAL, Option.PARALLEL));
+        add(out, EnumSet.of(Option.LR1, Option.CG_COMPACT, Option.PARALLEL));
+        add(out, EnumSet.of(Option.LR1, Option.CG_COMPACT, Option.INLINE_EXPLICIT));
+        add(out, EnumSet.of(Option.LR1, Option.PARALLEL));
+        add(out, EnumSet.of(Option.LR1, Option.CG_LEXER_BINARYSEARCH));
+        add(out, EnumSet.of(Option.LR1, Option.CG_LEXER_LINEARSEARCH));
+        add(out, EnumSet.of(Option.LR1, Option.CG_LARGE, Option.CG_DEBUG));
+        add(out, EnumSet.of(Option.LR1, Option.CG_LISTREFS_MUTABLE));
+        // Fairly representative.
+        add(out, EnumSet.of(Option.LR1, Option.CG_PARENT, Option.CG_JSR305, Option.CG_FINDBUGS, Option.CG_APIDOC));
+
+        return out;
+    }
+
+    private final Set<Option> options;
+
+    public PolyglotOptionsTest(Set<Option> options) {
+        this.options = options;
+    }
 
     private void parse(@Nonnull File file, Set<Option> options) throws Exception {
         // File dst = new File("build/test/velocity/" + file.getName());
@@ -38,25 +83,7 @@ public class PolyglotOptionsTest extends AbstractPolyglotTest {
     }
 
     @Test
-    public void testExperiments() throws Exception {
-        File file = new File(FILE);
-        LOG.info("File is " + file);
-
-        assertTrue(file.isFile());
-        parse(file, EnumSet.of(Option.LR1, Option.CG_INLINE_TABLES, Option.PARALLEL));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_PARENT, Option.PARALLEL));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_APIDOC, Option.PARALLEL));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_FINDBUGS, Option.PARALLEL));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_COMMENT, Option.PARALLEL));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_JSR305, Option.PARALLEL));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_JSR305_INTERNAL, Option.PARALLEL));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_COMPACT, Option.PARALLEL));
-        parse(file, EnumSet.of(Option.LR1, Option.PARALLEL));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_LEXER_BINARYSEARCH));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_LEXER_LINEARSEARCH));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_LARGE, Option.CG_DEBUG));
-        parse(file, EnumSet.of(Option.LR1, Option.CG_LISTREFS_MUTABLE));
-        // Fairly representative.
-        parse(file, EnumSet.of(Option.LR1, Option.CG_PARENT, Option.CG_JSR305, Option.CG_FINDBUGS, Option.CG_APIDOC));
+    public void testOptions() throws Exception {
+        parse(new File(FILE), options);
     }
 }
