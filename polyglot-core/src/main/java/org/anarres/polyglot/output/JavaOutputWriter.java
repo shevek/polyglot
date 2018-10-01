@@ -6,8 +6,10 @@
 package org.anarres.polyglot.output;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -90,7 +92,9 @@ public class JavaOutputWriter extends AbstractOutputWriter {
         ImmutableMap<String, Object> context = newGlobalContext(grammar);
         PackageDirectoryMapper p = new PackageDirectoryMapper(grammar);
 
-        processTemplates(executor, templates, context);
+        for (Map.Entry<? extends String, ? extends File> e : templates.entrySet()) {
+            processSource(executor, Files.asCharSource(e.getValue(), StandardCharsets.UTF_8), p.map(e.getKey()), context, ImmutableMap.<String, Object>of());
+        }
 
         // Parser
         processResource(executor, "parserexception.vm", p.map("parser/ParserException.java"), context);
