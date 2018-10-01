@@ -62,6 +62,7 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         setProperty(engine, VelocityEngine.EVENTHANDLER_INVALIDREFERENCES, ReportInvalidReferences.class.getName());
         setProperty(engine, VelocityEngine.RUNTIME_REFERENCES_STRICT, true);
         // setProperty(engine, VelocityEngine.FILE_RESOURCE_LOADER_PATH, includeBuf.toString());
+        engine.init();
         return engine;
     }
 
@@ -70,7 +71,6 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     private final String grammarName;
     private final File destinationDir;
     private final Set<? extends Option> options;
-    private final VelocityEngine engine = newVelocityEngine();
     private final EscapeTool escapeTool = new EscapeTool();
 
     public AbstractOutputWriter(
@@ -132,6 +132,8 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     }
 
     protected void processSync(@Nonnull CharSource source, @Nonnull String dstFilePath, @Nonnull Map<? extends String, ? extends Object> contextValuesGlobal, @Nonnull Map<? extends String, ? extends Object> contextValuesLocal) throws IOException {
+        // We'd love to share here, but it seems to cause all sorts of issues.
+        VelocityEngine engine = newVelocityEngine();
         VelocityContext context = new VelocityContext() {
             /** The superclass calls key.intern(). */
             @Override
@@ -158,6 +160,10 @@ public abstract class AbstractOutputWriter implements OutputWriter {
             // try (Writer writer = sink.openBufferedStream()) {
             engine.evaluate(context, writer, dstFilePath, reader);
             // }
+        } catch (RuntimeException e) {
+            // e.g. Velocity throwing a ConcurrentModificationException?
+            // at org.apache.velocity.runtime.directive.Foreach.render(Foreach.java:393)
+            throw new IOException(getClass().getName() + " failed to process " + source + " -> " + dstFile + " with contextValuesGlobal=" + contextValuesGlobal + ", contextValuesLocal=" + contextValuesLocal + ": " + e, e);
         }
         // This trick lets us do the write in a single IOP.
         CharSink sink = Files.asCharSink(dstFile, Charsets.UTF_8);

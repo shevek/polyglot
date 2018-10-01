@@ -597,11 +597,13 @@ public class PolyglotEngine {
                 callback.run(writer);
             }
         } finally {
-            if (isOption(Option.AWAIT)) {
-                executor.await();
-                LOG.info("{}: Writing {} took {}", getName(), callback, stopwatch);
-            }
+            // If we don't always AWAIT, we can get a ConcurrentModificationException from Velocity.
+            // I'm not sure on what data structure, though.
+            // if (isOption(Option.AWAIT)) {
+            executor.await();
+            // }
         }
+        LOG.info("{}: Writing {} took {}", getName(), callback, stopwatch);
     }
 
     /**
