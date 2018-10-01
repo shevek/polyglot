@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.test.calculator;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +18,16 @@ public class CalculatorInterpreterTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CalculatorInterpreterTest.class);
 
-    public void testCalculator(String text) throws Exception {
-        LOG.info(text + " = " + CalculatorInterpreter.evaluate(text));
+    public void testCalculator(int expect, String text) throws Exception {
+        Integer actual = CalculatorInterpreter.evaluate(text);
+        LOG.info(text + " = " + actual);
+        Assert.assertEquals(expect, actual.intValue());
     }
 
     @Test
     public void testCalculator() throws Exception {
-        testCalculator("1 + 45");
-        testCalculator("1 + 2 * 3");
+        testCalculator(46, "1 + 45");
+        testCalculator(7, "1 + 2 * 3");
     }
 
 }

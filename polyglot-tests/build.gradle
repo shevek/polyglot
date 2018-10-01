@@ -1,10 +1,27 @@
-dependencies {
-	compile project(':polyglot-runtime')
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		jcenter()
+	}
+
+	dependencies {
+		classpath 'org.anarres.gradle:gradle-stdproject-plugin:1.0.8'
+		classpath 'org.anarres.polyglot:polyglot-gradle:1.0.4-SNAPSHOT'
+	}
 }
 
-sourceSets.main.java.srcDir 'build/generated-sources/polyglot-java'
-processResources {
-	from ('build/generated-sources/polyglot-java') {
-		include '**/*.dat'
-	}
+apply plugin: 'org.anarres.stdproject'
+apply plugin: 'org.anarres.stdmodule'
+apply plugin: 'org.anarres.polyglot'
+
+dependencies {
+	compile "com.google.code.findbugs:annotations:3.0.1"
+	compile "com.google.guava:guava:23.6-jre"
+	compile "org.slf4j:slf4j-api:1.7.25"
+	runtime 'ch.qos.logback:logback-classic:1.2.3'
+}
+
+animalsniffer {
+	skip = true;
 }
