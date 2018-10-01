@@ -1,0 +1,297 @@
+/* ${header} */
+package ${package}.analysis;
+
+## GRAMMAR:
+
+## Tokens:
+## @stringifyFormat on a token controls the token, else it uses @Text or fixed-ness.
+## Format string is %{element} or %% or constants
+## Tokens will use the Text annotation if no stringifyFormat, else will use their literal text.
+
+## Production rules:
+## The StringifyVisitor created will be based on the first alternative encountered, which has the proper annotation.
+
+## Alternatives:
+## @stringifyFormat on either production or alternative controls the stringification of the alternative(s).
+## It must be present, or all other annotations are ignored.
+
+## Element:
+## An element may have @stringifyPrefix, @stringifySeparator and/or @stringifySuffix
+## These element stringify rules are only applied if the element is present. (e.g. "@stringifyPrefix('DISTINCT') kw_distinct?" will only be applied if the kw_distinct element is present. )
+
+## Incorporating Element rules:
+## An parent must have a @stringifyFormat rule, in order for the element rule to be recognized. For example:
+##	@stringifyFormat('DELETE %{from}%{where}')
+##	delete =
+##		[keyword]:kw_delete
+##		[from]:from_item
+##		@stringifyPrefix(' WHERE ')[where]:expression? ;
+
+## @stringifyDefault on list elements which may be empty, or nullables
+
+## Compute whether we have any abstract methods.
+#set($abstract = '')
+#foreach ($external in $grammar.externals)
+#if ($helper.hasAnnotations($external, 'stringifyAbstract'))
+#set($abstract = 'abstract')
+#end
+#end
+#foreach ($production in $grammar.astProductions)
+#if ($helper.hasAnnotations($production, 'stringifyAbstract'))
+#set($abstract = 'abstract')
+#end##production.isAbstract
+#foreach ($alternative in $production.alternatives)
+#if ($helper.hasAnnotations($alternative, 'stringifyAbstract'))
+#set($abstract = 'abstract')
+#end##alternative.isAbstract
+#foreach ($element in $alternative.elements)
+#if ($helper.hasAnnotation($element, 'stringifyAbstract'))
+#set($abstract = 'abstract')
+#end##element.isAbstract
+#end##element
+#end##alternative
+#end##production
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import java.util.List;
+import org.anarres.polyglot.test.common.IndentedOutput;
+import ${package}.node.*;
+#if ($helper.isOption("CG_FINDBUGS"))
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+#end##CG_FINDBUGS
+
+#set($throws = "java.lang.RuntimeException")
+/**
+ *
+ * @author shevek
+ */
+#if ($helper.isOption("CG_FINDBUGS"))
+@SuppressFBWarnings({"RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"})
+#end##CG_FINDBUGS
+public ${abstract} class StringifyVisitor extends DepthFirstVisitor<IndentedOutput, Void, $throws> {
+
+#if ($abstract.empty)
+	public static final StringifyVisitor INSTANCE = new StringifyVisitor();
+#end
+
+	/** Major, simple entry point. */
+	@Nonnull
+	public IndentedOutput applyTo(@Nonnull Node node) throws $throws {
+		IndentedOutput buf = new IndentedOutput();
+		applyTo(node, buf);
+		return buf;
+	}
+
+	protected Void appendNode(@Nonnull IndentedOutput buf, @Nonnull Node node) throws $throws {
+		return node.apply(this, buf);
+	}
+
+	protected void appendNodeList(@Nonnull IndentedOutput buf, @Nonnull List<? extends Node> nodes) throws $throws {
+		for (Node node : nodes) {
+			appendNode(buf, node);
+		}
+	}
+
+	protected void appendNodeList(@Nonnull IndentedOutput buf, @Nonnull List<? extends Node> nodes, @Nonnull String separator) throws $throws {
+		String s = "";
+		for (Node node : nodes) {
+			buf.append(s);
+			s = separator;
+			appendNode(buf, node);
+		}
+	}
+
+#foreach ($external in $grammar.externals)
+#if ($helper.hasAnnotations($external, 'stringifyAbstract'))
+	/** Abstract method for appending $external. */
+	protected abstract void appendExternal${external.javaMethodName}(@Nonnull IndentedOutput buf, @Nonnull ${external.javaTypeName} value) throws $throws;
+#else##external.isabstract
+	/** Overrideable method for appending $external. */
+	protected void appendExternal${external.javaMethodName}(@Nonnull IndentedOutput buf, @Nonnull ${external.javaTypeName} value) throws $throws {
+		buf.append(String.valueOf(value));
+	}
+#end##external.isabstract
+
+#end##external
+#foreach ($parserMachine in $parserMachines)
+	@Override
+	public Void visit${parserMachine.startClassName}(${parserMachine.startClassName} node, IndentedOutput buf) throws $throws {
+		in${parserMachine.startClassName}(node, buf);
+		applyTo(node.get${parserMachine.astProductionRoot.javaMethodName}(), buf);
+		return out${parserMachine.startClassName}(node, buf);
+	}
+
+#end##parserMachine
+	@Override
+	public Void visitToken(Token node, IndentedOutput buf) throws $throws {
+		buf.appendRaw(node.getText());
+		return null;
+	}
+
+#foreach ($token in $grammar.tokens)
+#if ($helper.hasAnnotations($token, 'stringifyFormat'))
+#set($stringifyFormat = $helper.getAnnotation($token, 'stringifyFormat'))
+	@Override
+	public Void visit${token.javaMethodName}(${token.javaTypeName} node, IndentedOutput buf) throws $throws {
+		buf.append("$stringifyFormat");
+		return null;
+	}
+
+#elseif ($helper.hasAnnotations($token, 'stringifyAbstract'))
+	@Override
+	public abstract Void visit${token.javaMethodName}(${token.javaTypeName} node, IndentedOutput buf) throws $throws;
+
+###elseif ($token.fixed)
+##	@Override
+##	public Void visit${token.javaMethodName}(${token.javaTypeName} node, IndentedOutput buf) throws $throws {
+##		buf.append("$token.javaText");
+##		return null;
+##	}
+##
+#end##has annotation
+#end##token
+
+#macro(stringifyList $token)
+## Compute stringifySeparator
+#set($stringifySeparator = false)
+#if ($helper.hasAnnotation($token.element, 'stringifySeparator'))
+#set($stringifySeparator = $helper.getAnnotationJavaText($token.element, 'stringifySeparator'))
+#end##Compute stringifySeparator
+#if ($stringifySeparator)
+				String separator = "";
+#end##stringifySeparator
+				for (${token.element.javaTypeName} value : list) {
+#if ($stringifySeparator)
+					buf.append(separator);
+					separator = "$stringifySeparator";
+#end##stringifySeparator
+					$stringifyCode
+				}
+#end##macro
+##
+#macro(stringifySubformat $token)
+#if ($helper.hasAnnotation($token.element, 'stringifyPrefix'))
+				buf.append("${helper.getAnnotationJavaText($token.element, 'stringifyPrefix')}");
+#end##stringifyPrefix
+#if ($helper.hasAnnotation($token.element, 'stringifyFormat'))
+#foreach ($token in $helper.lexFormat($token.element, $helper.getAnnotation($token.element, 'stringifyFormat')))
+##		// Token: $token
+#if ($token.isText())
+				buf.append("${token.javaText}");
+#elseif ($token.isIndent())
+				buf.indent($token.getIndent());
+#else##not constant text or indent; must be an element.
+$bodyContent##
+#end##token type
+#end##foreach token
+#else##stringifyFormat
+$bodyContent##
+#end##stringifyFormat
+#if ($helper.hasAnnotation($token.element, 'stringifySuffix'))
+				buf.append("${helper.getAnnotationJavaText($token.element, 'stringifySuffix')}");
+#end##stringifySuffix
+#end##macro
+##
+
+#foreach ($production in $grammar.astProductions)
+#foreach ($alternative in $production.alternatives)
+#foreach ($element in $alternative.elements)
+#if ($helper.hasAnnotation($element, 'stringifyAbstract'))
+#if ($element.list)
+	protected abstract void appendElement${alternative.javaMethodName}_${element.javaMethodName}(@Nonnull IndentedOutput buf, @Nonnull List<? extends ${element.javaTypeName}> nodes) throws $throws;
+#else##element.list
+	protected abstract void appendElement${alternative.javaMethodName}_${element.javaMethodName}(@Nonnull IndentedOutput buf, #if($element.nullable)@CheckForNull#{else}@Nonnull#{end} ${element.javaTypeName} node) throws $throws;
+#end##element.list
+#end##element.isAbstract
+#end##element
+#end##alternative
+#end##production
+
+#foreach ($production in $grammar.astProductions)
+#if ($helper.isOption("CG_COMMENT"))
+	// Production: $production
+#end##CG_COMMENT
+#foreach ($alternative in $production.alternatives)
+#if ($helper.isOption("CG_COMMENT"))
+	// Alternative: $alternative
+#end##CG_COMMENT
+#if ($helper.hasAnnotation($production, 'stringifyAbstract') || $helper.hasAnnotations($alternative, 'stringifyAbstract'))
+	@Override
+	public abstract Void visit${alternative.javaMethodName}(${alternative.javaTypeName} node, IndentedOutput input) throws $throws;
+#else##alternative.abstract
+#set($stringifyFormat = false)
+#if ($helper.hasAnnotations($alternative, 'stringifyFormat'))
+#set($stringifyFormat = $helper.getAnnotation($alternative, 'stringifyFormat'))
+#elseif ($helper.hasAnnotations($production, 'stringifyFormat'))
+#set($stringifyFormat = $helper.getAnnotation($production, 'stringifyFormat'))
+#end##finding stringifyFormat
+#if ($stringifyFormat)
+	@Override
+	public Void visit${alternative.javaMethodName}(${alternative.javaTypeName} node, IndentedOutput buf) throws $throws {
+		in${alternative.javaMethodName}(node, buf);
+
+#if ($helper.isOption("CG_COMMENT"))
+		// Format: $stringifyFormat
+#end##CG_COMMENT
+#foreach ($token in $helper.lexFormat($alternative, $stringifyFormat))
+##		// Token: $token
+#if ($token.isText())
+		buf.append("${token.javaText}");
+#elseif ($token.isIndent())
+		buf.indent($token.getIndent());
+#else##not constant text or indent; must be an element.
+##===== Element start
+#if ($helper.isOption("CG_COMMENT"))
+		// Element $token.element
+#end##CG_COMMENT
+#if ($helper.hasAnnotation($token.element, 'stringifyAbstract'))
+		appendElement${alternative.javaMethodName}_${token.element.javaMethodName}(buf, node.get${token.element.javaMethodName}());
+#else##token.element is stringifyAbstract
+#set($stringifyCode = "appendNode(buf, value);")
+#if ($token.element.isExternal())
+#set($stringifyCode = "appendExternal${token.element.external.javaMethodName}(buf, value);")
+#end##Compute stringifyCode
+		{
+#if ($token.element.list)
+			List<? extends ${token.element.javaTypeName}> list = node.get${token.element.javaMethodName}();
+## If this is an external, then a null is a possibility.
+			if (list != null && !list.isEmpty()) {
+#@stringifySubformat($token)
+#stringifyList($token)
+#end##stringifySubformat
+			}
+#else##not token.element.list
+			${token.element.javaTypeName} value = node.get${token.element.javaMethodName}();
+#if ($token.element.isJavaTypePrimitive())
+			{
+#else##isJavaTypePrimitive
+			if (value != null) {
+#end##isJavaTypePrimitive
+#@stringifySubformat($token)
+				$stringifyCode
+#end##stringifySubformat
+			}
+#end##token.element.list
+#if ($helper.hasAnnotation($token.element, 'stringifyDefault'))
+## This else trails on either the single or the list case above,
+			else {
+				buf.append("${helper.getAnnotation($token.element, 'stringifyDefault')}");
+			}
+#end##stringifyDefault
+		}
+##===== Element end
+#end##token.element is stringifyAbstract
+#end##token.text
+#end##token
+
+		return out${alternative.javaMethodName}(node, buf);
+	}
+#end##alternative is stringifyAbstract
+
+#end##stringifyFormat exists
+#end##alternative
+#end##production
+
+}
+
