@@ -157,6 +157,7 @@ public class ImmutableIndexedSet<IndexedItem extends Indexed> extends AbstractIn
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
         int size = size();
         T[] out = a.length >= size

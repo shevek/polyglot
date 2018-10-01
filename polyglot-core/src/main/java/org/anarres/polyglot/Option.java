@@ -59,4 +59,6 @@ public enum Option {
     ALLOWMASKEDTOKENS,
     /** Perform advanced diagnosis (not yet reliable). */
     DIAGNOSIS,
+    /** Always await individual asynchronous operation sets - without this, timings may be unreliable. */
+    AWAIT,
 }

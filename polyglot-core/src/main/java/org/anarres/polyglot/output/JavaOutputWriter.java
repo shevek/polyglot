@@ -8,17 +8,20 @@ package org.anarres.polyglot.output;
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
+import org.anarres.polyglot.Option;
 import org.anarres.polyglot.PolyglotExecutor;
+import org.anarres.polyglot.analysis.StartChecker;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstProductionModel;
+import org.anarres.polyglot.model.CstProductionModel;
 import org.anarres.polyglot.model.GrammarModel;
 import org.anarres.polyglot.model.TokenModel;
-import org.apache.velocity.VelocityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,108 +32,121 @@ import org.slf4j.LoggerFactory;
 public class JavaOutputWriter extends AbstractOutputWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(JavaOutputWriter.class);
-    private final JavaHelper helper;
 
-    public JavaOutputWriter(
-            @Nonnull ErrorHandler errors,
-            @Nonnull File destinationDir,
-            @Nonnull Map<? extends String, ? extends File> templates,
-            @Nonnull OutputData outputData) {
-        super(errors, OutputLanguage.java, destinationDir, templates, outputData);
-        this.helper = new JavaHelper(outputData.getOptions(), outputData.getGrammar());
-    }
+    /** Syntactic sugar. */
+    private static class PackageDirectoryMapper {
 
-    @Override
-    protected File newDestinationFile(@Nonnull String dstFilePath) throws IOException {
-        File dstRoot = new File(getDestinationDir(), getGrammar().getPackage().getPackagePath());
-        File dstFile = new File(dstRoot, dstFilePath);
-        // Reconstruct this as dstFilePath may contain a slash.
-        return newDestinationFile(dstFile);
-    }
+        private final String packagePath;
 
-    @Override
-    protected void initContext(@Nonnull VelocityContext context) {
-        super.initContext(context);
-        context.put("helper", helper);
-    }
-
-    @Override
-    public void run(@Nonnull PolyglotExecutor executor) throws InterruptedException, ExecutionException, IOException {
-        GrammarModel grammar = getGrammar();
-
-        // Kick this off first, as it's the long pole.
-        // Parser
-        // if (!parserTables.isEmpty())
-        process(executor, "parserexception.vm", "parser/ParserException.java");
-        List<? extends EncodedStateMachine.Parser> parserMachines = getOutputData().getParserMachines();
-        for (EncodedStateMachine.Parser parserMachine : parserMachines) {
-            Map<String, Object> contextValues = ImmutableMap.<String, Object>of("parserMachine", parserMachine);
-            // LRAutomaton automaton = parserMachine.getAutomaton();
-            process(executor, "parser.vm", "parser/" + parserMachine.getParserClassName() + ".java", contextValues);
-            process(executor, "start.vm", "node/" + parserMachine.getStartClassName() + ".java", contextValues);
-            write(executor, parserMachine.getEncodedData(), "parser/" + parserMachine.getParserClassName() + ".dat");
+        public PackageDirectoryMapper(@Nonnull GrammarModel grammar) {
+            this.packagePath = grammar.getPackage().getPackagePath();
         }
 
-        processTemplates(executor);
+        @Nonnull
+        public String map(String input) {
+            return packagePath + File.separator + input;
+        }
+    }
+
+    public JavaOutputWriter(ErrorHandler errors, String grammarName, File destinationDir, Set<? extends Option> options) {
+        super(errors, OutputLanguage.java, grammarName, destinationDir, options);
+    }
+
+    @Nonnull
+    private ImmutableMap<String, Object> newGlobalContext(@Nonnull GrammarModel grammar) {
+        Map<String, EncodedStateMachine.LexerMetadata> lexerMachines = new HashMap<>();
+        for (String lexerMachineName : grammar.getLexerMachineNames()) {
+            lexerMachines.put(lexerMachineName, () -> lexerMachineName);
+        }
+
+        Map<String, EncodedStateMachine.ParserMetadata> parserMachines = new HashMap<>();
+        for (final CstProductionModel root : grammar.getCstProductionRoots()) {
+            final String name = StartChecker.getMachineName(root);
+            parserMachines.put(name, new EncodedStateMachine.ParserMetadata() {
+                @Override
+                public String getName() {
+                    return name;
+                }
+
+                @Override
+                public CstProductionModel getCstProductionRoot() {
+                    return root;
+                }
+            });
+        }
+
+        JavaHelper helper = new JavaHelper(getOptions(), grammar);
+        return ImmutableMap.<String, Object>of(
+                "helper", helper,
+                "grammar", grammar,
+                "package", grammar.getPackage().getPackageName(),
+                "lexerMachines", lexerMachines,
+                "parserMachines", parserMachines
+        );
+    }
+
+    @Override
+    public void writeModel(PolyglotExecutor executor, final GrammarModel grammar, Map<? extends String, ? extends File> templates) throws ExecutionException, IOException {
+        ImmutableMap<String, Object> context = newGlobalContext(grammar);
+        PackageDirectoryMapper p = new PackageDirectoryMapper(grammar);
+
+        processTemplates(executor, templates, context);
+
+        // Parser
+        processResource(executor, "parserexception.vm", p.map("parser/ParserException.java"), context);
 
         // Lexer
-        process(executor, "ilexer.vm", "lexer/ILexer.java");
-        process(executor, "lexerexception.vm", "lexer/LexerException.java");
-        List<? extends EncodedStateMachine.Lexer> lexerMachines = getOutputData().getLexerMachines();
-        for (EncodedStateMachine.Lexer lexerMachine : lexerMachines) {
-            Map<String, Object> contextValues = ImmutableMap.<String, Object>of("lexerMachine", lexerMachine);
-            process(executor, "abstractlexer.vm", "lexer/" + lexerMachine.getLexerClassName("Abstract", "") + ".java", contextValues);
-            process(executor, "lexer.vm", "lexer/" + lexerMachine.getLexerClassName() + ".java", contextValues);
-            process(executor, "stringlexer.vm", "lexer/" + lexerMachine.getLexerClassName("", "String") + ".java", contextValues);
-            write(executor, lexerMachine.getEncodedData(), "lexer/" + lexerMachine.getLexerClassName() + ".dat");
-        }
+        processResource(executor, "ilexer.vm", p.map("lexer/ILexer.java"), context);
+        processResource(executor, "lexerexception.vm", p.map("lexer/LexerException.java"), context);
+        // if (grammar.isLrk())
+        // processResource(executor, "lookaheadlexer.vm", p.apply("lexer/LookaheadLexer.java"), context);
 
         // Nodes and tokens
-        process(executor, "inode.vm", "node/INode.java");
-        process(executor, "node.vm", "node/Node.java");
-        process(executor, "itoken.vm", "node/IToken.java");
-        process(executor, "token.vm", "node/Token.java");
+        processResource(executor, "inode.vm", p.map("node/INode.java"), context);
+        processResource(executor, "node.vm", p.map("node/Node.java"), context);
+        processResource(executor, "itoken.vm", p.map("node/IToken.java"), context);
+        processResource(executor, "token.vm", p.map("node/Token.java"), context);
 
-        process(executor, "token-fixed.vm", "node/EOF.java", ImmutableMap.<String, Object>of("token", TokenModel.EOF.INSTANCE));
-        process(executor, "token-variable.vm", "node/InvalidToken.java", ImmutableMap.<String, Object>of("token", TokenModel.Invalid.INSTANCE));
+        processResource(executor, "token-fixed.vm", p.map("node/EOF.java"), context, ImmutableMap.<String, Object>of("token", TokenModel.EOF.INSTANCE));
+        processResource(executor, "token-variable.vm", p.map("node/InvalidToken.java"), context, ImmutableMap.<String, Object>of("token", TokenModel.Invalid.INSTANCE));
         for (TokenModel token : grammar.tokens.values()) {
             // LOG.info("Generating " + token + " from " + token.isFixed());
             if (token.isFixed())
-                process(executor, "token-fixed.vm", "node/" + token.getJavaTypeName() + ".java", ImmutableMap.<String, Object>of("token", token));
+                processResource(executor, "token-fixed.vm", p.map("node/" + token.getJavaTypeName() + ".java"), context, ImmutableMap.<String, Object>of("token", token));
             else
-                process(executor, "token-variable.vm", "node/" + token.getJavaTypeName() + ".java", ImmutableMap.<String, Object>of("token", token));
+                processResource(executor, "token-variable.vm", p.map("node/" + token.getJavaTypeName() + ".java"), context, ImmutableMap.<String, Object>of("token", token));
         }
 
         // Analyses
-        process(executor, "clonelistener.vm", "node/CloneListener.java");
-        process(executor, "switchable.vm", "node/Switchable.java");
-        process(executor, "switch.vm", "node/Switch.java");
+        processResource(executor, "clonelistener.vm", p.map("node/CloneListener.java"), context);
+        processResource(executor, "switchable.vm", p.map("node/Switchable.java"), context);
+        processResource(executor, "switch.vm", p.map("node/Switch.java"), context);
 
-        process(executor, "visitable.vm", "node/Visitable.java");
-        process(executor, "visitor.vm", "analysis/Visitor.java");
-        process(executor, "abstractvisitoradapter.vm", "analysis/AbstractVisitorAdapter.java");
-        process(executor, "visitoradapter.vm", "analysis/VisitorAdapter.java");
+        processResource(executor, "visitable.vm", p.map("node/Visitable.java"), context);
+        processResource(executor, "visitor.vm", p.map("analysis/Visitor.java"), context);
+        processResource(executor, "abstractvisitoradapter.vm", p.map("analysis/AbstractVisitorAdapter.java"), context);
+        processResource(executor, "visitoradapter.vm", p.map("analysis/VisitorAdapter.java"), context);
 
-        process(executor, "analysis.vm", "analysis/Analysis.java");
-        process(executor, "analysisadapter.vm", "analysis/AnalysisAdapter.java");
+        processResource(executor, "analysis.vm", p.map("analysis/Analysis.java"), context);
+        processResource(executor, "analysisadapter.vm", p.map("analysis/AnalysisAdapter.java"), context);
 
         // It makes little sense to visit a lexer-only grammar depth-first, but
         // there's no reason why we wouldn't emit the degenerate case. It makes
         // things like Locator, ASTPrinter, and so forth work for lexer-only machines.
-        process(executor, "depthfirstadapter.vm", "analysis/DepthFirstAdapter.java");
-        process(executor, "reverseddepthfirstadapter.vm", "analysis/ReversedDepthFirstAdapter.java");
-        process(executor, "treevisitoradapter.vm", "analysis/TreeVisitorAdapter.java");
-        process(executor, "depthfirstvisitor.vm", "analysis/DepthFirstVisitor.java");
+        processResource(executor, "depthfirstadapter.vm", p.map("analysis/DepthFirstAdapter.java"), context);
+        processResource(executor, "reverseddepthfirstadapter.vm", p.map("analysis/ReversedDepthFirstAdapter.java"), context);
+        processResource(executor, "treevisitoradapter.vm", p.map("analysis/TreeVisitorAdapter.java"), context);
+        processResource(executor, "depthfirstvisitor.vm", p.map("analysis/DepthFirstVisitor.java"), context);
 
         if (!grammar.astProductions.isEmpty()) {
 
-            // process(executor, "reverseddepthfirstadapter.vm", "analysis/ReversedDepthFirstAdapter.java");
-            process(executor, "iproduction.vm", "node/IProduction.java");
-            process(executor, "ialternative.vm", "node/IAlternative.java");
+            // processResource(executor, "reverseddepthfirstadapter.vm", "analysis/ReversedDepthFirstAdapter.java"), context);
+            processResource(executor, "iproduction.vm", p.map("node/IProduction.java"), context);
+            processResource(executor, "ialternative.vm", p.map("node/IAlternative.java"), context);
             for (AstProductionModel production : grammar.astProductions.values()) {
-                process(executor, "production.vm", "node/" + production.getJavaTypeName() + ".java", ImmutableMap.<String, Object>of("production", production));
+                processResource(executor, "production.vm", p.map("node/" + production.getJavaTypeName() + ".java"), context, ImmutableMap.<String, Object>of("production", production));
                 for (AstAlternativeModel alternative : production.alternatives.values()) {
-                    process(executor, "alternative.vm", "node/" + alternative.getJavaTypeName() + ".java", ImmutableMap.<String, Object>of("production", production, "alternative", alternative));
+                    processResource(executor, "alternative.vm", p.map("node/" + alternative.getJavaTypeName() + ".java"), context, ImmutableMap.<String, Object>of("production", production, "alternative", alternative));
                 }
             }
         }
@@ -138,10 +154,32 @@ public class JavaOutputWriter extends AbstractOutputWriter {
         // Documentation
         String packageJavadoc = grammar.getPackage().getJavadocComment();
         if (packageJavadoc != null)
-            process(executor, "package-info.vm", "package-info.java", ImmutableMap.<String, Object>of("subpackage", "", "javadoc", packageJavadoc));
-        process(executor, "package-info.vm", "node/package-info.java", ImmutableMap.<String, Object>of("subpackage", ".node", "javadoc", "/** Autogenerated abstract syntax tree model classes. */"));
-        process(executor, "package-info.vm", "analysis/package-info.java", ImmutableMap.<String, Object>of("subpackage", ".analysis", "javadoc", "/** Autogenerated abstract syntax tree analysis and visitor classes. */"));
-        process(executor, "package-info.vm", "parser/package-info.java", ImmutableMap.<String, Object>of("subpackage", ".parser", "javadoc", "/** Autogenerated parser classes. */"));
-        process(executor, "package-info.vm", "lexer/package-info.java", ImmutableMap.<String, Object>of("subpackage", ".lexer", "javadoc", "/** Autogenerated lexer classes. */"));
+            processResource(executor, "package-info.vm", p.map("package-info.java"), context, ImmutableMap.<String, Object>of("subpackage", "", "javadoc", packageJavadoc));
+        processResource(executor, "package-info.vm", p.map("node/package-info.java"), context, ImmutableMap.<String, Object>of("subpackage", ".node", "javadoc", "/** Autogenerated abstract syntax tree model classes. */"));
+        processResource(executor, "package-info.vm", p.map("analysis/package-info.java"), context, ImmutableMap.<String, Object>of("subpackage", ".analysis", "javadoc", "/** Autogenerated abstract syntax tree analysis and visitor classes. */"));
+        processResource(executor, "package-info.vm", p.map("parser/package-info.java"), context, ImmutableMap.<String, Object>of("subpackage", ".parser", "javadoc", "/** Autogenerated parser classes. */"));
+        processResource(executor, "package-info.vm", p.map("lexer/package-info.java"), context, ImmutableMap.<String, Object>of("subpackage", ".lexer", "javadoc", "/** Autogenerated lexer classes. */"));
+    }
+
+    @Override
+    public void writeLexerMachine(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar, @Nonnull EncodedStateMachine.Lexer lexerMachine) throws ExecutionException, IOException {
+        ImmutableMap<String, Object> contextGlobal = newGlobalContext(grammar);
+        ImmutableMap<String, Object> contextLocal = ImmutableMap.<String, Object>of("lexerMachine", lexerMachine);
+        PackageDirectoryMapper p = new PackageDirectoryMapper(grammar);
+        processResource(executor, "abstractlexer.vm", p.map("lexer/" + lexerMachine.getLexerClassName("Abstract", "") + ".java"), contextGlobal, contextLocal);
+        processResource(executor, "lexer.vm", p.map("lexer/" + lexerMachine.getLexerClassName() + ".java"), contextGlobal, contextLocal);
+        processResource(executor, "stringlexer.vm", p.map("lexer/" + lexerMachine.getLexerClassName("", "String") + ".java"), contextGlobal, contextLocal);
+        write(executor, lexerMachine.getEncodedData(), p.map("lexer/" + lexerMachine.getLexerClassName() + ".dat"));
+    }
+
+    @Override
+    public void writeParserMachine(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar, @Nonnull EncodedStateMachine.Parser parserMachine) throws ExecutionException, IOException {
+        ImmutableMap<String, Object> contextGlobal = newGlobalContext(grammar);
+        ImmutableMap<String, Object> contextLocal = ImmutableMap.<String, Object>of("parserMachine", parserMachine);
+        PackageDirectoryMapper p = new PackageDirectoryMapper(grammar);
+        // LRAutomaton automaton = parserMachine.getAutomaton();
+        processResource(executor, "parser.vm", p.map("parser/" + parserMachine.getParserClassName() + ".java"), contextGlobal, contextLocal);
+        processResource(executor, "start.vm", p.map("node/" + parserMachine.getStartClassName() + ".java"), contextGlobal, contextLocal);
+        write(executor, parserMachine.getEncodedData(), p.map("parser/" + parserMachine.getParserClassName() + ".dat"));
     }
 }

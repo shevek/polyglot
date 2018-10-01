@@ -40,9 +40,10 @@ subprojects {
 
 	apply plugin: 'net.ltgt.errorprone'
 
-	sourceCompatibility = 1.7
+	sourceCompatibility = 1.8
 	animalsniffer {
-		signature = "org.codehaus.mojo.signature:java17:+@signature"
+		signature = "org.codehaus.mojo.signature:java18:+@signature"
+		skip = true	// Does not like Java 1.8 or the latest fastutil.
 	}
 
 	findbugs {

@@ -7,8 +7,6 @@ package org.anarres.polyglot;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -23,7 +21,6 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
@@ -66,7 +63,6 @@ import org.anarres.polyglot.lr.IgnoredProductionsSet;
 import org.anarres.polyglot.lr.LRDiagnosis;
 import org.anarres.polyglot.lr.LRState;
 import org.anarres.polyglot.lr.TokenSet;
-import org.anarres.polyglot.model.AnnotationModel;
 import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.AnnotationUtils;
 import org.anarres.polyglot.model.CstProductionModel;
@@ -75,7 +71,6 @@ import org.anarres.polyglot.model.StateModel;
 import org.anarres.polyglot.model.TokenModel;
 import org.anarres.polyglot.node.Start;
 import org.anarres.polyglot.output.EncodedStateMachine;
-import org.anarres.polyglot.output.OutputData;
 import org.anarres.polyglot.output.OutputLanguage;
 import org.anarres.polyglot.output.OutputWriter;
 import org.anarres.polyglot.parser.Parser;
@@ -287,10 +282,10 @@ public class PolyglotEngine {
     }
 
     @Nonnull
-    protected GrammarModel buildModel(@Nonnull PolyglotExecutor executor, @Nonnull Start ast) throws IOException, InterruptedException, ExecutionException {
+    protected GrammarModel buildModel(@Nonnull final PolyglotExecutor executor, @Nonnull List<? extends OutputWriter> writers, @Nonnull Start ast) throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
-        GrammarModel grammar = new GrammarModel();
+        final GrammarModel grammar = new GrammarModel();
         ast.apply(new ModelBuilderVisitor(errors, grammar));
         if (errors.isFatal())
             return grammar;
@@ -304,9 +299,17 @@ public class PolyglotEngine {
         dump(debugHandler.forTarget(GRAMMAR_CST, ".cst.dot"), grammar.getCstGraphVizable());
         dump(debugHandler.forTarget(GRAMMAR_AST, ".ast.dot"), grammar.getAstGraphVizable());
         stopwatch.stop();
-        buildOutputs(executor, grammar,
-                null, Collections.<EncodedStateMachine.Parser>emptyList(),
-                Predicates.equalTo(OutputLanguage.html));
+        buildOutputs(executor, writers, new OutputWriter.Callback() {
+            @Override
+            public void run(OutputWriter writer) throws ExecutionException, IOException {
+                writer.writeModel(executor, grammar, templates.row(writer.getLanguage()));
+            }
+
+            @Override
+            public String toString() {
+                return "model and templates";
+            }
+        });
         stopwatch.start();
 
         // dump("Linked model", grammar);
@@ -431,7 +434,7 @@ public class PolyglotEngine {
             try (Writer writer = sink.openBufferedStream()) {
                 for (CstProductionModel cstProductionRoot : grammar.getCstProductionRoots()) {
                     IgnoredProductionsSet ignoredProductions = new IgnoredProductionsSet(grammar, cstProductionRoot);
-                    writer.write("ROOT " + cstProductionRoot);
+                    writer.write("ROOT " + cstProductionRoot + "\n");
 
                     FirstFunction firstFunction = new FirstFunction(grammar, ignoredProductions);
                     for (CstProductionModel production : grammar.cstProductions.values())
@@ -565,27 +568,33 @@ public class PolyglotEngine {
         }
     }
 
+    @Nonnull
+    protected List<OutputWriter> buildWriters() {
+        List<OutputWriter> writers = new ArrayList<>(outputDirs.size());
+        for (Map.Entry<OutputLanguage, File> e : outputDirs.entrySet()) {
+            OutputWriter writer = e.getKey().newOutputWriter(errors, getName(), e.getValue(), options);
+            writers.add(writer);
+        }
+        return writers;
+    }
+
     protected void buildOutputs(
             @Nonnull PolyglotExecutor executor,
-            @Nonnull GrammarModel grammar,
-            @Nonnull List<EncodedStateMachine.Lexer> lexerMachines,
-            @Nonnull List<? extends EncodedStateMachine.Parser> parserMachines,
-            Predicate<? super OutputLanguage> languages) throws IOException, InterruptedException, ExecutionException {
+            @Nonnull List<? extends OutputWriter> writers,
+            @Nonnull OutputWriter.Callback callback) throws InterruptedException, ExecutionException, IOException {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        LOG.info("{}: Writing output.", getName());
-        OutputData data = new OutputData(getName(), grammar, lexerMachines, parserMachines, options);
+        LOG.info("{}: Writing {}", getName(), callback);
         try {
-            for (Map.Entry<OutputLanguage, File> e : outputDirs.entrySet()) {
-                if (languages.apply(e.getKey())) {
-                    LOG.info("{}: Writing output language {}", getName(), e.getKey());
-                    OutputWriter writer = e.getKey().newOutputWriter(errors, e.getValue(), templates.row(e.getKey()), data);
-                    writer.run(executor);
-                }
+            for (OutputWriter writer : writers) {
+                LOG.info("{}: Writing {} as {}", getName(), callback, writer.getLanguage());
+                callback.run(writer);
             }
         } finally {
-            executor.await();
+            if (isOption(Option.AWAIT)) {
+                executor.await();
+                LOG.info("{}: Writing {} took {}", getName(), callback, stopwatch);
+            }
         }
-        LOG.info("{}: Writing output took {}", getName(), stopwatch);
     }
 
     /**
@@ -602,33 +611,32 @@ public class PolyglotEngine {
     public boolean run() throws IOException, InterruptedException, ExecutionException {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
-        PolyglotExecutor executor = newExecutor();
+        final PolyglotExecutor executor = newExecutor();
         LOG.info("{}: Starting with {} threads and options {}.", getName(), executor.getParallelism(), getOptions());
+        List<OutputWriter> writers = buildWriters();
 
         try {
             Start ast = buildParseTree();
             if (errors.isFatal() || ast == null)
                 return false;
-            GrammarModel grammar = buildModel(executor, ast);
+            GrammarModel grammar = buildModel(executor, writers, ast);
             if (errors.isFatal())
                 return false;
             // dump("Parsed grammar", ast);
-            List<EncodedStateMachine.Lexer> lexerMachines = new ArrayList<>();
             for (String lexerName : grammar.getLexerMachineNames()) {
                 EncodedStateMachine.Lexer lexerMachine = buildLexer(grammar, lexerName);
                 if (errors.isFatal())
                     return false;
-                lexerMachines.add(lexerMachine);
+                buildOutputs(executor, writers, new OutputWriter.Callback.Lexer(executor, grammar, lexerMachine));
+                lexerMachine = null;    // Explicit GC help.
             }
 
             buildFunctions(grammar);
             if (errors.isFatal())
                 return false;
 
-            List<EncodedStateMachine.Parser> parserMachines = new ArrayList<>();
             for (CstProductionModel cstProductionRoot : grammar.getCstProductionRoots()) {
-                AnnotationModel startAnnotation = cstProductionRoot.getAnnotation(AnnotationName.ParserStart);
-                String machineName = startAnnotation == null ? "" : StartChecker.getMachineName(startAnnotation);
+                String machineName = StartChecker.getMachineName(cstProductionRoot);
 
                 LRAutomaton automaton = null;	// Helps the GC.
                 AUTOMATON:
@@ -659,11 +667,11 @@ public class PolyglotEngine {
                     errors.addError(null, "Failed to build an automaton: No more strategies.");
                     return false;
                 }
-                parserMachines.add(EncodedStateMachine.forParser(machineName, grammar, automaton, cstProductionRoot, isOption(Option.CG_INLINE_TABLES)));
+                EncodedStateMachine.Parser parserMachine = EncodedStateMachine.forParser(machineName, grammar, automaton, cstProductionRoot, isOption(Option.CG_INLINE_TABLES));
+                buildOutputs(executor, writers, new OutputWriter.Callback.Parser(executor, grammar, parserMachine));
+                parserMachine = null; // Explicit GC help.
             }
 
-            buildOutputs(executor, grammar, lexerMachines, parserMachines,
-                    Predicates.not(Predicates.equalTo(OutputLanguage.html)));
             if (errors.isFatal())
                 return false;
 

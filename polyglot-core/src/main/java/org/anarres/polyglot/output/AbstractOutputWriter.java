@@ -6,6 +6,7 @@
 package org.anarres.polyglot.output;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharSink;
 import com.google.common.io.CharSource;
@@ -19,20 +20,19 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import org.anarres.polyglot.ErrorHandler;
+import org.anarres.polyglot.Option;
 import org.anarres.polyglot.PolyglotEngine;
 import org.anarres.polyglot.PolyglotExecutor;
-import org.anarres.polyglot.model.GrammarModel;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.app.event.implement.ReportInvalidReferences;
 import org.apache.velocity.exception.ResourceNotFoundException;
-import org.apache.velocity.runtime.log.LogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.tools.generic.EscapeTool;
 import org.slf4j.Logger;
@@ -45,25 +45,45 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractOutputWriter implements OutputWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOutputWriter.class);
+
+    protected static void setProperty(@Nonnull VelocityEngine engine, @Nonnull String name, @Nonnull Object value) {
+        // if (LOG.isDebugEnabled()) LOG.debug("VelocityEngine property: " + name + " = " + value);
+        engine.setProperty(name, value);
+    }
+
+    @Nonnull
+    private static VelocityEngine newVelocityEngine() {
+        VelocityEngine engine = new VelocityEngine();
+        // setProperty(engine, VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS, SystemLogChute.class.getName());
+        setProperty(engine, VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new Slf4jLogChute());
+        setProperty(engine, VelocityEngine.RESOURCE_LOADER, "classpath");
+        setProperty(engine, "classpath.resource.loader.class", Loader.class.getName());  // Needs to be in this JAR file.
+        // setProperty(engine, VelocityEngine.FILE_RESOURCE_LOADER_CACHE, "true");
+        setProperty(engine, VelocityEngine.EVENTHANDLER_INVALIDREFERENCES, ReportInvalidReferences.class.getName());
+        setProperty(engine, VelocityEngine.RUNTIME_REFERENCES_STRICT, true);
+        // setProperty(engine, VelocityEngine.FILE_RESOURCE_LOADER_PATH, includeBuf.toString());
+        return engine;
+    }
+
     private final OutputLanguage language;
     private final ErrorHandler errors;
+    private final String grammarName;
     private final File destinationDir;
-    private final Map<? extends String, ? extends File> templates;
-    private final OutputData outputData;
-    private final LogChute logChute = new Slf4jLogChute();
+    private final Set<? extends Option> options;
+    private final VelocityEngine engine = newVelocityEngine();
     private final EscapeTool escapeTool = new EscapeTool();
 
     public AbstractOutputWriter(
             @Nonnull ErrorHandler errors,
             @Nonnull OutputLanguage language,
+            @Nonnull String grammarName,
             @Nonnull File destinationDir,
-            @Nonnull Map<? extends String, ? extends File> templates,
-            @Nonnull OutputData outputData) {
-        this.errors = errors;
-        this.language = language;
-        this.destinationDir = destinationDir;
-        this.templates = templates;
-        this.outputData = outputData;
+            @Nonnull Set<? extends Option> options) {
+        this.errors = Preconditions.checkNotNull(errors, "ErrorHandler was null.");
+        this.language = Preconditions.checkNotNull(language, "OutputLanguage was null.");
+        this.grammarName = Preconditions.checkNotNull(grammarName, "Grammar name was null.");
+        this.destinationDir = Preconditions.checkNotNull(destinationDir, "Destination dir was null.");
+        this.options = Preconditions.checkNotNull(options, "Options was null.");
     }
 
     @Nonnull
@@ -71,9 +91,14 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         return errors;
     }
 
-    @Nonnull
+    @Override
     public OutputLanguage getLanguage() {
         return language;
+    }
+
+    @Nonnull
+    public String getGrammarName() {
+        return grammarName;
     }
 
     @Nonnull
@@ -82,36 +107,18 @@ public abstract class AbstractOutputWriter implements OutputWriter {
     }
 
     @Nonnull
-    public OutputData getOutputData() {
-        return outputData;
-    }
-
-    @Nonnull
-    protected GrammarModel getGrammar() {
-        return getOutputData().getGrammar();
-    }
-
-    protected void setProperty(@Nonnull VelocityEngine engine, @Nonnull String name, @Nonnull Object value) {
-        // if (LOG.isDebugEnabled()) LOG.debug("VelocityEngine property: " + name + " = " + value);
-        engine.setProperty(name, value);
-    }
-
-    @Nonnull
-    protected File newDestinationFile(@Nonnull File dstFile) throws IOException {
-        // Reconstruct this as dstFilePath may contain a slash.
-        File dstDir = dstFile.getParentFile();
-        PolyglotEngine.mkdirs(dstDir, "output directory");
-        return dstFile;
+    public Set<? extends Option> getOptions() {
+        return options;
     }
 
     @Nonnull
     protected File newDestinationFile(@Nonnull String dstFilePath) throws IOException {
+        // TODO: Reconstruct this as dstFilePath may contain a slash.
         File dstFile = new File(getDestinationDir(), dstFilePath);
-        return newDestinationFile(dstFile);
-    }
-
-    @OverridingMethodsMustInvokeSuper
-    protected void initContext(@Nonnull VelocityContext context) {
+        File dstDir = dstFile.getParentFile();
+        if (dstDir != null)
+            PolyglotEngine.mkdirs(dstDir, "output directory");
+        return dstFile;
     }
 
     public static class Loader extends ClasspathResourceLoader {
@@ -124,16 +131,7 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         }
     }
 
-    protected void process(@Nonnull CharSource source, @Nonnull String dstFilePath, @Nonnull Map<String, Object> contextValues) throws IOException {
-        VelocityEngine engine = new VelocityEngine();
-        // setProperty(engine, VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS, SystemLogChute.class.getName());
-        setProperty(engine, VelocityEngine.RUNTIME_LOG_LOGSYSTEM, logChute);
-        setProperty(engine, VelocityEngine.RESOURCE_LOADER, "classpath");
-        setProperty(engine, "classpath.resource.loader.class", Loader.class.getName());  // Needs to be in this JAR file.
-        // setProperty(engine, VelocityEngine.FILE_RESOURCE_LOADER_CACHE, "true");
-        setProperty(engine, VelocityEngine.EVENTHANDLER_INVALIDREFERENCES, ReportInvalidReferences.class.getName());
-        setProperty(engine, VelocityEngine.RUNTIME_REFERENCES_STRICT, true);
-        // setProperty(engine, VelocityEngine.FILE_RESOURCE_LOADER_PATH, includeBuf.toString());
+    protected void processSync(@Nonnull CharSource source, @Nonnull String dstFilePath, @Nonnull Map<? extends String, ? extends Object> contextValuesGlobal, @Nonnull Map<? extends String, ? extends Object> contextValuesLocal) throws IOException {
         VelocityContext context = new VelocityContext() {
             /** The superclass calls key.intern(). */
             @Override
@@ -145,15 +143,14 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         };
         context.put("esc", escapeTool);
 
-        context.put("header", "This file was generated automatically by Polyglot from " + getOutputData().getName() + ". Edits will be lost.");
-        context.put("grammarName", getOutputData().getName());
-        context.put("grammarOptions", getOutputData().getOptions().toString());
-        context.put("grammar", getGrammar());
-        context.put("lexerMachines", getOutputData().getLexerMachines());
-        context.put("parserMachines", getOutputData().getParserMachines());
-        context.put("package", getGrammar().getPackage().getPackageName());
-        initContext(context);
-        for (Map.Entry<String, Object> e : contextValues.entrySet())
+        context.put("header", "This file was generated automatically by Polyglot from " + getGrammarName() + ". Edits will be lost.");
+        context.put("grammarName", getGrammarName());
+        context.put("grammarOptions", String.valueOf(getOptions()));
+        // context.put("grammar", getOutputData().getGrammar());
+        // context.put("package", getGrammar().getPackage().getPackageName());
+        for (Map.Entry<? extends String, ? extends Object> e : contextValuesGlobal.entrySet())
+            context.put(e.getKey(), e.getValue());
+        for (Map.Entry<? extends String, ? extends Object> e : contextValuesLocal.entrySet())
             context.put(e.getKey(), e.getValue());
         File dstFile = newDestinationFile(dstFilePath);
         StringWriter writer = new StringWriter();
@@ -167,31 +164,35 @@ public abstract class AbstractOutputWriter implements OutputWriter {
         sink.write(writer.getBuffer());
     }
 
-    protected void process(@Nonnull PolyglotExecutor executor, @Nonnull final CharSource source, @Nonnull final String dstFilePath, @Nonnull final Map<String, Object> contextValues) throws ExecutionException, IOException {
+    protected void processSource(@Nonnull PolyglotExecutor executor, @Nonnull final CharSource source, @Nonnull final String dstFilePath,
+            @Nonnull final Map<? extends String, ? extends Object> contextValuesGlobal,
+            @Nonnull final Map<? extends String, ? extends Object> contextValuesLocal) throws ExecutionException, IOException {
         executor.execute(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                process(source, dstFilePath, contextValues);
+                processSync(source, dstFilePath, contextValuesGlobal, contextValuesLocal);
                 return null;
             }
         });
     }
 
-    protected void process(@Nonnull PolyglotExecutor executor, @Nonnull String srcResourceName, @Nonnull final String dstFilePath, @Nonnull final Map<String, Object> contextValues) throws ExecutionException, IOException {
+    protected void processResource(@Nonnull PolyglotExecutor executor, @Nonnull String srcResourceName, @Nonnull final String dstFilePath,
+            @Nonnull final Map<? extends String, ? extends Object> contextValuesGlobal,
+            @Nonnull final Map<? extends String, ? extends Object> contextValuesLocal) throws ExecutionException, IOException {
         URL resource = Resources.getResource(getClass(), language.name() + "/" + srcResourceName);
         final CharSource source = Resources.asCharSource(resource, Charsets.UTF_8);
-        process(executor, source, dstFilePath, contextValues);
+        processSource(executor, source, dstFilePath, contextValuesGlobal, contextValuesLocal);
     }
 
-    protected void process(@Nonnull PolyglotExecutor executor, @Nonnull String srcResourceName, @Nonnull String dstFilePath) throws ExecutionException, IOException {
-        process(executor, srcResourceName, dstFilePath, ImmutableMap.<String, Object>of());
+    protected void processResource(@Nonnull PolyglotExecutor executor, @Nonnull String srcResourceName, @Nonnull final String dstFilePath,
+            @Nonnull final Map<? extends String, ? extends Object> contextValuesGlobal) throws ExecutionException, IOException {
+        processResource(executor, srcResourceName, dstFilePath, contextValuesGlobal, ImmutableMap.<String, Object>of());
     }
 
-    protected void processTemplates(@Nonnull PolyglotExecutor executor) throws ExecutionException, IOException {
+    protected void processTemplates(@Nonnull PolyglotExecutor executor, @Nonnull Map<? extends String, ? extends File> templates,
+            @Nonnull final Map<? extends String, ? extends Object> contextValuesGlobal) throws ExecutionException, IOException {
         for (Map.Entry<? extends String, ? extends File> e : templates.entrySet()) {
-            String dstFilePath = e.getKey();
-            File template = e.getValue();
-            process(executor, Files.asCharSource(template, StandardCharsets.UTF_8), dstFilePath, ImmutableMap.<String, Object>of());
+            processSource(executor, Files.asCharSource(e.getValue(), StandardCharsets.UTF_8), e.getKey(), contextValuesGlobal, ImmutableMap.<String, Object>of());
         }
     }
 

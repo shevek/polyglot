@@ -155,7 +155,24 @@ public class EncodedStateMachine {
         return encodedText;
     }
 
-    public static class Lexer extends EncodedStateMachine {
+    @FunctionalInterface
+    public static interface LexerMetadata {
+
+        public String getName();
+
+        @Nonnull
+        default public String getLexerClassName(@Nonnull String prefix, @Nonnull String infix) {
+            return prefix + getName() + infix + "Lexer";
+        }
+
+        @Nonnull
+        default public String getLexerClassName() {
+            return getLexerClassName("", "");
+        }
+
+    }
+
+    public static class Lexer extends EncodedStateMachine implements LexerMetadata {
 
         private final String name;
 
@@ -165,23 +182,41 @@ public class EncodedStateMachine {
             this.name = name;
         }
 
-        @Nonnull
+        @Override
         public String getName() {
             return name;
         }
+    }
+
+    public static interface ParserMetadata {
+
+        public String getName();
+
+        public CstProductionModel getCstProductionRoot();
 
         @Nonnull
-        public String getLexerClassName(@Nonnull String prefix, @Nonnull String infix) {
-            return prefix + getName() + infix + "Lexer";
+        default public String getParserClassName() {
+            return getName() + "Parser";
         }
 
         @Nonnull
-        public String getLexerClassName() {
-            return getLexerClassName("", "");
+        default public String getStartClassName() {
+            if (getName().isEmpty())
+                return "Start";
+            return "S" + getName();
+        }
+
+        @Nonnull
+        default public AstProductionSymbol getAstProductionRoot() {
+            CstProductionModel cstProductionRoot = getCstProductionRoot();
+            CstTransformPrototypeModel transformPrototype = Iterables.getFirst(getCstProductionRoot().getTransformPrototypes(), null);
+            if (transformPrototype == null)
+                throw new IllegalStateException("CST production " + cstProductionRoot + " has no transform prototypes.");
+            return transformPrototype.getSymbol();
         }
     }
 
-    public static class Parser extends EncodedStateMachine {
+    public static class Parser extends EncodedStateMachine implements ParserMetadata {
 
         private final String name;
         // private final LRAutomaton automaton;
@@ -198,40 +233,20 @@ public class EncodedStateMachine {
             this.cstAlternativeSet = cstAlternativeSet;
         }
 
-        @Nonnull
+        @Override
         public String getName() {
             return name;
         }
 
-        @Nonnull
-        public String getParserClassName() {
-            return getName() + "Parser";
-        }
-
-        @Nonnull
-        public String getStartClassName() {
-            if (getName().isEmpty())
-                return "Start";
-            return "S" + getName();
-        }
-
         // See also JavaHelper.
         // @Nonnull public LRAutomaton getAutomaton() { return automaton; }
-        @Nonnull
+        @Override
         public CstProductionModel getCstProductionRoot() {
             return cstProductionRoot;
         }
 
         public boolean isCstAlternativeReachable(@Nonnull CstAlternativeModel cstAlternative) {
             return cstAlternativeSet.contains(cstAlternative.getIndex());
-        }
-
-        @Nonnull
-        public AstProductionSymbol getAstProductionRoot() {
-            CstTransformPrototypeModel transformPrototype = Iterables.getFirst(getCstProductionRoot().getTransformPrototypes(), null);
-            if (transformPrototype == null)
-                throw new IllegalStateException("CST production " + cstProductionRoot + " has no transform prototypes.");
-            return transformPrototype.getSymbol();
         }
     }
 

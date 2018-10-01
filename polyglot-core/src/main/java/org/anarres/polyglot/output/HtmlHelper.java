@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import org.anarres.polyglot.ErrorHandler;
 import org.anarres.polyglot.analysis.DepthFirstAdapter;
 import org.anarres.polyglot.model.AbstractElementModel;
 import org.anarres.polyglot.model.AbstractModel;
@@ -58,12 +57,10 @@ import org.anarres.polyglot.node.PMatcher;
  */
 public class HtmlHelper extends AbstractHelper {
 
-    private final ErrorHandler errors;
     private final GrammarModel grammar;
 
-    public HtmlHelper(ErrorHandler errors, OutputData data) {
-        this.errors = errors;
-        this.grammar = data.getGrammar();
+    public HtmlHelper(GrammarModel grammar) {
+        this.grammar = grammar;
         buildUsage();
     }
 
