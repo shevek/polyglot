@@ -8,6 +8,7 @@ package org.anarres.polyglot.model;
 import com.google.common.base.MoreObjects;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.anarres.polyglot.PolyglotEngine;
 import org.anarres.polyglot.node.AAnnotation;
 import org.anarres.polyglot.node.TIdentifier;
 import org.anarres.polyglot.node.TString;
@@ -54,6 +55,6 @@ public class AnnotationModel extends AbstractModel {
 
     @Override
     public String toString() {
-        return "@" + getName() + "(" + MoreObjects.firstNonNull(getValue(), "") + ")";
+        return "@" + getName() + "(" + PolyglotEngine.firstNonNull(getValue(), "") + ")";
     }
 }

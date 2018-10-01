@@ -116,6 +116,13 @@ public class PolyglotEngine {
         java.nio.file.Files.createDirectories(dir.toPath());
     }
 
+    @Nonnull
+    public static <T> T firstNonNull(@CheckForNull T first, @Nonnull T second) {
+        if (first != null)
+            return first;
+        return Preconditions.checkNotNull(second, "Both arguments were null.");
+    }
+
     private final ErrorHandler errors = new ErrorHandler();
     private final String name;
     private final CharSource input;

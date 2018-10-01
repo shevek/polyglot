@@ -5,7 +5,6 @@
  */
 package org.anarres.polyglot.model;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
@@ -24,6 +23,7 @@ import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizNode;
 import org.anarres.graphviz.builder.GraphVizScope;
 import org.anarres.graphviz.builder.GraphVizable;
+import org.anarres.polyglot.PolyglotEngine;
 import org.anarres.polyglot.node.AAstProduction;
 import org.anarres.polyglot.node.AAstSection;
 import org.anarres.polyglot.node.ACstProduction;
@@ -131,10 +131,10 @@ public class GrammarModel implements GraphVizScope {
         for (TokenModel token : tokens.values()) {
             if (token.hasAnnotation(AnnotationName.LexerInclude))
                 for (AnnotationModel annotation : token.getAnnotations(AnnotationName.LexerInclude))
-                    out.add(MoreObjects.firstNonNull(annotation.getValue(), ""));
+                    out.add(PolyglotEngine.firstNonNull(annotation.getValue(), ""));
             if (token.hasAnnotation(AnnotationName.LexerExclude))
                 for (AnnotationModel annotation : token.getAnnotations(AnnotationName.LexerExclude))
-                    out.add(MoreObjects.firstNonNull(annotation.getValue(), ""));
+                    out.add(PolyglotEngine.firstNonNull(annotation.getValue(), ""));
         }
         if (out.isEmpty())
             return Collections.singleton("");
