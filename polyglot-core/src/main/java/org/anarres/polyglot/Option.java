@@ -39,6 +39,8 @@ public enum Option {
     CG_LISTREFS_MUTABLE,
     /** Enables findbugs annotation generation. */
     CG_FINDBUGS,
+    /** Enables checker-framework annotation generation. */
+    CG_CHECKERFRAMEWORK,
     /** Enables compact code generation. */
     CG_COMPACT,
     /** Enables usage of common runtime interfaces. */
