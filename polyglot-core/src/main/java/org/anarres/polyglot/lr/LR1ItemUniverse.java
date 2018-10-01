@@ -125,7 +125,7 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
 
     /** This routine is meant to be allocation-free. */
     @Override
-    protected void closure(Set<? super LR1Item> out, Queue<LR1Item> queue, LR1Item root, IntSet lookaheads) {
+    protected void closure(MutableIndexedSet<? super LR1Item> out, Queue<LR1Item> queue, LR1Item root, IntSet lookaheads) {
         // Invariant: Queue contains all unwalked items (and possibly some duplicates).
         // When an item is removed from the queue, it is added to the result.
         // TokenUniverse tokenUniverse = firstFunction.getUniverse();

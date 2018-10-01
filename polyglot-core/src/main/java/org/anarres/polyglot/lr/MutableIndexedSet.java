@@ -103,6 +103,11 @@ public class MutableIndexedSet<IndexedItem extends Indexed> extends AbstractInde
         return super.removeAll(c);
     }
 
+    /** A faster, type-specific version of {@link #contains(Object)}. */
+    public boolean contains(IndexedItem i) {
+        return indices.contains(i.getIndex());
+    }
+
     @Override
     public boolean contains(Object o) {
         // It's probably faster to call this second.

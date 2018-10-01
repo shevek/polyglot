@@ -88,7 +88,7 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
         return ignoredProductions;
     }
 
-    protected abstract void closure(@Nonnull Set<? super I> out, @Nonnull Queue<I> queue, @Nonnull I root, @Nonnull IntSet tmp);
+    protected abstract void closure(@Nonnull MutableIndexedSet<? super I> out, @Nonnull Queue<I> queue, @Nonnull I root, @Nonnull IntSet tmp);
 
     // Caching doesn't actually make this faster.
     /*
@@ -122,7 +122,7 @@ public abstract class LRItemUniverse<I extends LRItem> extends IndexedUniverse<I
      * Returns the next index in sourceItems which contains an item with a DIFFERENT symbol.
      */
     @Nonnegative
-    private int _goto(@Nonnull Set<? super I> out, @Nonnull Queue<I> tmpClosureQueue, @Nonnull IntSet tmpClosureLookaheads, @Nonnull LRItem[] sourceItems, @Nonnegative int sourceItemIndex, @Nonnull CstProductionSymbol symbol) {
+    private int _goto(@Nonnull MutableIndexedSet<? super I> out, @Nonnull Queue<I> tmpClosureQueue, @Nonnull IntSet tmpClosureLookaheads, @Nonnull LRItem[] sourceItems, @Nonnegative int sourceItemIndex, @Nonnull CstProductionSymbol symbol) {
         // LOG.info("Computing GOTO from " + items + " on " + symbol);
         // Preconditions.checkState(out.isEmpty(), "Output set not empty before GOTO.");
         // TODO: This allocates an iterator, which is the majority of our memory allocation.
