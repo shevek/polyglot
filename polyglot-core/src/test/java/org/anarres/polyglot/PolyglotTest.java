@@ -80,7 +80,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
 
         Stopwatch stopwatch = Stopwatch.createStarted();
         parse(file, true);
-        LOG.info("Generaring parser took " + stopwatch);
+        LOG.info("Generating parser took " + stopwatch);
         compile();
     }
 
@@ -88,7 +88,7 @@ public class PolyglotTest extends AbstractPolyglotTest {
     public void testLR1() throws Exception {
         Stopwatch stopwatch = Stopwatch.createStarted();
         parse(file, false);
-        LOG.info("Generaring parser took " + stopwatch);
+        LOG.info("Generating parser took " + stopwatch);
         compile();
     }
 
