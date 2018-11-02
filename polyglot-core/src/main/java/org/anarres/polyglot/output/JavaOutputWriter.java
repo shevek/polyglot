@@ -56,11 +56,6 @@ public class JavaOutputWriter extends AbstractOutputWriter {
 
     @Nonnull
     private ImmutableMap<String, Object> newGlobalContext(@Nonnull GrammarModel grammar) {
-        Map<String, EncodedStateMachine.LexerMetadata> lexerMachines = new HashMap<>();
-        for (String lexerMachineName : grammar.getLexerMachineNames()) {
-            lexerMachines.put(lexerMachineName, () -> lexerMachineName);
-        }
-
         Map<String, EncodedStateMachine.ParserMetadata> parserMachines = new HashMap<>();
         for (final CstProductionModel root : grammar.getCstProductionRoots()) {
             final String name = StartChecker.getMachineName(root);
@@ -82,15 +77,14 @@ public class JavaOutputWriter extends AbstractOutputWriter {
                 "helper", helper,
                 "grammar", grammar,
                 "package", grammar.getPackage().getPackageName(),
-                "lexerMachines", lexerMachines,
                 "parserMachines", parserMachines
         );
     }
 
     @Override
     public void writeModel(PolyglotExecutor executor, final GrammarModel grammar, Map<? extends String, ? extends File> templates) throws ExecutionException, IOException {
-        ImmutableMap<String, Object> context = newGlobalContext(grammar);
         PackageDirectoryMapper p = new PackageDirectoryMapper(grammar);
+        ImmutableMap<String, Object> context = newGlobalContext(grammar);
 
         for (Map.Entry<? extends String, ? extends File> e : templates.entrySet()) {
             processSource(executor, Files.asCharSource(e.getValue(), StandardCharsets.UTF_8), p.map(e.getKey()), context, ImmutableMap.<String, Object>of());
@@ -98,6 +92,9 @@ public class JavaOutputWriter extends AbstractOutputWriter {
 
         // Parser
         processResource(executor, "parserexception.vm", p.map("parser/ParserException.java"), context);
+        for (EncodedStateMachine.ParserMetadata parserMachine : ((Map<?, EncodedStateMachine.ParserMetadata>) context.get("parserMachines")).values()) {
+            processResource(executor, "start.vm", p.map("node/" + parserMachine.getStartClassName() + ".java"), context, ImmutableMap.of("parserMachine", parserMachine));
+        }
 
         // Lexer
         processResource(executor, "ilexer.vm", p.map("lexer/ILexer.java"), context);
@@ -167,23 +164,22 @@ public class JavaOutputWriter extends AbstractOutputWriter {
 
     @Override
     public void writeLexerMachine(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar, @Nonnull EncodedStateMachine.Lexer lexerMachine) throws ExecutionException, IOException {
+        PackageDirectoryMapper p = new PackageDirectoryMapper(grammar);
         ImmutableMap<String, Object> contextGlobal = newGlobalContext(grammar);
         ImmutableMap<String, Object> contextLocal = ImmutableMap.<String, Object>of("lexerMachine", lexerMachine);
-        PackageDirectoryMapper p = new PackageDirectoryMapper(grammar);
-        processResource(executor, "abstractlexer.vm", p.map("lexer/" + lexerMachine.getLexerClassName("Abstract", "") + ".java"), contextGlobal, contextLocal);
         processResource(executor, "lexer.vm", p.map("lexer/" + lexerMachine.getLexerClassName() + ".java"), contextGlobal, contextLocal);
+        processResource(executor, "abstractlexer.vm", p.map("lexer/" + lexerMachine.getLexerClassName("Abstract", "") + ".java"), contextGlobal, contextLocal); // requires property 'inline'.
         processResource(executor, "stringlexer.vm", p.map("lexer/" + lexerMachine.getLexerClassName("", "String") + ".java"), contextGlobal, contextLocal);
         write(executor, lexerMachine.getEncodedData(), p.map("lexer/" + lexerMachine.getLexerClassName() + ".dat"));
     }
 
     @Override
     public void writeParserMachine(@Nonnull PolyglotExecutor executor, @Nonnull GrammarModel grammar, @Nonnull EncodedStateMachine.Parser parserMachine) throws ExecutionException, IOException {
+        PackageDirectoryMapper p = new PackageDirectoryMapper(grammar);
         ImmutableMap<String, Object> contextGlobal = newGlobalContext(grammar);
         ImmutableMap<String, Object> contextLocal = ImmutableMap.<String, Object>of("parserMachine", parserMachine);
-        PackageDirectoryMapper p = new PackageDirectoryMapper(grammar);
         // LRAutomaton automaton = parserMachine.getAutomaton();
         processResource(executor, "parser.vm", p.map("parser/" + parserMachine.getParserClassName() + ".java"), contextGlobal, contextLocal);
-        processResource(executor, "start.vm", p.map("node/" + parserMachine.getStartClassName() + ".java"), contextGlobal, contextLocal);
         write(executor, parserMachine.getEncodedData(), p.map("parser/" + parserMachine.getParserClassName() + ".dat"));
     }
 }
