@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.model;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
 import javax.annotation.Nonnull;
@@ -15,6 +16,8 @@ import org.anarres.polyglot.output.TemplateProperty;
  * @author shevek
  */
 public interface AnnotatedModel extends Model {
+
+    public static final ImmutableMultimap<String, AnnotationModel> NO_ANNOTATIONS = ImmutableMultimap.<String, AnnotationModel>of();
 
     @Nonnull
     @TemplateProperty
