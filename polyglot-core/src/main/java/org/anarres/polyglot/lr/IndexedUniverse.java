@@ -6,6 +6,8 @@
 package org.anarres.polyglot.lr;
 
 import com.google.common.base.Preconditions;
+import it.unimi.dsi.fastutil.ints.IntCollection;
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnegative;
@@ -58,5 +60,16 @@ public class IndexedUniverse<IndexedItem extends Indexed> {
     @Nonnegative
     public int size() {
         return itemList.size();
+    }
+
+    @Nonnull
+    public String toString(@Nonnull IntCollection indices) {
+        if (indices.isEmpty())
+            return "{}";
+        StringBuilder buf = new StringBuilder("{");
+        for (IntIterator it = indices.iterator(); it.hasNext(); /**/) {
+            buf.append(' ').append(getItemByIndex(it.nextInt()));
+        }
+        return buf.append(" }").toString();
     }
 }
