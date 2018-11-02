@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
  */
 public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
 
-
     private static final Logger LOG = LoggerFactory.getLogger(LR1ItemUniverse.class);
     // private static final boolean DEBUG = false;
     private final FirstFunction firstFunction;
@@ -143,13 +142,15 @@ public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
             CstAlternativeModel alternative = item.getProductionAlternative();
             CstProductionModel subproduction = (CstProductionModel) symbol;
             // if (DEBUG) LOG.info("Closing over " + item);
+
+            lookaheads.clear();
+            if (firstFunction.addFirst(lookaheads, alternative.getElements(), item.getPosition() + 1))  // Walk the remainder of the parent, hence the +1
+                lookaheads.add(item.getLookahead().getIndex());    // If everything was nullable, add the terminal.
+            // if (DEBUG) LOG.info("    FIRST(" + item + " = " + subalternative.elements + " ,, " + alternative.elements.subList(item.getPosition() + 1, alternative.elements.size()) + ") = " + lookaheads);
+
             for (CstAlternativeModel subalternative : subproduction.alternatives.values()) {
                 if (ignoredProductions.isIgnored(subalternative))
                     continue;
-                lookaheads.clear();
-                if (firstFunction.addFirst(lookaheads, alternative.getElements(), item.getPosition() + 1))  // Walk the remainder of the parent, hence the +1
-                    lookaheads.add(item.getLookahead().getIndex());    // If everything was nullable, add the terminal.
-                // if (DEBUG) LOG.info("    FIRST(" + item + " = " + subalternative.elements + " ,, " + alternative.elements.subList(item.getPosition() + 1, alternative.elements.size()) + ") = " + lookaheads);
 
                 // TODO: We could iterate the bitset directly here.
                 // for (TokenModel lookahead : lookaheads) {
