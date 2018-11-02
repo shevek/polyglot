@@ -39,7 +39,7 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
 
         private boolean nullable = false;
 
-        public Result(TokenUniverse universe) {
+        public Result(@Nonnull TokenUniverse universe) {
             super(universe);
         }
 
@@ -93,7 +93,7 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
     // Dragon book page 189.
     // Mogensen page 55.
     private void build(@Nonnull GrammarModel grammar, @Nonnull IgnoredProductionsSet ignoredProductions) {
-        for (CstProductionModel production : grammar.cstProductions.values()) {
+        for (CstProductionModel production : grammar.getCstProductions()) {
             if (ignoredProductions.isIgnored(production))
                 continue;
             Result firstSet = new Result(universe);
@@ -106,13 +106,13 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
         boolean modified;
         do {
             modified = false;
-            for (CstProductionModel production : grammar.cstProductions.values()) {
+            for (CstProductionModel production : grammar.getCstProductions()) {
                 if (ignoredProductions.isIgnored(production))
                     continue;
                 // if (production == null) throw new IllegalStateException("No Production");
                 Result firstSet = firstMap.get(production);
                 // if (firstSet == null) throw new IllegalStateException("No FirstSet (Result) for " + production);
-                for (CstAlternativeModel alternative : production.alternatives.values()) {
+                for (CstAlternativeModel alternative : production.getAlternatives()) {
                     if (ignoredProductions.isIgnored(alternative))
                         continue;
                     ELEMENT:
@@ -210,7 +210,7 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
                 if (DEBUG)
                     LOG.info("First-X: " + element.getCstProduction().getName() + " = " + firstSet);
                 out.addAll(firstSet);
-                // Sub-production cannot reduce to epsilon.
+                // If the sub-production cannot reduce to epsilon:
                 if (!firstSet.isNullable())
                     return false;
             }
@@ -231,7 +231,7 @@ public class FirstFunction implements Function<CstProductionSymbol, Set<TokenMod
                 if (DEBUG)
                     LOG.info("First-X: " + element.getCstProduction().getName() + " = " + firstSet);
                 out.addAll(firstSet.getIndices());
-                // Sub-production cannot reduce to epsilon.
+                // If the sub-production cannot reduce to epsilon:
                 if (!firstSet.isNullable())
                     return false;
             }

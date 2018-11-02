@@ -50,7 +50,8 @@ public class FollowFunction implements Function<CstProductionModel, Set<TokenMod
         // Rule 2. Within a rule, excluding epsilon and EOF.
         for (CstProductionModel production : grammar.cstProductions.values()) {
             for (CstAlternativeModel alternative : production.alternatives.values()) {  // A
-                for (int i = 0; i < alternative.elements.size(); i++) {
+                // No point looking at the last element.
+                for (int i = 0; i < alternative.elements.size() - 1; i++) {
                     CstElementModel element = alternative.elements.get(i);  // B
                     if (element.isTerminal())
                         continue;
