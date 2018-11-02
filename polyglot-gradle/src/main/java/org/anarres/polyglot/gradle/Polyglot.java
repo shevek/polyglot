@@ -13,6 +13,8 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.jdiagnostics.DefaultQuery;
@@ -46,6 +48,7 @@ import org.slf4j.LoggerFactory;
 public class Polyglot extends SourceTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(Polyglot.class);
+    private static final ReentrantLock mutex = new ReentrantLock();
     private File outputDir;
     @CheckForNull
     private File debugDir;
@@ -166,7 +169,6 @@ public class Polyglot extends SourceTask {
         option(names);
     }
 
-    @TaskAction
     public void runPolyglot() throws IOException {
         // println "Reading from $inputDir"
         final File outputDir = getOutputDir();
@@ -212,5 +214,21 @@ public class Polyglot extends SourceTask {
                 }
             }
         });
+    }
+
+    @TaskAction
+    public void runPolyglotExclusively() throws IOException, InterruptedException {
+        try {
+            for (;;) {
+                getLogger().debug("Attempting to acquire Polyglot mutex.");
+                if (mutex.tryLock(10, TimeUnit.SECONDS))
+                    break;
+            }
+            getLogger().debug("Successfully acquired Polyglot mutex.");
+            runPolyglot();
+        } finally {
+            mutex.unlock();
+            getLogger().debug("Successfully released Polyglot mutex.");
+        }
     }
 }
