@@ -30,7 +30,8 @@ import javax.annotation.Nonnull;
     }
 
     @SuppressWarnings(value = "unchecked")
-    public V get(@Nonnull int index) {
+    @Override
+    public V get(@Nonnegative int index) {
         return (V) data[index];
     }
 

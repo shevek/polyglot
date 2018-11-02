@@ -43,6 +43,11 @@ public class SparseIndexedMap<K extends Indexed, V> extends AbstractMap<K, V> im
     }
 
     @Override
+    public V get(int index) {
+        return data.get(index);
+    }
+
+    @Override
     public V get(K key) {
         return data.get(key.getIndex());
     }
