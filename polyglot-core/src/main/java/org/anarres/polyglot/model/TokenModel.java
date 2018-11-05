@@ -19,6 +19,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
+import org.anarres.polyglot.JavaTypeNameGenerator;
 import org.anarres.polyglot.analysis.MatcherParserVisitor;
 import org.anarres.polyglot.dfa.NFA;
 import org.anarres.polyglot.lr.Indexed;
@@ -161,7 +162,7 @@ public class TokenModel extends AbstractNamedJavaModel implements CstProductionS
         this.matcher = matcher;
         this.transformPrototype = new CstTransformPrototypeModel(name, Specifier.TOKEN, name, UnaryOperator.NONE);
         this.transformPrototype.symbol = this;
-        this.javaTypeName = "T" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, getName());
+        this.javaTypeName = JavaTypeNameGenerator.generateJavaTypeName("T" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, getName()));
         this.text = text;
     }
 
