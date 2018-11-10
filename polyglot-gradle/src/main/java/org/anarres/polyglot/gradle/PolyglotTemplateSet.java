@@ -23,7 +23,7 @@ public class PolyglotTemplateSet implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String name;
-    private final Table<OutputLanguage, String, File> templates = HashBasedTable.create();
+    private final Table<OutputLanguage, String, Object> templates = HashBasedTable.create();
 
     public PolyglotTemplateSet(@Nonnull String name) {
         this.name = name;
@@ -35,23 +35,23 @@ public class PolyglotTemplateSet implements Serializable {
     }
 
     @Nonnull
-    public Table<OutputLanguage, String, File> getTemplates() {
+    public Table<OutputLanguage, String, Object> getTemplates() {
         return templates;
     }
 
-    public void template(@Nonnull String language, @Nonnull String dstPath, @Nonnull File srcFile) {
+    public void template(@Nonnull String language, @Nonnull String dstPath, @Nonnull Object srcFile) {
         templates.put(OutputLanguage.valueOf(language), dstPath, srcFile);
     }
 
-    public void java(@Nonnull String dstPath, @Nonnull File srcFile) {
+    public void java(@Nonnull String dstPath, @Nonnull Object srcFile) {
         templates.put(OutputLanguage.java, dstPath, srcFile);
     }
 
-    public void html(@Nonnull String dstPath, @Nonnull File srcFile) {
+    public void html(@Nonnull String dstPath, @Nonnull Object srcFile) {
         templates.put(OutputLanguage.html, dstPath, srcFile);
     }
 
-    public void graphviz(@Nonnull String dstPath, @Nonnull File srcFile) {
+    public void graphviz(@Nonnull String dstPath, @Nonnull Object srcFile) {
         templates.put(OutputLanguage.graphviz, dstPath, srcFile);
     }
 

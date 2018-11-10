@@ -117,7 +117,8 @@ public class Polyglot extends SourceTask {
         try {
             List<File> out = new ArrayList<>();
             for (PolyglotTemplateSet templateSet : templates.values())
-                out.addAll(templateSet.getTemplates().values());
+                for (Object templateFile : templateSet.getTemplates().values())
+                    out.add(getProject().file(templateFile));
             return out;
         } catch (LinkageError e) {
             // If we have a conflict on Guava versions, we can get a NoSuchMethodError here.
@@ -201,8 +202,13 @@ public class Polyglot extends SourceTask {
                     for (PolyglotTemplateSet templateSet : templates.values()) {
                         if (!templateSet.toSpec().isSatisfiedBy(file))
                             continue;
-                        for (Map.Entry<OutputLanguage, Map<String, File>> e : templateSet.getTemplates().rowMap().entrySet())
-                            engine.addTemplates(e.getKey(), e.getValue());
+                        for (Map.Entry<OutputLanguage, ? extends Map<? extends String, ? extends Object>> e : templateSet.getTemplates().rowMap().entrySet()) {
+                            Map<String, File> temp = new HashMap<>(e.getValue().size());
+                            // Resolve all files late against the project
+                            for (Map.Entry<? extends String, ? extends Object> f : e.getValue().entrySet())
+                                temp.put(f.getKey(), getProject().file(f.getValue()));
+                            engine.addTemplates(e.getKey(), temp);
+                        }
                     }
                     if (!engine.run())
                         throw new GradleException("Failed to process " + file + ":\n" + engine.getErrors().toString(engine.getInput()));
