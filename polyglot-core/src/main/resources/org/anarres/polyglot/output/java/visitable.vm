@@ -9,6 +9,7 @@ import ${package}.analysis.Visitor;
  *
  * @see Visitor
  */
+${generated}
 public interface Visitable {
 
 	public static final Visitable[] EMPTY_ARRAY = new Visitable[0];

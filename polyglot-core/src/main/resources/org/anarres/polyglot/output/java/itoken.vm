@@ -3,5 +3,6 @@ package ${grammar.package.packageName}.node;
 
 import javax.annotation.Nonnull;
 
+${generated}
 public interface IToken extends INode {
 }

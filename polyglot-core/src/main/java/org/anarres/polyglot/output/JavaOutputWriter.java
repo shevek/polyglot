@@ -74,6 +74,7 @@ public class JavaOutputWriter extends AbstractOutputWriter {
 
         JavaHelper helper = new JavaHelper(getOptions(), grammar);
         return ImmutableMap.<String, Object>of(
+                "generated", "@javax.annotation.Generated(\"org.anarres.Polyglot\")",
                 "helper", helper,
                 "grammar", grammar,
                 "package", grammar.getPackage().getPackageName(),

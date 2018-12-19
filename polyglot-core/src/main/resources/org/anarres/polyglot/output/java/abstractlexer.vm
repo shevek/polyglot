@@ -11,6 +11,7 @@ import ${grammar.package.packageName}.node.*;
 /**
  * An abstract base lexer class.
  */
+${generated}
 public abstract class ${lexerMachine.getLexerClassName("Abstract", "")} implements ILexer {
 
 	protected State state = State.${grammar.states.get(0).name};

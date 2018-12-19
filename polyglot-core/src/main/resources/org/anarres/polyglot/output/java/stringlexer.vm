@@ -8,6 +8,7 @@ import ${grammar.package.packageName}.node.*;
 /**
  * A fast string-reading concrete lexer implementation.
  */
+${generated}
 public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMachine.getLexerClassName("Abstract", "")} {
 
 	protected final String in;

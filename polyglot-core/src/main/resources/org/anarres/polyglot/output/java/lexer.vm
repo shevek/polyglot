@@ -13,6 +13,7 @@ import ${grammar.package.packageName}.node.*;
 /**
  * The default concrete lexer implementation.
  */
+${generated}
 public class ${lexerMachine.getLexerClassName()} extends ${lexerMachine.getLexerClassName("Abstract", "")} {
 
 	protected final PushbackReader in;

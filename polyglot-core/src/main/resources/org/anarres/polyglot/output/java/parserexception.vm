@@ -4,6 +4,7 @@ package ${grammar.package.packageName}.parser;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.Token;
 
+${generated}
 public class ParserException extends Exception {
 
 	@Nonnull

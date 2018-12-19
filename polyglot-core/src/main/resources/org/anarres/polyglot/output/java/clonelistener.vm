@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
  * A listener which is notified about node-clone events.
  * This is a useful way to preserve metadata about nodes over clone operations.
  */
+${generated}
 public interface CloneListener {
 
 	public static final CloneListener NONE = new CloneListener() {

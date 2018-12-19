@@ -18,6 +18,7 @@ import ${grammar.package.packageName}.node.*;
  * @see TreeVisitorAdapter
  * @see DepthFirstAdapter
  */
+${generated}
 public class DepthFirstVisitor<I, O, X extends Exception> extends TreeVisitorAdapter<I, O, X> {
 
 #foreach ($parserMachine in $parserMachines)

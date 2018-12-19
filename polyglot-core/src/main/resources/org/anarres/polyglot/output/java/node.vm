@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 #set($listNullable = "@Nonnull")
 #end##CG_LISTREFS_MUTABLE
 /** The superclass of all {@link Token}, production and alternative types. */
+${generated}
 public abstract class Node implements INode, Cloneable {
 
 ## The list could be $listNullable but then the == null would cause an FB warning.

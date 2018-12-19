@@ -18,6 +18,7 @@ $production.javadocComment
 #end
 #end##CG_APIDOC
 #annotate($production, 'javaClassAnnotation')
+${generated}
 public abstract class ${production.javaTypeName}
 		extends $helper.getSuperClass($production, "Node")
 		implements IProduction

@@ -8,6 +8,7 @@ import ${grammar.package.packageName}.node.Token;
 /**
  * The generic interface for a lexer, which may be used by a parser.
  */
+${generated}
 public interface ILexer {
 
 	/**

@@ -18,6 +18,7 @@ import ${package}.node.*;
  * @see AbstractVisitorAdapter
  * @see DepthFirstVisitor
  */
+${generated}
 public class TreeVisitorAdapter<I, O, X extends Exception> extends VisitorAdapter<I, O, X> {
 
 ## Externals could use ialternative rather than Node.

@@ -8,6 +8,7 @@ import ${package}.analysis.Visitor;
 ## It's not actually an element, it's an AstProductionModel
 #set($element = $parserMachine.astProductionRoot)
 /** This class is the root of the parse tree returned from the Parser. */
+${generated}
 public final class ${parserMachine.startClassName} extends Node {
 
 	private ${element.javaTypeName} _${element.javaFieldName}_;

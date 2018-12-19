@@ -9,6 +9,7 @@ import ${package}.analysis.Visitor;
  *
  * You may prefer to use the {@link Visitor} interface for new code.
  */
+${generated}
 public interface Switch {
 #foreach ($token in $grammar.tokensAlphabetical)
 	public void case${token.javaMethodName}(@Nonnull ${token.javaTypeName} node);

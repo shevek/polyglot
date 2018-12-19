@@ -16,6 +16,7 @@ import ${grammar.package.packageName}.node.*;
  * @see AbstractVisitorAdapter
  * @see VisitorAdapter
  */
+${generated}
 public interface Visitor<I, O, X extends Exception> {
 #foreach ($token in $grammar.tokensAlphabetical)
 	public O visit${token.javaMethodName}(@Nonnull ${token.javaTypeName} node, I input) throws X;

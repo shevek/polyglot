@@ -13,6 +13,7 @@ import ${grammar.package.packageName}.node.Switch;
  * as it has the ability to pass and return state on the stack, rather
  * than using a separate state store.
  */
+${generated}
 public interface Analysis extends Switch {
 
 	public Object getIn(@Nonnull Node node);

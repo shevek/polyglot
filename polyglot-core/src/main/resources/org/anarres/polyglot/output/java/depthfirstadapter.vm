@@ -13,6 +13,7 @@ import ${grammar.package.packageName}.node.*;
  * as it has the ability to pass and return state on the stack, rather
  * than using a separate state store.
  */
+${generated}
 public class DepthFirstAdapter extends AnalysisAdapter {
 
 	public void defaultIn(@Nonnull Node node) {

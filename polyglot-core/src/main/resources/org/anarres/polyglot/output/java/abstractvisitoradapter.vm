@@ -36,6 +36,7 @@ import ${package}.node.*;
  * @see Visitor
  * @see VisitorAdapter
  */
+${generated}
 public abstract class AbstractVisitorAdapter<I, O, X extends Exception> implements Visitor<I, O, X> {
 
 	/**

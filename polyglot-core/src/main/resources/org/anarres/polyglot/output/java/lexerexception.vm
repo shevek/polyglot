@@ -4,6 +4,7 @@ package ${grammar.package.packageName}.lexer;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.InvalidToken;
 
+${generated}
 public class LexerException extends Exception {
 
 	private final InvalidToken token;
