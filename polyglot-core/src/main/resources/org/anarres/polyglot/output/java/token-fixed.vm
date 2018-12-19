@@ -23,6 +23,7 @@ public final class ${token.javaTypeName} extends Token
 #end##CG_APIDOC
 	public static final int INDEX = ${token.index};
 #end
+	public static final String NAME = "${token.descriptiveName}";
 	public static final String DEFAULT_TEXT = "${token.javaText}";
 
 	public ${token.javaTypeName}() {
@@ -40,6 +41,11 @@ public final class ${token.javaTypeName} extends Token
 			location.getOffset(),
 			location.getLine(),
 			location.getColumn());
+	}
+
+	@Override
+	public String getTokenName() {
+		return NAME;
 	}
 
 	@Override

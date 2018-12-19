@@ -19,6 +19,15 @@ public abstract class Token extends Node implements IToken {
 	public abstract int getTokenIndex();
 
 	/**
+	 * Returns the token name, for diagnostic purposes.
+	 * No restrictions are placed on the characters in a name, they are for
+	 * human consumption only. Specifically, they may contain or consist
+	 * entirely of punctuation, and may (but probably should not) contain spaces.
+	 */
+	@Nonnull
+	public abstract String getTokenName();
+
+	/**
 	 * Returns the textual content of this token.
 	 *
 	 * If the token represents a nontrivial lexical form, such as a C string,

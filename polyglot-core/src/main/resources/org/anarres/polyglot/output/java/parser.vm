@@ -160,7 +160,7 @@ public class ${parserMachine.parserClassName} {
 					StringBuilder buf = new StringBuilder("After");
 					for (int i = 1; i <= stackPointer; i++)
 						buf.append(' ').append(stack.get(i).name);
-					buf.append(", got ").append(token.getClass().getSimpleName());
+					buf.append(", got ").append(token.getTokenName());
 					buf.append("(").append(token.getText());
 					buf.append(") but expected [").append(errorTable[actionValue]);
 					buf.append("].");
