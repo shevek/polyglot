@@ -2,6 +2,7 @@
 package ${grammar.package.packageName}.lexer;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
@@ -113,13 +114,7 @@ public abstract class ${lexerMachine.getLexerClassName("Abstract", "")} implemen
 		}
 	}
 
-	@Nonnull
-	private static int[] readTable(@Nonnull DataInputStream in, @Nonnegative int sublength) throws IOException {
-		int[] out = new int[in.readInt() * sublength];
-		for (int i = 0; i < out.length; i++)
-			out[i] = in.readInt();
-		return out;
-	}
+#parse("org/anarres/polyglot/output/java/varint.vm")
 
 	static {
 		try {
@@ -138,19 +133,19 @@ public abstract class ${lexerMachine.getLexerClassName("Abstract", "")} implemen
 #end
 			);
 
-			int lexerStateCount = in.readInt();
+			int lexerStateCount = readVarint(in);
 			gotoTable = new int[lexerStateCount][][];
 			acceptTable = new int[lexerStateCount][];
 
 			for (int lexerStateIndex = 0; lexerStateIndex < lexerStateCount; lexerStateIndex++) {
 				// DFA state count in this lexer state
-				int dfaStateCount = in.readInt();
+				int dfaStateCount = readVarint(in);
 
 				gotoTable[lexerStateIndex] = new int[dfaStateCount][];
 				acceptTable[lexerStateIndex] = new int[dfaStateCount];
 				for (int dfaStateIndex = 0; dfaStateIndex < dfaStateCount; dfaStateIndex++) {
-					gotoTable[lexerStateIndex][dfaStateIndex] = readTable(in, 3);
-					acceptTable[lexerStateIndex][dfaStateIndex] = in.readInt();
+					gotoTable[lexerStateIndex][dfaStateIndex] = readVarintTable(in, 3);
+					acceptTable[lexerStateIndex][dfaStateIndex] = readVarint(in);
 				}
 			}
 

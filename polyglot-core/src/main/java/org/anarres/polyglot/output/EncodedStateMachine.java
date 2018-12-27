@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.dfa.DFA;
 import org.anarres.polyglot.lr.Indexed;
@@ -48,32 +49,46 @@ public class EncodedStateMachine {
         return new Lexer(name, encodedData, encodedText);
     }
 
+    /** Writes a little-endian varint with no optimization for negative numbers. */
+    private static void writeInt(@Nonnull DataOutputStream out, @Nonnegative int value) throws IOException {
+        // out.writeInt(value);
+        while (true) {
+            if ((value & ~0x7F) == 0) {
+                out.write((byte) value);
+                return;
+            } else {
+                out.write((byte) ((value & 0x7F) | 0x80));
+                value >>>= 7;
+            }
+        }
+    }
+
     @Nonnull
     private static byte[] newLexerTable(@Nonnull GrammarModel grammar, @Nonnull List<DFA> dfas) throws IOException {
         if (grammar.states.size() != dfas.size())
             throw new IllegalArgumentException("Bad DFA count: states.size=" + grammar.states.size() + ", dfas.size=" + dfas.size());
         ByteArrayOutputStream buf = new ByteArrayOutputStream(8192);
         try (DataOutputStream out = new DataOutputStream(buf)) {
-            out.writeInt(dfas.size());
+            writeInt(out, dfas.size());
             for (DFA dfa : dfas) {
                 if (dfa == null) {
-                    out.writeInt(0);
+                    writeInt(out, 0);
                     continue;
                 }
 
-                out.writeInt(dfa.getStates().size());
+                writeInt(out, dfa.getStates().size());
 
                 for (DFA.State dfaState : dfa.getStates()) {
                     // Write gotoTable.
-                    out.writeInt(dfaState.getTransitions().size());
+                    writeInt(out, dfaState.getTransitions().size());
                     for (DFA.Transition dfaTransition : dfaState.getTransitions()) {
-                        out.writeInt(dfaTransition.getStart());
-                        out.writeInt(dfaTransition.getEnd());
-                        out.writeInt(dfaTransition.getDestination().getIndex());
+                        writeInt(out, dfaTransition.getStart());
+                        writeInt(out, dfaTransition.getEnd());
+                        writeInt(out, dfaTransition.getDestination().getIndex());
                     }
 
                     // Write acceptTable.
-                    out.writeInt(dfaState.getAcceptTokenIndex());
+                    writeInt(out, dfaState.getAcceptTokenIndex());
                 }
             }
         }
@@ -93,23 +108,23 @@ public class EncodedStateMachine {
     private static byte[] newParserTable(@Nonnull GrammarModel grammar, @Nonnull LRAutomaton automaton, @Nonnull IntSet cstAlternativeSet) throws IOException {
         ByteArrayOutputStream buf = new ByteArrayOutputStream(8192);
         try (DataOutputStream out = new DataOutputStream(buf)) {
-            out.writeInt(automaton.getStates().size()); // parserStateCount
+            writeInt(out, automaton.getStates().size()); // parserStateCount
 
             for (LRState state : automaton.getStates()) {
 
-                out.writeInt(state.getActionMap().size() + 1);
+                writeInt(out, state.getActionMap().size() + 1);
                 // Error is slot 0.
-                out.writeInt(-1);
-                out.writeInt(AbstractParser.ERROR);
-                out.writeInt(state.getErrorIndex());
+                writeInt(out, -1);
+                writeInt(out, AbstractParser.ERROR);
+                writeInt(out, state.getErrorIndex());
 
                 for (Map.Entry<TokenModel, LRAction> e : state.getActionMap().entrySet()) {
                     // TokenModel key = e.getKey();
                     LRAction action = e.getValue();
-                    out.writeInt(e.getKey().getIndex());
-                    out.writeInt(action.getAction().getOpcode());
+                    writeInt(out, e.getKey().getIndex());
+                    writeInt(out, action.getAction().getOpcode());
                     Indexed target = action.getTarget();
-                    out.writeInt(target == null ? -1 : target.getIndex());
+                    writeInt(out, target == null ? -1 : target.getIndex());
 
                     // Keep track of all the CstProductionModels which are reachable from this Parser.
                     if (action instanceof LRAction.Reduce) {
@@ -118,17 +133,17 @@ public class EncodedStateMachine {
                     }
                 }
 
-                out.writeInt(state.getGotoMap().size());
+                writeInt(out, state.getGotoMap().size());
                 for (Map.Entry<CstProductionModel, LRState> e : state.getGotoMap().entrySet()) {
                     // CstProductionModel key = e.getKey();
                     // LRState value = e.getValue();
-                    out.writeInt(e.getKey().getIndex());
-                    out.writeInt(e.getValue().getIndex());
+                    writeInt(out, e.getKey().getIndex());
+                    writeInt(out, e.getValue().getIndex());
                 }
             }
 
             // Errors.
-            out.writeInt(automaton.getErrors().size());
+            writeInt(out, automaton.getErrors().size());
             for (String error : automaton.getErrors())
                 out.writeUTF(error);
         }
