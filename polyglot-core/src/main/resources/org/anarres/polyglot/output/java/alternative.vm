@@ -294,6 +294,19 @@ public class ${alternative.javaTypeName}
 	public <I, O, X extends Exception> O apply(Visitor<I, O, X> v, I input) throws X {
 		return v.visit${alternative.javaMethodName}(this, input);
 	}
+#if ($helper.isOption("CG_PARENT") && $helper.isOption("CG_SERIALIZE_THAW"))
+
+	@Override
+	public void thaw() {
+#foreach ($element in $alternative.elements)
+#if ($element.list)
+		thawParentAll(this, this._${element.javaFieldName}_);
+#else##if element.list
+		thawParent(this, this._${element.javaFieldName}_);
+#end##if element.list
+#end##foreach alternative.elements
+	}
+#end##CG_PARENT
 
 	@Override
 	protected void toStringBuilderDefault(StringBuilder buf) {

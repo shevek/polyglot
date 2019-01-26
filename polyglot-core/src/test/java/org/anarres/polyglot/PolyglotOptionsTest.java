@@ -55,7 +55,7 @@ public class PolyglotOptionsTest extends AbstractPolyglotTest {
         add(out, EnumSet.of(Option.LR1, Option.CG_LEXER_BINARYSEARCH));
         add(out, EnumSet.of(Option.LR1, Option.CG_LEXER_LINEARSEARCH));
         add(out, EnumSet.of(Option.LR1, Option.CG_LARGE, Option.CG_DEBUG));
-        add(out, EnumSet.of(Option.LR1, Option.CG_LISTREFS_MUTABLE));
+        add(out, EnumSet.of(Option.LR1, Option.CG_LISTREFS_MUTABLE, Option.CG_SERIALIZE_THAW));
         // Fairly representative.
         add(out, EnumSet.of(Option.LR1, Option.CG_PARENT, Option.CG_JSR305, Option.CG_FINDBUGS, Option.CG_APIDOC));
 

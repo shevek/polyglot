@@ -53,6 +53,8 @@ public enum Option {
     CG_LEXER_LINEARSEARCH,
     /** Forces binary-search in the lexer. */
     CG_LEXER_BINARYSEARCH,
+    /** Create a freeze() and thaw() method pair for serialization. Allows more efficient serialization. */
+    CG_SERIALIZE_THAW,
     /** Enables threaded execution, which can generate simpler error messages. */
     PARALLEL,
     /** Log additional debugging information. */

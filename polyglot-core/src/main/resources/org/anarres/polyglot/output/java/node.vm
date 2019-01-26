@@ -97,7 +97,23 @@ public abstract class Node implements INode, Cloneable {
 		}
 	}
 
+#if ($helper.isOption("CG_SERIALIZE_THAW"))
+	protected static void thawParent(@Nonnull Node parent, @Nonnull Node node) {
+		node.parent(parent);
+		node.thaw();
+	}
+
+	protected static void thawParentAll(@Nonnull Node parent, @CheckForNull List<? extends Node> nodes) {
+		if (nodes == null || nodes.isEmpty())
+			return;
+		for (Node node : nodes)
+			thawParent(parent, node);
+	}
+
+	private transient Node parent;
+#else##CG_SERIALIZE_THAW
 	private Node parent;
+#end##CG_SERIALIZE_THAW
 
 	/**
 	 * Returns the parent Node of this Node.
@@ -200,6 +216,20 @@ public abstract class Node implements INode, Cloneable {
 			out.add(cloneNode(listener, item));
 		return out;
 	}
+#if ($helper.isOption("CG_SERIALIZE_THAW"))
+
+	public void freeze() {
+	}
+
+	/**
+	 * Restores all transient pointers within this data structure after deserialization.
+	 *
+	 * This method recurses as required; it need be called only on the root of any tree.
+	 * If there are no transient pointers in the tree, this method is a no-op.
+	 */
+	public void thaw() {
+	}
+#end##CG_SERIALIZE_THAW
 
 	protected static void toStringBuilder(@Nonnull StringBuilder buf, @CheckForNull Node node) {
 		if (node != null)
