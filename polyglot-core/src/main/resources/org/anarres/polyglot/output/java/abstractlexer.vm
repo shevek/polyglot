@@ -133,19 +133,20 @@ public abstract class ${lexerMachine.getLexerClassName("Abstract", "")} implemen
 #end
 			);
 
-			int lexerStateCount = readVarint(in);
+			VIR r = new VIR();
+			int lexerStateCount = r.readVarint(in);
 			gotoTable = new int[lexerStateCount][][];
 			acceptTable = new int[lexerStateCount][];
 
 			for (int lexerStateIndex = 0; lexerStateIndex < lexerStateCount; lexerStateIndex++) {
 				// DFA state count in this lexer state
-				int dfaStateCount = readVarint(in);
+				int dfaStateCount = r.readVarint(in);
 
 				gotoTable[lexerStateIndex] = new int[dfaStateCount][];
 				acceptTable[lexerStateIndex] = new int[dfaStateCount];
 				for (int dfaStateIndex = 0; dfaStateIndex < dfaStateCount; dfaStateIndex++) {
-					gotoTable[lexerStateIndex][dfaStateIndex] = readVarintTable(in, 3);
-					acceptTable[lexerStateIndex][dfaStateIndex] = readVarint(in);
+					gotoTable[lexerStateIndex][dfaStateIndex] = r.readVarintTable(in, 3);
+					acceptTable[lexerStateIndex][dfaStateIndex] = r.readVarint(in);
 				}
 			}
 

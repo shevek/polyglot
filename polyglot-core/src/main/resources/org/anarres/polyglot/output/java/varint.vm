@@ -1,22 +1,27 @@
+## These methods are NOT static because that breaks
+## loop unrolling or performance or something on big systems.
+	private static class VIR {
 
-	/** Reads a little-endian varint with no optimization for negative numbers. */
-	private static int readVarint(@Nonnull DataInputStream in) throws IOException {
-		int result = 0;
-		for (int shift = 0; shift < 32; shift += 7) {
-			int b = in.read();
-			if (b == -1)
-				throw new EOFException("Truncated varint in stream.");
-			result |= (b & 0x7f) << shift;
-			if ((b & 0x80) == 0)
-				return result;
+		/** Reads a little-endian varint with no optimization for negative numbers. */
+		private int readVarint(@Nonnull DataInputStream in) throws IOException {
+			int result = 0;
+			for (int shift = 0; shift < 32; shift += 7) {
+				int b = in.read();
+				if (b == -1)
+					throw new EOFException("Truncated varint in stream.");
+				result |= (b & 0x7f) << shift;
+				if ((b & 0x80) == 0)
+					return result;
+			}
+			throw new IOException("Malformed varint in stream.");
 		}
-		throw new IOException("Malformed varint in stream.");
-	}
 
-	@Nonnull
-	private static int[] readVarintTable(@Nonnull DataInputStream in, @Nonnegative int sublength) throws IOException {
-		int[] out = new int[readVarint(in) * sublength];
-		for (int i = 0; i < out.length; i++)
-			out[i] = readVarint(in);
-		return out;
+		@Nonnull
+		private int[] readVarintTable(@Nonnull DataInputStream in, @Nonnegative int sublength) throws IOException {
+			int len = readVarint(in) * sublength;
+			int[] out = new int[len];
+			for (int i = 0; i < len; i++)
+				out[i] = readVarint(in);
+			return out;
+		}
 	}

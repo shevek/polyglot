@@ -451,16 +451,17 @@ ${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 #end
 			);
 
-			int parserStateCount = readVarint(in);
+			VIR r = new VIR();
+			int parserStateCount = r.readVarint(in);
 
 			actionTable = new int[parserStateCount][];
 			gotoTable = new int[parserStateCount][];
 			for (int i = 0; i < parserStateCount; i++) {
-				actionTable[i] = readVarintTable(in, 3);
-				gotoTable[i] = readVarintTable(in, 2);
+				actionTable[i] = r.readVarintTable(in, 3);
+				gotoTable[i] = r.readVarintTable(in, 2);
 			}
 
-			errorTable = new String[readVarint(in)];
+			errorTable = new String[r.readVarint(in)];
 			for (int i = 0; i < errorTable.length; i++)
 				errorTable[i] = in.readUTF();
 
