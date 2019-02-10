@@ -1,9 +1,12 @@
-## These methods are NOT static because that breaks
-## loop unrolling or performance or something on big systems.
-	private static class VIR {
+## These methods are in a separate class because hotspot cannot optimize
+## static method calls in a class which isn't fully initialized yet.
+## https://bugs.openjdk.java.net/browse/JDK-8215634
+## This is an inner class because it's required in lexer and parser,
+## so if it were shared, it would have to be public.
+	private static class V {
 
 		/** Reads a little-endian varint with no optimization for negative numbers. */
-		private int readVarint(@Nonnull DataInputStream in) throws IOException {
+		private static int readVarint(@Nonnull DataInputStream in) throws IOException {
 			int result = 0;
 			for (int shift = 0; shift < 32; shift += 7) {
 				int b = in.read();
@@ -17,7 +20,7 @@
 		}
 
 		@Nonnull
-		private int[] readVarintTable(@Nonnull DataInputStream in, @Nonnegative int sublength) throws IOException {
+		private static int[] readVarintTable(@Nonnull DataInputStream in, @Nonnegative int sublength) throws IOException {
 			int len = readVarint(in) * sublength;
 			int[] out = new int[len];
 			for (int i = 0; i < len; i++)
