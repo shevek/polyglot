@@ -183,5 +183,5 @@ project(':polyglot-maven') {
 }
 
 wrapper {
-	gradleVersion = '4.5.1'
+	gradleVersion = '4.10.3'
 }
