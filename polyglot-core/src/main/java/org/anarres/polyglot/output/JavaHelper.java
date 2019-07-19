@@ -21,6 +21,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.Option;
 import org.anarres.polyglot.lr.Indexed;
+import org.anarres.polyglot.model.AnnotationName;
 import org.anarres.polyglot.model.AstAlternativeModel;
 import org.anarres.polyglot.model.AstElementModel;
 import org.anarres.polyglot.model.AstModel;
@@ -168,6 +169,14 @@ public class JavaHelper extends AbstractHelper {
         }
         validateGroups(out, LEXER_GROUP_SHIFT);
         return out;
+    }
+
+    @TemplateProperty("stringlexer.vm")
+    public boolean isPredicated(EncodedStateMachine.Lexer lexerMachine) {
+        for (TokenModel token : grammar.getTokens())
+            if (token.hasAnnotation(AnnotationName.LexerPredicated))
+                return true;
+        return false;
     }
 
     /**

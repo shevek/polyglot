@@ -1,6 +1,7 @@
 /* ${header} */
 package ${grammar.package.packageName}.lexer;
 
+import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import ${grammar.package.packageName}.node.*;
@@ -55,7 +56,12 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 			if (dfa_state >= 0) {
 				// If there was a valid transition found on this character.
 				int acceptTableItem = acceptTableEntry[dfa_state];
+				ACCEPT:
 				if (acceptTableItem != 0) {
+#if ($helper.isPredicated($lexerMachine))
+					if (!isValidToken(acceptTableItem, start_offset, current_offset))
+						break ACCEPT;
+#end##isPredicated
 					accept_token = acceptTableItem;
 					accept_offset = current_offset;
 				}
@@ -147,6 +153,97 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 	}
 #end##foreach lexerGroup
 #end##large
+#if ($helper.isPredicated($lexerMachine))
+
+	protected class ValidityHandle implements CharSequence {
+
+		@Nonnegative
+		private int start_offset;
+		@Nonnegative
+		private int current_offset;
+
+		private void set(@Nonnegative int start_offset, @Nonnegative int current_offset) {
+			this.start_offset = start_offset;
+			this.current_offset = current_offset;
+		}
+
+		/** StringLexer-specific: The offset into the input String of the start of this token, inclusive. */
+		@Nonnegative
+		public int getStartOffset() {
+			return start_offset;
+		}
+
+		/** StringLexer-specific: The offset into the input String of the end of this token, exclusive. */
+		@Nonnegative
+		public int getCurrentOffset() {
+			return current_offset;
+		}
+
+		/** A utility method for isValid*() overrides: Returns the character n characters after this token, starting with 0. */
+		@CheckForSigned
+		public int lookahead(@Nonnegative int distance) {
+			if (distance < 0)
+				throw new IndexOutOfBoundsException();
+			int offset = current_offset + distance;
+			if (offset < in.length())
+				return in.charAt(offset);
+			return -1;
+		}
+
+		@Override
+		public int length() {
+			return current_offset - start_offset;
+		}
+
+		@Override
+		public char charAt(int index) {
+			if (index < 0)
+				throw new IndexOutOfBoundsException();
+			int offset = current_offset + index;
+			if (offset > current_offset)
+				throw new IndexOutOfBoundsException();
+			return in.charAt(offset);
+		}
+
+		@Override
+		public CharSequence subSequence(int start, int end) {
+			return in.subSequence(current_offset + start, current_offset + end);
+		}
+
+		@Override
+		public String toString() {
+			return in.substring(start_offset, current_offset);
+		}
+	}
+
+	private final ValidityHandle validityHandle = new ValidityHandle();
+#foreach ($token in ${grammar.tokensSorted})
+#if ($helper.hasAnnotation($token, 'LexerPredicated'))
+
+	// @ForOverride
+	protected boolean isValid${token.javaTypeName}(@Nonnull ValidityHandle handle) {
+		return true;
+	}
+#end##if-token-LexerPredicated
+#end##foreach-token(predicate)
+
+	private boolean isValidToken(
+			@Nonnegative int accept_token,
+			@Nonnegative int start_offset,
+			@Nonnegative int current_offset) {
+		switch (accept_token) {
+#foreach ($token in ${grammar.tokensSorted})
+#if ($helper.hasAnnotation($token, 'LexerPredicated'))
+			case ${token.index}:
+				validityHandle.set(start_offset, current_offset);
+				return isValid${token.javaTypeName}(validityHandle);
+#end##if-token-LexerPredicated
+#end##foreach-token(predicate)
+			default:
+				return true;
+		}
+	}
+#end
 
 	private void accept_at(int accept_offset) {
 		int current_line = this.line;

@@ -40,6 +40,8 @@ public enum AnnotationName {
     LexerExclude(TokenModel.class),
     /** Used on a TokenModel to indicate that it may be masked, i.e. never match. */
     LexerAllowMasking(TokenModel.class),
+    /** Used on a TokenModel to indicate that acceptance is conditional on a predicate. */
+    LexerPredicated(TokenModel.class),
     /** Used on a TokenModel to indicate that the token or production is ignored by the parser with the given name(s). Usage on CstProductionModel and CstAlternativeModel is deprecated. */
     ParserIgnore(TokenModel.class, CstProductionModel.class, CstAlternativeModel.class),
     /** Used on a CstProductionModel or CstAlternativeModel to indicate that the production is included by only the parser with the given name(s). */

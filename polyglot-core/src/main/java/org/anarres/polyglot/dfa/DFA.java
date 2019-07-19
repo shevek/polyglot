@@ -14,7 +14,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenCustomHashMap;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -516,6 +515,13 @@ public class DFA implements GraphVizable, GraphVizScope {
         public String getAcceptTokenName() {
             return (acceptToken == null) ? "" : acceptToken.getName();
         }
+
+/*
+        @TemplateProperty
+        public boolean isAcceptTokenPredicated() {
+            return (acceptToken == null) ? false : acceptToken.hasAnnotation(AnnotationName.LexerPredicated);
+        }
+*/
 
         @TemplateProperty
         @CheckForSigned

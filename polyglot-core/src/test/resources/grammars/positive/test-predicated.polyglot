@@ -1,0 +1,26 @@
+Package org.anarres.polyglot.test.expression.lr0;
+
+Helpers
+
+	digit = ['0'..'9'];
+	letter = ['a'..'z'];
+
+Tokens
+
+	tok_number = digit+ ;
+	@LexerPredicated
+	tok_word = (digit | letter)+ ;
+
+Productions
+
+	// Page 222
+	root { -> root } =
+		tok_word { -> New root.word(tok_word) } |
+		tok_number { -> New root.number(tok_number) } ;
+
+Abstract Syntax Tree
+
+	root =
+		{word} tok_word |
+		{number} tok_number ;
+
