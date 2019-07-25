@@ -116,6 +116,10 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 
 #foreach ($lexerGroup in $helper.lexerGroups)
 	@Nonnull
+#if ($helper.isOption("CG_FINDBUGS"))
+## current_offset is unused if we don't enable CG_DEBUG
+	@SuppressWarnings({"UnusedVariable"})
+#end##CG_FINDBUGS
 	private Token lex${lexerGroup.javaMethodName}(
 			@Nonnegative int accept_token,
 			@Nonnegative int start_offset,

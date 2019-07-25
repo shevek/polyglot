@@ -168,6 +168,10 @@ public class ${lexerMachine.getLexerClassName()} extends ${lexerMachine.getLexer
 ##	}
 
 	@Nonnull
+#if ($helper.isOption("CG_FINDBUGS"))
+## This is unused if all tokens are fixed.
+	@SuppressWarnings({"UnusedMethod"})
+#end##CG_FINDBUGS
 	private String getText(/* @Nonnegative */ int acceptLength) {
 		return this.text.substring(0, acceptLength);
 	}
