@@ -96,7 +96,7 @@ public class ${parserMachine.parserClassName} {
 			stack.add(out);
 		} else {
 			out = stack.get(stackPointer);
-			out.clear();
+##			out.clear();
 		}
 		out.state = state;
 		out.name = name;
@@ -123,7 +123,10 @@ public class ${parserMachine.parserClassName} {
 	/* Pop, and return the first transform result. */
 	@SuppressWarnings("TypeParameterUnusedInFormals")
 	private <T> T p() {
-		return pop().t(0);
+		S state = pop();
+		T out = state.t(0);
+		state.clear();
+		return out;
 	}
 
 	protected void ignore(@Nonnull Token token) {
@@ -157,7 +160,7 @@ public class ${parserMachine.parserClassName} {
 					break;
 				case ACCEPT:
 					EOF eof = (EOF) this.lexer.next();
-					${parserMachine.astProductionRoot.javaTypeName} root = (${parserMachine.astProductionRoot.javaTypeName}) pop().get(0);
+					${parserMachine.astProductionRoot.javaTypeName} root = (${parserMachine.astProductionRoot.javaTypeName}) p();
 					return new ${parserMachine.startClassName}(root, eof);
 				case ERROR:
 					StringBuilder buf = new StringBuilder("After");
@@ -377,6 +380,9 @@ ${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 		$javaTypeName ${helper.getLocalVariableName($element, $transformPrototype)} = p();
 #end## transformPrototypes.size()
 #end##transformPrototype												}
+#if ($element.symbol.transformPrototypes.size() != 1)
+		${helper.getLocalVariableName($element)}.clear();
+#end## multiple transformPrototypes
 ##
 #end##element														   }}
 ## This push has to happen after we have popped the items, as goTo() looks at the outstanding top state.
