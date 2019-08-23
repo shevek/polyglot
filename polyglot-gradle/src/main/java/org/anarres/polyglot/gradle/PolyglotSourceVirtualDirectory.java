@@ -7,21 +7,22 @@ package org.anarres.polyglot.gradle;
 
 import groovy.lang.Closure;
 import javax.annotation.Nonnull;
+import org.gradle.api.Action;
 import org.gradle.api.file.SourceDirectorySet;
-import org.gradle.api.internal.file.SourceDirectorySetFactory;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.util.ConfigureUtil;
 
 /**
  *
  * @author shevek
  */
-public class PolyglotSourceSet {
+public class PolyglotSourceVirtualDirectory {
 
     private final SourceDirectorySet polyglot;
 
-    public PolyglotSourceSet(@Nonnull String displayName, @Nonnull SourceDirectorySetFactory sourceDirectorySetFactory) {
+    public PolyglotSourceVirtualDirectory(@Nonnull String displayName, @Nonnull ObjectFactory objectFactory) {
         // polyglot = new DefaultSourceDirectorySet(String.format("Polyglot %s source", displayName), fileResolver);
-        polyglot = sourceDirectorySetFactory.create(displayName + ".polyglot", String.format("%s Polyglot source", displayName));
+        polyglot = objectFactory.sourceDirectorySet(displayName + ".polyglot", String.format("%s Polyglot source", displayName));
         polyglot.getFilter().include("**/*.polyglot", "**/*.sablecc");
     }
 
@@ -31,8 +32,15 @@ public class PolyglotSourceSet {
     }
 
     @Nonnull
-    public PolyglotSourceSet polyglot(Closure<?> configureClosure) {
+    public PolyglotSourceVirtualDirectory polyglot(Closure<?> configureClosure) {
         ConfigureUtil.configure(configureClosure, getPolyglot());
         return this;
     }
+
+    @Nonnull
+    public PolyglotSourceVirtualDirectory polyglot(Action<? super SourceDirectorySet> configureAction) {
+        configureAction.execute(getPolyglot());
+        return this;
+    }
+
 }

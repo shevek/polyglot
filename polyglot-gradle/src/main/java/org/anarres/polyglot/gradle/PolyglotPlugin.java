@@ -22,8 +22,8 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.CopySpec;
-import org.gradle.api.internal.file.SourceDirectorySetFactory;
 import org.gradle.api.internal.plugins.DslObject;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 
@@ -33,11 +33,11 @@ import org.gradle.api.tasks.SourceSet;
  */
 public class PolyglotPlugin implements Plugin<Project> {
 
-    private final SourceDirectorySetFactory sourceDirectorySetFactory;
+    private final ObjectFactory objectFactory;
 
     @Inject
-    public PolyglotPlugin(@Nonnull SourceDirectorySetFactory sourceDirectorySetFactory) {
-        this.sourceDirectorySetFactory = sourceDirectorySetFactory;
+    public PolyglotPlugin(@Nonnull ObjectFactory objectFactory) {
+        this.objectFactory = objectFactory;
     }
 
     @Override
@@ -93,7 +93,7 @@ public class PolyglotPlugin implements Plugin<Project> {
     }
 
     private void apply(@Nonnull final Project project, @Nonnull final SourceSet sourceSet, @Nonnull final PolyglotPluginExtension extension) {
-        final PolyglotSourceSet polyglotSourceSet = new PolyglotSourceSet(sourceSet.getName(), sourceDirectorySetFactory);
+        final PolyglotSourceVirtualDirectory polyglotSourceSet = new PolyglotSourceVirtualDirectory(sourceSet.getName(), objectFactory);
         new DslObject(sourceSet).getConvention().getPlugins().put("polyglot", polyglotSourceSet);
         final String srcDir = String.format("src/%s/polyglot", sourceSet.getName());
         polyglotSourceSet.getPolyglot().srcDir(srcDir);
