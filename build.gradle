@@ -4,15 +4,23 @@ buildscript {
 		mavenCentral()
 		jcenter()
 		// maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-		maven { url "https://plugins.gradle.org/m2/" }
+		gradlePluginPortal()
 	}
 
 	dependencies {
-		classpath 'org.anarres.gradle:gradle-stdproject-plugin:1.0.8'
+		classpath 'org.anarres.gradle:gradle-stdproject-plugin:1.0.10'
 		// classpath "org.anarres.gradle:gradle-sablecc-plugin:1.0.4"
 		// classpath 'org.anarres.sablecc:sablecc-gradle:3.7.1-SNAPSHOT'
 		classpath 'org.anarres.polyglot:polyglot-gradle:1.0.0'
 		classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.13'
+		// classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+	}
+
+	configurations.classpath {
+		resolutionStrategy {
+			// Polyglot 1.0 uses Files.fileTreeTraverser()
+			force 'com.google.guava:guava:17.0'
+		}
 	}
 }
 
@@ -41,12 +49,7 @@ subprojects {
 	apply plugin: 'net.ltgt.errorprone'
 
 	sourceCompatibility = 1.8
-	animalsniffer {
-		signature = "org.codehaus.mojo.signature:java18:+@signature"
-		skip = true	// Does not like Java 1.8 or the latest fastutil.
-	}
-
-	findbugs {
+	spotbugs {
 		excludeFilter = file("$rootProject.projectDir/gradle/filter.xml")
 	}
 
@@ -66,6 +69,10 @@ subprojects {
 	}
 
 	dependencies {
+		implementation 'org.slf4j:slf4j-api:1.7.12'
+		implementation 'com.google.code.findbugs:annotations:3.0.1'
+		implementation 'com.google.guava:guava:27.1-jre'
+
 		testCompile 'com.google.testing.compile:compile-testing:0.7'
 	}
 
@@ -74,15 +81,12 @@ subprojects {
 project(':polyglot-runtime') {
 	dependencies {
 		compile 'org.slf4j:slf4j-api:1.7.12'
-		compile 'com.google.code.findbugs:annotations:2.0.3'
+		compile 'com.google.code.findbugs:annotations:3.0.1'
 	}
 }
 
 project(':polyglot-core') {
 	dependencies {
-		compile 'org.slf4j:slf4j-api:1.7.12'
-		compile 'com.google.code.findbugs:annotations:2.0.3'
-		compile 'com.google.guava:guava-jdk5:17.0'
 		compile 'org.anarres:jcpp:1.4.11'
 		compile 'org.anarres.graphviz:graphviz-builder:1.0.3'
 		compile 'org.anarres.jdiagnostics:jdiagnostics:1.0.2'
@@ -107,14 +111,11 @@ project(':polyglot-core') {
 project(':polyglot-diagnoser') {
 	dependencies {
 		compile project(':polyglot-core')
-		compile 'org.choco-solver:choco-graph:3.3.0'
-	}
-
-	animalsniffer {
-		skip = true
+		implementation 'org.choco-solver:choco-graph:3.3.0'
 	}
 }
 
+/*
 project(':polyglot-cmd') {
 	apply plugin: 'application'
 	apply plugin: 'com.github.johnrengelman.shadow'
@@ -122,8 +123,8 @@ project(':polyglot-cmd') {
 	mainClassName = 'org.anarres.polyglot.cmd.Main'
 
 	dependencies {
-		compile project(':polyglot-core')
-		compile 'net.sf.jopt-simple:jopt-simple:4.8'
+		implementation project(':polyglot-core')
+		implementation 'net.sf.jopt-simple:jopt-simple:4.8'
 	}
 
 	shadowJar {
@@ -139,6 +140,7 @@ project(':polyglot-cmd') {
 		}
 	}
 }
+*/
 
 project(':polyglot-gradle') {
 	apply plugin: 'org.anarres.stdplugin'
@@ -148,40 +150,35 @@ project(':polyglot-gradle') {
 	}
 
 	dependencies {
-		compile (project(':polyglot-core')) {
+		implementation (project(':polyglot-core')) {
 			// Gradle (2.4+?) uses version 0.17. We must exclude our own here.
 			exclude group: 'com.google.guava', module: 'guava'
 		}
-		compile gradleApi()
-		compile 'org.anarres.gradle:gradle-velocity-plugin:1.0.7'
+		implementation gradleApi()
+		implementation localGroovy()
+		implementation 'org.anarres.gradle:gradle-velocity-plugin:1.0.8'
 
 		testCompile gradleTestKit()
 	}
-
-	animalsniffer {
-		skip = true
-	}
 }
 
+/*
 project(':polyglot-ant') {
 	dependencies {
-		compile project(':polyglot-core')
-		compile 'org.apache.ant:ant:1.7.0'
+		implementation project(':polyglot-core')
+		implementation 'org.apache.ant:ant:1.7.0'
 	}
 }
 
 project(':polyglot-maven') {
 	dependencies {
-		compile project(':polyglot-core')
-		compile 'org.apache.maven:maven-plugin-api:3.0.5'
-		compile 'org.apache.maven:maven-project:2.2.1'
-		compile 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.2'
-		compile 'org.codehaus.plexus:plexus-compiler-api:2.2'
+		implementation project(':polyglot-core')
+		implementation 'org.apache.maven:maven-plugin-api:3.0.5'
+		implementation 'org.apache.maven:maven-project:2.2.1'
+		implementation 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.2'
+		implementation 'org.codehaus.plexus:plexus-compiler-api:2.2'
 
 		testCompile 'org.apache.maven.shared:maven-plugin-testing-harness:1.1'
 	}
 }
-
-wrapper {
-	gradleVersion = '4.10.3'
-}
+*/

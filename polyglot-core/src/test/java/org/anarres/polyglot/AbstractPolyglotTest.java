@@ -107,7 +107,7 @@ public abstract class AbstractPolyglotTest {
         {
             LOG.info("Collecting file objects.");
             Stopwatch stopwatch = Stopwatch.createStarted();
-            for (File javaFile : Files.fileTreeTraverser().preOrderTraversal(destinationDir)) {
+            for (File javaFile : Files.fileTraverser().depthFirstPreOrder(destinationDir)) {
                 if (!javaFile.isFile())
                     continue;
                 if (!javaFile.getName().endsWith(".java"))

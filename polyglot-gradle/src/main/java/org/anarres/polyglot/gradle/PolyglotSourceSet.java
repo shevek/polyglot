@@ -8,8 +8,6 @@ package org.anarres.polyglot.gradle;
 import groovy.lang.Closure;
 import javax.annotation.Nonnull;
 import org.gradle.api.file.SourceDirectorySet;
-import org.gradle.api.internal.file.DefaultSourceDirectorySet;
-import org.gradle.api.internal.file.FileResolver;
 import org.gradle.api.internal.file.SourceDirectorySetFactory;
 import org.gradle.util.ConfigureUtil;
 
@@ -23,7 +21,7 @@ public class PolyglotSourceSet {
 
     public PolyglotSourceSet(@Nonnull String displayName, @Nonnull SourceDirectorySetFactory sourceDirectorySetFactory) {
         // polyglot = new DefaultSourceDirectorySet(String.format("Polyglot %s source", displayName), fileResolver);
-        polyglot = sourceDirectorySetFactory.create(String.format("Polyglot %s source", displayName));
+        polyglot = sourceDirectorySetFactory.create(displayName + ".polyglot", String.format("%s Polyglot source", displayName));
         polyglot.getFilter().include("**/*.polyglot", "**/*.sablecc");
     }
 

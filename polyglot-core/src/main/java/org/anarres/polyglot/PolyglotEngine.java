@@ -95,7 +95,7 @@ public class PolyglotEngine {
      * it will tend to see the recreation of files within a source root.
      */
     public static void deleteChildren(@Nonnull File dir, @Nonnull String name) throws IOException {
-        for (File file : Files.fileTreeTraverser().postOrderTraversal(dir)) {
+        for (File file : Files.fileTraverser().depthFirstPostOrder(dir)) {
             // Don't delete the actual output directory as this confuses file-watching IDEs.
             if (dir.equals(file) && dir.isDirectory())
                 continue;

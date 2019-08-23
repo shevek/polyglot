@@ -84,7 +84,7 @@ public class Polyglot extends SourceTask {
     @CheckForNull
     @Optional
     @Input  // We only care about the directory name, not the contents.
-    @PathSensitive(PathSensitivity.RELATIVE)
+    // @PathSensitive(PathSensitivity.RELATIVE)
     public File getDebugDir() {
         return debugDir;
     }

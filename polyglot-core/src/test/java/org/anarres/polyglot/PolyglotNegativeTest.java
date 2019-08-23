@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot;
 
+import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
 import java.io.File;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class PolyglotNegativeTest extends AbstractPolyglotTest {
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> data() {
         List<Object[]> out = new ArrayList<>();
-        for (File file : Files.fileTreeTraverser().preOrderTraversal(ROOT).filter(new TestFilePredicate())) {
+        for (File file : Iterables.filter(Files.fileTraverser().depthFirstPreOrder(ROOT), new TestFilePredicate())) {
             out.add(new Object[]{file});
         }
         return out;

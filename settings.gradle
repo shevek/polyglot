@@ -2,8 +2,8 @@ rootProject.name='polyglot'
 include 'polyglot-runtime',
 	'polyglot-core',
 	'polyglot-diagnoser',
-	'polyglot-cmd',
-	'polyglot-gradle',
-	'polyglot-ant',
-	'polyglot-maven'
+	'polyglot-gradle'
+	// 'polyglot-ant',
+	// 'polyglot-maven'
+	// 'polyglot-cmd',
 	// 'polyglot-tests'

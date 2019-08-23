@@ -37,11 +37,11 @@ public class ErrorHandler {
         if (offset < 0 || offset > source.length())
             return "<invalid-offset>";
 
-        String prefix = CharMatcher.WHITESPACE.collapseFrom(source.substring(0, offset), ' ');
+        String prefix = CharMatcher.whitespace().collapseFrom(source.substring(0, offset), ' ');
         int start = Math.max(0, prefix.length() - CONTEXT_LENGTH);
         prefix = prefix.substring(start);
 
-        String suffix = CharMatcher.WHITESPACE.collapseFrom(source.substring(offset), ' ');
+        String suffix = CharMatcher.whitespace().collapseFrom(source.substring(offset), ' ');
         int end = Math.min(suffix.length(), CONTEXT_LENGTH);
         suffix = suffix.substring(0, end);
 

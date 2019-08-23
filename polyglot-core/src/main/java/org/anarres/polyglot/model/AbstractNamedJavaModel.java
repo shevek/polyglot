@@ -38,7 +38,7 @@ public abstract class AbstractNamedJavaModel extends AbstractNamedModel {
     /** Returns true if the Java type of this (presumably external) is primitive. */
     @TemplateProperty("alternative.vm")
     public boolean isJavaTypePrimitive() {
-        return CharMatcher.JAVA_LOWER_CASE.matchesAllOf(getJavaTypeName());
+        return CharMatcher.javaLowerCase().matchesAllOf(getJavaTypeName());
     }
 
     /** Typically {@link CaseFormat#LOWER_CAMEL}. */
