@@ -11,16 +11,9 @@ buildscript {
 		classpath 'org.anarres.gradle:gradle-stdproject-plugin:1.0.10'
 		// classpath "org.anarres.gradle:gradle-sablecc-plugin:1.0.4"
 		// classpath 'org.anarres.sablecc:sablecc-gradle:3.7.1-SNAPSHOT'
-		classpath 'org.anarres.polyglot:polyglot-gradle:1.0.0'
+		classpath 'org.anarres.polyglot:polyglot-gradle:1.0.5-SNAPSHOT'
 		classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.13'
 		// classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
-	}
-
-	configurations.classpath {
-		resolutionStrategy {
-			// Polyglot 1.0 uses Files.fileTreeTraverser()
-			force 'com.google.guava:guava:17.0'
-		}
 	}
 }
 

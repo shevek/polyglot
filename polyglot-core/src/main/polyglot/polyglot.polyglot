@@ -27,13 +27,13 @@ Helpers
 	// simple_escape_seq = '\\\'' | '\\"' | '\\?' | '\\\\' | '\\a' | '\\b' | '\\f' | '\\n' | '\\r' | '\\t' | '\\v';
 	// octal_escape_seq = '\\' octal_digit octal_digit? octal_digit?;
 	// hex_escape_seq = '\\x' hex_digit+;
-	escape_seq = '\' all ;
+	escape_seq = '\\' all ;
 			// simple_escape_seq |
 			// octal_escape_seq |
 			// hex_escape_seq ;
 			// universal_char_name;
 
-	s_char = [all - [''' + ['\' + [cr + lf]]]] | escape_seq;
+	s_char = [all - ['\'' + ['\\' + [cr + lf]]]] | escape_seq;
 
 Tokens
 
@@ -83,7 +83,7 @@ Tokens
 	dec_char = digit+;
 	hex_char = '0' ('x' | 'X') hex_digit+;
 
-	string = ''' s_char* ''';
+	string = '\'' s_char* '\'';
 	custom_name = '`' nondigit (nondigit | digit)* '`' ;
 
 	blank = (eol | tab | ' ')+ ;
