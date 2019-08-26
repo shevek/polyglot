@@ -40,6 +40,7 @@ subprojects {
 	}
 
 	apply plugin: 'net.ltgt.errorprone'
+	apply plugin: 'maven-publish'
 
 	sourceCompatibility = 1.8
 	spotbugs {
@@ -69,6 +70,17 @@ subprojects {
 		testCompile 'com.google.testing.compile:compile-testing:0.7'
 	}
 
+	publishing {
+		publications {
+			release(MavenPublication) {
+				from components.java
+			}
+		}
+	}
+
+	signing {
+		sign publishing.publications.release
+	}
 }
 
 project(':polyglot-runtime') {
