@@ -45,6 +45,7 @@ public class PolyglotPlugin implements Plugin<Project> {
         // project.getPluginManager().apply(JavaPlugin.class);
 
         final PolyglotPluginExtension extension = project.getExtensions().create("polyglot", PolyglotPluginExtension.class);
+        /*
         final Configuration configuration = project.getConfigurations().create("polyglot")
                 // .setVisible(false)
                 .setDescription("The Polyglot parser generator used by this build.");
@@ -60,14 +61,15 @@ public class PolyglotPlugin implements Plugin<Project> {
         } catch (IOException e) {
             throw Throwables.propagate(e);
         }
+         */
 
         project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(
                 new Action<SourceSet>() {
-                    @Override
-                    public void execute(SourceSet t) {
-                        apply(project, t, extension);
-                    }
-                });
+            @Override
+            public void execute(SourceSet t) {
+                apply(project, t, extension);
+            }
+        });
     }
 
     /** All SerializableEscapeTools are equal. */
@@ -160,8 +162,8 @@ public class PolyglotPlugin implements Plugin<Project> {
         CopySpec processResourcesTask = (CopySpec) project.getTasks().getByName(sourceSet.getProcessResourcesTaskName());
         processResourcesTask.with(
                 project.copySpec()
-                .from(polyglotParserTask.getOutputDir())
-                .include("**/*.dat")
+                        .from(polyglotParserTask.getOutputDir())
+                        .include("**/*.dat")
         );
     }
 }
