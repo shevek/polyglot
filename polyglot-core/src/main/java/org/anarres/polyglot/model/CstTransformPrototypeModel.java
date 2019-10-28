@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CstTransformPrototypeModel extends AbstractElementModel<AstProductionSymbol> {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(CstTransformPrototypeModel.class);
 
     @Nonnull

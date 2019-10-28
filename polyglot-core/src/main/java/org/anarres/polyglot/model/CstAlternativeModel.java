@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class CstAlternativeModel extends AbstractNamedModel implements Indexed, CstTransformExpressionModel.Container {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(CstAlternativeModel.class);
 
     @Nonnull

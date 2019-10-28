@@ -399,6 +399,7 @@ public class JavaHelper extends AbstractHelper {
 
     public static abstract class FormatLexer {
 
+        @SuppressWarnings("UnusedVariable")
         private static final Logger LOG = LoggerFactory.getLogger(FormatLexer.class);
 
         @Nonnull

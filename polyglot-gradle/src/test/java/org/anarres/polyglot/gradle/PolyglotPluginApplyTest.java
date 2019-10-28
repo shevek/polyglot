@@ -42,7 +42,8 @@ public class PolyglotPluginApplyTest {
                 // A("4.5.1"),
                 // A("4.10.3"),
                 A("5.4.1"),
-                A("5.6")
+                A("5.6"),
+                A("5.6.3")
         );
     }
 

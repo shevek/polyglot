@@ -299,7 +299,9 @@ public class DFA implements GraphVizable, GraphVizScope {
     /** A factory which transforms an {@link NFA} into a {@link DFA}. */
     public static class Builder {
 
+        @SuppressWarnings("UnusedVariable")
         private final ErrorHandler errors;
+        @SuppressWarnings("UnusedVariable")
         private final GrammarModel grammar;
         private final TokenMask mask;
         private final NFA nfa;
@@ -516,13 +518,12 @@ public class DFA implements GraphVizable, GraphVizScope {
             return (acceptToken == null) ? "" : acceptToken.getName();
         }
 
-/*
+        /*
         @TemplateProperty
         public boolean isAcceptTokenPredicated() {
             return (acceptToken == null) ? false : acceptToken.hasAnnotation(AnnotationName.LexerPredicated);
         }
-*/
-
+         */
         @TemplateProperty
         @CheckForSigned
         public int getAcceptTokenIndex() {

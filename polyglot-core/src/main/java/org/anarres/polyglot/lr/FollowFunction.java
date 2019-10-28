@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FollowFunction implements Function<CstProductionModel, Set<TokenModel>> {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(FollowFunction.class);
 
     /** In a value, TokenModel.EOF means $ (end of input). */

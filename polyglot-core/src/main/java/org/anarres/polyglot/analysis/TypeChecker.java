@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TypeChecker implements Runnable {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(TypeChecker.class);
 
     @Nonnull

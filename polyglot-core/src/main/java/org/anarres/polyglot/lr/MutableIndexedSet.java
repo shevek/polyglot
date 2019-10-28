@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MutableIndexedSet<IndexedItem extends Indexed> extends AbstractIndexedSet<IndexedItem> {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(MutableIndexedSet.class);
     private final IntOpenHashSet indices = new IntOpenHashSet();
 

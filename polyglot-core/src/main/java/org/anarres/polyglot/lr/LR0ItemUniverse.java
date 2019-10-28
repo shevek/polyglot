@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LR0ItemUniverse extends LRItemUniverse<LR0Item> {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(LR0ItemUniverse.class);
     /** A map from CstAlternativeModel to LR0Item(CstAlternativeModel, 0), to avoid allocation. */
     private final Map<CstAlternativeModel, LR0Item> itemMapInitial = new HashMap<>();

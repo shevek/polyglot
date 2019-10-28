@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ModelBuilderVisitor extends DepthFirstAdapter {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderVisitor.class);
 
     private static class AstSynthesizerAdapter extends AnalysisAdapter {

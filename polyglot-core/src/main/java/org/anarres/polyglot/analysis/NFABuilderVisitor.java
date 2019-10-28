@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NFABuilderVisitor extends MatcherParserVisitor {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(NFABuilderVisitor.class);
 
     private final ErrorHandler errors;

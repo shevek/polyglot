@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractParser {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(AbstractParser.class);
 
     public static final int SHIFT = 0;

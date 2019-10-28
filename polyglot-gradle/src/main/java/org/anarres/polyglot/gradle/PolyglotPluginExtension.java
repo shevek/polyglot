@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PolyglotPluginExtension {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(PolyglotPluginExtension.class);
     @Nonnull
     public List<Object> includeDirs = new ArrayList<Object>();

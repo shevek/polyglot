@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TokenModel extends AbstractNamedJavaModel implements CstProductionSymbol, AstProductionSymbol, Indexed {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(TokenModel.class);
 
     public static class IndexComparator implements Comparator<TokenModel> {

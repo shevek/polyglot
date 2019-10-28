@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(Parameterized.class)
 public class PolyglotOptionsTest extends AbstractPolyglotTest {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(PolyglotOptionsTest.class);
     public static final String FILE = "build/resources/test/grammars/positive/test-calculator.polyglot";
 

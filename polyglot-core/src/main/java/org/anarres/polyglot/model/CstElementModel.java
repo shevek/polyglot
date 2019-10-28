@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 // TODO: Extends AbstractElementModel.
 public class CstElementModel extends AbstractElementModel<CstProductionSymbol> {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(CstElementModel.class);
 
     @Nonnull

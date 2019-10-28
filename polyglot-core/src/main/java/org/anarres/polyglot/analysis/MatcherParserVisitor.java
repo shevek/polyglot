@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MatcherParserVisitor extends DepthFirstAdapter {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(MatcherParserVisitor.class);
 
     @Nonnull

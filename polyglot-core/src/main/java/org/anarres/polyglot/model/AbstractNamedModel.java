@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractNamedModel extends AbstractModel implements AnnotatedModel {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(AbstractNamedModel.class);
 
     public static class NameComparator implements Comparator<AbstractNamedModel> {

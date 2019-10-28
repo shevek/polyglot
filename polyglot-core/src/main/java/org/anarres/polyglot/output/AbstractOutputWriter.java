@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractOutputWriter implements OutputWriter {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOutputWriter.class);
 
     protected static void setProperty(@Nonnull VelocityEngine engine, @Nonnull String name, @Nonnull Object value) {

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JavaOutputWriter extends AbstractOutputWriter {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(JavaOutputWriter.class);
 
     /** Syntactic sugar. */

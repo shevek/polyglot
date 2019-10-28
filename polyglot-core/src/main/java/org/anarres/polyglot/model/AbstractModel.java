@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractModel implements Model {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(AbstractModel.class);
 
     private static class TokenFinder extends DepthFirstAdapter {

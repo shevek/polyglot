@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LR1ItemUniverse extends LRItemUniverse<LR1Item> {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(LR1ItemUniverse.class);
     // private static final boolean DEBUG = false;
     private final FirstFunction firstFunction;

@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class CstProductionModel extends AbstractNamedModel implements CstProductionSymbol, Indexed {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(CstProductionModel.class);
 
     @Nonnull

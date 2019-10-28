@@ -41,7 +41,9 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(LRAutomaton.class);
+    @SuppressWarnings("UnusedVariable")
     private final String machineName;
     /** These are guaranteed indexed sequentially. */
     private final Map<ImmutableIndexedSet<? extends LRItem>, LRState> states = new LinkedHashMap<>();

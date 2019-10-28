@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ExpressionSubstituteVisitor implements CstTransformExpressionModel.Visitor<ExpressionSubstituteVisitor.SubstitutionMap, CstTransformExpressionModel, RuntimeException> {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(ExpressionSubstituteVisitor.class);
 
     private static class Needle {

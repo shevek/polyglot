@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class CstTransformExpressionModel extends AbstractModel {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(CstTransformExpressionModel.class);
 
     public interface Visitor<I, O, X extends Exception> {
