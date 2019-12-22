@@ -161,7 +161,7 @@ project(':polyglot-gradle') {
 		}
 		implementation gradleApi()
 		implementation localGroovy()
-		implementation 'org.anarres.gradle:gradle-velocity-plugin:1.0.8'
+		implementation 'org.anarres.gradle:gradle-velocity-plugin:1.0.9'
 
 		testCompile gradleTestKit()
 	}
