@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.jdiagnostics.DefaultQuery;
 import org.anarres.polyglot.DebugHandler;
@@ -56,6 +57,8 @@ public class Polyglot extends SourceTask {
     private final Map<String, PolyglotTemplateSet> templates = new HashMap<>();
     @CheckForNull
     private Map<Option, Boolean> options;
+    @Nonnegative
+    private int maxThreads = Integer.MAX_VALUE;
 
     @Deprecated // Use setSource.
     public void setInputDir(File inputDir) {
@@ -170,6 +173,18 @@ public class Polyglot extends SourceTask {
         option(names);
     }
 
+    public int getMaxThreads() {
+        return maxThreads;
+    }
+
+    public void setMaxThreads(int maxThreads) {
+        this.maxThreads = maxThreads;
+    }
+
+    public void maxThreads(int maxThreads) {
+        setMaxThreads(maxThreads);
+    }
+
     public void runPolyglot() throws IOException {
         // println "Reading from $inputDir"
         final File outputDir = getOutputDir();
@@ -195,10 +210,11 @@ public class Polyglot extends SourceTask {
                         engine.setDebugHandler(new DebugHandler.File(debugDir, file.getName()));
                     }
                     if (options != null) {
-                        for (Map.Entry<Option, Boolean> e : options.entrySet()) {
+                        for (Map.Entry<Option, Boolean> e : getOptions().entrySet()) {
                             engine.setOption(e.getKey(), e.getValue().booleanValue());
                         }
                     }
+                    engine.setMaxThreads(getMaxThreads());
                     for (PolyglotTemplateSet templateSet : templates.values()) {
                         if (!templateSet.toSpec().isSatisfiedBy(file))
                             continue;

@@ -129,7 +129,8 @@ public class PolyglotEngine {
     private final Map<OutputLanguage, File> outputDirs = new EnumMap<>(OutputLanguage.class);
     @Nonnull
     private DebugHandler debugHandler = DebugHandler.None.INSTANCE;
-    public final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_ON_CONFLICT, Option.CG_INLINE_TABLES, Option.CG_PARENT, Option.CG_APIDOC, Option.CG_JSR305, Option.CG_FINDBUGS, Option.PARALLEL);
+    private final Set<Option> options = EnumSet.of(Option.SLR, Option.LR1, Option.INLINE_ON_CONFLICT, Option.CG_INLINE_TABLES, Option.CG_PARENT, Option.CG_APIDOC, Option.CG_JSR305, Option.CG_FINDBUGS, Option.PARALLEL);
+    private int maxThreads = Integer.MAX_VALUE;
     private final Table<OutputLanguage, String, File> templates = HashBasedTable.create();
 
     public PolyglotEngine(@Nonnull String name, @Nonnull CharSource input, @Nonnull File outputDir) {
@@ -190,6 +191,14 @@ public class PolyglotEngine {
 
     public boolean isOption(@Nonnull Option option) {
         return options.contains(option);
+    }
+
+    public int getMaxThreads() {
+        return maxThreads;
+    }
+
+    public void setMaxThreads(int maxThreads) {
+        this.maxThreads = maxThreads;
     }
 
     public void addTemplates(@Nonnull OutputLanguage language, Map<String, File> templates) {
@@ -262,7 +271,8 @@ public class PolyglotEngine {
         if (!isOption(Option.PARALLEL))
             return new PolyglotExecutor.Serial();
         int nthreads = Runtime.getRuntime().availableProcessors();
-        if (nthreads == 1)
+        nthreads = Math.min(nthreads, getMaxThreads());
+        if (nthreads <= 1)
             return new PolyglotExecutor.Serial();
         return new PolyglotExecutor.Parallel(name, nthreads);
     }
