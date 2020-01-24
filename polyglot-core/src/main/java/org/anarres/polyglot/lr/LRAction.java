@@ -171,9 +171,7 @@ public abstract class LRAction {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (null == obj)
-            return false;
-        if (!getClass().equals(obj.getClass()))
+        if (!(obj instanceof LRAction))
             return false;
         LRAction o = (LRAction) obj;
         return Objects.equals(getTarget(), o.getTarget());

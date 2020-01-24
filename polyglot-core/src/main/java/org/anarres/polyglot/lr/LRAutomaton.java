@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,6 +62,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
     }
 
     @Nonnull
+    @SuppressWarnings("UnusedMethod")
     private LRState getState(@Nonnull ImmutableIndexedSet<? extends LRItem> items) {
         LRState state = states.get(items);
         if (state == null)
@@ -206,7 +206,7 @@ public abstract class LRAutomaton implements GraphVizable, GraphVizScope {
                 for (Map.Entry<? extends CstProductionSymbol, ? extends LRState> e : state.getTransitionMap().entrySet()) {
                     CstProductionSymbol symbol = e.getKey();
                     LRState target = e.getValue();
-                    GraphVizEdge edge = graph.edge(this, state, target).label(symbol.getName());
+                    /* GraphVizEdge edge = */ graph.edge(this, state, target).label(symbol.getName());
                     // edge.color("green");
                 }
             }

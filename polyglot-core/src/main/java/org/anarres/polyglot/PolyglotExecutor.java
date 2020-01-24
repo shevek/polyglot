@@ -54,7 +54,7 @@ public abstract class PolyglotExecutor {
         private final ExecutorService executor;
         private final Queue<Future<?>> futures = new ArrayDeque<>();
 
-        public Parallel(@Nonnull String name, int parallelism) {
+        public Parallel(@Nonnull String name, @Nonnegative int parallelism) {
             this.parallelism = parallelism;
             this.executor = Executors.newFixedThreadPool(parallelism, new ThreadFactoryBuilder().setNameFormat("polyglot-%d (" + name + ")").build());
         }

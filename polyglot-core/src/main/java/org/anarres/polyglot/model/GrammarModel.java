@@ -225,6 +225,7 @@ public class GrammarModel implements GraphVizScope {
     }
 
     @Nonnull
+    @SuppressWarnings("MixedMutabilityReturnType")
     public List<? extends CstProductionModel> getCstProductionRoots() {
         List<CstProductionModel> out = new ArrayList<>();
         for (CstProductionModel cstProduction : getCstProductions())

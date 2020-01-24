@@ -177,9 +177,7 @@ public class ImmutableIndexedSet<IndexedItem extends Indexed> extends AbstractIn
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (null == o)
-            return false;
-        if (!getClass().equals(o.getClass()))
+        if (!(o instanceof ImmutableIndexedSet))
             return false;
         ImmutableIndexedSet<?> s = (ImmutableIndexedSet<?>) o;
         return universe == s.universe

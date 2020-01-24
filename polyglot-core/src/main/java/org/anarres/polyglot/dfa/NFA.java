@@ -241,7 +241,7 @@ public class NFA implements HelperModel.Value, GraphVizable, GraphVizScope {
                         CharSetTransition c = (CharSetTransition) transition;
                         label.append(c.chars == null ? "e" : c.chars.toString());
                     } else {
-                        CustomTransition c = (CustomTransition) transition;
+                        // CustomTransition c = (CustomTransition) transition;
                         label.append("!");
                     }
                 }

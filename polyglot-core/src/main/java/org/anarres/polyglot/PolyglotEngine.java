@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.CheckForNull;
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.graphviz.builder.GraphVizGraph;
 import org.anarres.graphviz.builder.GraphVizable;
@@ -193,11 +194,12 @@ public class PolyglotEngine {
         return options.contains(option);
     }
 
+    @Nonnegative
     public int getMaxThreads() {
         return maxThreads;
     }
 
-    public void setMaxThreads(int maxThreads) {
+    public void setMaxThreads(@Nonnegative int maxThreads) {
         this.maxThreads = maxThreads;
     }
 

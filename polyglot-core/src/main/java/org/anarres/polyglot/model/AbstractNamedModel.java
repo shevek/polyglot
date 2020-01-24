@@ -81,6 +81,7 @@ public abstract class AbstractNamedModel extends AbstractModel implements Annota
     }
 
     @Nonnull
+    @SuppressWarnings("MixedMutabilityReturnType")
     public List<? extends AAnnotation> toAnnotations(@Nonnull Multimap<? extends String, ? extends AnnotationModel> annotations) {
         if (annotations.isEmpty())
             return Collections.<AAnnotation>emptyList();

@@ -218,9 +218,7 @@ public class MutableIndexedSet<IndexedItem extends Indexed> extends AbstractInde
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (null == o)
-            return false;
-        if (!getClass().equals(o.getClass()))
+        if (!(o instanceof MutableIndexedSet))
             return false;
         @SuppressWarnings("unchecked")
         MutableIndexedSet<IndexedItem> s = (MutableIndexedSet<IndexedItem>) o;

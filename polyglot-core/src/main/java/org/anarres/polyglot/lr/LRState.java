@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LRState implements Indexed {
 
+    @SuppressWarnings("UnusedVariable")
     private static final Logger LOG = LoggerFactory.getLogger(LRState.class);
     // private final LRAutomaton automaton;
     private final int index;

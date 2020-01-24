@@ -173,15 +173,16 @@ public class Polyglot extends SourceTask {
         option(names);
     }
 
+    @Nonnegative
     public int getMaxThreads() {
         return maxThreads;
     }
 
-    public void setMaxThreads(int maxThreads) {
+    public void setMaxThreads(@Nonnegative int maxThreads) {
         this.maxThreads = maxThreads;
     }
 
-    public void maxThreads(int maxThreads) {
+    public void maxThreads(@Nonnegative int maxThreads) {
         setMaxThreads(maxThreads);
     }
 
