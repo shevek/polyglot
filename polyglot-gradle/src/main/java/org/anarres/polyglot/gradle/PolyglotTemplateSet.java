@@ -13,6 +13,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.output.OutputLanguage;
 import org.gradle.api.specs.Spec;
+import org.gradle.api.tasks.Input;
 
 /**
  *
@@ -30,11 +31,13 @@ public class PolyglotTemplateSet implements Serializable {
     }
 
     @Nonnull
+    @Input
     public String getName() {
         return name;
     }
 
     @Nonnull
+    @Input
     public Table<OutputLanguage, String, Object> getTemplates() {
         return templates;
     }
