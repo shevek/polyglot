@@ -5,10 +5,11 @@
  */
 package org.anarres.polyglot.gradle;
 
+import com.google.common.collect.Table;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -25,12 +26,14 @@ import org.anarres.polyglot.PolyglotEngine;
 import org.anarres.polyglot.output.OutputLanguage;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
+import org.gradle.api.Project;
 import org.gradle.api.file.EmptyFileVisitor;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileVisitDetails;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
@@ -110,20 +113,22 @@ public class Polyglot extends SourceTask {
         return super.getSource();
     }
 
-    @Input
-    @Nested
+    @Internal
     public Map<String, PolyglotTemplateSet> getTemplates() {
         return templates;
     }
 
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
-    /* pp */ Collection<? extends File> getTemplateFiles() {
+    @Nested
+    /* pp */ List<PolyglotTemplateEntry> getTemplateEntries() {
         try {
-            List<File> out = new ArrayList<>();
-            for (PolyglotTemplateSet templateSet : templates.values())
-                for (Object templateFile : templateSet.getTemplates().values())
-                    out.add(getProject().file(templateFile));
+            Project project = getProject();
+            List<PolyglotTemplateEntry> out = new ArrayList<>();
+            for (Map.Entry<String, PolyglotTemplateSet> e : getTemplates().entrySet()) {
+                for (Table.Cell<OutputLanguage, String, Object> cell : e.getValue().getTemplates().cellSet()) {
+                    out.add(new PolyglotTemplateEntry(project, e.getKey(), cell));
+                }
+            }
+            Collections.sort(out);
             return out;
         } catch (LinkageError e) {
             // If we have a conflict on Guava versions, we can get a NoSuchMethodError here.
