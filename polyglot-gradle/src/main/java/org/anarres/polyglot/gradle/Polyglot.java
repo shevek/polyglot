@@ -64,12 +64,6 @@ public class Polyglot extends SourceTask {
     @Nonnegative
     private int maxThreads = Integer.MAX_VALUE;
 
-    @Deprecated // Use setSource.
-    public void setInputDir(File inputDir) {
-        getLogger().warn("Polyglot.setInputDir is deprecated. Please use Polyglot.setSource() from SourceTask.");
-        setSource(inputDir);
-    }
-
     @Nonnull
     @OutputDirectory
     // I don't think this is relevant for output directories.
