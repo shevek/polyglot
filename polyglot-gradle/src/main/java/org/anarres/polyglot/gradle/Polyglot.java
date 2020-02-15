@@ -84,7 +84,7 @@ public class Polyglot extends SourceTask {
      */
     @CheckForNull
     @Optional
-    @Input  // We only care about the directory name, not the contents.
+    @Internal  // We only care about the directory name, not the contents.
     // @PathSensitive(PathSensitivity.RELATIVE)
     public File getDebugDir() {
         return debugDir;
@@ -175,6 +175,7 @@ public class Polyglot extends SourceTask {
     }
 
     @Nonnegative
+    @Internal   // Makes no difference to the output.
     public int getMaxThreads() {
         return maxThreads;
     }

@@ -26,7 +26,6 @@ import org.gradle.api.tasks.PathSensitivity;
 /* pp */ class PolyglotTemplateEntry implements Comparable<PolyglotTemplateEntry>, Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Internal
     private final Project project;
     private final String templateGlob;
     private final Table.Cell<OutputLanguage, String, Object> cell;
@@ -35,6 +34,11 @@ import org.gradle.api.tasks.PathSensitivity;
         this.project = project;
         this.templateGlob = templateGlob;
         this.cell = cell;
+    }
+
+    @Internal
+    private Project getProject() {
+        return project;
     }
 
     @Input
@@ -60,7 +64,7 @@ import org.gradle.api.tasks.PathSensitivity;
     @InputFile
     @PathSensitive(value = PathSensitivity.NONE)
     public File getTemplateSourceFile() {
-        return project.file(cell.getValue());
+        return getProject().file(cell.getValue());
     }
 
     @Override
