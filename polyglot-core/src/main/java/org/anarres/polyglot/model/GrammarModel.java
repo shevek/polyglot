@@ -119,7 +119,11 @@ public class GrammarModel implements GraphVizScope {
     }
 
     public boolean addHelper(@Nonnull HelperModel model) {
+        // If the new helper is weak and one already exists, this is fine.
+        if (model.hasAnnotation(AnnotationName.Weak) && helpers.containsKey(model.getName()))
+            return true;
         HelperModel prev = helpers.put(model.getName(), model);
+        // If the old helper did not exist or was weak, this is fine.
         return prev == null || prev.hasAnnotation(AnnotationName.Weak);
     }
 
@@ -254,7 +258,11 @@ public class GrammarModel implements GraphVizScope {
     public boolean addCstProduction(@Nonnull CstProductionModel cstProduction) {
         if (cstProductionRoot == null)
             cstProductionRoot = cstProduction;
+        // If the new production is weak and one already exists, this is fine.
+        if (cstProduction.hasAnnotation(AnnotationName.Weak) && cstProductions.containsKey(cstProduction.getName()))
+            return true;
         CstProductionModel prev = cstProductions.put(cstProduction.getName(), cstProduction);
+        // If the old production did not exist or was weak, this is fine.
         return prev == null || prev.hasAnnotation(AnnotationName.Weak);
     }
 
@@ -291,7 +299,11 @@ public class GrammarModel implements GraphVizScope {
 
     public boolean addAstProduction(@Nonnull AstProductionModel astProduction) {
         // if (astProductionRoot == null) astProductionRoot = astProduction;
+        // If the new production is weak and one already exists, this is fine.
+        if (astProduction.hasAnnotation(AnnotationName.Weak) && astProductions.containsKey(astProduction.getName()))
+            return true;
         AstProductionModel prev = astProductions.put(astProduction.getName(), astProduction);
+        // If the old production did not exist or was weak, this is fine.
         return prev == null || prev.hasAnnotation(AnnotationName.Weak);
     }
 
