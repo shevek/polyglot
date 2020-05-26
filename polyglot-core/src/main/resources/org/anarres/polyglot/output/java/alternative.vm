@@ -259,7 +259,7 @@ public class ${alternative.javaTypeName}
 
 	@Override
 #if ($helper.isOption("CG_FINDBUGS"))
-	@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("CN_IDIOM_NO_SUPER_CALL")
+	@SuppressWarnings("CN_IDIOM_NO_SUPER_CALL")
 #end
 	public ${alternative.javaTypeName} clone() {
 		return clone(CloneListener.NONE);

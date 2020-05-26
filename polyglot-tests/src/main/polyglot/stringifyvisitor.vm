@@ -57,9 +57,6 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import org.anarres.polyglot.test.common.IndentedOutput;
 import ${package}.node.*;
-#if ($helper.isOption("CG_FINDBUGS"))
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-#end##CG_FINDBUGS
 
 #set($throws = "java.lang.RuntimeException")
 /**
@@ -67,7 +64,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * @author shevek
  */
 #if ($helper.isOption("CG_FINDBUGS"))
-@SuppressFBWarnings({"RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"})
+@SuppressWarnings({"RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"})
 #end##CG_FINDBUGS
 public ${abstract} class StringifyVisitor extends DepthFirstVisitor<IndentedOutput, Void, $throws> {
 

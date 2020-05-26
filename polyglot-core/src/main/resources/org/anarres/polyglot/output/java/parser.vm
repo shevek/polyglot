@@ -14,14 +14,10 @@ import javax.annotation.Nonnull;
 import ${package}.node.*;
 import ${package}.lexer.ILexer;
 import ${package}.lexer.LexerException;
-#if ($helper.isOption("CG_FINDBUGS"))
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-#end##CG_FINDBUGS
 
 #if ($helper.isOption("CG_FINDBUGS"))
-@SuppressFBWarnings({"SKIPPED_CLASS_TOO_BIG", "DLS_DEAD_LOCAL_STORE"})
 ## Locals are often unused after p().
-@SuppressWarnings({"UnusedVariable"})
+@SuppressWarnings({"UnusedVariable", "SKIPPED_CLASS_TOO_BIG", "DLS_DEAD_LOCAL_STORE"})
 #end##CG_FINDBUGS
 ${generated}
 public class ${parserMachine.parserClassName} {
