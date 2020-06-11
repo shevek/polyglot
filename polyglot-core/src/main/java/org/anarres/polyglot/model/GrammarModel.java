@@ -97,8 +97,12 @@ public class GrammarModel implements GraphVizScope {
     }
 
     public boolean addExternal(@Nonnull ExternalModel model) {
-        Object prev = externals.put(model.getName(), model);
-        return prev == null;
+        // See addAstProduction for logic description.
+        ExternalModel prev = externals.get(model.getName());
+        if (prev != null && !prev.hasAnnotation(AnnotationName.Weak))
+            return model.hasAnnotation(AnnotationName.Weak);
+        externals.put(model.getName(), model);
+        return true;
     }
 
     @TemplateProperty("html")
@@ -119,12 +123,12 @@ public class GrammarModel implements GraphVizScope {
     }
 
     public boolean addHelper(@Nonnull HelperModel model) {
-        // If the new helper is weak and one already exists, this is fine.
-        if (model.hasAnnotation(AnnotationName.Weak) && helpers.containsKey(model.getName()))
-            return true;
-        HelperModel prev = helpers.put(model.getName(), model);
-        // If the old helper did not exist or was weak, this is fine.
-        return prev == null || prev.hasAnnotation(AnnotationName.Weak);
+        // See addAstProduction for logic description.
+        HelperModel prev = helpers.get(model.getName());
+        if (prev != null && !prev.hasAnnotation(AnnotationName.Weak))
+            return model.hasAnnotation(AnnotationName.Weak);
+        helpers.put(model.getName(), model);
+        return true;
     }
 
     @Nonnull
@@ -258,12 +262,12 @@ public class GrammarModel implements GraphVizScope {
     public boolean addCstProduction(@Nonnull CstProductionModel cstProduction) {
         if (cstProductionRoot == null)
             cstProductionRoot = cstProduction;
-        // If the new production is weak and one already exists, this is fine.
-        if (cstProduction.hasAnnotation(AnnotationName.Weak) && cstProductions.containsKey(cstProduction.getName()))
-            return true;
-        CstProductionModel prev = cstProductions.put(cstProduction.getName(), cstProduction);
-        // If the old production did not exist or was weak, this is fine.
-        return prev == null || prev.hasAnnotation(AnnotationName.Weak);
+        // See addAstProduction for logic description.
+        CstProductionModel prev = cstProductions.get(cstProduction.getName());
+        if (prev != null && !prev.hasAnnotation(AnnotationName.Weak))
+            return  cstProduction.hasAnnotation(AnnotationName.Weak);
+        cstProductions.put(cstProduction.getName(), cstProduction);
+        return true;
     }
 
     public boolean removeCstProduction(@Nonnull CstProductionModel cstProduction) {
@@ -300,11 +304,19 @@ public class GrammarModel implements GraphVizScope {
     public boolean addAstProduction(@Nonnull AstProductionModel astProduction) {
         // if (astProductionRoot == null) astProductionRoot = astProduction;
         // If the new production is weak and one already exists, this is fine.
-        if (astProduction.hasAnnotation(AnnotationName.Weak) && astProductions.containsKey(astProduction.getName()))
-            return true;
-        AstProductionModel prev = astProductions.put(astProduction.getName(), astProduction);
-        // If the old production did not exist or was weak, this is fine.
-        return prev == null || prev.hasAnnotation(AnnotationName.Weak);
+        AstProductionModel prev = astProductions.get(astProduction.getName());
+        if (prev != null && !prev.hasAnnotation(AnnotationName.Weak)) {
+            // If the existing production exists and is strong.
+            if (astProduction.hasAnnotation(AnnotationName.Weak))
+                // If the existing production was strong, and we are weak, we do nothing.
+                return true;
+            else
+                // If the existing production was strong, and we are strong, we fail
+                return false;
+        }
+        astProductions.put(astProduction.getName(), astProduction);
+        // If the production did not exist or was weak, this is fine.
+        return true;
     }
 
     public boolean removeAstProduction(@Nonnull AstProductionModel astProduction) {
