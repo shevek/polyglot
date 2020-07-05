@@ -83,7 +83,6 @@ public class Polyglot extends SourceTask {
      * @return the directory into which to output debug information.
      */
     @CheckForNull
-    @Optional
     @Internal  // We only care about the directory name, not the contents.
     // @PathSensitive(PathSensitivity.RELATIVE)
     public File getDebugDir() {
