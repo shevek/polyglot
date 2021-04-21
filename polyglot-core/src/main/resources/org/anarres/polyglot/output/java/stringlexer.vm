@@ -202,10 +202,10 @@ public class ${lexerMachine.getLexerClassName("", "String")} extends ${lexerMach
 		@Override
 		public char charAt(int index) {
 			if (index < 0)
-				throw new IndexOutOfBoundsException();
-			int offset = current_offset + index;
-			if (offset > current_offset)
-				throw new IndexOutOfBoundsException();
+				throw new IndexOutOfBoundsException("Illegal negative index.");
+			int offset = start_offset + index;
+			if (offset >= current_offset)
+				throw new IndexOutOfBoundsException("Illegal over-length index.");
 			return in.charAt(offset);
 		}
 
