@@ -142,17 +142,17 @@ public class ${parserMachine.parserClassName} {
 			int state = state();	// TODO: Inline
 			int[] actionTableEntry = actionTable[state];
 ##			// [+1, +2] = Either shift and stack state, or reduce by production number.
-			int actionTableIndex = lookup(actionTableEntry, index, 1, 3);
+			int actionTableIndex = lookup(actionTableEntry, index, 1, 2);
 ##			// dump(token, actionEntry);
-			int actionValue = actionTableEntry[actionTableIndex + 2];
+			int actionValue = actionTableEntry[actionTableIndex + 1];
 
-			switch (actionTableEntry[actionTableIndex + 1]) {
+			switch (actionValue & 0x3) {
 				case SHIFT:
 ## token.getText() hould be TokenModel's descriptiveName annotation if present.
-					push(actionValue, token.getText()).add(this.lexer.next());
+					push(actionValue >>> 2, token.getText()).add(this.lexer.next());
 					break;
 				case REDUCE:
-					reduce(actionValue);
+					reduce(actionValue >>> 2);
 					break;
 				case ACCEPT:
 					EOF eof = (EOF) this.lexer.next();
@@ -164,7 +164,7 @@ public class ${parserMachine.parserClassName} {
 						buf.append(' ').append(stack.get(i).name);
 					buf.append(", got ").append(token.getTokenName());
 					buf.append("(").append(token.getText());
-					buf.append(") but expected [").append(errorTable[actionValue]);
+					buf.append(") but expected [").append(errorTable[actionValue >>> 2]);
 					buf.append("].");
 					throw new ParserException(token, buf.toString());
 			}
@@ -467,7 +467,7 @@ ${indent}${helper.getLocalVariableName($root.element, $root.transform)}##
 			actionTable = new int[parserStateCount][];
 			gotoTable = new int[parserStateCount][];
 			for (int i = 0; i < parserStateCount; i++) {
-				actionTable[i] = V.readVarintTable(in, 3);
+				actionTable[i] = V.readVarintTable(in, 2);
 				gotoTable[i] = V.readVarintTable(in, 2);
 			}
 

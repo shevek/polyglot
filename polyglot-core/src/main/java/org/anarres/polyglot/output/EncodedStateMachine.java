@@ -5,6 +5,7 @@
  */
 package org.anarres.polyglot.output;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.io.BaseEncoding;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -103,6 +104,12 @@ public class EncodedStateMachine {
         return new Parser(name, /* automaton, */ cstProductionRoot, cstAlternativeSet, encodedData, encodedText);
     }
 
+    private static int newOpcodeActionPair(int opcode, int action) {
+        Preconditions.checkArgument(opcode == (opcode & 0x3), "Opcode out of range.");
+        Preconditions.checkArgument((action << 2) >> 2 == action, "Action out of range.");
+        return opcode | (action << 2);
+    }
+
     // This takes an argument with a different nullability annotation than the field.
     @Nonnull
     private static byte[] newParserTable(@Nonnull GrammarModel grammar, @Nonnull LRAutomaton automaton, @Nonnull IntSet cstAlternativeSet) throws IOException {
@@ -115,16 +122,14 @@ public class EncodedStateMachine {
                 writeInt(out, state.getActionMap().size() + 1);
                 // Error is slot 0.
                 writeInt(out, -1);
-                writeInt(out, AbstractParser.ERROR);
-                writeInt(out, state.getErrorIndex());
+                writeInt(out, newOpcodeActionPair(AbstractParser.ERROR, state.getErrorIndex()));
 
                 for (Map.Entry<TokenModel, LRAction> e : state.getActionMap().entrySet()) {
                     // TokenModel key = e.getKey();
                     LRAction action = e.getValue();
                     writeInt(out, e.getKey().getIndex());
-                    writeInt(out, action.getAction().getOpcode());
                     Indexed target = action.getTarget();
-                    writeInt(out, target == null ? -1 : target.getIndex());
+                    writeInt(out, newOpcodeActionPair(action.getAction().getOpcode(), target == null ? -1 : target.getIndex()));
 
                     // Keep track of all the CstProductionModels which are reachable from this Parser.
                     if (action instanceof LRAction.Reduce) {
