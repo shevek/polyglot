@@ -3,11 +3,12 @@ buildscript {
 		mavenLocal()
 		mavenCentral()
 		jcenter()
+		gradlePluginPortal()
 	}
 
 	dependencies {
-		classpath 'org.anarres.gradle:gradle-stdproject-plugin:1.0.8'
-		classpath 'org.anarres.polyglot:polyglot-gradle:1.0.4-SNAPSHOT'
+		classpath 'org.anarres.gradle:gradle-stdproject-plugin:1.0.10'
+		classpath 'org.anarres.polyglot:polyglot-gradle:1.0.7-SNAPSHOT'
 	}
 }
 
@@ -27,8 +28,4 @@ polyglotParser {
 	templates {
 		java "analysis/StringifyVisitor.java", new File(polyglotDir, "stringifyvisitor.vm")
 	}
-}
-
-animalsniffer {
-	skip = true;
 }
