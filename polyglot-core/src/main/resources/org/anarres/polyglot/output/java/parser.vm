@@ -55,7 +55,7 @@ public class ${parserMachine.parserClassName} {
 		if (table.length < 20) {
 			for (int tableOffset = lowStart * 2; tableOffset < table.length; tableOffset += 2)
 				if (key == table[tableOffset])
-					return tableOffset;
+					return table[tableOffset + 1];
 		} else {
 			int low = lowStart;
 			int high = (table.length >>> 1) - 1;
@@ -67,12 +67,12 @@ public class ${parserMachine.parserClassName} {
 				else if (key > table[tableOffset])
 					low = middle + 1;
 				else
-					return tableOffset;
+					return table[tableOffset + 1];
 			}
 		}
 		// If the zero index is the default.
 		if (lowStart == 1)
-			return 0;
+			return table[1];
 		else
 			throw new IllegalStateException("Table lookup failed for " + key);
 	}
@@ -80,8 +80,7 @@ public class ${parserMachine.parserClassName} {
 	@Nonnegative
 	private int goTo(@Nonnegative int productionIndex) {
 		int[] gotoTableEntry = gotoTable[state()];
-		int gotoTableIndex = lookup(gotoTableEntry, productionIndex, 0);
-		return gotoTableEntry[gotoTableIndex + 1];
+		return lookup(gotoTableEntry, productionIndex, 0);
 	}
 
 	@Nonnull
@@ -142,10 +141,8 @@ public class ${parserMachine.parserClassName} {
 
 			int state = state();	// TODO: Inline
 			int[] actionTableEntry = actionTable[state];
-##			// [+1, +2] = Either shift and stack state, or reduce by production number.
-			int actionTableIndex = lookup(actionTableEntry, index, 1);
-##			// dump(token, actionEntry);
-			int actionValue = actionTableEntry[actionTableIndex + 1];
+##			// [0NNNNNNN NNNNNNNN NNNNNNNN NNNNNNAA] = Either AA=shift and stack state, or AA=reduce by production number.
+			int actionValue = lookup(actionTableEntry, index, 1);
 
 			switch (actionValue & 0x3) {
 				case SHIFT:
