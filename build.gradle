@@ -33,8 +33,8 @@ subprojects {
 		description "A multilingual LR(1) parser generator."
 		author id: 'shevek', name: 'Shevek', email: 'github@anarres.org'
 		license {
-			name = 'Proprietary'
-			description = 'Proprietary - Do Not Redistribute'
+			name = 'GPL-3'
+			description = 'GNU General Public License version 3'
 			uri = new URI("http://www.anarres.org/")
 		}
 	}
