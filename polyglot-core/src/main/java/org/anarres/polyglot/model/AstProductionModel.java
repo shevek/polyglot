@@ -14,6 +14,7 @@ import java.util.TreeMap;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
+import org.anarres.polyglot.JavaTypeNameGenerator;
 import org.anarres.polyglot.node.AAstAlternative;
 import org.anarres.polyglot.node.AAstProduction;
 import org.anarres.polyglot.node.TIdentifier;
@@ -43,7 +44,7 @@ public final class AstProductionModel extends AbstractNamedJavaModel implements 
     @Override
     @TemplateProperty("parser.vm")
     public String getJavaTypeName() {
-        return "P" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, getName());
+        return JavaTypeNameGenerator.generateJavaTypeName("P" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, getName()));
     }
 
     @Nonnull

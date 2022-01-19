@@ -15,6 +15,7 @@ import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.anarres.polyglot.ErrorHandler;
+import org.anarres.polyglot.JavaTypeNameGenerator;
 import org.anarres.polyglot.node.AAstAlternative;
 import org.anarres.polyglot.node.AElement;
 import org.anarres.polyglot.node.TIdentifier;
@@ -53,7 +54,7 @@ public final class AstAlternativeModel extends AbstractNamedJavaModel implements
         if (alternativeName != null)
             buf.append(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, alternativeName.getText()));
         buf.append(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, production.getName()));
-        this.javaTypeName = buf.toString();
+        this.javaTypeName = JavaTypeNameGenerator.generateJavaTypeName(buf.toString());
     }
 
     @Override
